@@ -77,9 +77,9 @@ export default function MenuPage() {
       {/* Sticky Header Nav matching Stitch UI */}
       <div className="sticky top-0 z-40 bg-[#F9F9FB]/95 backdrop-blur-xl border-b border-[#EAE1DB]/60 pt-24 pb-4 px-6 md:px-12 transition-all">
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight mb-1">
-              Meniul <span className="text-[#1A1A1A] italic font-normal">Nostru</span>
+          <div className="flex flex-col mb-12">
+            <h1 className="font-serif text-[42px] leading-[1.1] font-bold text-[#1A1A1A] tracking-tight mb-3">
+              Meniu
             </h1>
             <p className="text-[#82756A] text-[14px] font-medium hidden md:block">
               Alege-ți preferatul. Totul este preparat pe loc, din ingrediente originale.
