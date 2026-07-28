@@ -79,7 +79,7 @@ export default function MenuPage() {
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-col mb-12">
             <h1 className="font-serif text-[42px] leading-[1.1] font-bold text-[#1A1A1A] tracking-tight mb-3">
-              Meniu
+              Meniul <span className="text-[#1A1A1A] italic font-normal">Nostru</span>
             </h1>
             <p className="text-[#82756A] text-[14px] font-medium hidden md:block">
               Alege-ți preferatul. Totul este preparat pe loc, din ingrediente originale.
