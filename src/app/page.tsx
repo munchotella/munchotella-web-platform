@@ -3,7 +3,7 @@
 import React from "react";
 import CinematicScrollHero from "@/components/CinematicScrollHero";
 import { AnimateIn } from "@/components/ui/AnimateIn";
-import { MagneticButton } from "@/components/ui/MagneticButton";
+import MagneticButton from "@/components/ui/MagneticButton";
 import ScrollyTellingProcess from "@/components/ui/ScrollyTellingProcess";
 import MapSection from "@/components/MapSection";
 
