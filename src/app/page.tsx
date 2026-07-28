@@ -3,7 +3,8 @@
 import React from "react";
 import CinematicScrollHero from "@/components/CinematicScrollHero";
 import { AnimateIn } from "@/components/ui/AnimateIn";
-import MagneticButton from "@/components/ui/MagneticButton";
+import { MagneticButton } from "@/components/ui/MagneticButton";
+import ScrollyTellingProcess from "@/components/ui/ScrollyTellingProcess";
 import MapSection from "@/components/MapSection";
 
 import { Star } from "lucide-react";
@@ -31,7 +32,7 @@ export default function MunchotellaBoutique() {
   };
 
   return (
-    <div className="bg-background text-on-background font-sans antialiased overflow-x-hidden selection:bg-accent-gold selection:text-white">
+    <div className="bg-background text-on-background font-sans antialiased selection:bg-accent-gold selection:text-white">
       <ProductCustomizationModal
         product={selectedProduct}
         isOpen={isModalOpen}
@@ -118,66 +119,12 @@ export default function MunchotellaBoutique() {
               <span className="material-symbols-outlined text-sm">arrow_outward</span>
             </a>
             
-            {/* Features Section (Filozofia Munchotella & Artă Culinară) */}
-            <section className="py-24 md:py-32 bg-[#1A120B] text-white rounded-3xl border border-white/10 mt-20 relative overflow-hidden shadow-2xl">
-              {/* Background Secondary Video (Google Flow Storytelling Process) */}
-              <div className="absolute inset-0 w-full h-full opacity-35 z-0">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  poster="/dubai_pistachio_crepe_ref.png"
-                  className="w-full h-full object-cover object-center"
-                >
-                  <source src="/videos/munchotella_philosophy_process.mp4" type="video/mp4" />
-                </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-[#1A120B]/60 to-[#1A120B]" />
-              </div>
-
-              <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8">
-                <AnimateIn direction="up">
-                  <div className="text-center mb-16">
-                    <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#FFFDF8]">Cum preparăm desertul tău?</h2>
-                  </div>
-                </AnimateIn>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                  <AnimateIn direction="up" delay={0.1} className="h-full">
-                    <div className="text-left p-8 bg-transparent border-l-2 border-[#D4A853]/30 hover:border-[#D4A853] hover:bg-[#D4A853]/5 transition-all duration-500 flex flex-col h-full justify-start">
-                      <span className="font-serif text-5xl font-bold text-[#D4A853]/40 mb-4 block">01</span>
-                      <h3 className="font-serif text-2xl font-bold text-[#FFFDF8] mb-4">Ciocolată Autentică</h3>
-                      <p className="text-[15px] text-white/70 leading-relaxed font-light">
-                        Nu facem compromisuri la gust. Folosim doar Nutella® originală, Kinder, Oreo și fructe tăiate fix înainte de livrare pentru o experiență intensă și inconfundabilă.
-                      </p>
-                    </div>
-                  </AnimateIn>
-                  
-                  <AnimateIn direction="up" delay={0.2} className="h-full">
-                    <div className="text-left p-8 bg-transparent border-l-2 border-[#D4A853]/30 hover:border-[#D4A853] hover:bg-[#D4A853]/5 transition-all duration-500 flex flex-col h-full justify-start">
-                      <span className="font-serif text-5xl font-bold text-[#D4A853]/40 mb-4 block">02</span>
-                      <h3 className="font-serif text-2xl font-bold text-[#FFFDF8] mb-4">Frământat Manual</h3>
-                      <p className="text-[15px] text-white/70 leading-relaxed font-light">
-                        Lăsăm aluatul la maturat în fiecare dimineață pentru a ne asigura că primești acea crustă crocantă la exterior și textura irezistibil de pufoasă la interior.
-                      </p>
-                    </div>
-                  </AnimateIn>
-                  
-                  <AnimateIn direction="up" delay={0.3} className="h-full">
-                    <div className="text-left p-8 bg-transparent border-l-2 border-[#D4A853]/30 hover:border-[#D4A853] hover:bg-[#D4A853]/5 transition-all duration-500 flex flex-col h-full justify-start">
-                      <span className="font-serif text-5xl font-bold text-[#D4A853]/40 mb-4 block">03</span>
-                      <h3 className="font-serif text-2xl font-bold text-[#FFFDF8] mb-4">Ajunge la tine cald</h3>
-                      <p className="text-[15px] text-white/70 leading-relaxed font-light">
-                        Ambalajele noastre termice protejează desertul pe drum, ca tu să te bucuri de el exact așa cum l-am scos noi din aparat, proaspăt și aburind.
-                      </p>
-                    </div>
-                  </AnimateIn>
-                </div>
-              </div>
-            </section>
+            {/* Features Section (Scrollytelling Editorial Process) */}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        
+        <ScrollyTellingProcess />
 
       {/* Testimonials Section (Real Google Maps Scraped Reviews) */}
       <section className="py-24 md:py-32 bg-[#1A120B] relative z-10" id="testimonials">
