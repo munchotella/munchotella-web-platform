@@ -97,7 +97,7 @@ export default function CinematicScrollHero() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
           }}
-          className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-6"
+          className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[68px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-6"
         >
           <div className="overflow-hidden pb-2">
             <motion.div

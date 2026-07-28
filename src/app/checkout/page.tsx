@@ -333,7 +333,7 @@ export default function CheckoutPage() {
                   <input
                     type="tel"
                     required
-                    placeholder="079 000 000"
+                    placeholder="ex: 079 xxx xxx"
                     className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853] transition-all"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}

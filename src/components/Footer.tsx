@@ -21,9 +21,9 @@ export default function Footer() {
                 <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">location_on</span>
                 <span>Nicolae Testemițeanu 21/1, Chișinău</span>
               </a>
-              <a href="tel:+37379000000" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
+              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
                 <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">phone</span>
-                <span>+373 79 000 000</span>
+                <span>079 006 499</span>
               </a>
               <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
                 <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">mail</span>

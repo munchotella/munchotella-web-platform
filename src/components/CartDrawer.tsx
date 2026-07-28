@@ -258,7 +258,7 @@ export default function CartDrawer() {
                         <input 
                           type="tel" 
                           required
-                          placeholder="079 000 000"
+                          placeholder="ex: 079 xxx xxx"
                           className="w-full bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.phone}
                           onChange={e => setFormData({...formData, phone: e.target.value})}

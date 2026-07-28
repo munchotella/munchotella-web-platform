@@ -138,7 +138,7 @@ export default function ContactPage() {
                         <input
                           type="tel"
                           required
-                          placeholder="079 000 000"
+                          placeholder="ex: 079 xxx xxx"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
