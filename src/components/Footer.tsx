@@ -19,9 +19,7 @@ export default function Footer() {
                 Munchotella
               </span>
             </div>
-            <p className="text-white/60 text-[15px] mb-6 max-w-xs leading-relaxed">
-              Nu facem compromisuri când vine vorba de gust. Descoperă deserturile premium, frământate și coapte zilnic în inima Chișinăului.
-            </p>
+
             <div className="flex flex-col space-y-3">
               <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
                 <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">location_on</span>
