@@ -2,6 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
+import LogoIconSVG from "./LogoIconSVG";
+import LogoTextSVG from "./LogoTextSVG";
 
 export default function Footer() {
   return (
@@ -9,26 +11,10 @@ export default function Footer() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-16 pb-16">
           <div className="md:col-span-1">
-            <div className="flex items-center space-x-3 mb-6">
-              <img 
-                src="/logo_icon_only.png" 
-                alt="Munchotella Logo" 
-                className="h-9 w-auto object-contain opacity-90"
-              />
-              <div 
-                className="w-[150px] h-[40px] bg-[#FDF9F1]"
-                style={{ 
-                  WebkitMaskImage: "url('/logo-official-text.svg')", 
-                  WebkitMaskSize: "contain", 
-                  WebkitMaskRepeat: "no-repeat", 
-                  WebkitMaskPosition: "center left",
-                  maskImage: "url('/logo-official-text.svg')",
-                  maskSize: "contain",
-                  maskRepeat: "no-repeat",
-                  maskPosition: "center left"
-                }}
-              />
-            </div>
+            <Link href="/" className="flex items-center gap-2 group z-50 mb-6">
+              <LogoIconSVG className="h-9 w-9 opacity-90 transition-transform duration-300 group-hover:scale-105 text-[#f3922c]" />
+              <LogoTextSVG className="h-[45px] w-auto text-[#FDF9F1] transition-colors duration-300 group-hover:text-[#D4A853]" />
+            </Link>
 
             <div className="flex flex-col space-y-3">
               <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">

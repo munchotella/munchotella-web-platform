@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import LogoIconSVG from "./LogoIconSVG";
+import LogoTextSVG from "./LogoTextSVG";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,25 +38,16 @@ export default function Navbar() {
     >
       <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-300 active:scale-95 group">
-          <img 
-            src="/logo_icon_only.png" 
-            alt="Munchotella Logo" 
-            className="h-10 w-auto object-contain transition-all duration-500"
-            style={!effectiveIsScrolled ? { filter: "drop-shadow(0 0 10px rgba(255,255,255,0.2))" } : {}}
+        <Link href="/" className="flex items-center gap-2 group z-50">
+          <LogoIconSVG 
+            className="h-10 w-10 md:h-12 md:w-12 transition-all duration-300 group-hover:scale-105 text-[#f3922c]" 
           />
-          <div 
-            className={`w-[130px] h-[35px] transition-colors duration-300 ${effectiveIsScrolled ? "bg-[#1A120B] group-hover:bg-[#D4A853]" : "bg-white group-hover:bg-[#D4A853]"}`}
-            style={{ 
-              WebkitMaskImage: "url('/logo-official-text.svg')", 
-              WebkitMaskSize: "contain", 
-              WebkitMaskRepeat: "no-repeat", 
-              WebkitMaskPosition: "center left",
-              maskImage: "url('/logo-official-text.svg')",
-              maskSize: "contain",
-              maskRepeat: "no-repeat",
-              maskPosition: "center left"
-            }}
+          <LogoTextSVG 
+            className={`h-[45px] md:h-[55px] w-auto transition-colors duration-300 ${
+              effectiveIsScrolled 
+                ? "text-[#1A120B] group-hover:text-[#D4A853]" 
+                : "text-white group-hover:text-[#D4A853]"
+            }`} 
           />
         </Link>
 
