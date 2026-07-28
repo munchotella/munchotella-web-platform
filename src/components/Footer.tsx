@@ -15,9 +15,19 @@ export default function Footer() {
                 alt="Munchotella Logo" 
                 className="h-9 w-auto object-contain opacity-90"
               />
-              <span className="font-[family-name:var(--font-logo)] text-4xl font-normal text-[#FDF9F1]">
-                Munchotella
-              </span>
+              <div 
+                className="w-[150px] h-[40px] bg-[#FDF9F1]"
+                style={{ 
+                  WebkitMaskImage: "url('/logo-official-text.svg')", 
+                  WebkitMaskSize: "contain", 
+                  WebkitMaskRepeat: "no-repeat", 
+                  WebkitMaskPosition: "center left",
+                  maskImage: "url('/logo-official-text.svg')",
+                  maskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center left"
+                }}
+              />
             </div>
 
             <div className="flex flex-col space-y-3">

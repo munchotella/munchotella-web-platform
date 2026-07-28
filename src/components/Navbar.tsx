@@ -43,9 +43,19 @@ export default function Navbar() {
             className="h-10 w-auto object-contain transition-all duration-500"
             style={!effectiveIsScrolled ? { filter: "drop-shadow(0 0 10px rgba(255,255,255,0.2))" } : {}}
           />
-          <span className={`font-[family-name:var(--font-logo)] text-3xl md:text-4xl tracking-normal font-normal transition-colors duration-300 ${effectiveIsScrolled ? "text-[#1A120B] group-hover:text-[#D4A853]" : "text-white group-hover:text-[#D4A853]"}`}>
-            Munchotella
-          </span>
+          <div 
+            className={`w-[130px] h-[35px] transition-colors duration-300 ${effectiveIsScrolled ? "bg-[#1A120B] group-hover:bg-[#D4A853]" : "bg-white group-hover:bg-[#D4A853]"}`}
+            style={{ 
+              WebkitMaskImage: "url('/logo-official-text.svg')", 
+              WebkitMaskSize: "contain", 
+              WebkitMaskRepeat: "no-repeat", 
+              WebkitMaskPosition: "center left",
+              maskImage: "url('/logo-official-text.svg')",
+              maskSize: "contain",
+              maskRepeat: "no-repeat",
+              maskPosition: "center left"
+            }}
+          />
         </Link>
 
         {/* Center Nav (Desktop) */}
