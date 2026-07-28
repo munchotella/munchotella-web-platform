@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Play, Pause, Volume2, VolumeX, ChevronRight } from "lucide-react";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 const HERO_PLAYLIST = [
   {
@@ -89,20 +90,42 @@ export default function CinematicScrollHero() {
 
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
       <div className="relative z-20 max-w-[1200px] w-full mx-auto px-6 md:px-12 h-full flex flex-col justify-center text-left pt-20">
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
+          }}
           className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-6"
         >
-          Artă dulce, <br />
-          <span className="italic font-normal text-[#D4A853]">preparată cu pasiune</span>
-        </motion.h1>
+          <div className="overflow-hidden pb-2">
+            <motion.div
+              variants={{
+                hidden: { y: "100%", rotateZ: 3, opacity: 0 },
+                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+              }}
+            >
+              Artă dulce,
+            </motion.div>
+          </div>
+          <div className="overflow-hidden pb-2 mt-2">
+            <motion.div
+              variants={{
+                hidden: { y: "100%", rotateZ: 3, opacity: 0 },
+                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+              }}
+              className="italic font-normal text-[#D4A853]"
+            >
+              preparată cu pasiune
+            </motion.div>
+          </div>
+        </motion.div>
 
         <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.8 }}
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ delay: 1, duration: 1, ease: "easeOut" }}
           className="text-[#E8E2D9] text-base md:text-lg max-w-lg leading-relaxed mb-8 font-light"
         >
           Waffles și clătite proaspăt preparate cu ingrediente premium — Nutella®, Kinder Bueno, Lotus Biscoff și fructe proaspete.
@@ -115,20 +138,24 @@ export default function CinematicScrollHero() {
           transition={{ delay: 0.9, duration: 0.8 }}
           className="flex flex-wrap items-center gap-4"
         >
-          <a
-            href="#menu"
-            className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer"
-          >
-            <span>Descoperă Meniul</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </a>
+          <MagneticButton>
+            <a
+              href="#menu"
+              className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer"
+            >
+              <span>Descoperă Meniul</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </MagneticButton>
           
-          <a
-            href="/about"
-            className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/20 hover:border-[#D4A853] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 cursor-pointer"
-          >
-            Povestea Noastră
-          </a>
+          <MagneticButton>
+            <a
+              href="/about"
+              className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/20 hover:border-[#D4A853] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 cursor-pointer"
+            >
+              Povestea Noastră
+            </a>
+          </MagneticButton>
         </motion.div>
       </div>
 
