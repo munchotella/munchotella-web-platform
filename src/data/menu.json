@@ -1,0 +1,236 @@
+[
+  {
+    "name": "Waffle sticks",
+    "price": 145,
+    "currency": "MDL",
+    "description": "2 waffles, Nutella, white chocolate, Oreo, Lotus biscuits.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb3799de38d298ead5916_Waffle%20sticks%2095%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Delux mini waffle",
+    "price": 160,
+    "currency": "MDL",
+    "description": "16 pieces american mini waffles, Nutella, white chocolate, Oreo, Lotus biscuits, pistachio, peanuts.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Nutella Mini waffles",
+    "price": 145,
+    "currency": "MDL",
+    "description": "16 pieces american mini waffles, Nutella, white chocolate, Oreo, Lotus biscuits.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Lotus Mini waffles",
+    "price": 200,
+    "currency": "MDL",
+    "description": "16 pieces american mini waffles, paste lotus, white chocolate, baby biscuits.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Fruits waffle",
+    "price": 155,
+    "currency": "MDL",
+    "description": "Belgian waffle, Nutella, white chocolale, banana, strawberry, kiwi.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf696f40c3d241e1d7e_Fruits%20waffle%20100%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Classic waffle",
+    "price": 145,
+    "currency": "MDL",
+    "description": "Belgian waffle, nutella, white chocolale, Oreo, Lotus biscuits.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf7b1acf26632f25e9f_Classic%20waffle%2095%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Belgian panda waffle",
+    "price": 160,
+    "currency": "MDL",
+    "description": "Belgian waffle, Nutella, white chocolate.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd194fb8fb228a3ba7063_Belgian%20panda%20waffle%2075%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Biscoff waffle",
+    "price": 195,
+    "currency": "MDL",
+    "description": "Belgian waffle, lotus paste, baby biscuits white chocolate.",
+    "category": "waffles",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf60a22082f24f319fe_Biscoff%20waffle%20105%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Delux crepe",
+    "price": 165,
+    "currency": "MDL",
+    "description": "Crepe, Nutella, white chocolate, Oreo, Lotus biscuits, peanuts, pistachio, Kinder, Kinder bueno.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Biscoff crepe",
+    "price": 205,
+    "currency": "MDL",
+    "description": "Crepe, lotus paste, white chocolate, baby biscuits.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc34a2b40db8c32b886c8_Lotus%20crepe%20115%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Fruits crepe",
+    "price": 145,
+    "currency": "MDL",
+    "description": "Crepe, Nutella, white chocolate, banana, strawberry.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc348aec4d72161434151_Fruits%20crepe%20100%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Oreo crepe",
+    "price": 145,
+    "currency": "MDL",
+    "description": "Crepe, Nutella, white chocolate, Oreo.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347a42d11206bd3abc6_Oreo%20crepe%2095%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Kinder crepe",
+    "price": 145,
+    "currency": "MDL",
+    "description": "Crepe, Nutella, while chocolate, Oreo, Kinder chocolate.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc34783b146d0fe11bace_Kinden%20crepe%2095%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Biskoff pancakes",
+    "price": 190,
+    "currency": "MDL",
+    "description": "4 pancakes, Nutella, baby biscuits, white chocolate.",
+    "category": "pancakes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc64dc4eb2fbd3e14b517_Lotus%20pancakes%20105%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Fruits pancakes",
+    "price": 170,
+    "currency": "MDL",
+    "description": "4 pancakes, Nutella, banana, strawberry, white chocolate.",
+    "category": "pancakes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc64d24850039bdb45b37_Fruits%20pancakes%20100%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Royal pancakes",
+    "price": 165,
+    "currency": "MDL",
+    "description": "4 pancakes, Oreo, Kinder, Nutella, white chocolate.",
+    "category": "pancakes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc64d5c1f00318d9ba99b_Royal%20pancakes%20100%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Chocolate bites",
+    "price": 165,
+    "currency": "MDL",
+    "description": "10 pieces, Nutella, while chocolate, Kinder, Kinder bueno, Oreo, pistachio, banana, strawbenry, peanuts.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd476bb79d13ad44e538_Chocolate%20biles%20120%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Royal sushi",
+    "price": 155,
+    "currency": "MDL",
+    "description": "12 pieces, banana, Nutella, white chocolate, Oreo, Lotus biscuits, pistachio, peanuts, kiwi, pineapple.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd48bbfc389f658b22d0_Royal%20sushi%20115%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Sushi banana",
+    "price": 140,
+    "currency": "MDL",
+    "description": "12 pieces, banana, Nutella, white chocolate.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd46a906d1517839379a_Sushi%20banana%2085%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Crepe Dubai",
+    "price": 265,
+    "currency": "MDL",
+    "description": "Crepe, Nutella, pistachio cream, white chocolate, katayf.",
+    "category": "crepes",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/69691863f3f6b84aaec78530_processed-image%20(2)%20(1).png",
+    "available": true
+  },
+  {
+    "name": "Milk shake Oreo",
+    "price": 135,
+    "currency": "MDL",
+    "description": "Premium milkshake with crushed Oreo cookies, milk and vanilla ice cream.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/6855ab2cd017f42da36b2391_Untitled-2.png",
+    "available": true
+  },
+  {
+    "name": "Milk shake Kinder",
+    "price": 135,
+    "currency": "MDL",
+    "description": "Creamy milkshake with smooth Kinder chocolate blending.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/6855aaae83eb1236e0c491ad_Untitled-3.png",
+    "available": true
+  },
+  {
+    "name": "Milk shake Nutella",
+    "price": 135,
+    "currency": "MDL",
+    "description": "Rich hazelnut milkshake made with real Nutella.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/6855aca21342de325ac57d9a_nutella.png",
+    "available": true
+  },
+  {
+    "name": "Milk shake Strawberry",
+    "price": 135,
+    "currency": "MDL",
+    "description": "Sweet, refreshing milkshake with fresh strawberry syrup.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/6855ad6e88c1377b658fd83e_strawberry.png",
+    "available": true
+  },
+  {
+    "name": "Ice Lemonade",
+    "price": 90,
+    "currency": "MDL",
+    "description": "Refreshing freshly squeezed lemonade served over ice.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86277b38b8e9015b635_Ice%20Lemonade%2065%20lei.png",
+    "available": true
+  },
+  {
+    "name": "Black/Green Tea",
+    "price": 50,
+    "currency": "MDL",
+    "description": "Infusion tea, choice of premium black or green tea leaves.",
+    "category": "drinks",
+    "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png",
+    "available": true
+  }
+]
