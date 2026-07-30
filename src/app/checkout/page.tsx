@@ -24,9 +24,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
-import { Autocomplete } from "@react-google-maps/api";
-import { useGoogleMaps } from "@/context/GoogleMapsContext";
-const libraries: any[] = ["places"];
+import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -88,30 +86,6 @@ export default function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { isLoaded } = useGoogleMaps();
-
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
-
-  const onAutocompleteLoad = (autoC: google.maps.places.Autocomplete) => {
-    setAutocomplete(autoC);
-  };
-
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      const address = place.formatted_address || place.name || '';
-      
-      if (place.geometry?.location) {
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
-        const roadDist = straightDist * 1.3; // Approx road distance multiplier
-        setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
-      } else {
-        setFormData(prev => ({ ...prev, street: address }));
-      }
-    }
-  };
 
   // Exact Munchotella Backend Delivery Calculation Engine (geoUtils.js)
   const deliveryCalc = useMemo(() => {
@@ -455,36 +429,20 @@ export default function CheckoutPage() {
                     <label className="block text-xs font-bold uppercase tracking-wider text-[#736A60] mb-2">
                       Stradă & Număr *
                     </label>
-                    {isLoaded ? (
-                      <div className="relative">
-                        <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
-                        <Autocomplete
-                          onLoad={onAutocompleteLoad}
-                          onPlaceChanged={onPlaceChanged}
-                          options={{ componentRestrictions: { country: "md" } }}
-                        >
-                          <input
-                            type="text"
-                            required
-                            placeholder="Caută adresa (ex: Stefan cel Mare 130)..."
-                            className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-[#D4A853] transition-all"
-                            value={formData.street}
-                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                          />
-                        </Autocomplete>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
-                        <input
-                          type="text"
-                          required
-                          disabled
-                          placeholder="Se încarcă harta..."
-                          className="w-full bg-gray-50 border border-[#E8E2D9] rounded-xl pl-10 pr-4 py-3 text-sm outline-none opacity-70"
-                        />
-                      </div>
-                    )}
+                    <div className="relative">
+                      <MapAutocomplete
+                        value={formData.street}
+                        onChange={(val) => setFormData({ ...formData, street: val })}
+                        onPlaceSelected={(lat, lng, address) => {
+                          const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
+                          const roadDist = straightDist * 1.3;
+                          setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
+                        }}
+                        placeholder="Caută adresa (ex: Stefan cel Mare 130)..."
+                        className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl pl-10 pr-4 py-3 text-sm outline-none focus:border-[#D4A853] transition-all"
+                        required={true}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">

@@ -4,11 +4,10 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Plus, Trash2, Edit2, X, Home, Briefcase, Users, Map } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { Autocomplete } from "@react-google-maps/api";
-import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import MapPickerModal from "./MapPickerModal";
+import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
-const libraries: any = ["places"];
+
 
 export default function AddressManager() {
   const { user, token, updateUser } = useAuth();
@@ -23,10 +22,6 @@ export default function AddressManager() {
   const [formLng, setFormLng] = useState<number | null>(null);
   const [formLabel, setFormLabel] = useState("Acasă");
   const [saving, setSaving] = useState(false);
-
-  const { isLoaded } = useGoogleMaps();
-
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -71,20 +66,7 @@ export default function AddressManager() {
     setIsModalOpen(true);
   };
 
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      const address = place.formatted_address || place.name || '';
-      
-      if (place.geometry?.location) {
-        setFormLat(place.geometry.location.lat());
-        setFormLng(place.geometry.location.lng());
-        setFormStreet(address);
-      } else {
-        setFormStreet(address);
-      }
-    }
-  };
+
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,33 +257,18 @@ export default function AddressManager() {
                     </button>
                   </div>
                   <div className="relative">
-                    <div className="absolute top-4 left-4 text-[#1A120B]/40">
-                      <MapPin size={20} />
-                    </div>
-                    {isLoaded ? (
-                      <Autocomplete
-                        onLoad={(autoC) => setAutocomplete(autoC)}
-                        onPlaceChanged={onPlaceChanged}
-                      >
-                        <input
-                          type="text"
-                          value={formStreet}
-                          onChange={(e) => setFormStreet(e.target.value)}
-                          placeholder="Strada, Numărul, Blocul, Scara, Apartamentul..."
-                          className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                          required
-                        />
-                      </Autocomplete>
-                    ) : (
-                      <input
-                        type="text"
-                        value={formStreet}
-                        onChange={(e) => setFormStreet(e.target.value)}
-                        placeholder="Strada, Numărul, Blocul, Scara, Apartamentul..."
-                        className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                        required
-                      />
-                    )}
+                    <MapAutocomplete
+                      value={formStreet}
+                      onChange={(val) => setFormStreet(val)}
+                      onPlaceSelected={(lat, lng, address) => {
+                        setFormLat(lat);
+                        setFormLng(lng);
+                        setFormStreet(address);
+                      }}
+                      placeholder="Strada, Numărul, Blocul, Scara, Apartamentul..."
+                      className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                      required={true}
+                    />
                   </div>
                   {formLat && formLng ? (
                     <p className="text-[11px] text-[#D4A853] mt-1 font-medium">
