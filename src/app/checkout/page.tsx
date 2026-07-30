@@ -213,8 +213,8 @@ export default function CheckoutPage() {
         items: menuItems.map(i => ({
           menuItemId: i.id || i.cartItemId,
           quantity: i.quantity,
-          variantName: i.selectedVariant, // presupunem ca aici se tine
-          modifiers: i.selectedToppings?.map(t => ({
+          variantName: (i as any).selectedVariant,
+          modifiers: i.selectedToppings?.map((t: any) => ({
             title: t.groupName || 'Topping',
             optionName: t.name
           })) || []

@@ -157,7 +157,7 @@ export default function AuthModal() {
         >
           <motion.div
             className="w-full max-w-[450px] bg-[#FFFCF6] rounded-[24px] shadow-2xl overflow-hidden relative flex flex-col"
-            variants={modalVariants}
+            variants={modalVariants as any}
             initial="hidden"
             animate="visible"
             exit="exit"
