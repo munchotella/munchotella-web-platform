@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import MagneticButton from "@/components/ui/MagneticButton";
 
@@ -31,7 +32,7 @@ export default function AboutPage() {
           </AnimateIn>
           <AnimateIn direction="up" delay={0.4}>
             <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto font-sans font-light leading-relaxed">
-              Ne-am propus să aducem în Chișinău acel gust inconfundabil, pe care nu îl poți uita ușor. Fiecare waffle este frământat manual, fără scurtături — podul nostru către zâmbetul tău de la prima gustare.
+              Ne-am propus să aducem în Chișinău acel gust pe care să-l ții minte. Pregătim fiecare waffle și clătită de la zero, în fiecare dimineață, din dorința simplă de a-ți oferi un desert sincer, cald și delicios.
             </p>
           </AnimateIn>
         </div>
@@ -53,16 +54,16 @@ export default function AboutPage() {
             
             <AnimateIn direction="right">
               <div>
-                <span className="text-[12px] font-bold uppercase text-[#93a67f] tracking-widest mb-4 block">Ingrediente Premium</span>
+                <span className="text-[12px] font-bold uppercase text-[#93a67f] tracking-widest mb-4 block">Fără scurtături</span>
                 <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-8 leading-[1.2]">
-                  Fistic Sicilian Pur & Aluat Artizanal
+                  Ingrediente pe bune și aluat proaspăt
                 </h2>
                 <div className="space-y-6 text-[16px] text-[#4e4540] font-sans leading-relaxed">
                   <p>
-                    Nu acceptăm compromisuri când vine vorba de materie primă. Am căutat cel mai intens, vibrant și aromat fistic, pe care l-am adus direct din Sicilia pentru a crea cremele noastre inconfundabile.
+                    Nu ne zgârcim când vine vorba de calitatea ingredientelor. Pentru crema de fistic, am ales să aducem fistic autentic din Sicilia, fără arome artificiale sau coloranți, tocmai pentru a păstra acel gust natural și bogat.
                   </p>
                   <p>
-                    Fiecare crepe și fiecare waffle începe cu o cocă fresh, frământată și pregătită în atelierul nostru în fiecare dimineață. Nu folosim pre-mixuri. Respectăm timpul, temperatura și procesul artizanal.
+                    De asemenea, preparăm aluatul proaspăt în fiecare dimineață, chiar în locația noastră. Nu folosim prafuri la sac sau pre-mixuri cu apă. Facem totul după rețeta noastră proprie, cu ouă, lapte și multă răbdare.
                   </p>
                 </div>
               </div>
@@ -77,7 +78,7 @@ export default function AboutPage() {
           <AnimateIn direction="up">
             <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-widest mb-4 block">Echipa Noastră</span>
             <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-16 leading-[1.2]">
-              Maestrul din Spatele Gustului
+              Oamenii din spatele Munchotella
             </h2>
           </AnimateIn>
           
@@ -93,10 +94,10 @@ export default function AboutPage() {
           
           <AnimateIn direction="up" delay={0.3}>
             <blockquote className="font-serif text-2xl md:text-3xl text-[#1c1c19] italic mb-8 max-w-3xl mx-auto leading-normal">
-              "Am dorit să aducem conceptul de fine-dining într-un desert accesibil zilnic. Munchotella nu este doar un dulce, este o semnătură a respectului nostru pentru gastronomie."
+              "Munchotella s-a născut dintr-o poftă simplă de a mânca un desert cu adevărat bun, cu multă ciocolată și ingrediente de calitate. Nu am vrut să reinventăm roata, am vrut doar să facem cel mai bun waffle pe care l-ai mâncat vreodată."
             </blockquote>
             <p className="text-[12px] font-bold uppercase text-[#4e4540] tracking-widest">
-              — Echipa de Creație Munchotella
+              — Familia Munchotella
             </p>
           </AnimateIn>
         </div>
@@ -116,9 +117,9 @@ export default function AboutPage() {
               <div className="relative">
                 <div className="absolute -left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#d4af37] border-4 border-[#fcf9f4]"></div>
                 <span className="text-[12px] font-bold text-[#d4af37] tracking-widest mb-2 block">2023</span>
-                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Scânteia Ideii</h3>
+                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Cum ne-a venit ideea</h3>
                 <p className="text-[16px] text-[#4e4540] leading-relaxed">
-                  Totul a pornit de la o călătorie și o clătită perfectă. Am realizat că în Chișinău lipsește acel standard absolut de premium waffle & crepe.
+                  Totul a început simplu: ne-am dat seama că în Chișinău e greu să găsești o clătită cu adevărat bună, plină de ciocolată originală, nu doar cu creme ieftine și diluate.
                 </p>
               </div>
             </AnimateIn>
@@ -127,9 +128,9 @@ export default function AboutPage() {
               <div className="relative">
                 <div className="absolute -left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#d4af37] border-4 border-[#fcf9f4]"></div>
                 <span className="text-[12px] font-bold text-[#d4af37] tracking-widest mb-2 block">2024</span>
-                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Zeci de Rețete Testate</h3>
+                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Primele rețete</h3>
                 <p className="text-[16px] text-[#4e4540] leading-relaxed">
-                  Luni întregi petrecute în bucătărie ajustând gramaje, timpi de coacere și căutând partenerii potriviți pentru a importa ingredientele corecte.
+                  Au urmat luni de zile petrecute în bucătărie, stricând kilograme întregi de aluat, până când am găsit proporția perfectă pentru ca waffla să iasă ușor crocantă la exterior, dar foarte pufoasă în interior.
                 </p>
               </div>
             </AnimateIn>
@@ -138,18 +139,20 @@ export default function AboutPage() {
               <div className="relative">
                 <div className="absolute -left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#3d3028] border-4 border-[#fcf9f4]"></div>
                 <span className="text-[12px] font-bold text-[#3d3028] tracking-widest mb-2 block">Astăzi</span>
-                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Boutique-ul Munchotella</h3>
+                <h3 className="font-serif text-2xl font-bold text-[#1c1c19] mb-3">Azi la Munchotella</h3>
                 <p className="text-[16px] text-[#4e4540] leading-relaxed">
-                  Locația fizică deschisă pentru a servi zeci de pasionați ai gustului zilnic, cu o misiune simplă: Să oferim cea mai spectaculoasă experiență dulce.
+                  Te așteptăm în locația noastră, unde pregătim fiecare comandă pe loc, exact în fața ta. Misiunea noastră a rămas aceeași: să-ți facem ziua mai dulce, cu un desert corect.
                 </p>
               </div>
             </AnimateIn>
           </div>
           
           <div className="mt-24 text-center">
-            <MagneticButton className="bg-[#55463E] text-white text-[12px] font-bold uppercase tracking-widest px-8 py-4 hover:bg-[#3d3028] transition-colors duration-300">
-              Vezi Meniul Nostru
-            </MagneticButton>
+            <Link href="/menu">
+              <MagneticButton className="bg-[#55463E] text-white text-[12px] font-bold uppercase tracking-widest px-8 py-4 hover:bg-[#3d3028] transition-colors duration-300">
+                Vezi Meniul Nostru
+              </MagneticButton>
+            </Link>
           </div>
         </div>
       </section>

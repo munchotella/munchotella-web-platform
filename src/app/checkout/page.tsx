@@ -22,9 +22,10 @@ import {
   Footprints,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
-import { useLoadScript, Autocomplete } from "@react-google-maps/api";
-
+import { Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "@/context/GoogleMapsContext";
 const libraries: any[] = ["places"];
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
@@ -68,14 +69,26 @@ export default function CheckoutPage() {
     intercom: "",
     notes: "",
     estimatedKm: 3.5, // Standard estimated distance in Chisinau (~3.5km rutieri)
+    lat: 46.996452,
+    lng: 28.834809,
   });
+
+  const { user, token, updateUser } = useAuth();
+
+  // Pre-fill user data if available
+  React.useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        phone: user.phone || prev.phone,
+      }));
+    }
+  }, [user]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries,
-  });
+  const { isLoaded } = useGoogleMaps();
 
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
@@ -93,7 +106,7 @@ export default function CheckoutPage() {
         const lng = place.geometry.location.lng();
         const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
         const roadDist = straightDist * 1.3; // Approx road distance multiplier
-        setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist }));
+        setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
       } else {
         setFormData(prev => ({ ...prev, street: address }));
       }
@@ -169,38 +182,92 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0 || !deliveryCalc.isDeliverable) return;
 
     setIsSubmitting(true);
 
-    const orderId = `MNC-${Math.floor(100000 + Math.random() * 900000)}`;
+    try {
+      const menuItems = items.filter(i => !String(i.cartItemId).startsWith('drink_'));
+      const drinkItems = items.filter(i => String(i.cartItemId).startsWith('drink_'));
 
-    const orderData = {
-      orderId,
-      createdAt: new Date().toISOString(),
-      customer: formData,
-      deliveryType,
-      doorDelivery,
-      paymentMethod,
-      timing: timing === "asap" ? "Livrare Imediată (30-60 min)" : `Programată la ${scheduledTime}`,
-      items,
-      totalPrice,
-      deliveryFee,
-      discountAmount,
-      grandTotal,
-      deliveryCalc,
-      status: "pending",
-    };
+      // Pregătește adresa completă (adăugând detalii bloc/apartament/interfon)
+      let fullAddress = formData.street;
+      const extras = [];
+      if (formData.house) extras.push(`Bloc ${formData.house}`);
+      if (formData.apartment) extras.push(`Ap. ${formData.apartment}`);
+      if (formData.intercom) extras.push(`Interfon ${formData.intercom}`);
+      if (extras.length > 0) {
+        fullAddress += ` (${extras.join(', ')})`;
+      }
 
-    localStorage.setItem(`munchotella_order_${orderId}`, JSON.stringify(orderData));
+      const orderPayload = {
+        customer: {
+          name: formData.name,
+          phone: formData.phone,
+          address: fullAddress,
+          notes: formData.notes,
+          coordinates: { lat: formData.lat, lng: formData.lng }
+        },
+        items: menuItems.map(i => ({
+          menuItemId: i.id || i.cartItemId,
+          quantity: i.quantity,
+          variantName: i.selectedVariant, // presupunem ca aici se tine
+          modifiers: i.selectedToppings?.map(t => ({
+            title: t.groupName || 'Topping',
+            optionName: t.name
+          })) || []
+        })),
+        drinks: drinkItems.map(i => ({
+          name: i.name,
+          quantity: i.quantity
+        })),
+        paymentMethod: paymentMethod === "online" ? "card" : paymentMethod, // Backend asteapta 'cash' sau 'card'
+        doorDelivery,
+        needsCutlery: false, // Default false pentru moment
+        promoCode: discountPercent > 0 ? couponCode : undefined
+      };
 
-    setTimeout(() => {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      
+      const res = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(orderPayload)
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.message || "Eroare la plasarea comenzii");
+      }
+
+      // Update user profile if they were logged in (backend auto-saves phone if missing)
+      if (user) {
+         try {
+           const profileRes = await fetch(`${API_URL}/auth/me`, {
+             headers: { "Authorization": `Bearer ${token}` }
+           });
+           const profileData = await profileRes.json();
+           if (profileData.success) {
+             updateUser(profileData.data);
+           }
+         } catch(e) { console.error(e); }
+      }
+
       clearCart();
+      router.push(`/order-tracking/${data.data._id}`);
+      
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.");
+    } finally {
       setIsSubmitting(false);
-      router.push(`/order-tracking/${orderId}`);
-    }, 1200);
+    }
   };
 
   if (items.length === 0) {
@@ -343,6 +410,47 @@ export default function CheckoutPage() {
 
               {deliveryType === "delivery" && (
                 <div className="space-y-4 pt-2">
+                  {/* Selectare Adrese Salvate */}
+                  {user && user.addresses && user.addresses.length > 0 && (
+                    <div className="mb-4">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#736A60] mb-2 flex items-center gap-1">
+                        <MapPin className="w-4 h-4 text-[#D4A853]" /> 
+                        Adrese Salvate
+                      </label>
+                      <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
+                        {user.addresses.map((addr: any) => {
+                          const isSelected = formData.street === addr.street;
+                          const iconName = addr.label === 'Acasă' ? '🏠' : addr.label === 'Birou' ? '💼' : addr.label === 'Prieten' ? '👥' : '📌';
+                          
+                          return (
+                            <button
+                              key={addr._id}
+                              type="button"
+                              onClick={() => {
+                                const dist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, addr.lat, addr.lng);
+                                setFormData(prev => ({
+                                  ...prev,
+                                  street: addr.street,
+                                  lat: addr.lat,
+                                  lng: addr.lng,
+                                  estimatedKm: dist * 1.3
+                                }));
+                              }}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-all shrink-0 ${
+                                isSelected 
+                                  ? 'bg-[#D4A853] border-[#D4A853] text-[#1A120B] font-bold shadow-md' 
+                                  : 'bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50'
+                              }`}
+                            >
+                              <span>{iconName}</span>
+                              {addr.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[#736A60] mb-2">
                       Stradă & Număr *

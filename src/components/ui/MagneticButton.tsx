@@ -3,43 +3,53 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-export default function MagneticButton({
-  children,
-  className = "",
-  onClick,
-}: {
+interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
+  magneticIntensity?: number;
+}
+
+export default function MagneticButton({ 
+  children, 
+  className = "", 
+  magneticIntensity = 0.3,
+  ...props 
+}: MagneticButtonProps) {
+  const ref = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouse = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!ref.current) return;
+    
     const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
     const middleX = clientX - (left + width / 2);
     const middleY = clientY - (top + height / 2);
-    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
+    
+    setPosition({ x: middleX * magneticIntensity, y: middleY * magneticIntensity });
   };
 
   const reset = () => {
     setPosition({ x: 0, y: 0 });
   };
 
-  const { x, y } = position;
-
   return (
-    <motion.div
+    <motion.button
       ref={ref}
       onMouseMove={handleMouse}
       onMouseLeave={reset}
-      animate={{ x, y }}
+      animate={{ x: position.x, y: position.y }}
       transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-      className={`relative inline-flex items-center justify-center ${className}`}
-      onClick={onClick}
+      className={className}
+      {...props}
     >
-      {children}
-    </motion.div>
+      <motion.div
+        animate={{ x: position.x * 0.2, y: position.y * 0.2 }}
+        transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+        className="w-full h-full flex items-center justify-center gap-3"
+      >
+        {children}
+      </motion.div>
+    </motion.button>
   );
 }

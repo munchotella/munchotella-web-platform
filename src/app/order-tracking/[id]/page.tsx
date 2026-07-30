@@ -1,213 +1,168 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import {
-  CheckCircle2,
-  Clock,
-  MapPin,
-  Phone,
-  Utensils,
-  Truck,
-  Check,
-  ShoppingBag,
-  Home,
-  RefreshCw,
-} from "lucide-react";
-
-type OrderDetails = {
-  orderId: string;
-  createdAt: string;
-  customer: {
-    name: string;
-    phone: string;
-    street: string;
-    house?: string;
-    apartment?: string;
-    intercom?: string;
-    notes?: string;
-  };
-  deliveryType: "delivery" | "pickup";
-  paymentMethod: string;
-  timing: string;
-  items: any[];
-  totalPrice: number;
-  deliveryFee: number;
-  discountAmount: number;
-  grandTotal: number;
-};
+import { useParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { ChevronLeft, CheckCircle2, Clock, ChefHat, Truck, MapPin, PackageOpen } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const STEPS = [
-  { id: 1, title: "Comandă Înregistrată", desc: "Preluată de sistemul Munchotella", icon: Clock },
-  { id: 2, title: "Se Prepară în Bucătărie", desc: "Bucătarii noștri prepară desertul proaspăt", icon: Utensils },
-  { id: 3, title: "În Curs de Livrare", desc: "Curierul se îndreaptă spre adresa ta", icon: Truck },
-  { id: 4, title: "Comandă Finalizată", desc: "Poftă bună!", icon: CheckCircle2 },
+  { id: "pending", label: "Comandă Plasată", icon: Clock },
+  { id: "preparing", label: "Se Prepară", icon: ChefHat },
+  { id: "delivering", label: "În Livrare", icon: Truck },
+  { id: "completed", label: "Livrată", icon: PackageOpen }
 ];
 
 export default function OrderTrackingPage() {
   const params = useParams();
-  const orderId = params?.id as string;
+  const router = useRouter();
+  const [currentStepIndex, setCurrentStepIndex] = useState(1); // 1 = Preparing (Mock)
+  const [loading, setLoading] = useState(true);
 
-  const [order, setOrder] = useState<OrderDetails | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [minutesLeft, setMinutesLeft] = useState(35);
+  const orderId = typeof params?.id === 'string' ? params.id : '...';
 
   useEffect(() => {
-    if (!orderId) return;
+    // Simulate API fetch for order status
+    setTimeout(() => {
+      setLoading(false);
+    }, 800);
 
-    const saved = localStorage.getItem(`munchotella_order_${orderId}`);
-    if (saved) {
-      try {
-        setOrder(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse order", e);
-      }
-    } else {
-      // Demo order fallback
-      setOrder({
-        orderId: orderId || "MNC-849201",
-        createdAt: new Date().toISOString(),
-        customer: {
-          name: "Client Munchotella",
-          phone: "+373 79 000 000",
-          street: "Nicolae Testemițeanu 21/1",
-        },
-        deliveryType: "delivery",
-        paymentMethod: "cash",
-        timing: "Livrare Imediată (30-60 min)",
-        items: [],
-        totalPrice: 165,
-        deliveryFee: 30,
-        discountAmount: 0,
-        grandTotal: 195,
-      });
-    }
-  }, [orderId]);
+    // Simulate live update
+    const timer = setTimeout(() => {
+      setCurrentStepIndex(2);
+    }, 5000);
 
-  // Simulate progress steps over time
-  useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(2), 5000);
-    const timer2 = setTimeout(() => {
-      setCurrentStep(3);
-      setMinutesLeft(15);
-    }, 25000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!order) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FFFCF6] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans pt-28 pb-32">
-      <div className="max-w-4xl mx-auto px-6">
-        {/* Header */}
-        <div className="bg-white p-8 rounded-3xl border border-[#E8E2D9] shadow-lg mb-8 text-center relative overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D4A853]/10 rounded-full blur-2xl" />
+    <main className="min-h-screen bg-[#FFFCF6] flex flex-col">
+      <Navbar />
+      
+      <div className="flex-1 pt-32 pb-24 max-w-[800px] mx-auto px-6 w-full">
+        <button 
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-[#1A120B]/60 hover:text-[#D4A853] transition-colors mb-10"
+        >
+          <ChevronLeft size={20} />
+          <span className="font-medium">Înapoi</span>
+        </button>
 
-          <span className="inline-block bg-[#D4A853]/20 text-[#1A120B] font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">
-            Comanda #{order.orderId}
-          </span>
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-[#1A120B] mb-2">
-            Status <span className="text-[#D4A853] italic font-normal">Comandă</span>
-          </h1>
-          <p className="text-sm text-[#736A60] font-light">
-            Timp estimat de sosire: <strong className="text-[#1A120B]">{minutesLeft} minute</strong>
-          </p>
-
-          <div className="mt-8 flex justify-center gap-4">
-            <a
-              href="tel:+37379006499"
-              className="inline-flex items-center gap-2 bg-[#1A120B] text-[#D4A853] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#3D3028] transition-colors"
-            >
-              <Phone className="w-4 h-4" />
-              Sunați Restaurantul
-            </a>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 bg-[#FAF7F2] border border-[#E8E2D9] text-[#1A120B] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:border-[#D4A853] transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              Acasă
-            </Link>
-          </div>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-2">Urmărire Comandă</h1>
+          <p className="text-[#1A120B]/60">#{orderId.toUpperCase()}</p>
         </div>
 
-        {/* Status Stepper */}
-        <div className="bg-white p-8 rounded-3xl border border-[#E8E2D9] shadow-sm mb-8 space-y-8">
-          <h3 className="font-serif text-xl font-bold text-[#1A120B] border-b border-[#E8E2D9] pb-4">
-            Progres Livrare în Timp Real
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-            {STEPS.map((step) => {
-              const Icon = step.icon;
-              const isCompleted = step.id < currentStep;
-              const isCurrent = step.id === currentStep;
-
-              return (
-                <div key={step.id} className="flex flex-col items-center text-center space-y-3 relative z-10">
-                  <div
-                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${
-                      isCompleted
-                        ? "bg-[#D4A853] text-[#FCF9F4]"
-                        : isCurrent
-                        ? "bg-[#D4A853] text-[#1A120B] ring-4 ring-[#D4A853]/20 scale-110"
-                        : "bg-[#F5F2EC] text-[#736A60] border border-[#E8E2D9]"
-                    }`}
-                  >
-                    {isCompleted ? <Check className="w-7 h-7" /> : <Icon className="w-6 h-6" />}
-                  </div>
-                  <div>
-                    <h4 className={`font-bold text-sm ${isCurrent ? "text-[#1A120B]" : "text-[#736A60]"}`}>
-                      {step.title}
-                    </h4>
-                    <p className="text-[11px] text-[#736A60] mt-1 font-light">{step.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Order Details Summary */}
-        <div className="bg-white p-8 rounded-3xl border border-[#E8E2D9] shadow-sm space-y-6">
-          <h3 className="font-serif text-xl font-bold text-[#1A120B] border-b border-[#E8E2D9] pb-4">
-            Detalii Comandă
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#736A60] block">
-                Client & Adresă
-              </span>
-              <p className="font-bold text-[#1A120B]">{order.customer.name}</p>
-              <p className="text-[#736A60]">{order.customer.phone}</p>
-              <p className="text-[#736A60]">
-                {order.deliveryType === "pickup"
-                  ? "Preluare din Boutique (Nicolae Testemițeanu 21/1)"
-                  : `${order.customer.street} ${order.customer.house || ""} ${order.customer.apartment || ""}`}
-              </p>
+        {/* Status Tracker */}
+        <div className="bg-white p-8 md:p-12 rounded-[32px] border border-[#E8E2D9] shadow-sm mb-8">
+          
+          <div className="relative">
+            {/* Background Line */}
+            <div className="absolute top-8 left-[10%] right-[10%] h-1 bg-[#E8E2D9] rounded-full hidden md:block"></div>
+            
+            {/* Active Line */}
+            <div 
+              className="absolute top-8 left-[10%] h-1 bg-[#D4A853] rounded-full hidden md:block transition-all duration-1000 ease-in-out overflow-hidden"
+              style={{ width: `${(currentStepIndex / (STEPS.length - 1)) * 80}%` }}
+            >
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent w-full"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+              />
             </div>
 
-            <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#736A60] block">
-                Metodă Plată & Orar
-              </span>
-              <p className="font-bold text-[#1A120B] capitalize">
-                {order.paymentMethod === "cash" ? "Numerar la livrare" : "Card la livrare (POS)"}
-              </p>
-              <p className="text-[#736A60]">{order.timing}</p>
-              <p className="text-lg font-serif font-bold text-[#D4A853] pt-2">
-                Total: {order.grandTotal} MDL
-              </p>
+            <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-0">
+              {STEPS.map((step, index) => {
+                const isCompleted = index <= currentStepIndex;
+                const isActive = index === currentStepIndex;
+                const Icon = step.icon;
+
+                return (
+                  <div key={step.id} className="flex md:flex-col items-center gap-4 md:gap-2 relative group">
+                    {/* Vertical Line for Mobile */}
+                    {index !== STEPS.length - 1 && (
+                      <div className={`absolute left-8 top-16 bottom-[-32px] w-0.5 md:hidden ${index < currentStepIndex ? 'bg-[#D4A853]' : 'bg-[#E8E2D9]'}`}></div>
+                    )}
+                    
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`w-16 h-16 rounded-full flex items-center justify-center border-4 transition-colors duration-500 z-10 relative bg-white ${
+                        isActive 
+                          ? "border-[#D4A853] text-[#D4A853]" 
+                          : isCompleted 
+                            ? "border-[#D4A853] bg-[#D4A853] text-white" 
+                            : "border-[#E8E2D9] text-[#1A120B]/30"
+                      }`}
+                    >
+                      {isCompleted && !isActive ? <CheckCircle2 size={28} /> : <Icon size={28} />}
+                      
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-full border-4 border-[#D4A853] animate-ping opacity-20"></div>
+                      )}
+                    </motion.div>
+                    
+                    <div className="md:text-center">
+                      <p className={`font-bold transition-colors duration-500 ${isCompleted ? "text-[#1A120B]" : "text-[#1A120B]/40"}`}>
+                        {step.label}
+                      </p>
+                      {isActive && (
+                        <p className="text-[12px] text-[#D4A853] mt-1 hidden md:block">În progres...</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
+
+        {/* Order Details & Delivery Map Mock */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-[#1A120B] p-8 rounded-[32px] text-white">
+            <div className="flex items-center gap-3 mb-6">
+              <MapPin size={24} className="text-[#D4A853]" />
+              <h3 className="font-bold text-lg">Adresa de livrare</h3>
+            </div>
+            <p className="text-white/80">Str. Nicolae Testemițeanu 29</p>
+            <p className="text-white/60 text-sm mt-1">Ap. 45, Etaj 4</p>
+            
+            <div className="mt-8 pt-8 border-t border-white/10">
+              <p className="text-white/40 text-sm mb-2">Timp estimat de livrare</p>
+              <p className="text-3xl font-serif text-[#FDF9F1]">15 - 20 min</p>
+            </div>
+          </div>
+          
+          <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] flex flex-col justify-center items-center text-center">
+            <motion.div 
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="w-16 h-16 bg-[#1A120B]/5 rounded-full flex items-center justify-center text-[#1A120B] mb-4 shadow-[0_10px_30px_rgba(26,18,11,0.05)]"
+            >
+              <Truck size={28} />
+            </motion.div>
+            <h3 className="font-bold text-[#1A120B] mb-2">Livrare prin curier propriu</h3>
+            <p className="text-[#1A120B]/60 text-sm mb-6">Curierul va fi alocat imediat ce comanda este gata.</p>
+            <button className="px-6 py-3 border border-[#E8E2D9] rounded-full font-bold text-[#1A120B] hover:bg-[#1A120B]/5 transition-colors">
+              Contactează suportul
+            </button>
+          </div>
+        </div>
+
       </div>
-    </div>
+      
+      <Footer />
+    </main>
   );
 }

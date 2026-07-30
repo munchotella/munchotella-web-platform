@@ -47,7 +47,7 @@ export default function ScrollyTellingProcess() {
   // Background video zoom effect for cinematic feel
   const videoScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const videoBlur = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], ["blur(0px)", "blur(4px)", "blur(4px)", "blur(0px)"]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0.4, 0.7, 0.7, 0.4]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 0.1, 0.9, 1], [0.65, 0.85, 0.85, 0.65]);
 
   // Video Opacity Cross-fading
   const vid1Opacity = useTransform(scrollYProgress, [0, 0.3, 0.4, 1], [1, 1, 0, 0]);

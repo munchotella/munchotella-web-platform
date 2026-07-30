@@ -9,7 +9,7 @@ export type ToppingOption = {
 
 export type CartItem = {
   cartItemId: string; // Unique identifier (id + selected toppings)
-  id: number;
+  id: string | number; // Suportă ID-uri Mongoose (string)
   name: string;
   basePrice: number;
   price: number; // Unit price (basePrice + sum(toppings))
@@ -19,7 +19,7 @@ export type CartItem = {
 };
 
 type AddToCartInput = {
-  id: number;
+  id: string | number;
   name: string;
   price: number; // base price or calculated price
   image: string;
@@ -37,13 +37,17 @@ type CartContextType = {
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
   clearCart: () => void;
+  replaceCart: (newItems: CartItem[]) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+import { useToast } from "@/context/ToastContext";
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { showToast } = useToast();
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -101,7 +105,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
-    setIsCartOpen(true);
+    
+    // În loc să deschidem tot coșul invaziv, doar arătăm un Toast fluid
+    showToast(`${input.name} adăugat în coș!`);
   };
 
   const removeFromCart = (cartItemId: string) => {
@@ -110,6 +116,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+  };
+
+  const replaceCart = (newItems: CartItem[]) => {
+    setItems(newItems);
   };
 
   const updateQuantity = (cartItemId: string, delta: number) => {
@@ -139,6 +149,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isCartOpen,
         setIsCartOpen,
         clearCart,
+        replaceCart,
       }}
     >
       {children}
