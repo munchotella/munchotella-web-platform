@@ -7,22 +7,10 @@ import MagneticButton from "@/components/ui/MagneticButton";
 
 const HERO_PLAYLIST = [
   {
-    src: "/videos/munchotella_hero_commercial_loop.mp4",
-    poster: "/dubai_pistachio_crepe_ref.png",
-    title: "Crepe Dubai & Kataif",
-    subtitle: "Fistic Sicilian 100% & Glazură Nutella"
-  },
-  {
     src: "/videos/waffles_biscoff.mp4",
     poster: "/lotus_biscoff_waffle_ref.png",
     title: "Delux & Lotus Mini Waffles",
     subtitle: "Pastă Biscoff Caramelizată & Ciocolată Albă"
-  },
-  {
-    src: "/videos/crepe_sushi.mp4",
-    poster: "/royal_crepe_sushi_ref.png",
-    title: "Royal Crepe Sushi Roll",
-    subtitle: "Căpșuni Proaspete, Banane & Sos Belgian"
   }
 ];
 
@@ -73,6 +61,7 @@ export default function CinematicScrollHero() {
           ref={videoRef}
           key={currentTrack.src}
           autoPlay
+          loop
           muted={isMuted}
           playsInline
           preload="auto"
@@ -162,18 +151,20 @@ export default function CinematicScrollHero() {
       {/* Playlist Indicator & Media Controls */}
       <div className="absolute bottom-8 right-8 z-20 flex flex-col md:flex-row items-end md:items-center gap-4">
         {/* Track Selector Bullets */}
-        <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-          {HERO_PLAYLIST.map((track, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentTrackIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
-              }`}
-              aria-label={`Select shot ${idx + 1}`}
-            />
-          ))}
-        </div>
+        {HERO_PLAYLIST.length > 1 && (
+          <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+            {HERO_PLAYLIST.map((track, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentTrackIndex(idx)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
+                }`}
+                aria-label={`Select shot ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Audio/Video Controls */}
         <div className="flex items-center space-x-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-white/80 text-xs">
