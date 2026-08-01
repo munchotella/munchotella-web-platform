@@ -17,6 +17,12 @@ const HERO_PLAYLIST = [
     poster: "/royal_sushi_official.png",
     title: "Royal Sushi Banana",
     subtitle: "Clătite Subțiri, Nutella & Fructe Proaspete"
+  },
+  {
+    src: "/videos/mini_waffle_video_hero.mp4",
+    poster: "/delux_mini_waffle_official.png",
+    title: "Delux Mini Waffles",
+    subtitle: "Pufoase, Nutella, Fistic & Oreo"
   }
 ];
 
