@@ -45,7 +45,7 @@ export default function MunchotellaBoutique() {
 
       {/* Info Banner Ribbon */}
       <div className="bg-[#1A120B] text-[#D4A853] py-4 border-y border-[#D4A853]/20 relative z-20 shadow-lg">
-        <div className="max-w-[1200px] mx-auto px-4 flex flex-wrap items-center justify-center gap-6 md:gap-12 text-xs font-bold uppercase tracking-widest text-center">
+        <div className="max-w-[1400px] mx-auto px-4 flex flex-col lg:flex-row lg:flex-nowrap lg:whitespace-nowrap items-center justify-center gap-4 lg:gap-8 text-[11px] lg:text-xs font-bold uppercase tracking-widest text-center">
           <div className="flex items-center space-x-2.5">
             <span className="material-symbols-outlined text-sm text-[#D4A853]">location_on</span>
             <span className="text-[#FFFDF8]">Strada Nicolae Testemițeanu 21/1, Chișinău</span>
