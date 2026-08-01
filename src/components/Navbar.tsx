@@ -23,6 +23,13 @@ export default function Navbar() {
   const isHome = pathname === "/";
   const effectiveIsScrolled = isHome ? isScrolled : true;
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -45,7 +52,7 @@ export default function Navbar() {
     >
       <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group z-50">
+        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 group z-50">
           <LogoIconSVG 
             className="h-10 w-10 md:h-12 md:w-12 transition-all duration-300 group-hover:scale-105 text-[#f3922c]" 
           />
@@ -164,7 +171,14 @@ export default function Navbar() {
             className="fixed inset-0 z-[100] bg-[#FFFCF6] flex flex-col pt-6 px-6"
           >
             <div className="flex justify-between items-center mb-12">
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 group">
+              <Link 
+                href="/" 
+                onClick={(e) => {
+                  handleLogoClick(e);
+                  setIsMobileMenuOpen(false);
+                }} 
+                className="flex items-center gap-2 group"
+              >
                 <LogoIconSVG className="h-10 w-10 text-[#f3922c]" />
                 <LogoTextSVG className="h-[45px] w-auto text-[#1A120B]" />
               </Link>

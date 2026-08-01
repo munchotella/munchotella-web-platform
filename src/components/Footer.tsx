@@ -6,13 +6,20 @@ import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 
 export default function Footer() {
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <footer className="bg-[#1A120B] text-white pt-20 pb-10 border-t border-[#D4A853]/20 relative z-10 w-full">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-16 pb-16">
           <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-3 group z-50 mb-8">
-              <LogoIconSVG className="h-12 w-12 opacity-90 transition-transform duration-300 group-hover:scale-105 text-[#f3922c]" />
+            <Link href="/" onClick={handleLogoClick} className="flex items-center gap-3 group z-50 mb-8">
+              <LogoIconSVG className="h-14 w-14 md:h-16 md:w-16 opacity-90 transition-transform duration-300 group-hover:scale-105 text-[#f3922c]" />
               <LogoTextSVG className="h-[55px] w-auto text-[#FDF9F1] transition-colors duration-300 group-hover:text-[#D4A853]" />
             </Link>
 
