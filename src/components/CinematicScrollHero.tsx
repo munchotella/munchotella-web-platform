@@ -11,6 +11,12 @@ const HERO_PLAYLIST = [
     poster: "/lotus_biscoff_waffle_ref.png",
     title: "Delux & Lotus Mini Waffles",
     subtitle: "Pastă Biscoff Caramelizată & Ciocolată Albă"
+  },
+  {
+    src: "/Munchotella_Commercial_1785537195299.mp4",
+    poster: "/royal_sushi_official.png",
+    title: "Royal Sushi Banana",
+    subtitle: "Clătite Subțiri, Nutella & Fructe Proaspete"
   }
 ];
 
