@@ -66,15 +66,11 @@ export default function Navbar() {
         </Link>
 
         {/* Center Nav (Desktop) */}
-        <div className={`hidden md:flex items-center space-x-1 text-[13px] font-bold uppercase tracking-widest rounded-full px-2 py-1.5 transition-all duration-500 ${
-          effectiveIsScrolled 
-            ? "bg-[#1A120B]/5 border border-[#1A120B]/10" 
-            : "bg-white/10 backdrop-blur-md border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
-        }`}>
-          <Link href="/" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Home</Link>
-          <Link href="/about" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Povestea</Link>
-          <Link href="/menu" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Meniu</Link>
-          <Link href="/contact" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Contact</Link>
+        <div className="hidden md:flex items-center space-x-2 text-[13px] font-bold uppercase tracking-widest">
+          <Link href="/" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Home</Link>
+          <Link href="/about" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Povestea</Link>
+          <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Meniu</Link>
+          <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Contact</Link>
         </div>
 
         {/* Trailing Icons */}
