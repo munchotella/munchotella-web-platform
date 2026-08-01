@@ -152,7 +152,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Dr. Nawar</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Local Guide • Google Maps</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     DN
@@ -204,7 +204,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Rusu Victoria</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Chișinău • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     RV
@@ -230,7 +230,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Tatiana Moraru</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Chișinău • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     TM
