@@ -17,15 +17,15 @@ export default function Footer() {
             </Link>
 
             <div className="flex flex-col space-y-4">
-              <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+              <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">location_on</span>
                 <span>Nicolae Testemițeanu 21/1, Chișinău</span>
               </a>
-              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">phone</span>
                 <span>079 006 499</span>
               </a>
-              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">mail</span>
                 <span>munchotella@gmail.com</span>
               </a>
@@ -35,19 +35,19 @@ export default function Footer() {
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Explorați</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Povestea Noastră</Link></li>
-              <li><Link href="/menu" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Meniul Complet</Link></li>
-              <li><Link href="/#testimonials" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Recenzii</Link></li>
+              <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Povestea Noastră</Link></li>
+              <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Meniul Complet</Link></li>
+              <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Recenzii</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Suport</h4>
             <ul className="space-y-4">
-              <li><Link href="/contact" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Contact</Link></li>
-              <li><Link href="/legal#privacy" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Politica de Confidențialitate</Link></li>
-              <li><Link href="/legal#terms" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Termeni și Condiții</Link></li>
-              <li><Link href="/legal#delivery" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Informații Livrare</Link></li>
+              <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Contact</Link></li>
+              <li><Link href="/legal#privacy" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Politica de Confidențialitate</Link></li>
+              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Termeni și Condiții</Link></li>
+              <li><Link href="/legal#delivery" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Informații Livrare</Link></li>
             </ul>
           </div>
           
