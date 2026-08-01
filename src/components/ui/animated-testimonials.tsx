@@ -46,7 +46,7 @@ export const AnimatedTestimonials = ({
   };
 
   return (
-    <div className="max-w-sm md:max-w-6xl mx-auto antialiased font-sans px-4 md:px-8 lg:px-12 py-20 bg-[#1A120B]">
+    <div className="max-w-sm md:max-w-6xl mx-auto antialiased font-sans px-4 md:px-8 lg:px-12 py-20 bg-[#FAF7F2]">
       <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
         <div>
           <div className="relative h-80 md:h-[500px] w-full">
@@ -87,7 +87,7 @@ export const AnimatedTestimonials = ({
                     alt={testimonial.name}
                     draggable={false}
                     fill
-                    className="h-full w-full rounded-3xl object-cover object-center border border-white/10"
+                    className="h-full w-full rounded-3xl object-cover object-center border border-[#1A120B]/10"
                   />
                 </motion.div>
               ))}
@@ -114,13 +114,13 @@ export const AnimatedTestimonials = ({
               ease: "easeInOut",
             }}
           >
-            <h3 className="text-3xl md:text-5xl font-serif font-bold text-[#E8E2D9]">
+            <h3 className="text-3xl md:text-5xl font-serif font-bold text-[#1A120B]">
               {testimonials[active].name}
             </h3>
             <p className="text-sm md:text-base text-[#D4A853] mt-2 mb-8 uppercase tracking-widest font-bold">
               {testimonials[active].designation}
             </p>
-            <motion.p className="text-lg md:text-2xl text-white/70 mt-8 font-light italic leading-relaxed">
+            <motion.p className="text-lg md:text-2xl text-[#1A120B]/80 mt-8 font-light italic leading-relaxed">
               {testimonials[active].quote.split(" ").map((word, index) => (
                 <motion.span
                   key={index}
@@ -150,9 +150,9 @@ export const AnimatedTestimonials = ({
             <MagneticButton>
               <button
                 onClick={handlePrev}
-                className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group/button hover:border-[#D4A853] hover:bg-white/10 transition-all duration-300"
+                className="h-14 w-14 rounded-full bg-[#1A120B]/5 border border-[#1A120B]/10 flex items-center justify-center group/button hover:border-[#D4A853] hover:bg-[#1A120B]/10 transition-all duration-300"
               >
-                <ArrowLeft className="h-6 w-6 text-white/50 group-hover/button:text-[#D4A853] transition-colors" />
+                <ArrowLeft className="h-6 w-6 text-[#1A120B]/50 group-hover/button:text-[#D4A853] transition-colors" />
               </button>
             </MagneticButton>
             <MagneticButton>
