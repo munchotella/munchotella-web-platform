@@ -67,7 +67,6 @@ export default function CinematicScrollHero() {
           ref={videoRef}
           key={currentTrack.src}
           autoPlay
-          loop
           muted={isMuted}
           playsInline
           preload="auto"
