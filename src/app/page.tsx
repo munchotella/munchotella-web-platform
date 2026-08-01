@@ -130,28 +130,6 @@ export default function MunchotellaBoutique() {
       <section className="py-24 md:py-32 bg-[#FAF7F2] relative z-10" id="testimonials">
         <div className="max-w-[1200px] mx-auto px-4 md:px-8 text-center">
           <AnimateIn direction="up">
-            {/* Interactive Rating Prompt Banner */}
-            <a 
-              href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Beanu+21%2F1+Chisinau"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex flex-col items-center justify-center bg-white border border-[#1A120B]/10 hover:border-[#D4A853] px-6 py-4 rounded-2xl mb-8 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
-            >
-              <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-2 flex items-center gap-2">
-                <span>🔥 4.4 ★ pe Google Maps • Lasă o recenzie</span>
-              </span>
-              <div className="flex items-center space-x-1.5 my-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    className="w-7 h-7 fill-[#D4A853] text-[#D4A853] group-hover:scale-125 transition-transform duration-200" 
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-[#1A120B]/60 font-medium mt-2 underline decoration-[#D4A853]/60 group-hover:text-[#1A120B] transition-colors">
-                Apasă aici pentru a acorda o notă pe Google Maps →
-              </span>
-            </a>
 
             <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1A120B] mb-16">Ce spun clienții noștri pe Google</h2>
           </AnimateIn>
@@ -168,7 +146,7 @@ export default function MunchotellaBoutique() {
                   </div>
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
-                <p className="text-[#1A120B]/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
+                <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   "Absolutely best ☺️ No dieting here ✊ It was my first time trying pure Nutella based desserts and I love it so much also I recommend their iced mint lemonade too..."
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
@@ -194,7 +172,7 @@ export default function MunchotellaBoutique() {
                   </div>
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
-                <p className="text-[#1A120B]/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
+                <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   "I tried the Waffle delux, and it was heavenly - crisp on the outside, fluffy inside, and generously topped!! Staff is super friendly. Loved the experience!"
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
@@ -220,7 +198,7 @@ export default function MunchotellaBoutique() {
                   </div>
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
-                <p className="text-[#1A120B]/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
+                <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   "Very great place. From all Chișinău, this is the place with the best sweet food. Waffle exotic and Nutella mini waffles are the best!"
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
@@ -246,7 +224,7 @@ export default function MunchotellaBoutique() {
                   </div>
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
-                <p className="text-[#1A120B]/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
+                <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   "The most delicious place in chisinau, Luv it !!! I advice everyone to try it, Best service with lovely manager and workers 🥰"
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
