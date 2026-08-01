@@ -167,22 +167,22 @@ export default function ProductCustomizationModal({
                       <div
                         key={topping.name}
                         onClick={(e) => toggleTopping(e, topping)}
-                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
+                        className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
                           index !== AVAILABLE_TOPPINGS.length - 1 ? "border-b border-[#EAE1DB]" : ""
                         } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
                       >
-                        <div className="flex flex-col">
-                          <span className={`text-[15px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#50453B]"}`}>
+                        <div className="flex flex-row items-center gap-3">
+                          <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
                             {topping.name}
                           </span>
-                          <span className={`text-[13px] mt-0.5 ${isSelected ? "text-[#D4A373] font-semibold" : "text-[#736A60]"}`}>
-                            +{topping.price} MDL
+                          <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
+                            (+{topping.price} MDL)
                           </span>
                         </div>
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                          isSelected ? "bg-[#D4A853] shadow-sm" : "border-2 border-[#EAE1DB] bg-white"
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
+                          isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
                         }`}>
-                          {isSelected && <Check className="w-4 h-4 text-white stroke-[3]" />}
+                          {isSelected && <Check className="w-5 h-5 text-white stroke-[3]" />}
                         </div>
                       </div>
                     );
