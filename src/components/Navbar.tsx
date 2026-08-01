@@ -68,15 +68,19 @@ export default function Navbar() {
         </div>
 
         {/* Trailing Icons */}
-        <div className={`flex items-center space-x-3 md:space-x-4 ${effectiveIsScrolled ? "text-[#1A120B]" : "text-white"}`}>
+        <div className={`flex items-center space-x-2 md:space-x-4 ${effectiveIsScrolled ? "text-[#1A120B]" : "text-white"}`}>
           <a href="tel:+37379006499" className={`hidden md:flex items-center space-x-2 text-[14px] font-bold hover:text-[#D4A853] transition-colors`}>
             <span className="material-symbols-outlined text-[18px]">call</span>
             <span>079 006 499</span>
           </a>
-          <NotificationsDropdown isScrolled={effectiveIsScrolled} />
-          {/* Auth Button */}
+          
+          <div className="hidden md:block">
+            <NotificationsDropdown isScrolled={effectiveIsScrolled} />
+          </div>
+          
+          {/* Auth Button (Desktop Only) */}
           {user ? (
-            <div className="relative group/user flex items-center">
+            <div className="relative group/user hidden md:flex items-center">
               <Link 
                 href="/profile"
                 className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ${
@@ -103,7 +107,7 @@ export default function Navbar() {
           ) : (
             <button 
               onClick={() => setIsAuthModalOpen(true)}
-              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ${
+              className={`hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ${
                 effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A]" : "bg-white/10 hover:bg-white/20 text-white"
               }`}
             >
@@ -141,7 +145,7 @@ export default function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ml-1 ${
-              effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A1A1A]" : "hover:bg-white/10 text-white"
+              effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A]" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
             <Menu size={20} />
@@ -164,12 +168,18 @@ export default function Navbar() {
                 <LogoIconSVG className="h-10 w-10 text-[#f3922c]" />
                 <LogoTextSVG className="h-[45px] w-auto text-[#1A120B]" />
               </Link>
-              <button 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A] transition-colors"
-              >
-                <X size={24} />
-              </button>
+              
+              <div className="flex items-center gap-2">
+                {/* Notifications in Mobile Menu */}
+                <NotificationsDropdown isScrolled={true} />
+                
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A] transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
             
             <div className="flex flex-col space-y-6 text-2xl font-serif text-[#1A120B]">
@@ -177,6 +187,28 @@ export default function Navbar() {
               <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Povestea</Link>
               <Link href="/menu" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Meniu</Link>
               <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Contact</Link>
+              
+              {/* Auth Links in Mobile Menu */}
+              {user ? (
+                <>
+                  <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors pt-4 border-t border-[#E8E2D9]">
+                    Profilul Meu
+                  </Link>
+                  <button 
+                    onClick={() => { logout(); setIsMobileMenuOpen(false); }} 
+                    className="text-left text-red-500/90 hover:text-red-500 transition-colors"
+                  >
+                    Deconectare
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => { setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }} 
+                  className="text-left hover:text-[#D4A853] transition-colors pt-4 border-t border-[#E8E2D9]"
+                >
+                  Contul Meu
+                </button>
+              )}
             </div>
 
             <div className="mt-auto mb-10 border-t border-[#E8E2D9] pt-8">
