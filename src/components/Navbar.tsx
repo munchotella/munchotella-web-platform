@@ -61,7 +61,7 @@ export default function Navbar() {
           <Link href="/" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Home</Link>
           <Link href="/about" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/about" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Povestea</Link>
           <Link href="/menu" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/menu" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Meniu</Link>
-          <Link href="/#testimonials" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Recenzii</Link>
+
           <Link href="/contact" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/contact" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Contact</Link>
         </div>
 
