@@ -7,10 +7,10 @@ import MagneticButton from "@/components/ui/MagneticButton";
 
 const HERO_PLAYLIST = [
   {
-    src: "/videos/waffles_biscoff.mp4",
-    poster: "/lotus_biscoff_waffle_ref.png",
-    title: "Delux & Lotus Mini Waffles",
-    subtitle: "Pastă Biscoff Caramelizată & Ciocolată Albă"
+    src: "/videos/mini_waffle_video_hero.mp4",
+    poster: "/delux_mini_waffle_official.png",
+    title: "Delux Mini Waffles",
+    subtitle: "Pufoase, Nutella, Fistic & Oreo"
   },
   {
     src: "/Munchotella_Commercial_1785537195299.mp4",
@@ -19,10 +19,10 @@ const HERO_PLAYLIST = [
     subtitle: "Clătite Subțiri, Nutella & Fructe Proaspete"
   },
   {
-    src: "/videos/mini_waffle_video_hero.mp4",
-    poster: "/delux_mini_waffle_official.png",
-    title: "Delux Mini Waffles",
-    subtitle: "Pufoase, Nutella, Fistic & Oreo"
+    src: "/videos/waffles_biscoff.mp4",
+    poster: "/lotus_biscoff_waffle_ref.png",
+    title: "Delux & Lotus Mini Waffles",
+    subtitle: "Pastă Biscoff Caramelizată & Ciocolată Albă"
   }
 ];
 
