@@ -21,7 +21,7 @@ interface NotificationsDropdownProps {
 }
 
 export default function NotificationsDropdown({ isScrolled = false }: NotificationsDropdownProps) {
-  const { user, token } = useAuth();
+  const { user, token, setIsAuthModalOpen } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -110,14 +110,16 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
   };
 
   const toggleDropdown = () => {
+    if (!user) {
+      if (setIsAuthModalOpen) setIsAuthModalOpen(true);
+      return;
+    }
     if (!isOpen) {
       markAsRead();
       fetchNotifications();
     }
     setIsOpen(!isOpen);
   };
-
-  if (!user) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
