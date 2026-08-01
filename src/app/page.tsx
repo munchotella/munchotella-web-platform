@@ -42,10 +42,10 @@ const reviewData = [
     src: "/reviews/rusu.jpg"
   },
   {
-    quote: "I love this place. The waffles and crepes are so delicious. I definitely recommend them 🥰❤️🫶",
-    name: "Serban Anna",
-    designation: "1 recenzie • Google Maps",
-    src: "/reviews/serban.jpg"
+    quote: "Foarte gustos aici. Se vede ca e totul facut din suflet. Si deserturile si interiorul si personalul, top.",
+    name: "Razi Azzam",
+    designation: "5 recenzii • Google Maps",
+    src: "/reviews/razi.jpg"
   }
 ];
 
