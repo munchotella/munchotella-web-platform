@@ -11,8 +11,8 @@ const steps = [
   },
   {
     num: "02",
-    title: "Frământat Manual",
-    desc: "Lăsăm aluatul la maturat în fiecare dimineață pentru a ne asigura că primești acea crustă crocantă la exterior și textura irezistibil de pufoasă la interior.",
+    title: "Zilnic proaspăt",
+    desc: "Secretul nostru e prospețimea pură. Pregătim aluatul în fiecare dimineață și îl folosim strict în acea zi, pentru un desert fraged, fierbinte și de neuitat.",
   },
   {
     num: "03",
