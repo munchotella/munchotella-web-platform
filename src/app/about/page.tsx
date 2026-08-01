@@ -13,7 +13,7 @@ export default function AboutPage() {
       <section className="relative h-[80vh] md:h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full z-0">
           {/* We will use a high-end luxury dark image placeholder for the kitchen atmosphere */}
-          <div className="absolute inset-0 bg-black/60 z-10" />
+          <div className="absolute inset-0 bg-black/80 z-10" />
           <img 
             src="/dubai_pistachio_crepe_ref.png" 
             alt="Munchotella Dubai Pistachio Crepe" 
