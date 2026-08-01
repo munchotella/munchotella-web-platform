@@ -21,31 +21,31 @@ const reviewData = [
     quote: "The most delicious place in Chișinău Moldova everyone have to try it",
     name: "Jebril ABUSIAM",
     designation: "5 recenzii • Google Maps",
-    src: "/delux_mini_waffle_official.png"
+    src: "/reviews/jebril.jpg"
   },
   {
     quote: "Absolutely best ☺️ No dieting here ✊ It's was my first time trying pure Nutella based desserts and I love it so much also I recommend their iced mint lemonade (mojito) too... Any one who likes chocolates will definitely love this 😍",
     name: "Dr. Nawar",
     designation: "Local Guide • Google Maps",
-    src: "/royal_sushi_official.png"
+    src: "/reviews/dr_nawar.jpg"
   },
   {
     quote: "I tried the Waffle delux, and it was heavenly- crisp on the outside, fluffy inside, and generously topped!! Oh and the staff is super friendly and welcoming!! Loved the experience! Highly recommended!!",
     name: "Krishna Rajendran",
     designation: "4 recenzii • Google Maps",
-    src: "/lotus_biscoff_waffle_ref.png"
+    src: "/reviews/krishna.jpg"
   },
   {
     quote: "Very great place. Nice people, customer service is excellent. From all Chișinău, this is the place with the best sweet food. Waffle exotic and Nutella mini waffles are the best!",
     name: "Rusu Victoria",
     designation: "1 recenzie • Google Maps",
-    src: "/delux_mini_waffle_official.png"
+    src: "/reviews/rusu.jpg"
   },
   {
     quote: "I love this place. The waffles and crepes are so delicious. I definitely recommend them 🥰❤️🫶",
     name: "Serban Anna",
     designation: "1 recenzie • Google Maps",
-    src: "/royal_sushi_official.png"
+    src: "/reviews/serban.jpg"
   }
 ];
 
