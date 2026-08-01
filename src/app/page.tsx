@@ -38,7 +38,6 @@ export default function MunchotellaBoutique() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-      <StickyBottomBar />
 
       {/* Hero Section */}
       <CinematicScrollHero />
@@ -261,6 +260,8 @@ export default function MunchotellaBoutique() {
       {/* Map Section */}
       <MapSection />
 
+      {/* Static Mobile Cart Action (previously StickyBottomBar) */}
+      <StickyBottomBar />
 
     </div>
   );

@@ -7,7 +7,7 @@ import LogoTextSVG from "./LogoTextSVG";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1A120B] text-white pt-20 pb-32 md:pb-10 border-t border-[#D4A853]/20 relative z-10 w-full">
+    <footer className="bg-[#1A120B] text-white pt-20 pb-10 border-t border-[#D4A853]/20 relative z-10 w-full">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-16 pb-16">
           <div className="md:col-span-1">
