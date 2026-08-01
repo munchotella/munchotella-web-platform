@@ -247,7 +247,7 @@ export default function MunchotellaBoutique() {
               rel="noopener noreferrer" 
               className="inline-flex items-center gap-3 bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-xl cursor-pointer min-h-[44px] hover:scale-105"
             >
-              <span>Lasă o Notă de 5 Stele pe Google Maps</span>
+              <span>Lasă o recenzie pe Google Maps</span>
               <div className="flex space-x-0.5">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-3.5 h-3.5 fill-[#1A120B] text-[#1A120B]" />
