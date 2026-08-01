@@ -66,12 +66,15 @@ export default function Navbar() {
         </Link>
 
         {/* Center Nav (Desktop) */}
-        <div className="hidden md:flex items-center space-x-8 text-[13px] font-bold uppercase tracking-widest">
-          <Link href="/" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Home</Link>
-          <Link href="/about" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/about" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Povestea</Link>
-          <Link href="/menu" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/menu" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Meniu</Link>
-
-          <Link href="/contact" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 py-1 ${pathname === "/contact" ? "border-b-2 border-[#D4A853] text-[#D4A853]" : effectiveIsScrolled ? "text-[#736A60]" : "text-white/80"}`}>Contact</Link>
+        <div className={`hidden md:flex items-center space-x-1 text-[13px] font-bold uppercase tracking-widest rounded-full px-2 py-1.5 transition-all duration-500 ${
+          effectiveIsScrolled 
+            ? "bg-[#1A120B]/5 border border-[#1A120B]/10" 
+            : "bg-white/10 backdrop-blur-md border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
+        }`}>
+          <Link href="/" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Home</Link>
+          <Link href="/about" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Povestea</Link>
+          <Link href="/menu" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Meniu</Link>
+          <Link href="/contact" className={`hover:text-[#D4A853] transition-colors duration-300 active:scale-95 px-4 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-white text-[#1A120B] shadow-md") : (effectiveIsScrolled ? "text-[#736A60]" : "text-white")}`}>Contact</Link>
         </div>
 
         {/* Trailing Icons */}
