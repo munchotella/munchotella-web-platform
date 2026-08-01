@@ -11,48 +11,48 @@ export default function Footer() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-16 pb-16">
           <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 group z-50 mb-6">
-              <LogoIconSVG className="h-9 w-9 opacity-90 transition-transform duration-300 group-hover:scale-105 text-[#f3922c]" />
-              <LogoTextSVG className="h-[45px] w-auto text-[#FDF9F1] transition-colors duration-300 group-hover:text-[#D4A853]" />
+            <Link href="/" className="flex items-center gap-3 group z-50 mb-8">
+              <LogoIconSVG className="h-12 w-12 opacity-90 transition-transform duration-300 group-hover:scale-105 text-[#f3922c]" />
+              <LogoTextSVG className="h-[55px] w-auto text-[#FDF9F1] transition-colors duration-300 group-hover:text-[#D4A853]" />
             </Link>
 
-            <div className="flex flex-col space-y-3">
-              <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
-                <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">location_on</span>
+            <div className="flex flex-col space-y-4">
+              <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">location_on</span>
                 <span>Nicolae Testemițeanu 21/1, Chișinău</span>
               </a>
-              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
-                <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">phone</span>
+              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">phone</span>
                 <span>079 006 499</span>
               </a>
-              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/40 text-[13px] hover:text-white transition-colors group">
-                <span className="material-symbols-outlined text-[16px] group-hover:text-[#D4A853]">mail</span>
+              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group">
+                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">mail</span>
                 <span>munchotella@gmail.com</span>
               </a>
             </div>
           </div>
           
           <div>
-            <h4 className="text-[#D4A853] text-[13px] font-bold uppercase mb-6 tracking-widest">Explorați</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Explorați</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Povestea Noastră</Link></li>
-              <li><Link href="/menu" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Meniul Complet</Link></li>
-              <li><Link href="/#testimonials" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Recenzii</Link></li>
+              <li><Link href="/about" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Povestea Noastră</Link></li>
+              <li><Link href="/menu" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Meniul Complet</Link></li>
+              <li><Link href="/#testimonials" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Recenzii</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[#D4A853] text-[13px] font-bold uppercase mb-6 tracking-widest">Suport</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Suport</h4>
             <ul className="space-y-4">
-              <li><Link href="/contact" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Contact</Link></li>
-              <li><Link href="/legal#privacy" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Politica de Confidențialitate</Link></li>
-              <li><Link href="/legal#terms" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Termeni și Condiții</Link></li>
-              <li><Link href="/legal#delivery" className="text-white/60 text-[15px] hover:text-[#D4A853] transition-colors">Informații Livrare</Link></li>
+              <li><Link href="/contact" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Contact</Link></li>
+              <li><Link href="/legal#privacy" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Politica de Confidențialitate</Link></li>
+              <li><Link href="/legal#terms" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Termeni și Condiții</Link></li>
+              <li><Link href="/legal#delivery" className="text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Informații Livrare</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-[#D4A853] text-[13px] font-bold uppercase mb-6 tracking-widest">Urmărește-ne</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Urmărește-ne</h4>
             <div className="flex space-x-4">
               <a href="https://www.instagram.com/munchotella.md" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#D4A853] hover:text-[#D4A853] hover:bg-[#D4A853]/10 transition-all duration-300 group">
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -71,17 +71,17 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-8">
-              <p className="text-white/40 text-[12px] uppercase tracking-widest font-bold mb-2">Program</p>
-              <p className="text-white/80 text-[14px]">Luni - Duminică: 16:00 - 00:00</p>
-              <p className="text-[#D4A853] text-[13px] font-bold mt-1">Miercuri: Închis</p>
+              <p className="text-white/50 text-[13px] uppercase tracking-widest font-bold mb-2">Program</p>
+              <p className="text-white/90 text-[16px]">Luni - Duminică: 16:00 - 00:00</p>
+              <p className="text-[#D4A853] text-[15px] font-bold mt-1">Miercuri: Închis</p>
             </div>
           </div>
         </div>
         
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between">
-          <p className="text-white/40 text-[13px] text-center md:text-left mb-4 md:mb-0">
+          <p className="text-white/50 text-[14px] text-center md:text-left mb-4 md:mb-0">
             © {new Date().getFullYear()} Munchotella. Toate drepturile rezervate.<br/>
-            <span className="text-[11px] mt-1 block">IDNO: 1017600046702, "Munchotella" S.R.L.</span>
+            <span className="text-[12px] mt-1 block">IDNO: 1017600046702, "Munchotella" S.R.L.</span>
           </p>
         </div>
       </div>
