@@ -6,6 +6,7 @@ import { AnimateIn } from "@/components/ui/AnimateIn";
 import MagneticButton from "@/components/ui/MagneticButton";
 import ScrollyTellingProcess from "@/components/ui/ScrollyTellingProcess";
 import MapSection from "@/components/MapSection";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 
 import { Star } from "lucide-react";
 import StickyBottomBar from "@/components/StickyBottomBar";
@@ -14,6 +15,33 @@ import { useCart } from "@/context/CartContext";
 import ProductCustomizationModal, { ProductItem } from "@/components/ProductCustomizationModal";
 import ProductCard from "@/components/ProductCard";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
+
+const reviewData = [
+  {
+    quote: "Absolutely best ☺️ No dieting here ✊ It was my first time trying pure Nutella based desserts and I love it so much also I recommend their iced mint lemonade too...",
+    name: "Dr. Nawar",
+    designation: "Local Guide • Google Maps",
+    src: "/delux_mini_waffle_official.png"
+  },
+  {
+    quote: "I tried the Waffle delux, and it was heavenly - crisp on the outside, fluffy inside, and generously topped!! Staff is super friendly. Loved the experience!",
+    name: "Krishna Rajendran",
+    designation: "Client Verificat • Google",
+    src: "/royal_sushi_official.png"
+  },
+  {
+    quote: "Very great place. From all Chișinău, this is the place with the best sweet food. Waffle exotic and Nutella mini waffles are the best!",
+    name: "Rusu Victoria",
+    designation: "Client Chișinău • Google",
+    src: "/lotus_biscoff_waffle_ref.png"
+  },
+  {
+    quote: "The most delicious place in chisinau, Luv it !!! I advice everyone to try it, Best service with lovely manager and workers 🥰",
+    name: "Tatiana Moraru",
+    designation: "Client Chișinău • Google",
+    src: "/delux_mini_waffle_official.png"
+  }
+];
 
 export default function MunchotellaBoutique() {
   const { addToCart } = useCart();
@@ -156,111 +184,7 @@ export default function MunchotellaBoutique() {
             <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#FDF9F1] mb-16">Ce spun clienții noștri pe Google</h2>
           </AnimateIn>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
-            {/* Review 1 */}
-            <AnimateIn direction="up" delay={0.1}>
-              <div className="bg-[#241912] p-6 rounded-2xl border border-white/10 relative h-full flex flex-col hover:border-[#D4A853]/40 transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Google Review</span>
-                </div>
-                <p className="text-white/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
-                  "Absolutely best ☺️ No dieting here ✊ It was my first time trying pure Nutella based desserts and I love it so much also I recommend their iced mint lemonade too..."
-                </p>
-                <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-bold text-[14px]">Dr. Nawar</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Local Guide • Google Maps</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
-                    DN
-                  </div>
-                </div>
-              </div>
-            </AnimateIn>
-
-            {/* Review 2 */}
-            <AnimateIn direction="up" delay={0.2}>
-              <div className="bg-[#241912] p-6 rounded-2xl border border-white/10 relative h-full flex flex-col hover:border-[#D4A853]/40 transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Google Review</span>
-                </div>
-                <p className="text-white/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
-                  "I tried the Waffle delux, and it was heavenly - crisp on the outside, fluffy inside, and generously topped!! Staff is super friendly. Loved the experience!"
-                </p>
-                <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-bold text-[14px]">Krishna Rajendran</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
-                    KR
-                  </div>
-                </div>
-              </div>
-            </AnimateIn>
-
-            {/* Review 3 */}
-            <AnimateIn direction="up" delay={0.3}>
-              <div className="bg-[#241912] p-6 rounded-2xl border border-white/10 relative h-full flex flex-col hover:border-[#D4A853]/40 transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Google Review</span>
-                </div>
-                <p className="text-white/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
-                  "Very great place. From all Chișinău, this is the place with the best sweet food. Waffle exotic and Nutella mini waffles are the best!"
-                </p>
-                <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-bold text-[14px]">Rusu Victoria</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Chișinău • Google</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
-                    RV
-                  </div>
-                </div>
-              </div>
-            </AnimateIn>
-
-            {/* Review 4 */}
-            <AnimateIn direction="up" delay={0.4}>
-              <div className="bg-[#241912] p-6 rounded-2xl border border-white/10 relative h-full flex flex-col hover:border-[#D4A853]/40 transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Google Review</span>
-                </div>
-                <p className="text-white/80 font-light text-[14px] leading-relaxed mb-6 italic flex-grow">
-                  "The most delicious place in chisinau, Luv it !!! I advice everyone to try it, Best service with lovely manager and workers 🥰"
-                </p>
-                <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-bold text-[14px]">Tatiana Moraru</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Chișinău • Google</p>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
-                    TM
-                  </div>
-                </div>
-              </div>
-            </AnimateIn>
-          </div>
+          <AnimatedTestimonials testimonials={reviewData} autoplay={true} />
 
           <div className="mt-12 text-center">
             <a 
