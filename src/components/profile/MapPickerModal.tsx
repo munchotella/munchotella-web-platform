@@ -28,6 +28,33 @@ const defaultCenter = {
   lng: 28.8638,
 };
 
+const retroMapStyles = [
+  { elementType: "geometry", stylers: [{ color: "#ebe3cd" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#523735" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#f5f1e6" }] },
+  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9b2a6" }] },
+  { featureType: "administrative.land_parcel", elementType: "geometry.stroke", stylers: [{ color: "#dcd2be" }] },
+  { featureType: "administrative.land_parcel", elementType: "labels.text.fill", stylers: [{ color: "#ae9e90" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#93817c" }] },
+  { featureType: "poi.park", elementType: "geometry.fill", stylers: [{ color: "#a5b076" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#447530" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#f5f1e6" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#fdfcf8" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f8c967" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e9bc62" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#e98d58" }] },
+  { featureType: "road.highway.controlled_access", elementType: "geometry.stroke", stylers: [{ color: "#db8555" }] },
+  { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#806b63" }] },
+  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "transit.line", elementType: "labels.text.fill", stylers: [{ color: "#8f7d77" }] },
+  { featureType: "transit.line", elementType: "labels.text.stroke", stylers: [{ color: "#ebe3cd" }] },
+  { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
+  { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#b9d3c2" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#92998d" }] }
+];
+
 export default function MapPickerModal({
   isOpen,
   onClose,
@@ -76,7 +103,6 @@ export default function MapPickerModal({
     setGeocoding(false);
   }, []);
 
-  // Sync position and trigger reverseGeocode when modal is opened or props change
   useEffect(() => {
     if (isOpen) {
       const newLat = initialLat || defaultCenter.lat;
@@ -139,45 +165,74 @@ export default function MapPickerModal({
 
   if (!isOpen) return null;
 
+  // Varianta slide-over din dreapta pentru desktop, slide-up pentru mobil
+  const slideVariants = {
+    hidden: { x: "100%", opacity: 0 },
+    visible: { x: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
+    exit: { x: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }
+  };
+
+  const slideUpVariants = {
+    hidden: { y: "100%", opacity: 0 },
+    visible: { y: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
+    exit: { y: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[300] flex justify-end">
+        {/* Backdrop */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0, transition: { type: "spring", bounce: 0.4, duration: 0.6 } }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-3xl h-[80vh] bg-[#FFFCF6] rounded-[28px] overflow-hidden flex flex-col shadow-2xl relative border border-[#E8E2D9]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        />
+
+        {/* Panel Container (Responsive) */}
+        <motion.div
+          variants={typeof window !== 'undefined' && window.innerWidth >= 768 ? slideVariants : slideUpVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="relative w-full md:w-[450px] lg:w-[500px] h-[85vh] md:h-full mt-auto md:mt-0 bg-[#FFFCF6] md:rounded-l-[32px] rounded-t-[32px] md:rounded-tr-none overflow-hidden flex flex-col shadow-2xl border-l border-t md:border-t-0 border-[#E8E2D9]"
         >
           {/* Header */}
-          <div className="bg-[#1A120B] p-4 px-6 flex justify-between items-center text-white shrink-0">
-            <div className="flex items-center gap-2">
-              <MapPin size={20} className="text-[#D4A853]" />
-              <h3 className="font-serif text-lg font-bold">Alege locația pe hartă (Google Maps)</h3>
+          <div className="bg-[#FFFCF6] p-5 md:p-6 flex justify-between items-center shrink-0 border-b border-[#E8E2D9]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#D4A853]/10 flex items-center justify-center">
+                <MapPin size={20} className="text-[#D4A853]" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-[#1A120B]">Locația ta</h3>
+                <p className="text-xs font-medium text-[#736A60]">Caută sau fixează pinul</p>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+              className="w-10 h-10 rounded-full bg-[#FAF7F2] border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:border-[#D4A853] transition-colors"
             >
               <X size={20} />
             </button>
           </div>
 
-          {/* Map Area */}
-          <div className="flex-1 relative w-full h-full bg-[#E8E2D9]/30">
-            {/* Search Bar Floating Overlay */}
-            <div className="absolute top-3 left-3 right-3 sm:left-6 sm:right-6 z-20">
-              <MapAutocomplete
-                value={addressText}
-                onChange={(val) => setAddressText(val)}
-                onPlaceSelected={(lat, lng, address) => {
-                  setPosition({ lat, lng });
-                  setAddressText(address);
-                }}
-                placeholder="Caută strada / adresa direct pe hartă..."
-                className="w-full bg-white/95 backdrop-blur-md border border-[#D4A853]/40 rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:ring-2 focus:ring-[#D4A853] shadow-xl transition-all"
-              />
-            </div>
+          {/* Search Bar - Fixed at top of map */}
+          <div className="p-4 bg-[#FFFCF6] shrink-0 z-10 relative shadow-sm border-b border-[#E8E2D9]">
+            <MapAutocomplete
+              value={addressText}
+              onChange={(val) => setAddressText(val)}
+              onPlaceSelected={(lat, lng, address) => {
+                setPosition({ lat, lng });
+                setAddressText(address);
+              }}
+              placeholder="Caută adresa..."
+              className="w-full bg-white border border-[#E8E2D9] rounded-2xl pl-10 pr-4 py-3.5 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+            />
+          </div>
 
+          {/* Map Area */}
+          <div className="flex-1 relative w-full bg-[#E8E2D9]/30">
             {/* Map Canvas / Embed */}
             <div className="w-full h-full relative">
               {isLoaded && !loadError ? (
@@ -187,8 +242,9 @@ export default function MapPickerModal({
                   zoom={16}
                   options={{
                     disableDefaultUI: true,
-                    zoomControl: true,
+                    zoomControl: false,
                     gestureHandling: "greedy",
+                    styles: retroMapStyles
                   }}
                   onLoad={(map) => {
                     mapRef.current = map;
@@ -211,39 +267,39 @@ export default function MapPickerModal({
               
               {/* Center Target Pin Icon Overlay */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
-                <div className="flex flex-col items-center animate-bounce">
-                  <div className="bg-[#1A120B] text-[#D4A853] p-2.5 rounded-full shadow-2xl border-2 border-[#D4A853]">
-                    <MapPin size={24} />
+                <div className="flex flex-col items-center">
+                  <div className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-xl border-2 border-[#D4A853]">
+                    <MapPin size={24} className="fill-[#1A120B]" />
                   </div>
                   <div className="w-3 h-3 bg-[#1A120B] rotate-45 -mt-1.5 border-r-2 border-b-2 border-[#D4A853]" />
-                  <div className="w-4 h-1.5 bg-black/40 rounded-full blur-[2px] mt-1" />
+                  <div className="w-6 h-2 bg-black/30 rounded-[100%] blur-[3px] mt-1" />
                 </div>
               </div>
 
               {/* Floating Real-time Map Navigation D-Pad & GPS Button */}
-              <div className="absolute right-4 bottom-14 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-[#E8E2D9]">
+              <div className="absolute right-4 bottom-4 z-20 flex flex-col items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-[#E8E2D9]">
                 <button
                   type="button"
                   title="Ajustează Nord"
                   onClick={() => handlePan(0.0004, 0)}
-                  className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                  className="p-1.5 hover:bg-[#D4A853]/10 rounded-xl text-[#736A60] transition-colors"
                 >
-                  <ChevronUp size={18} />
+                  <ChevronUp size={20} />
                 </button>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     title="Ajustează Vest"
                     onClick={() => handlePan(0, -0.0004)}
-                    className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                    className="p-1.5 hover:bg-[#D4A853]/10 rounded-xl text-[#736A60] transition-colors"
                   >
-                    <ChevronLeft size={18} />
+                    <ChevronLeft size={20} />
                   </button>
                   <button
                     type="button"
                     title="Locația mea GPS"
                     onClick={handleLocateMe}
-                    className="p-2 bg-[#D4A853] text-[#1A120B] rounded-xl shadow font-bold hover:bg-[#C09640] transition-all active:scale-95"
+                    className="p-2.5 bg-[#D4A853] text-[#1A120B] rounded-xl shadow-md font-bold hover:bg-[#C09640] transition-colors"
                   >
                     <Locate size={18} />
                   </button>
@@ -251,47 +307,41 @@ export default function MapPickerModal({
                     type="button"
                     title="Ajustează Est"
                     onClick={() => handlePan(0, 0.0004)}
-                    className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                    className="p-1.5 hover:bg-[#D4A853]/10 rounded-xl text-[#736A60] transition-colors"
                   >
-                    <ChevronRight size={18} />
+                    <ChevronRight size={20} />
                   </button>
                 </div>
                 <button
                   type="button"
                   title="Ajustează Sud"
                   onClick={() => handlePan(-0.0004, 0)}
-                  className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                  className="p-1.5 hover:bg-[#D4A853]/10 rounded-xl text-[#736A60] transition-colors"
                 >
-                  <ChevronDown size={18} />
+                  <ChevronDown size={20} />
                 </button>
               </div>
-            </div>
-
-            {/* Instruction Badge */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">
-              Trage de hartă pentru a fixa pin-ul la locația dorită
             </div>
           </div>
 
           {/* Footer Address Confirmation */}
-          <div className="p-5 bg-white border-t border-[#E8E2D9] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-6 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-10 relative">
             <div className="flex-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#D4A853]">Adresă selectată</span>
-              <p className="text-sm font-bold text-[#1A120B] truncate mt-0.5">
+              <p className="text-sm font-bold text-[#1A120B] truncate leading-tight">
                 {geocoding ? "Se determină adresa..." : addressText || "Selectează o locație pe hartă"}
               </p>
-              <p className="text-[11px] text-[#1A120B]/50 mt-0.5">
-                Coordonate: {position.lat.toFixed(5)}, {position.lng.toFixed(5)}
+              <p className="text-[11px] font-medium uppercase tracking-wider text-[#D4A853] mt-1">
+                Pin Fixat Exact
               </p>
             </div>
 
             <button
               onClick={handleConfirm}
               disabled={geocoding || !position.lat}
-              className="w-full sm:w-auto px-8 py-3.5 bg-[#1A120B] text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors disabled:opacity-50"
+              className="w-full py-4 bg-[#1A120B] text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50"
             >
               <Check size={18} />
-              <span>Confirmă Adresa</span>
+              <span>Confirmă Locația</span>
             </button>
           </div>
         </motion.div>
@@ -299,5 +349,6 @@ export default function MapPickerModal({
     </AnimatePresence>
   );
 }
+
 
 
