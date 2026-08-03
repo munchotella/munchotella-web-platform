@@ -26,7 +26,7 @@ export default function MapAutocomplete({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-app.onrender.com/api";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,12 +39,44 @@ export default function MapAutocomplete({
   }, []);
 
   const fetchPredictions = async (input: string) => {
-    if (!input || input.length < 3) {
+    if (!input || input.length < 2) {
       setPredictions([]);
       setShowDropdown(false);
       return;
     }
 
+    // Try Native Google Maps JS SDK Places Service first
+    if (typeof window !== "undefined" && window.google?.maps?.places?.AutocompleteService) {
+      try {
+        setLoading(true);
+        const service = new window.google.maps.places.AutocompleteService();
+        service.getPlacePredictions(
+          {
+            input,
+            componentRestrictions: { country: "md" },
+          },
+          (results, status) => {
+            setLoading(false);
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+              setPredictions(
+                results.map((p) => ({
+                  place_id: p.place_id,
+                  description: p.description,
+                  main_text: p.structured_formatting?.main_text || p.description,
+                  secondary_text: p.structured_formatting?.secondary_text || "",
+                }))
+              );
+              setShowDropdown(true);
+            }
+          }
+        );
+        return;
+      } catch (e) {
+        console.warn("Client-side Autocomplete failed, trying API fallback...", e);
+      }
+    }
+
+    // Fallback to backend API
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/maps/autocomplete?input=${encodeURIComponent(input)}`);
@@ -68,13 +100,30 @@ export default function MapAutocomplete({
     
     debounceTimer.current = setTimeout(() => {
       fetchPredictions(val);
-    }, 400);
+    }, 300);
   };
 
   const handleSelect = async (place_id: string, description: string) => {
     onChange(description);
     setShowDropdown(false);
     setPredictions([]);
+
+    // Try Native Geocoder first
+    if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ placeId: place_id }, (results, status) => {
+          if (status === "OK" && results && results[0]) {
+            const loc = results[0].geometry.location;
+            onPlaceSelected(loc.lat(), loc.lng(), results[0].formatted_address || description);
+            return;
+          }
+        });
+        return;
+      } catch (e) {
+        console.warn("Client-side Geocode failed, using API fallback...", e);
+      }
+    }
 
     try {
       const res = await fetch(`${API_URL}/maps/geocode?place_id=${place_id}`);

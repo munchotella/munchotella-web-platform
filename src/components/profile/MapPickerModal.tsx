@@ -6,6 +6,8 @@ import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, X, Check, Loader2 } from "lucide-react";
 
+import MapAutocomplete from "@/components/ui/MapAutocomplete";
+
 interface MapPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -107,6 +109,20 @@ export default function MapPickerModal({
 
           {/* Map Area */}
           <div className="flex-1 relative w-full h-full bg-[#E8E2D9]/30">
+            {/* Search Bar Floating Overlay */}
+            <div className="absolute top-3 left-3 right-3 sm:left-6 sm:right-6 z-20">
+              <MapAutocomplete
+                value={addressText}
+                onChange={(val) => setAddressText(val)}
+                onPlaceSelected={(lat, lng, address) => {
+                  setPosition({ lat, lng });
+                  setAddressText(address);
+                }}
+                placeholder="Caută strada / adresa direct pe hartă..."
+                className="w-full bg-white/95 backdrop-blur-md border border-[#D4A853]/40 rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:ring-2 focus:ring-[#D4A853] shadow-xl transition-all"
+              />
+            </div>
+
             {!isLoaded ? (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[#1A120B]/60">
                 <Loader2 size={32} className="animate-spin text-[#D4A853]" />
@@ -135,7 +151,7 @@ export default function MapPickerModal({
             )}
 
             {/* Instruction Badge */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">
               Trage pinul roșu sau dă click pe hartă pentru a fixa adresa
             </div>
           </div>

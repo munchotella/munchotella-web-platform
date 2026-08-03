@@ -25,6 +25,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
+import MapPickerModal from "@/components/profile/MapPickerModal";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -57,6 +58,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [couponError, setCouponError] = useState("");
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -426,9 +428,19 @@ export default function CheckoutPage() {
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#736A60] mb-2">
-                      Stradă & Număr *
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#736A60]">
+                        Stradă & Număr *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsMapModalOpen(true)}
+                        className="text-xs font-bold text-[#D4A853] hover:text-[#1A120B] flex items-center gap-1.5 bg-[#D4A853]/10 hover:bg-[#D4A853]/20 px-3 py-1 rounded-full transition-all"
+                      >
+                        <MapPin size={13} />
+                        <span>Alege pe hartă (Pin)</span>
+                      </button>
+                    </div>
                     <div className="relative">
                       <MapAutocomplete
                         value={formData.street}
@@ -736,6 +748,18 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
+      {/* Modal Pin Picker pe Hartă */}
+      <MapPickerModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        initialLat={formData.lat}
+        initialLng={formData.lng}
+        onSelectLocation={({ address, lat, lng }) => {
+          const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
+          const roadDist = straightDist * 1.3;
+          setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
+        }}
+      />
     </div>
   );
 }
