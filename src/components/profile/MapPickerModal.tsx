@@ -43,29 +43,77 @@ export default function MapPickerModal({
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
 
-  // Sync position when modal is opened or when props change
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    setGeocoding(true);
+
+    // 1. Try Google Maps Geocoder if available & not loaded with error
+    if (typeof window !== "undefined" && window.google?.maps?.Geocoder && !loadError) {
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        const res = await new Promise<string | null>((resolve) => {
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === "OK" && results && results[0]) {
+              resolve(results[0].formatted_address);
+            } else {
+              resolve(null);
+            }
+          });
+        });
+
+        if (res) {
+          setAddressText(res);
+          setGeocoding(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("Google reverse geocode failed, using fallbacks...", e);
+      }
+    }
+
+    // 2. Try OpenStreetMap Nominatim Reverse Geocoding
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.display_name) {
+          setAddressText(data.display_name);
+          setGeocoding(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Nominatim reverse geocode failed, trying BigDataCloud...", e);
+    }
+
+    // 3. Try BigDataCloud Reverse Geocoding
+    try {
+      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ro`);
+      if (response.ok) {
+        const data = await response.json();
+        const parts = [data.locality, data.city, data.countryName].filter(Boolean);
+        if (parts.length > 0) {
+          setAddressText(parts.join(", "));
+          setGeocoding(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("BigDataCloud reverse geocode failed", e);
+    }
+
+    setAddressText(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
+    setGeocoding(false);
+  }, [loadError]);
+
+  // Sync position and trigger reverseGeocode when modal is opened or props change
   React.useEffect(() => {
     if (isOpen) {
-      setPosition({
-        lat: initialLat || defaultCenter.lat,
-        lng: initialLng || defaultCenter.lng,
-      });
+      const newLat = initialLat || defaultCenter.lat;
+      const newLng = initialLng || defaultCenter.lng;
+      setPosition({ lat: newLat, lng: newLng });
+      reverseGeocode(newLat, newLng);
     }
-  }, [isOpen, initialLat, initialLng]);
-
-  const reverseGeocode = useCallback((lat: number, lng: number) => {
-    if (typeof window === "undefined" || !window.google || loadError) return;
-    setGeocoding(true);
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      setGeocoding(false);
-      if (status === "OK" && results && results[0]) {
-        setAddressText(results[0].formatted_address);
-      } else {
-        setAddressText(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      }
-    });
-  }, [loadError]);
+  }, [isOpen, initialLat, initialLng, reverseGeocode]);
 
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
