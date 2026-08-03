@@ -649,20 +649,7 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
-                    <div className="pt-6 border-t border-[#E8E2D9]">
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-3 flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-[#D4A853]" />
-                        Ai o preferință anume?
-                      </label>
-                      <textarea
-                        rows={3}
-                        placeholder="Ex: Fără alergeni, doresc un mesaj scris de mână, interfonul nu funcționează..."
-                        className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all resize-none"
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      />
-                    </div>
-                    
+
                     <div className="mt-6 flex justify-end">
                       <button type="button" onClick={() => handleNextStep(4)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
                         Continuă
