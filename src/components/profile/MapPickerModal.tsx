@@ -123,38 +123,27 @@ export default function MapPickerModal({
               />
             </div>
 
-            {loadError || !isLoaded ? (
-              <div className="w-full h-full relative">
-                <iframe
-                  title="OpenStreetMap Picker"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${position.lng - 0.008}%2C${position.lat - 0.005}%2C${position.lng + 0.008}%2C${position.lat + 0.005}&layer=mapnik&marker=${position.lat}%2C${position.lng}`}
-                  className="w-full h-full border-0 pointer-events-auto"
-                />
+            {/* Map Canvas / Embed */}
+            <div className="w-full h-full relative">
+              <iframe
+                title="Google Maps Location Embed"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                src={`https://maps.google.com/maps?q=${position.lat},${position.lng}&z=16&output=embed`}
+                className="w-full h-full border-0"
+              />
+              {/* Center Target Pin Icon Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
+                <div className="flex flex-col items-center animate-bounce">
+                  <div className="bg-[#1A120B] text-[#D4A853] p-2.5 rounded-full shadow-2xl border-2 border-[#D4A853]">
+                    <MapPin size={24} />
+                  </div>
+                  <div className="w-3 h-3 bg-[#1A120B] rotate-45 -mt-1.5 border-r-2 border-b-2 border-[#D4A853]" />
+                  <div className="w-4 h-1.5 bg-black/40 rounded-full blur-[2px] mt-1" />
+                </div>
               </div>
-            ) : (
-              <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={position}
-                zoom={15}
-                onClick={handleMapClick}
-                options={{
-                  disableDefaultUI: false,
-                  zoomControl: true,
-                  streetViewControl: false,
-                  mapTypeControl: false,
-                }}
-              >
-                <Marker
-                  position={position}
-                  draggable={true}
-                  onDragEnd={handleMarkerDragEnd}
-                  animation={window.google?.maps?.Animation?.DROP}
-                />
-              </GoogleMap>
-            )}
+            </div>
 
             {/* Instruction Badge */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">

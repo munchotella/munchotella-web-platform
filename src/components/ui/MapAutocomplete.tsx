@@ -38,6 +38,34 @@ export default function MapAutocomplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const fetchNominatim = async (input: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&countrycodes=md`);
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setPredictions(
+          data.slice(0, 5).map((item: any) => ({
+            place_id: `osm_${item.place_id}`,
+            description: item.display_name,
+            main_text: item.display_name.split(",")[0],
+            secondary_text: item.display_name.split(",").slice(1).join(","),
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon),
+          }))
+        );
+        setShowDropdown(true);
+      } else {
+        setPredictions([]);
+      }
+    } catch (err) {
+      console.error("OSM Autocomplete error:", err);
+      setPredictions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchPredictions = async (input: string) => {
     if (!input || input.length < 2) {
       setPredictions([]);
@@ -56,8 +84,8 @@ export default function MapAutocomplete({
             componentRestrictions: { country: "md" },
           },
           (results, status) => {
-            setLoading(false);
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+              setLoading(false);
               setPredictions(
                 results.map((p) => ({
                   place_id: p.place_id,
@@ -67,38 +95,20 @@ export default function MapAutocomplete({
                 }))
               );
               setShowDropdown(true);
+            } else {
+              // Status is NOT OK (e.g. RefererNotAllowedMapError) -> Fallback to Nominatim
+              fetchNominatim(input);
             }
           }
         );
         return;
       } catch (e) {
-        console.warn("Client-side Autocomplete failed, trying API fallback...", e);
+        console.warn("Client-side Autocomplete failed, trying Nominatim fallback...", e);
       }
     }
 
-    // Fallback to OpenStreetMap Nominatim for Moldova (Free & Instant)
-    try {
-      setLoading(true);
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&countrycodes=md`);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setPredictions(
-          data.slice(0, 5).map((item: any) => ({
-            place_id: `osm_${item.place_id}`,
-            description: item.display_name,
-            main_text: item.display_name.split(",")[0],
-            secondary_text: item.display_name.split(",").slice(1).join(","),
-            lat: parseFloat(item.lat),
-            lng: parseFloat(item.lon),
-          }))
-        );
-        setShowDropdown(true);
-      }
-    } catch (err) {
-      console.error("OSM Autocomplete error:", err);
-    } finally {
-      setLoading(false);
-    }
+    // Fallback to OpenStreetMap Nominatim for Moldova
+    fetchNominatim(input);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
