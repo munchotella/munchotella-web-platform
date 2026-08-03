@@ -292,7 +292,7 @@ export default function CheckoutPage() {
             </Link>
             <div>
               <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight">
-                Finalizare <span className="text-[#D4A853] italic font-normal">Comandă</span>
+                Finalizează <span className="text-[#D4A853] italic font-normal">Comanda</span>
               </h1>
             </div>
           </div>
@@ -315,10 +315,10 @@ export default function CheckoutPage() {
                     1
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Mod de Livrare</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Cum îți livrăm bunătățile?</h3>
                     {activeStep !== 1 && (
                       <p className="text-xs text-[#736A60] font-medium mt-1">
-                        {deliveryType === 'delivery' ? 'Livrare la Adresă' : 'Preluare din Boutique'}
+                        {deliveryType === 'delivery' ? 'Prin curier la adresa ta' : 'Treci tu pe la noi (Boutique)'}
                       </p>
                     )}
                   </div>
@@ -402,10 +402,10 @@ export default function CheckoutPage() {
                     2
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Contact & Adresă</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Unde te găsim?</h3>
                     {activeStep > 2 && formData.name && (
                       <p className="text-xs text-[#736A60] font-medium mt-1 truncate max-w-[200px] md:max-w-[300px]">
-                        {formData.name} • {deliveryType === 'delivery' ? formData.street : 'Preluare Local'}
+                        {formData.name} • {deliveryType === 'delivery' ? formData.street : 'Te așteptăm la noi'}
                       </p>
                     )}
                   </div>
@@ -424,22 +424,22 @@ export default function CheckoutPage() {
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Nume & Prenume *</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Numele tău complet *</label>
                         <input
                           type="text"
                           required
-                          placeholder="Ex: Ion Popescu"
+                          placeholder="Ex: Ana Popescu"
                           className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Telefon *</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Număr de contact *</label>
                         <input
                           type="tel"
                           required
-                          placeholder="Ex: 079 000 000"
+                          placeholder="Ex: 079 123 456"
                           className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -485,14 +485,14 @@ export default function CheckoutPage() {
                         {/* Search Address Input & Map Button */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">Stradă & Număr *</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">Adresa de livrare *</label>
                             <button
                               type="button"
                               onClick={() => setIsMapModalOpen(true)}
                               className="text-xs font-bold text-[#D4A853] hover:text-[#1A120B] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#FFFCF6] transition-colors"
                             >
                               <MapPin size={14} />
-                              <span>Fixează Pin pe Hartă</span>
+                              <span>Selectează pe Hartă</span>
                             </button>
                           </div>
                           
@@ -513,10 +513,10 @@ export default function CheckoutPage() {
                         {/* Additional Address Info (Grid) */}
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Bloc / Scară</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Detalii clădire</label>
                             <input
                               type="text"
-                              placeholder="Ex: 2A"
+                              placeholder="Bloc/Scară"
                               className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
                               value={formData.house}
                               onChange={(e) => setFormData({ ...formData, house: e.target.value })}
@@ -584,10 +584,10 @@ export default function CheckoutPage() {
                     3
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Timpul & Note Speciale</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Când să o pregătim?</h3>
                     {activeStep > 3 && (
                       <p className="text-xs text-[#736A60] font-medium mt-1 truncate">
-                        {timing === 'asap' ? 'Cât mai curând (ASAP)' : `Programat la ${scheduledTime}`}
+                        {timing === 'asap' ? 'Cât mai repede posibil' : `Voi fi acolo/aștept la ${scheduledTime}`}
                       </p>
                     )}
                   </div>
@@ -614,7 +614,7 @@ export default function CheckoutPage() {
                             : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50"
                         }`}
                       >
-                        Cât Mai Curând
+                        Cât Mai Repede
                       </button>
                       <button
                         type="button"
@@ -644,11 +644,11 @@ export default function CheckoutPage() {
                     <div className="pt-6 border-t border-[#E8E2D9]">
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-3 flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5 text-[#D4A853]" />
-                        Mesaj sau Detalii Speciale
+                        Ai o preferință anume?
                       </label>
                       <textarea
                         rows={3}
-                        placeholder="Ex: Fără arahide, am nevoie de o lumânare, te rog sună la interfonul vecinei..."
+                        placeholder="Ex: Fără alergeni, doresc un mesaj scris de mână, interfonul nu funcționează..."
                         className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all resize-none"
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -677,7 +677,7 @@ export default function CheckoutPage() {
                     4
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Metodă Plată</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Cum preferi să plătești?</h3>
                   </div>
                 </div>
                 {activeStep === 4 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : null}
