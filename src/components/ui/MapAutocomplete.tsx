@@ -147,32 +147,53 @@ export default function MapAutocomplete({
 
     setPredictions([]);
 
-    // Try Native Geocoder
+    // Try Native Google Geocoder
     if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
       try {
         const geocoder = new window.google.maps.Geocoder();
-        geocoder.geocode({ placeId: place_id }, (results, status) => {
-          if (status === "OK" && results && results[0]) {
-            const loc = results[0].geometry.location;
-            onPlaceSelected(loc.lat(), loc.lng(), results[0].formatted_address || description);
-            return;
-          }
+        const success = await new Promise<boolean>((resolve) => {
+          geocoder.geocode({ placeId: place_id }, (results, status) => {
+            if (status === "OK" && results && results[0]) {
+              const loc = results[0].geometry.location;
+              onPlaceSelected(loc.lat(), loc.lng(), results[0].formatted_address || description);
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          });
         });
-        return;
+
+        if (success) return;
       } catch (e) {
-        console.warn("Client-side Geocode failed, using API fallback...", e);
+        console.warn("Client-side Geocode failed, trying Nominatim fallback...", e);
       }
     }
 
+    // Fallback: Geocode via OpenStreetMap Nominatim
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(description)}&countrycodes=md`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          onPlaceSelected(lat, lng, description);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error("Nominatim geocode fallback error:", err);
+    }
+
+    // Try Backend API fallback as last resort
     try {
       const res = await fetch(`${API_URL}/maps/geocode?place_id=${place_id}`);
       const data = await res.json();
-      
       if (data.success && data.data) {
         onPlaceSelected(data.data.lat, data.data.lng, data.data.formatted_address || description);
       }
     } catch (err) {
-      console.error("Geocode error:", err);
+      console.error("Backend geocode error:", err);
     }
   };
 

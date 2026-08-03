@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, X, Check, Loader2 } from "lucide-react";
+import { MapPin, X, Check, Loader2, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
 
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
@@ -115,6 +115,31 @@ export default function MapPickerModal({
     }
   }, [isOpen, initialLat, initialLng, reverseGeocode]);
 
+  const handlePan = (dLat: number, dLng: number) => {
+    const newLat = position.lat + dLat;
+    const newLng = position.lng + dLng;
+    setPosition({ lat: newLat, lng: newLng });
+    reverseGeocode(newLat, newLng);
+  };
+
+  const handleLocateMe = () => {
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      setGeocoding(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const newLat = pos.coords.latitude;
+          const newLng = pos.coords.longitude;
+          setPosition({ lat: newLat, lng: newLng });
+          reverseGeocode(newLat, newLng);
+        },
+        (err) => {
+          console.warn("Geolocation denied or unavailable", err);
+          setGeocoding(false);
+        }
+      );
+    }
+  };
+
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
     const newLat = e.latLng.lat();
@@ -175,6 +200,7 @@ export default function MapPickerModal({
                 onPlaceSelected={(lat, lng, address) => {
                   setPosition({ lat, lng });
                   setAddressText(address);
+                  reverseGeocode(lat, lng);
                 }}
                 placeholder="Caută strada / adresa direct pe hartă..."
                 className="w-full bg-white/95 backdrop-blur-md border border-[#D4A853]/40 rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:ring-2 focus:ring-[#D4A853] shadow-xl transition-all"
@@ -201,11 +227,57 @@ export default function MapPickerModal({
                   <div className="w-4 h-1.5 bg-black/40 rounded-full blur-[2px] mt-1" />
                 </div>
               </div>
+
+              {/* Floating Real-time Map Navigation D-Pad & GPS Button */}
+              <div className="absolute right-4 bottom-14 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-[#E8E2D9]">
+                <button
+                  type="button"
+                  title="Ajustează Nord"
+                  onClick={() => handlePan(0.0004, 0)}
+                  className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                >
+                  <ChevronUp size={18} />
+                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    title="Ajustează Vest"
+                    onClick={() => handlePan(0, -0.0004)}
+                    className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Locația mea GPS"
+                    onClick={handleLocateMe}
+                    className="p-2 bg-[#D4A853] text-[#1A120B] rounded-xl shadow font-bold hover:bg-[#C09640] transition-all active:scale-95"
+                  >
+                    <Locate size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Ajustează Est"
+                    onClick={() => handlePan(0, 0.0004)}
+                    className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  title="Ajustează Sud"
+                  onClick={() => handlePan(-0.0004, 0)}
+                  className="p-2 hover:bg-[#D4A853]/20 rounded-xl text-[#1A120B] transition-all active:scale-95"
+                >
+                  <ChevronDown size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Instruction Badge */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">
-              Caută adresa sus sau folosește harta pentru a fixa coordonatele
+              Caută adresa sus sau folosește săgețile din dreapta pentru a fixa coordonatele
             </div>
           </div>
 
