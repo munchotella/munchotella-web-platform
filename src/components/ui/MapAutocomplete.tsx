@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { MapPin } from "lucide-react";
+import { Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "@/context/GoogleMapsContext";
 
 interface MapAutocompleteProps {
   value: string;
@@ -20,233 +22,79 @@ export default function MapAutocomplete({
   className = "",
   required = false
 }: MapAutocompleteProps) {
-  const [predictions, setPredictions] = useState<any[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-app.onrender.com/api";
+  const { isLoaded, loadError } = useGoogleMaps();
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  
+  // Keep local value in sync with prop for typing
+  const [inputValue, setInputValue] = useState(value);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    setInputValue(value);
+  }, [value]);
 
-  const formatNominatimItem = (item: any) => {
-    const addr = item.address || {};
-    const road = addr.road || addr.pedestrian || addr.street || addr.footway || "";
-    const houseNumber = addr.house_number || addr.building || "";
-    const city = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || "";
-
-    let mainText = "";
-    if (road && houseNumber) {
-      mainText = `${road} ${houseNumber}`;
-    } else if (road) {
-      mainText = road;
-    } else if (item.name) {
-      mainText = item.name;
-    } else {
-      const parts = (item.display_name || "").split(",");
-      mainText = parts.slice(0, 2).join(",").trim();
-    }
-
-    let secondaryText = city;
-    if (!secondaryText && item.display_name) {
-      const parts = item.display_name.split(",");
-      secondaryText = parts.slice(2, 4).join(",").trim();
-    }
-
-    const cleanDescription = secondaryText ? `${mainText}, ${secondaryText}` : mainText;
-
-    return {
-      place_id: `osm_${item.place_id}`,
-      description: cleanDescription,
-      main_text: mainText,
-      secondary_text: secondaryText,
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
-    };
+  const onLoad = (autocompleteObj: google.maps.places.Autocomplete) => {
+    setAutocomplete(autocompleteObj);
   };
 
-  const fetchNominatim = async (input: string) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(input)}&countrycodes=md`);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setPredictions(data.slice(0, 5).map(formatNominatimItem));
-        setShowDropdown(true);
-      } else {
-        setPredictions([]);
-      }
-    } catch (err) {
-      console.error("OSM Autocomplete error:", err);
-      setPredictions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchPredictions = async (input: string) => {
-    if (!input || input.length < 2) {
-      setPredictions([]);
-      setShowDropdown(false);
-      return;
-    }
-
-    if (typeof window !== "undefined" && window.google?.maps?.places?.AutocompleteService) {
-      try {
-        setLoading(true);
-        const service = new window.google.maps.places.AutocompleteService();
-        service.getPlacePredictions(
-          {
-            input,
-            componentRestrictions: { country: "md" },
-          },
-          (results, status) => {
-            setLoading(false);
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-              setPredictions(
-                results.map((p) => ({
-                  place_id: p.place_id,
-                  description: p.description,
-                  main_text: p.structured_formatting?.main_text || p.description,
-                  secondary_text: p.structured_formatting?.secondary_text || "",
-                }))
-              );
-              setShowDropdown(true);
-            } else {
-              setPredictions([]);
-            }
-          }
-        );
-      } catch (e) {
-        console.warn("Client-side Autocomplete failed...", e);
-        setLoading(false);
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const address = place.formatted_address || place.name || "";
+        
+        setInputValue(address);
+        onChange(address);
+        onPlaceSelected(lat, lng, address);
       }
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    onChange(val);
-
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    
-    debounceTimer.current = setTimeout(() => {
-      fetchPredictions(val);
-    }, 300);
+    setInputValue(e.target.value);
+    onChange(e.target.value);
   };
 
-  const handleSelect = async (place_id: string, description: string) => {
-    onChange(description);
-    setShowDropdown(false);
-
-    // If it's an OpenStreetMap result with direct coordinates
-    const selectedPrediction = predictions.find(p => p.place_id === place_id);
-    if (selectedPrediction && selectedPrediction.lat && selectedPrediction.lng) {
-      onPlaceSelected(selectedPrediction.lat, selectedPrediction.lng, description);
-      setPredictions([]);
-      return;
-    }
-
-    setPredictions([]);
-
-    // Try Native Google Geocoder
-    if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
-      try {
-        const geocoder = new window.google.maps.Geocoder();
-        const success = await new Promise<boolean>((resolve) => {
-          geocoder.geocode({ placeId: place_id }, (results, status) => {
-            if (status === "OK" && results && results[0]) {
-              const loc = results[0].geometry.location;
-              onPlaceSelected(loc.lat(), loc.lng(), results[0].formatted_address || description);
-              resolve(true);
-            } else {
-              resolve(false);
-            }
-          });
-        });
-
-        if (success) return;
-      } catch (e) {
-        console.warn("Client-side Geocode failed, trying Nominatim fallback...", e);
-      }
-    }
-
-    // Fallback: Geocode via OpenStreetMap Nominatim
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(description)}&countrycodes=md`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lng = parseFloat(data[0].lon);
-          onPlaceSelected(lat, lng, description);
-          return;
-        }
-      }
-    } catch (err) {
-      console.error("Nominatim geocode fallback error:", err);
-    }
-
-    // Try Backend API fallback as last resort
-    try {
-      const res = await fetch(`${API_URL}/maps/geocode?place_id=${place_id}`);
-      const data = await res.json();
-      if (data.success && data.data) {
-        onPlaceSelected(data.data.lat, data.data.lng, data.data.formatted_address || description);
-      }
-    } catch (err) {
-      console.error("Backend geocode error:", err);
-    }
-  };
+  if (loadError) {
+    return <div className="text-red-500">Eroare la încărcarea hărții Google.</div>;
+  }
 
   return (
-    <div className="relative w-full" ref={wrapperRef}>
+    <div className="relative w-full">
       <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
-      <input
-        type="text"
-        value={value}
-        onChange={handleInputChange}
-        placeholder={placeholder}
-        className={className}
-        required={required}
-        autoComplete="off"
-        onFocus={() => {
-          if (predictions.length > 0) setShowDropdown(true);
-        }}
-      />
       
-      {showDropdown && predictions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-[#E8E2D9] rounded-xl shadow-lg max-h-60 overflow-y-auto">
-          {predictions.map((p) => (
-            <div
-              key={p.place_id}
-              onClick={() => handleSelect(p.place_id, p.description)}
-              className="px-4 py-3 hover:bg-[#FFFCF6] cursor-pointer border-b border-[#E8E2D9] last:border-b-0 flex items-start gap-3 transition-colors"
-            >
-              <MapPin className="w-4 h-4 text-[#736A60] mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-bold text-[#1A120B]">{p.main_text}</p>
-                {p.secondary_text && (
-                  <p className="text-xs text-[#736A60]">{p.secondary_text}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {loading && (
-        <div className="absolute right-4 top-3.5">
-          <div className="w-4 h-4 border-2 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
+      {isLoaded ? (
+        <Autocomplete
+          onLoad={onLoad}
+          onPlaceChanged={onPlaceChanged}
+          options={{
+            componentRestrictions: { country: "md" } // Restrict to Moldova
+          }}
+        >
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder={placeholder}
+            className={className}
+            required={required}
+            autoComplete="off"
+          />
+        </Autocomplete>
+      ) : (
+        <div className="relative w-full">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder="Se încarcă Google Maps..."
+            className={className}
+            disabled
+          />
+          <div className="absolute right-4 top-3.5">
+            <div className="w-4 h-4 border-2 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
+          </div>
         </div>
       )}
     </div>
