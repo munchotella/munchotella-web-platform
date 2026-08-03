@@ -76,17 +76,26 @@ export default function MapAutocomplete({
       }
     }
 
-    // Fallback to backend API
+    // Fallback to OpenStreetMap Nominatim for Moldova (Free & Instant)
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/maps/autocomplete?input=${encodeURIComponent(input)}`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&countrycodes=md`);
       const data = await res.json();
-      if (data.success && data.predictions) {
-        setPredictions(data.predictions);
+      if (Array.isArray(data) && data.length > 0) {
+        setPredictions(
+          data.slice(0, 5).map((item: any) => ({
+            place_id: `osm_${item.place_id}`,
+            description: item.display_name,
+            main_text: item.display_name.split(",")[0],
+            secondary_text: item.display_name.split(",").slice(1).join(","),
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon),
+          }))
+        );
         setShowDropdown(true);
       }
     } catch (err) {
-      console.error("Autocomplete error:", err);
+      console.error("OSM Autocomplete error:", err);
     } finally {
       setLoading(false);
     }
@@ -106,9 +115,18 @@ export default function MapAutocomplete({
   const handleSelect = async (place_id: string, description: string) => {
     onChange(description);
     setShowDropdown(false);
+
+    // If it's an OpenStreetMap result with direct coordinates
+    const selectedPrediction = predictions.find(p => p.place_id === place_id);
+    if (selectedPrediction && selectedPrediction.lat && selectedPrediction.lng) {
+      onPlaceSelected(selectedPrediction.lat, selectedPrediction.lng, description);
+      setPredictions([]);
+      return;
+    }
+
     setPredictions([]);
 
-    // Try Native Geocoder first
+    // Try Native Geocoder
     if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
       try {
         const geocoder = new window.google.maps.Geocoder();

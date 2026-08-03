@@ -34,7 +34,7 @@ export default function MapPickerModal({
   initialLng,
   onSelectLocation,
 }: MapPickerModalProps) {
-  const { isLoaded } = useGoogleMaps();
+  const { isLoaded, loadError } = useGoogleMaps();
 
   const [position, setPosition] = useState({
     lat: initialLat || defaultCenter.lat,
@@ -44,7 +44,7 @@ export default function MapPickerModal({
   const [geocoding, setGeocoding] = useState(false);
 
   const reverseGeocode = useCallback((lat: number, lng: number) => {
-    if (typeof window === "undefined" || !window.google) return;
+    if (typeof window === "undefined" || !window.google || loadError) return;
     setGeocoding(true);
     const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
@@ -55,7 +55,7 @@ export default function MapPickerModal({
         setAddressText(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
       }
     });
-  }, []);
+  }, [loadError]);
 
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
@@ -123,10 +123,16 @@ export default function MapPickerModal({
               />
             </div>
 
-            {!isLoaded ? (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[#1A120B]/60">
-                <Loader2 size={32} className="animate-spin text-[#D4A853]" />
-                <span className="text-sm font-medium">Se încarcă Google Maps...</span>
+            {loadError || !isLoaded ? (
+              <div className="w-full h-full relative">
+                <iframe
+                  title="OpenStreetMap Picker"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${position.lng - 0.008}%2C${position.lat - 0.005}%2C${position.lng + 0.008}%2C${position.lat + 0.005}&layer=mapnik&marker=${position.lat}%2C${position.lng}`}
+                  className="w-full h-full border-0 pointer-events-auto"
+                />
               </div>
             ) : (
               <GoogleMap
@@ -152,7 +158,7 @@ export default function MapPickerModal({
 
             {/* Instruction Badge */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">
-              Trage pinul roșu sau dă click pe hartă pentru a fixa adresa
+              Caută adresa sus sau folosește harta pentru a fixa coordonatele
             </div>
           </div>
 
