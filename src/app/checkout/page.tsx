@@ -754,6 +754,7 @@ export default function CheckoutPage() {
         onClose={() => setIsMapModalOpen(false)}
         initialLat={formData.lat}
         initialLng={formData.lng}
+        initialAddress={formData.street || undefined}
         onSelectLocation={({ address, lat, lng }) => {
           const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
           const roadDist = straightDist * 1.3;

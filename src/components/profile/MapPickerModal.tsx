@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { GoogleMap, Marker } from "@react-google-maps/api";
+import React, { useState, useCallback, useRef } from "react";
+import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, X, Check, Loader2, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
+import { MapPin, X, Check, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
 
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
@@ -13,6 +13,7 @@ interface MapPickerModalProps {
   onClose: () => void;
   initialLat?: number;
   initialLng?: number;
+  initialAddress?: string;
   onSelectLocation: (location: { address: string; lat: number; lng: number }) => void;
 }
 
@@ -32,6 +33,7 @@ export default function MapPickerModal({
   onClose,
   initialLat,
   initialLng,
+  initialAddress,
   onSelectLocation,
 }: MapPickerModalProps) {
   const { isLoaded, loadError } = useGoogleMaps();
@@ -42,6 +44,7 @@ export default function MapPickerModal({
   });
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     setGeocoding(true);
@@ -111,9 +114,14 @@ export default function MapPickerModal({
       const newLat = initialLat || defaultCenter.lat;
       const newLng = initialLng || defaultCenter.lng;
       setPosition({ lat: newLat, lng: newLng });
-      reverseGeocode(newLat, newLng);
+      
+      if (initialAddress) {
+        setAddressText(initialAddress);
+      } else {
+        reverseGeocode(newLat, newLng);
+      }
     }
-  }, [isOpen, initialLat, initialLng, reverseGeocode]);
+  }, [isOpen, initialLat, initialLng, initialAddress, reverseGeocode]);
 
   const handlePan = (dLat: number, dLng: number) => {
     const newLat = position.lat + dLat;
@@ -140,20 +148,16 @@ export default function MapPickerModal({
     }
   };
 
-  const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
-    const newLat = e.latLng.lat();
-    const newLng = e.latLng.lng();
-    setPosition({ lat: newLat, lng: newLng });
-    reverseGeocode(newLat, newLng);
-  };
-
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
-    const newLat = e.latLng.lat();
-    const newLng = e.latLng.lng();
-    setPosition({ lat: newLat, lng: newLng });
-    reverseGeocode(newLat, newLng);
+  const handleDragEnd = () => {
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      if (center) {
+        const newLat = center.lat();
+        const newLng = center.lng();
+        setPosition({ lat: newLat, lng: newLng });
+        reverseGeocode(newLat, newLng);
+      }
+    }
   };
 
   const handleConfirm = () => {
@@ -200,7 +204,6 @@ export default function MapPickerModal({
                 onPlaceSelected={(lat, lng, address) => {
                   setPosition({ lat, lng });
                   setAddressText(address);
-                  reverseGeocode(lat, lng);
                 }}
                 placeholder="Caută strada / adresa direct pe hartă..."
                 className="w-full bg-white/95 backdrop-blur-md border border-[#D4A853]/40 rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:ring-2 focus:ring-[#D4A853] shadow-xl transition-all"
@@ -209,14 +212,40 @@ export default function MapPickerModal({
 
             {/* Map Canvas / Embed */}
             <div className="w-full h-full relative">
-              <iframe
-                title="Google Maps Location Embed"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                src={`https://maps.google.com/maps?q=${position.lat},${position.lng}&z=16&output=embed`}
-                className="w-full h-full border-0"
-              />
+              {isLoaded && !loadError ? (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={position}
+                  zoom={16}
+                  options={{
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    gestureHandling: "greedy",
+                  }}
+                  onLoad={(map) => {
+                    mapRef.current = map;
+                  }}
+                  onDragEnd={handleDragEnd}
+                  onClick={(e) => {
+                    if (e.latLng) {
+                      const newLat = e.latLng.lat();
+                      const newLng = e.latLng.lng();
+                      setPosition({ lat: newLat, lng: newLng });
+                      reverseGeocode(newLat, newLng);
+                    }
+                  }}
+                />
+              ) : (
+                <iframe
+                  title="Google Maps Location Embed"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  src={`https://maps.google.com/maps?q=${position.lat},${position.lng}&z=16&output=embed`}
+                  className="w-full h-full border-0"
+                />
+              )}
+              
               {/* Center Target Pin Icon Overlay */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
                 <div className="flex flex-col items-center animate-bounce">
@@ -277,7 +306,7 @@ export default function MapPickerModal({
 
             {/* Instruction Badge */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1A120B]/90 backdrop-blur-md text-white text-[11px] sm:text-xs font-medium px-4 py-2 rounded-full shadow-lg border border-[#D4A853]/30 pointer-events-none text-center">
-              Caută adresa sus sau folosește săgețile din dreapta pentru a fixa coordonatele
+              Trage de hartă pentru a fixa pin-ul la locația dorită
             </div>
           </div>
 
@@ -307,3 +336,4 @@ export default function MapPickerModal({
     </AnimatePresence>
   );
 }
+

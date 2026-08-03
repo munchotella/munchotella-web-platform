@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Play, Pause, Volume2, VolumeX, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 
 const HERO_PLAYLIST = [
@@ -29,8 +29,6 @@ const HERO_PLAYLIST = [
 export default function CinematicScrollHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
 
   const currentTrack = HERO_PLAYLIST[currentTrackIndex];
 
@@ -47,24 +45,6 @@ export default function CinematicScrollHero() {
     }
   }, [currentTrackIndex]);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
   return (
     <section className="relative bg-[#1A120B] h-screen w-full overflow-hidden flex flex-col items-center justify-center">
       {/* Background Video Layer with Seamless Playlist */}
@@ -73,7 +53,7 @@ export default function CinematicScrollHero() {
           ref={videoRef}
           key={currentTrack.src}
           autoPlay
-          muted={isMuted}
+          muted
           playsInline
           preload="auto"
           poster={currentTrack.poster}
@@ -147,47 +127,24 @@ export default function CinematicScrollHero() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
           </MagneticButton>
-          
-          <MagneticButton>
-            <a
-              href="/about"
-              className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/20 hover:border-[#D4A853] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 cursor-pointer"
-            >
-              Povestea Noastră
-            </a>
-          </MagneticButton>
         </motion.div>
       </div>
 
-      {/* Playlist Indicator & Media Controls */}
-      <div className="absolute bottom-8 right-8 z-20 flex flex-col md:flex-row items-end md:items-center gap-4">
-        {/* Track Selector Bullets */}
-        {HERO_PLAYLIST.length > 1 && (
-          <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-            {HERO_PLAYLIST.map((track, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentTrackIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
-                }`}
-                aria-label={`Select shot ${idx + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Audio/Video Controls */}
-        <div className="flex items-center space-x-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-white/80 text-xs">
-          <button onClick={togglePlay} className="hover:text-[#D4A853] transition-colors p-1" aria-label="Toggle Play">
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </button>
-          <div className="w-[1px] h-4 bg-white/20" />
-          <button onClick={toggleMute} className="hover:text-[#D4A853] transition-colors p-1" aria-label="Toggle Mute">
-            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
+      {/* Playlist Indicator */}
+      {HERO_PLAYLIST.length > 1 && (
+        <div className="absolute bottom-8 right-8 z-20 flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+          {HERO_PLAYLIST.map((track, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentTrackIndex(idx)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Select shot ${idx + 1}`}
+            />
+          ))}
         </div>
-      </div>
+      )}
 
       {/* Smooth Transition Mask to Body */}
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#FAF7F2] to-transparent z-20 pointer-events-none" />
