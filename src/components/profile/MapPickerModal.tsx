@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { MapPin, X, Check, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
 
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
@@ -166,13 +166,13 @@ export default function MapPickerModal({
   if (!isOpen) return null;
 
   // Varianta slide-over din dreapta pentru desktop, slide-up pentru mobil
-  const slideVariants = {
+  const slideVariants: Variants = {
     hidden: { x: "100%", opacity: 0 },
     visible: { x: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
     exit: { x: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }
   };
 
-  const slideUpVariants = {
+  const slideUpVariants: Variants = {
     hidden: { y: "100%", opacity: 0 },
     visible: { y: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
     exit: { y: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }

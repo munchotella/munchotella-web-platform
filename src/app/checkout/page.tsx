@@ -24,7 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const accordionVariants = {
+  const accordionVariants: Variants = {
     hidden: { height: 0, opacity: 0, marginTop: 0 },
     visible: { height: "auto", opacity: 1, marginTop: 24, transition: { duration: 0.3, ease: "easeInOut" } }
   };
