@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
-import { GoogleMap } from "@react-google-maps/api";
-import { useGoogleMaps } from "@/context/GoogleMapsContext";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, X, Check, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
 
@@ -16,11 +14,6 @@ interface MapPickerModalProps {
   initialAddress?: string;
   onSelectLocation: (location: { address: string; lat: number; lng: number }) => void;
 }
-
-const mapContainerStyle = {
-  width: "100%",
-  height: "100%",
-};
 
 // Chișinău coordinates as default center
 const defaultCenter = {
@@ -36,44 +29,18 @@ export default function MapPickerModal({
   initialAddress,
   onSelectLocation,
 }: MapPickerModalProps) {
-  const { isLoaded, loadError } = useGoogleMaps();
-
   const [position, setPosition] = useState({
     lat: initialLat || defaultCenter.lat,
     lng: initialLng || defaultCenter.lng,
   });
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     setGeocoding(true);
 
-    // 1. Try Google Maps Geocoder if available & not loaded with error
-    if (typeof window !== "undefined" && window.google?.maps?.Geocoder && !loadError) {
-      try {
-        const geocoder = new window.google.maps.Geocoder();
-        const res = await new Promise<string | null>((resolve) => {
-          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            if (status === "OK" && results && results[0]) {
-              resolve(results[0].formatted_address);
-            } else {
-              resolve(null);
-            }
-          });
-        });
-
-        if (res) {
-          setAddressText(res);
-          setGeocoding(false);
-          return;
-        }
-      } catch (e) {
-        console.warn("Google reverse geocode failed, using fallbacks...", e);
-      }
-    }
-
-    // 2. Try OpenStreetMap Nominatim Reverse Geocoding
+    // 1. OpenStreetMap Nominatim Reverse Geocoding with Address Details
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lng}`);
       if (response.ok) {
@@ -103,7 +70,7 @@ export default function MapPickerModal({
       console.warn("Nominatim reverse geocode failed, trying BigDataCloud...", e);
     }
 
-    // 3. Try BigDataCloud Reverse Geocoding
+    // 2. Try BigDataCloud Reverse Geocoding
     try {
       const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ro`);
       if (response.ok) {
@@ -121,10 +88,27 @@ export default function MapPickerModal({
 
     setAddressText(`Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`);
     setGeocoding(false);
-  }, [loadError]);
+  }, []);
+
+  // Listen for Leaflet drag/pan messages from iframe
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === "MAP_MOVED") {
+        const newLat = parseFloat(e.data.lat);
+        const newLng = parseFloat(e.data.lng);
+        if (!isNaN(newLat) && !isNaN(newLng)) {
+          setPosition({ lat: newLat, lng: newLng });
+          reverseGeocode(newLat, newLng);
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [reverseGeocode]);
 
   // Sync position and trigger reverseGeocode when modal is opened or props change
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       const newLat = initialLat || defaultCenter.lat;
       const newLng = initialLng || defaultCenter.lng;
@@ -135,13 +119,24 @@ export default function MapPickerModal({
       } else {
         reverseGeocode(newLat, newLng);
       }
+
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage({ type: "SET_CENTER", lat: newLat, lng: newLng }, "*");
+      }
     }
   }, [isOpen, initialLat, initialLng, initialAddress, reverseGeocode]);
+
+  const updateMapCenter = (lat: number, lng: number) => {
+    setPosition({ lat, lng });
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: "SET_CENTER", lat, lng }, "*");
+    }
+  };
 
   const handlePan = (dLat: number, dLng: number) => {
     const newLat = position.lat + dLat;
     const newLng = position.lng + dLng;
-    setPosition({ lat: newLat, lng: newLng });
+    updateMapCenter(newLat, newLng);
     reverseGeocode(newLat, newLng);
   };
 
@@ -152,7 +147,7 @@ export default function MapPickerModal({
         (pos) => {
           const newLat = pos.coords.latitude;
           const newLng = pos.coords.longitude;
-          setPosition({ lat: newLat, lng: newLng });
+          updateMapCenter(newLat, newLng);
           reverseGeocode(newLat, newLng);
         },
         (err) => {
@@ -160,18 +155,6 @@ export default function MapPickerModal({
           setGeocoding(false);
         }
       );
-    }
-  };
-
-  const handleDragEnd = () => {
-    if (mapRef.current) {
-      const center = mapRef.current.getCenter();
-      if (center) {
-        const newLat = center.lat();
-        const newLng = center.lng();
-        setPosition({ lat: newLat, lng: newLng });
-        reverseGeocode(newLat, newLng);
-      }
     }
   };
 
@@ -185,6 +168,49 @@ export default function MapPickerModal({
   };
 
   if (!isOpen) return null;
+
+  const mapHtmlDoc = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; background: #e8e2d9; }
+        .leaflet-control-attribution { display: none !important; }
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([${position.lat}, ${position.lng}], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(map);
+
+        var isInternalMove = false;
+
+        map.on('moveend', function() {
+          if (isInternalMove) {
+            isInternalMove = false;
+            return;
+          }
+          var center = map.getCenter();
+          window.parent.postMessage({ type: 'MAP_MOVED', lat: center.lat, lng: center.lng }, '*');
+        });
+
+        window.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SET_CENTER') {
+            isInternalMove = true;
+            map.setView([e.data.lat, e.data.lng], 16, { animate: true });
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `;
 
   return (
     <AnimatePresence>
@@ -217,8 +243,8 @@ export default function MapPickerModal({
                 value={addressText}
                 onChange={(val) => setAddressText(val)}
                 onPlaceSelected={(lat, lng, address) => {
-                  setPosition({ lat, lng });
                   setAddressText(address);
+                  updateMapCenter(lat, lng);
                 }}
                 placeholder="Caută strada / adresa direct pe hartă..."
                 className="w-full bg-white/95 backdrop-blur-md border border-[#D4A853]/40 rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:ring-2 focus:ring-[#D4A853] shadow-xl transition-all"
@@ -227,39 +253,12 @@ export default function MapPickerModal({
 
             {/* Map Canvas / Embed */}
             <div className="w-full h-full relative">
-              {isLoaded && !loadError ? (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={position}
-                  zoom={16}
-                  options={{
-                    disableDefaultUI: true,
-                    zoomControl: true,
-                    gestureHandling: "greedy",
-                  }}
-                  onLoad={(map) => {
-                    mapRef.current = map;
-                  }}
-                  onDragEnd={handleDragEnd}
-                  onClick={(e) => {
-                    if (e.latLng) {
-                      const newLat = e.latLng.lat();
-                      const newLng = e.latLng.lng();
-                      setPosition({ lat: newLat, lng: newLng });
-                      reverseGeocode(newLat, newLng);
-                    }
-                  }}
-                />
-              ) : (
-                <iframe
-                  title="Google Maps Location Embed"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  src={`https://maps.google.com/maps?q=${position.lat},${position.lng}&z=16&output=embed`}
-                  className="w-full h-full border-0"
-                />
-              )}
+              <iframe
+                ref={iframeRef}
+                title="Interactive Location Picker Map"
+                srcDoc={mapHtmlDoc}
+                className="w-full h-full border-0"
+              />
               
               {/* Center Target Pin Icon Overlay */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
@@ -351,4 +350,5 @@ export default function MapPickerModal({
     </AnimatePresence>
   );
 }
+
 
