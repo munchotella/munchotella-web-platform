@@ -43,6 +43,16 @@ export default function MapPickerModal({
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
 
+  // Sync position when modal is opened or when props change
+  React.useEffect(() => {
+    if (isOpen) {
+      setPosition({
+        lat: initialLat || defaultCenter.lat,
+        lng: initialLng || defaultCenter.lng,
+      });
+    }
+  }, [isOpen, initialLat, initialLng]);
+
   const reverseGeocode = useCallback((lat: number, lng: number) => {
     if (typeof window === "undefined" || !window.google || loadError) return;
     setGeocoding(true);

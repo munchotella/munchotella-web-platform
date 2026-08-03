@@ -73,10 +73,19 @@ export default function MapAutocomplete({
       return;
     }
 
-    // Try Native Google Maps JS SDK Places Service first
+    // Try Native Google Maps JS SDK Places Service first with a 1s safety timeout
     if (typeof window !== "undefined" && window.google?.maps?.places?.AutocompleteService) {
       try {
         setLoading(true);
+        let callbackExecuted = false;
+
+        const timeoutId = setTimeout(() => {
+          if (!callbackExecuted) {
+            console.warn("Google Maps Autocomplete timed out (Referer issue), using Nominatim fallback...");
+            fetchNominatim(input);
+          }
+        }, 1000);
+
         const service = new window.google.maps.places.AutocompleteService();
         service.getPlacePredictions(
           {
@@ -84,6 +93,8 @@ export default function MapAutocomplete({
             componentRestrictions: { country: "md" },
           },
           (results, status) => {
+            callbackExecuted = true;
+            clearTimeout(timeoutId);
             if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
               setLoading(false);
               setPredictions(
