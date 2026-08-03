@@ -145,6 +145,12 @@ export default function CheckoutPage() {
   const discountAmount = Math.round((totalPrice * discountPercent) / 100);
   const grandTotal = Math.max(0, totalPrice - discountAmount + deliveryFee);
 
+  React.useEffect(() => {
+    if (!deliveryCalc.isPedestrian && doorDelivery) {
+      setDoorDelivery(false);
+    }
+  }, [deliveryCalc.isPedestrian, doorDelivery]);
+
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     setCouponError("");
@@ -544,21 +550,23 @@ export default function CheckoutPage() {
                           </div>
                         </div>
 
-                        {/* Door Delivery Upsell */}
-                        <label className="flex items-start gap-4 p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] cursor-pointer hover:border-[#D4A853]/50 transition-all mt-2 group">
-                          <div className="pt-1">
-                            <input
-                              type="checkbox"
-                              checked={doorDelivery}
-                              onChange={(e) => setDoorDelivery(e.target.checked)}
-                              className="w-5 h-5 accent-[#D4A853] cursor-pointer"
-                            />
-                          </div>
-                          <div>
-                            <span className="text-sm font-bold text-[#1A120B] group-hover:text-[#D4A853] transition-colors">Livrare Până La Ușă (+20 MDL)</span>
-                            <p className="text-xs text-[#736A60] mt-1 leading-relaxed">Bifează dacă dorești ca șoferul/curierul să urce până la etaj și să livreze comanda direct la ușa apartamentului tău.</p>
-                          </div>
-                        </label>
+                        {/* Door Delivery Upsell (Only for Pedestrian) */}
+                        {deliveryCalc.isPedestrian && (
+                          <label className="flex items-start gap-4 p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] cursor-pointer hover:border-[#D4A853]/50 transition-all mt-2 group">
+                            <div className="pt-1">
+                              <input
+                                type="checkbox"
+                                checked={doorDelivery}
+                                onChange={(e) => setDoorDelivery(e.target.checked)}
+                                className="w-5 h-5 accent-[#D4A853] cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <span className="text-sm font-bold text-[#1A120B] group-hover:text-[#D4A853] transition-colors">Livrare Până La Ușă (+20 MDL)</span>
+                              <p className="text-xs text-[#736A60] mt-1 leading-relaxed">Opțiune valabilă doar pentru distanțe scurte. Bifează dacă dorești ca șoferul/curierul să urce până la etaj și să livreze comanda direct la ușa ta.</p>
+                            </div>
+                          </label>
+                        )}
                       </div>
                     )}
                     
