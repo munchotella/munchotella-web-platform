@@ -75,11 +75,26 @@ export default function MapPickerModal({
 
     // 2. Try OpenStreetMap Nominatim Reverse Geocoding
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lng}`);
       if (response.ok) {
         const data = await response.json();
-        if (data && data.display_name) {
-          setAddressText(data.display_name);
+        if (data && data.address) {
+          const addr = data.address;
+          const road = addr.road || addr.pedestrian || addr.street || addr.footway || "";
+          const houseNumber = addr.house_number || addr.building || "";
+          const city = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || "Chișinău";
+          
+          let mainText = "";
+          if (road && houseNumber) {
+            mainText = `${road} ${houseNumber}`;
+          } else if (road) {
+            mainText = road;
+          } else {
+            mainText = data.display_name?.split(",")[0] || "";
+          }
+
+          const cleanAddress = mainText ? `${mainText}, ${city}` : data.display_name;
+          setAddressText(cleanAddress);
           setGeocoding(false);
           return;
         }

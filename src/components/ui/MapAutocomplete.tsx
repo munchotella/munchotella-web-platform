@@ -38,22 +38,49 @@ export default function MapAutocomplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const formatNominatimItem = (item: any) => {
+    const addr = item.address || {};
+    const road = addr.road || addr.pedestrian || addr.street || addr.footway || "";
+    const houseNumber = addr.house_number || addr.building || "";
+    const city = addr.city || addr.town || addr.village || addr.municipality || addr.suburb || "";
+
+    let mainText = "";
+    if (road && houseNumber) {
+      mainText = `${road} ${houseNumber}`;
+    } else if (road) {
+      mainText = road;
+    } else if (item.name) {
+      mainText = item.name;
+    } else {
+      const parts = (item.display_name || "").split(",");
+      mainText = parts.slice(0, 2).join(",").trim();
+    }
+
+    let secondaryText = city;
+    if (!secondaryText && item.display_name) {
+      const parts = item.display_name.split(",");
+      secondaryText = parts.slice(2, 4).join(",").trim();
+    }
+
+    const cleanDescription = secondaryText ? `${mainText}, ${secondaryText}` : mainText;
+
+    return {
+      place_id: `osm_${item.place_id}`,
+      description: cleanDescription,
+      main_text: mainText,
+      secondary_text: secondaryText,
+      lat: parseFloat(item.lat),
+      lng: parseFloat(item.lon),
+    };
+  };
+
   const fetchNominatim = async (input: string) => {
     try {
       setLoading(true);
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&countrycodes=md`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(input)}&countrycodes=md`);
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        setPredictions(
-          data.slice(0, 5).map((item: any) => ({
-            place_id: `osm_${item.place_id}`,
-            description: item.display_name,
-            main_text: item.display_name.split(",")[0],
-            secondary_text: item.display_name.split(",").slice(1).join(","),
-            lat: parseFloat(item.lat),
-            lng: parseFloat(item.lon),
-          }))
-        );
+        setPredictions(data.slice(0, 5).map(formatNominatimItem));
         setShowDropdown(true);
       } else {
         setPredictions([]);
