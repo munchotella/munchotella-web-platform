@@ -100,19 +100,9 @@ export default function MapAutocomplete({
       return;
     }
 
-    // Try Native Google Maps JS SDK Places Service first with a 1s safety timeout
     if (typeof window !== "undefined" && window.google?.maps?.places?.AutocompleteService) {
       try {
         setLoading(true);
-        let callbackExecuted = false;
-
-        const timeoutId = setTimeout(() => {
-          if (!callbackExecuted) {
-            console.warn("Google Maps Autocomplete timed out (Referer issue), using Nominatim fallback...");
-            fetchNominatim(input);
-          }
-        }, 1000);
-
         const service = new window.google.maps.places.AutocompleteService();
         service.getPlacePredictions(
           {
@@ -120,10 +110,8 @@ export default function MapAutocomplete({
             componentRestrictions: { country: "md" },
           },
           (results, status) => {
-            callbackExecuted = true;
-            clearTimeout(timeoutId);
+            setLoading(false);
             if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-              setLoading(false);
               setPredictions(
                 results.map((p) => ({
                   place_id: p.place_id,
@@ -134,19 +122,15 @@ export default function MapAutocomplete({
               );
               setShowDropdown(true);
             } else {
-              // Status is NOT OK (e.g. RefererNotAllowedMapError) -> Fallback to Nominatim
-              fetchNominatim(input);
+              setPredictions([]);
             }
           }
         );
-        return;
       } catch (e) {
-        console.warn("Client-side Autocomplete failed, trying Nominatim fallback...", e);
+        console.warn("Client-side Autocomplete failed...", e);
+        setLoading(false);
       }
     }
-
-    // Fallback to OpenStreetMap Nominatim for Moldova
-    fetchNominatim(input);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
