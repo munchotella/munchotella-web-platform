@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/routing";
 
 const languages = [
   { code: "ro", label: "RO" },
@@ -31,15 +31,8 @@ export default function LanguageSwitcher() {
   }, []);
 
   const switchLocale = (newLocale: string) => {
-    // Basic implementation to swap locale in pathname
-    // pathname might be /ro/menu or just /menu if default
-    let newPath = pathname;
-    if (pathname.startsWith(`/${locale}`)) {
-      newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
-    } else {
-      newPath = `/${newLocale}${pathname === '/' ? '' : pathname}`;
-    }
-    router.push(newPath);
+    // router.replace will keep the current pathname but change the locale
+    router.replace(pathname, { locale: newLocale as any });
     setIsOpen(false);
   };
 

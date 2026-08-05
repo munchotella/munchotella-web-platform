@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LogoIconSVG from "./LogoIconSVG";
