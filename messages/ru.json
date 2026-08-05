@@ -1,0 +1,35 @@
+{
+  "Header": {
+    "home": "Главная",
+    "menu": "Меню",
+    "contact": "Контакты",
+    "story": "История"
+  },
+  "Global": {
+    "continue": "Продолжить",
+    "back": "Назад",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "addBtn": "Добавить",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "Все",
+    "Băuturi": "Напитки",
+    "Specialități": "Спецпредложения",
+    "Waffles": "Вафли",
+    "Crepes": "Блины",
+    "Pancakes": "Панкейки"
+  },
+  "Checkout": {
+    "checkoutTitle": "Оформление заказа",
+    "selectDeliveryMethod": "Как доставить вкусности?",
+    "delivery": "Доставка на дом",
+    "pickup": "Самовывоз",
+    "deliveryAddress": "Где вас найти?",
+    "paymentMethod": "Как предпочитаете оплатить?",
+    "cash": "Наличными курьеру",
+    "card": "Картой",
+    "placeOrder": "Оформить заказ"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "Header": {
+    "home": "Home",
+    "menu": "Menu",
+    "contact": "Contact",
+    "story": "Story"
+  },
+  "Global": {
+    "continue": "Continue",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "addBtn": "Add",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "All",
+    "Băuturi": "Drinks",
+    "Specialități": "Specialties",
+    "Waffles": "Waffles",
+    "Crepes": "Crepes",
+    "Pancakes": "Pancakes"
+  },
+  "Checkout": {
+    "checkoutTitle": "Checkout",
+    "selectDeliveryMethod": "How should we deliver your treats?",
+    "delivery": "Home delivery",
+    "pickup": "Pick up in store",
+    "deliveryAddress": "Where can we find you?",
+    "paymentMethod": "How do you prefer to pay?",
+    "cash": "Cash to courier",
+    "card": "Card",
+    "placeOrder": "Place order"
+  }
+}

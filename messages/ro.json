@@ -1,0 +1,35 @@
+{
+  "Header": {
+    "home": "Acasă",
+    "menu": "Meniu",
+    "contact": "Contact",
+    "story": "Povestea"
+  },
+  "Global": {
+    "continue": "Continuă",
+    "back": "Înapoi",
+    "cancel": "Renunță",
+    "save": "Salvează",
+    "addBtn": "Adaugă",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "Toate",
+    "Băuturi": "Băuturi",
+    "Specialități": "Specialități",
+    "Waffles": "Waffles",
+    "Crepes": "Clătite",
+    "Pancakes": "Pancakes"
+  },
+  "Checkout": {
+    "checkoutTitle": "Finalizare Comandă",
+    "selectDeliveryMethod": "Cum îți livrăm bunătățile?",
+    "delivery": "Livrare la domiciliu",
+    "pickup": "Ridicare din local",
+    "deliveryAddress": "Unde te găsim?",
+    "paymentMethod": "Cum preferi să plătești?",
+    "cash": "Numerar la curier",
+    "card": "Card",
+    "placeOrder": "Plasează comanda"
+  }
+}

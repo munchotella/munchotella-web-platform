@@ -11,8 +11,11 @@ import NotificationsDropdown from "./NotificationsDropdown";
 import { User, LogOut, Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import NumberTicker from "@/components/ui/NumberTicker";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function Navbar() {
+  const t = useTranslations("Header");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { totalItems, totalPrice, setIsCartOpen } = useCart();
@@ -67,10 +70,10 @@ export default function Navbar() {
 
         {/* Center Nav (Desktop) */}
         <div className="hidden md:flex items-center space-x-2 text-[13px] font-bold uppercase tracking-widest">
-          <Link href="/" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Home</Link>
+          <Link href="/" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("home")}</Link>
           <Link href="/about" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Povestea</Link>
-          <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Meniu</Link>
-          <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Contact</Link>
+          <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("menu")}</Link>
+          <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("contact")}</Link>
         </div>
 
         {/* Trailing Icons */}
@@ -79,6 +82,10 @@ export default function Navbar() {
             <span className="material-symbols-outlined text-[18px]">call</span>
             <span>079 006 499</span>
           </a>
+          
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
           
           <div className="hidden md:block">
             <NotificationsDropdown isScrolled={effectiveIsScrolled} />
