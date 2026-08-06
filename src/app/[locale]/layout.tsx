@@ -29,11 +29,11 @@ export const metadata: Metadata = {
   description: "Artă dulce, preparată cu pasiune. O experiență artizanală pentru gusturi fine.",
   icons: {
     icon: [
-      { url: "/logo_icon_only.png", type: "image/png" },
+      { url: "/munchotella_favicon.png", type: "image/png" },
       { url: "/favicon.ico" }
     ],
-    shortcut: "/logo_icon_only.png",
-    apple: "/logo_icon_only.png",
+    shortcut: "/munchotella_favicon.png",
+    apple: "/munchotella_favicon.png",
   },
 };
 
@@ -53,9 +53,9 @@ export default async function RootLayout({
       className={`${playfairFont.variable} ${outfitFont.variable} ${greatVibesFont.variable} h-full antialiased`}
     >
       <head>
-        <link rel="icon" type="image/png" href="/logo_icon_only.png" />
-        <link rel="shortcut icon" href="/logo_icon_only.png" />
-        <link rel="apple-touch-icon" href="/logo_icon_only.png" />
+        <link rel="icon" type="image/png" href="/munchotella_favicon.png" />
+        <link rel="shortcut icon" href="/munchotella_favicon.png" />
+        <link rel="apple-touch-icon" href="/munchotella_favicon.png" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-accent-gold selection:text-white">
