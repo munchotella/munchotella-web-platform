@@ -362,17 +362,21 @@
     "schedule2": "Среда: Закрыто"
   },
   "Toppings": {
-    "extraNutella": "Экстра Nutella®",
-    "extraWhiteChocolate": "Экстра белый шоколад",
-    "pistachio": "Дробленые фисташки и соус",
-    "freshFruit": "Порция свежих фруктов",
-    "iceCream": "Шарик мороженого",
-    "oreo": "Экстра печенье Oreo",
-    "hazelnuts": "Экстра жареный фундук",
-    "customize": "Персонализируйте десерт",
-    "optional": "Необязательно",
+    "extraNutella": "Доп. Nutella®",
+    "extraWhiteChocolate": "Доп. Белый Шоколад",
+    "extraStrawberry": "Доп. Клубника",
+    "extraBanana": "Доп. Банан",
+    "extraPistachio": "Измельченные Фисташки",
+    "extraOreo": "Доп. Oreo",
+    "extraKinder": "Доп. Kinder",
+    "extraPeanuts": "Доп. Арахис",
+    "extraLotus": "Доп. Lotus",
+    "iceCream": "Шарик Мороженого",
+    "freshFruit": "Порция Свежих Фруктов",
+    "customize": "Настройте свой десерт",
+    "optional": "Опционально",
     "quantity": "Количество",
-    "addToCart": "В корзину"
+    "addToCart": "В Корзину"
   },
   "CartDrawer": {
     "incorrectCode": "Введен неверный код.",

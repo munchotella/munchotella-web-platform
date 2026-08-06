@@ -35,11 +35,15 @@ export default function ProductCustomizationModal({
   const AVAILABLE_TOPPINGS: ToppingOption[] = [
     { name: t("extraNutella"), price: 15 },
     { name: t("extraWhiteChocolate"), price: 15 },
-    { name: t("pistachio"), price: 20 },
-    { name: t("freshFruit"), price: 15 },
-    { name: t("iceCream"), price: 20 },
-    { name: t("oreo"), price: 10 },
-    { name: t("hazelnuts"), price: 10 },
+    { name: t("extraStrawberry"), price: 15 },
+    { name: t("extraBanana"), price: 10 },
+    { name: t("extraPistachio"), price: 25 },
+    { name: t("extraOreo"), price: 15 },
+    { name: t("extraKinder"), price: 15 },
+    { name: t("extraPeanuts"), price: 15 },
+    { name: t("extraLotus"), price: 15 },
+    { name: t("iceCream"), price: 25 },
+    { name: t("freshFruit"), price: 30 },
   ];
 
   // Lock body scroll when modal is open
