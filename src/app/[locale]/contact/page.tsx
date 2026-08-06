@@ -9,23 +9,13 @@ import MapSection from "@/components/MapSection";
 import { useTranslations } from 'next-intl';
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
-
-const COUNTRY_CODES = [
-  { code: "+373", flag: "🇲🇩", name: "Moldova" },
-  { code: "+40", flag: "🇷🇴", name: "România" },
-  { code: "+49", flag: "🇩🇪", name: "Germania" },
-  { code: "+39", flag: "🇮🇹", name: "Italia" },
-  { code: "+33", flag: "🇫🇷", name: "Franța" },
-  { code: "+44", flag: "🇬🇧", name: "Marea Britanie" },
-  { code: "+34", flag: "🇪🇸", name: "Spania" },
-  { code: "+380", flag: "🇺🇦", name: "Ucraina" },
-  { code: "+1", flag: "🇺🇸", name: "SUA/Canada" },
-];
+import CountrySelector from "@/components/ui/CountrySelector";
+import { ALL_COUNTRIES, Country } from "@/data/countries";
 
 export default function ContactPage() {
   const t = useTranslations('Contact');
   const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
-  const [countryCode, setCountryCode] = useState("+373");
+  const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
   const [view, setView] = useState<'form' | 'otp' | 'success'>('form');
   const [isSending, setIsSending] = useState(false);
   const [otpCode, setOtpCode] = useState('');
@@ -51,7 +41,7 @@ export default function ContactPage() {
         const appVerifier = (window as any).recaptchaVerifierContact;
         // Format phone using selected country code
         const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
-        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${countryCode}${rawPhone}`;
+        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
         const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
         setConfirmationResult(confirmation);
         setIsSending(false);
@@ -261,31 +251,18 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('phoneNumber')}</label>
-                        <div className="relative flex items-center">
-                          <div className="absolute left-1 flex items-center h-[calc(100%-8px)] z-10 bg-white rounded-xl">
-                            <select
-                              value={countryCode}
-                              onChange={(e) => setCountryCode(e.target.value)}
-                              className="h-full bg-transparent appearance-none outline-none pl-3 pr-7 text-sm font-bold text-[#1A120B] border-r border-[#E8E2D9] cursor-pointer hover:bg-gray-50 transition-colors rounded-l-xl"
-                            >
-                              {COUNTRY_CODES.map(country => (
-                                <option key={country.code} value={country.code}>
-                                  {country.flag} {country.code}
-                                </option>
-                              ))}
-                            </select>
-                            {/* Custom caret */}
-                            <div className="absolute right-2 pointer-events-none text-[#D4A853]">
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                          </div>
+                        <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                          <CountrySelector
+                            selectedCountry={selectedCountry}
+                            onSelect={(country) => setSelectedCountry(country)}
+                          />
                           <input
                             type="tel"
                             required
                             placeholder={t('phonePlaceholder') || "79 000 000"}
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full bg-white border border-[#E8E2D9] rounded-2xl pl-[110px] pr-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
+                            className="w-full bg-transparent border-none px-4 py-4 outline-none text-[#1A120B] text-sm shadow-none"
                           />
                         </div>
                       </div>
@@ -449,7 +426,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-serif text-2xl font-bold text-[#1A120B] mb-2">{t('validateNumber') || "Verificare Număr"}</h3>
-                  <p className="text-[#736A60] text-sm">{t('smsNote') || "Am trimis un cod de 6 cifre la"} <br/><span className="font-bold text-[#1A120B]">{countryCode} {formData.phone.replace(/^0+/, '')}</span></p>
+                  <p className="text-[#736A60] text-sm">{t('smsNote') || "Am trimis un cod de 6 cifre la"} <br/><span className="font-bold text-[#1A120B]">{selectedCountry.dialCode} {formData.phone.replace(/^0+/, '')}</span></p>
                 </div>
               </div>
 
