@@ -84,11 +84,11 @@ export default function AboutPage() {
           </AnimateIn>
           
           <AnimateIn direction="up" delay={0.2}>
-            <div className="relative w-full max-w-2xl h-[400px] md:h-[500px] mx-auto mb-10 overflow-hidden rounded-2xl border border-[#e5e2dd] shadow-2xl shadow-black/5">
+            <div className="relative w-full max-w-md mx-auto mb-10 overflow-hidden rounded-2xl border-4 border-[#fcf9f4] shadow-2xl shadow-black/10">
               <img 
                 src="/echipa.jpg" 
                 alt="Echipa Munchotella" 
-                className="w-full h-full object-cover object-top"
+                className="w-full h-auto object-cover"
               />
             </div>
           </AnimateIn>
