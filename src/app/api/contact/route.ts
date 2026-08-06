@@ -24,7 +24,9 @@ export async function POST(request: Request) {
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: emailUser,
         pass: emailPass,
@@ -49,7 +51,16 @@ export async function POST(request: Request) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.error('SMTP Send Error:', err);
+          reject(err);
+        } else {
+          resolve(info);
+        }
+      });
+    });
 
     return NextResponse.json(
       { success: true, message: 'Email sent successfully' },
