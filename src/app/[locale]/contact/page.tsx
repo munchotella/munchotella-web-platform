@@ -136,14 +136,60 @@ export default function ContactPage() {
 
                 {isSubmitted ? (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-[#FCF9F4] border border-[#E8E2D9] text-[#D4A853] p-8 rounded-2xl text-center space-y-3 my-4"
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ type: "spring", bounce: 0.4, duration: 0.7 }}
+                    className="bg-white border border-[#D4A853]/20 p-10 md:p-12 rounded-[2rem] text-center shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]"
                   >
-                    <CheckCircle2 className="w-12 h-12 text-[#D4A853] mx-auto" />
-                    <h4 className="font-serif text-2xl font-bold">{t('messageSent')}</h4>
-                    <p className="text-sm font-light">{t('messageSentDesc')}</p>
+                    {/* Ripple Background Effect */}
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0.5 }}
+                      animate={{ scale: 4, opacity: 0 }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
+                      className="absolute w-40 h-40 bg-[#D4A853]/10 rounded-full"
+                    />
+                    
+                    {/* Animated Check Icon */}
+                    <div className="relative mb-6 z-10">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", delay: 0.2, bounce: 0.6 }}
+                        className="w-24 h-24 bg-gradient-to-tr from-[#D4A853] to-[#F3D799] rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(212,168,83,0.3)]"
+                      >
+                        <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <motion.path
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </motion.div>
+                    </div>
+
+                    {/* Animated Text */}
+                    <motion.h4 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7, duration: 0.5 }}
+                      className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3 z-10"
+                    >
+                      {t('messageSent') || "Mesaj trimis!"}
+                    </motion.h4>
+                    
+                    <motion.p 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9, duration: 0.5 }}
+                      className="text-base md:text-lg text-[#736A60] font-light max-w-sm mx-auto z-10"
+                    >
+                      {t('messageSentDesc') || "Îți mulțumim! Te vom contacta în cel mai scurt timp posibil."}
+                    </motion.p>
                   </motion.div>
+
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
