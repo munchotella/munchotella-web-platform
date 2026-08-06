@@ -26,6 +26,8 @@ import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useTranslations } from "next-intl";
+import CountrySelector from "@/components/ui/CountrySelector";
+import { ALL_COUNTRIES, Country } from "@/data/countries";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -51,6 +53,7 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
 
   const [activeStep, setActiveStep] = useState<number>(1);
+  const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
   const [doorDelivery, setDoorDelivery] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "pos" | "online">("cash");
@@ -445,14 +448,20 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
-                        <input
-                          type="tel"
-                          required
-                          placeholder={t('placeholderPhone')}
-                          className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        />
+                        <div className="relative flex items-center bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                          <CountrySelector
+                            selectedCountry={selectedCountry}
+                            onSelect={(country) => setSelectedCountry(country)}
+                          />
+                          <input
+                            type="tel"
+                            required
+                            placeholder={t('placeholderPhone') || "79 000 000"}
+                            className="w-full bg-transparent border-none px-4 py-3.5 outline-none text-[#1A120B] text-sm shadow-none"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          />
+                        </div>
                       </div>
                     </div>
 
