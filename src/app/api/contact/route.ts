@@ -14,13 +14,17 @@ export async function POST(request: Request) {
     }
 
     // 1. Save directly to Firebase Firestore (Backup)
-    await addDoc(collection(db, 'contactMessages'), {
-      name,
-      phone,
-      message,
-      createdAt: serverTimestamp(),
-      status: 'new' 
-    });
+    try {
+      await addDoc(collection(db, 'contactMessages'), {
+        name,
+        phone,
+        message,
+        createdAt: serverTimestamp(),
+        status: 'new' 
+      });
+    } catch (dbError) {
+      console.error('Firebase save error (non-blocking):', dbError);
+    }
 
     // 2. Send Email via Resend
     if (process.env.RESEND_API_KEY) {
