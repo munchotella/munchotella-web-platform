@@ -70,7 +70,7 @@ export default function Navbar() {
         {/* Center Nav (Desktop) */}
         <div className="hidden md:flex items-center space-x-2 text-[13px] font-bold uppercase tracking-widest">
           <Link href="/" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("home")}</Link>
-          <Link href="/about" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Povestea</Link>
+          <Link href="/about" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("story")}</Link>
           <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("menu")}</Link>
           <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("contact")}</Link>
         </div>
@@ -202,10 +202,10 @@ export default function Navbar() {
             </div>
             
             <div className="flex flex-col space-y-6 text-2xl font-serif text-[#1A120B]">
-              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Home</Link>
-              <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Povestea</Link>
-              <Link href="/menu" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Meniu</Link>
-              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Contact</Link>
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("home")}</Link>
+              <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("story")}</Link>
+              <Link href="/menu" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("menu")}</Link>
+              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("contact")}</Link>
               
               {/* Auth Links in Mobile Menu */}
               {user ? (

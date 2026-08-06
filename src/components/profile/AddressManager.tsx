@@ -6,10 +6,10 @@ import { MapPin, Plus, Trash2, Edit2, X, Home, Briefcase, Users, Map } from "luc
 import { useAuth } from "@/context/AuthContext";
 import MapPickerModal from "./MapPickerModal";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
-
-
+import { useTranslations } from 'next-intl';
 
 export default function AddressManager() {
+  const t = useTranslations('AddressManager');
   const { user, token, updateUser } = useAuth();
   const [addresses, setAddresses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ export default function AddressManager() {
   const [formStreet, setFormStreet] = useState("");
   const [formLat, setFormLat] = useState<number | null>(null);
   const [formLng, setFormLng] = useState<number | null>(null);
-  const [formLabel, setFormLabel] = useState("Acasă");
+  const [formLabel, setFormLabel] = useState(t('home'));
   const [saving, setSaving] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -53,7 +53,7 @@ export default function AddressManager() {
     setFormStreet("");
     setFormLat(null);
     setFormLng(null);
-    setFormLabel("Acasă");
+    setFormLabel(t('home'));
     setIsModalOpen(true);
   };
 
@@ -62,7 +62,7 @@ export default function AddressManager() {
     setFormStreet(addr.street);
     setFormLat(addr.lat || null);
     setFormLng(addr.lng || null);
-    setFormLabel(addr.label || "Acasă");
+    setFormLabel(addr.label || t('home'));
     setIsModalOpen(true);
   };
 
@@ -99,7 +99,7 @@ export default function AddressManager() {
         setIsModalOpen(false);
         fetchAddresses();
       } else {
-        alert(data.message || "Eroare la salvarea adresei");
+        alert(data.message || t('saveError'));
       }
     } catch (err) {
       console.error("Save address error:", err);
@@ -109,7 +109,7 @@ export default function AddressManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Sigur vrei să ștergi această adresă?")) return;
+    if (!confirm(t('confirmDelete'))) return;
 
     try {
       const res = await fetch(`${API_URL}/users/addresses/${id}`, {
@@ -126,24 +126,22 @@ export default function AddressManager() {
   };
 
   const getLabelIcon = (label: string) => {
-    switch (label) {
-      case "Acasă": return <Home size={20} className="text-[#D4A853]" />;
-      case "Birou": return <Briefcase size={20} className="text-[#D4A853]" />;
-      case "Prieten": return <Users size={20} className="text-[#D4A853]" />;
-      default: return <MapPin size={20} className="text-[#D4A853]" />;
-    }
+    if (label === t('home') || label === "Acasă") return <Home size={20} className="text-[#D4A853]" />;
+    if (label === t('office') || label === "Birou") return <Briefcase size={20} className="text-[#D4A853]" />;
+    if (label === t('friend') || label === "Prieten") return <Users size={20} className="text-[#D4A853]" />;
+    return <MapPin size={20} className="text-[#D4A853]" />;
   };
 
   return (
     <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] shadow-sm">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-serif text-[#1A120B]">Adrese Livrare</h2>
+        <h2 className="text-2xl font-serif text-[#1A120B]">{t('deliveryAddresses')}</h2>
         <button 
           onClick={openAddModal}
           className="flex items-center gap-2 px-4 py-2 bg-[#D4A853] text-white rounded-full font-bold hover:bg-[#C29641] transition-colors"
         >
           <Plus size={18} />
-          <span>Adaugă Adresă</span>
+          <span>{t('addAddress')}</span>
         </button>
       </div>
 
@@ -154,8 +152,8 @@ export default function AddressManager() {
       ) : addresses.length === 0 ? (
         <div className="text-center py-12 bg-[#FFFCF6] rounded-2xl border border-dashed border-[#D4A853]/30">
           <MapPin size={48} className="mx-auto text-[#D4A853]/40 mb-4" />
-          <p className="text-[#1A120B] font-medium text-lg mb-2">Nicio adresă salvată</p>
-          <p className="text-[#1A120B]/60 text-sm">Adaugă o adresă pentru o livrare mai rapidă.</p>
+          <p className="text-[#1A120B] font-medium text-lg mb-2">{t('noSavedAddresses')}</p>
+          <p className="text-[#1A120B]/60 text-sm">{t('addFasterDelivery')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -174,14 +172,14 @@ export default function AddressManager() {
                 <button 
                   onClick={() => openEditModal(addr)}
                   className="p-2 text-[#1A120B]/40 hover:text-[#D4A853] transition-colors"
-                  title="Editează"
+                  title={t('editBtn')}
                 >
                   <Edit2 size={18} />
                 </button>
                 <button 
                   onClick={() => handleDelete(addr._id)}
                   className="p-2 text-[#1A120B]/40 hover:text-red-500 transition-colors"
-                  title="Șterge"
+                  title={t('deleteBtn')}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -216,16 +214,16 @@ export default function AddressManager() {
               </button>
               
               <h3 className="text-2xl font-serif text-[#1A120B] mb-6">
-                {editingId ? "Editează Adresa" : "Adaugă Adresă"}
+                {editingId ? t('editAddress') : t('addAddress')}
               </h3>
               
               <form onSubmit={handleSave} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-[#1A120B]/70 mb-3">
-                    Etichetă
+                    {t('label')}
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["Acasă", "Birou", "Prieten", "Altul"].map(l => (
+                    {[t('home'), t('office'), t('friend'), t('other')].map(l => (
                       <button
                         key={l}
                         type="button"
@@ -245,7 +243,7 @@ export default function AddressManager() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="block text-sm font-medium text-[#1A120B]/70">
-                      Adresa completă
+                      {t('fullAddress')}
                     </label>
                     <button
                       type="button"
@@ -253,7 +251,7 @@ export default function AddressManager() {
                       className="text-xs font-bold text-[#D4A853] hover:underline flex items-center gap-1"
                     >
                       <Map size={14} />
-                      <span>Fixează pe Hartă (Pin)</span>
+                      <span>{t('pinOnMap')}</span>
                     </button>
                   </div>
                   <div className="relative">
@@ -265,14 +263,14 @@ export default function AddressManager() {
                         setFormLng(lng);
                         setFormStreet(address);
                       }}
-                      placeholder="Strada, Numărul, Blocul, Scara, Apartamentul..."
+                      placeholder={t('addressPlaceholder')}
                       className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                       required={true}
                     />
                   </div>
                   {formLat && formLng ? (
                     <p className="text-[11px] text-[#D4A853] mt-1 font-medium">
-                      ✓ Coordonate GPS salvate ({formLat.toFixed(4)}, {formLng.toFixed(4)})
+                      {t('gpsSaved')} ({formLat.toFixed(4)}, {formLng.toFixed(4)})
                     </p>
                   ) : null}
                 </div>
@@ -282,7 +280,7 @@ export default function AddressManager() {
                   disabled={saving}
                   className="w-full bg-[#1A120B] text-white font-bold py-4 rounded-2xl hover:bg-[#D4A853] transition-colors disabled:opacity-50"
                 >
-                  {saving ? "Se salvează..." : "Salvează Adresa"}
+                  {saving ? t('saving') : t('saveAddress')}
                 </button>
               </form>
             </motion.div>

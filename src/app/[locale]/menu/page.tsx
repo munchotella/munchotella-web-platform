@@ -10,9 +10,11 @@ import rawMenuItems from "@/data/menu.json";
 import { useCart } from "@/context/CartContext";
 import ProductCustomizationModal, { ProductItem } from "@/components/ProductCustomizationModal";
 import ProductCard from "@/components/ProductCard";
+import { useTranslations } from "next-intl";
 
 export default function MenuPage() {
-  const [activeCategory, setActiveCategory] = useState("Toate");
+  const t = useTranslations("Menu");
+  const [activeCategory, setActiveCategory] = useState(t('catAll'));
   const [searchQuery, setSearchQuery] = useState("");
   const { addToCart } = useCart();
 
@@ -35,10 +37,10 @@ export default function MenuPage() {
     "waffles": "Waffles",
     "crepes": "Crepes",
     "pancakes": "Pancakes",
-    "drinks": "Băuturi"
+    "drinks": t('catDrinks')
   };
   
-  const categories = ["Toate", "Waffles", "Crepes", "Pancakes", "Băuturi"];
+  const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
   
   // Authentic Munchotella Products mapped from database
   const menuItems = rawMenuItems.map((item, index) => ({
@@ -49,7 +51,7 @@ export default function MenuPage() {
     category: categoryMap[item.category] || item.category,
     desc: item.description,
     img: item.image,
-    badge: item.name.includes("Dubai") ? "Specialitatea Casei" : item.name.includes("Delux") ? "Top Seller" : undefined
+    badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
   }));
 
   const filteredItems = menuItems.filter(item => {
@@ -57,7 +59,7 @@ export default function MenuPage() {
     const query = searchQuery.trim().toLowerCase();
     const isSearching = query !== "";
     
-    const matchesCategory = isSearching || activeCategory === "Toate" || item.category === activeCategory;
+    const matchesCategory = isSearching || activeCategory === t('catAll') || item.category === activeCategory;
     
     const matchesSearch = !isSearching || 
       (item.name && item.name.toLowerCase().includes(query)) || 
@@ -79,10 +81,10 @@ export default function MenuPage() {
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-col mb-12">
             <h1 className="font-serif text-[42px] leading-[1.1] font-bold text-[#1A1A1A] tracking-tight mb-3">
-              Meniul <span className="text-[#1A1A1A] italic font-normal">Nostru</span>
+              {t('title1')} <span className="text-[#1A1A1A] italic font-normal">{t('title2')}</span>
             </h1>
             <p className="text-[#82756A] text-[14px] font-medium hidden md:block">
-              Alege-ți preferatul. Totul este preparat pe loc, din ingrediente originale.
+              {t('subtitle')}
             </p>
           </div>
 
@@ -94,10 +96,10 @@ export default function MenuPage() {
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 if (e.target.value.trim() !== "") {
-                  setActiveCategory("Toate");
+                  setActiveCategory(t('catAll'));
                 }
               }}
-              placeholder="Caută un desert..." 
+              placeholder={t('searchPlaceholder')} 
               className="w-full bg-[#FFFFFF] border border-[#EAE1DB] rounded-lg py-3 pl-11 pr-10 outline-none focus:border-[#D4A373] focus:ring-1 focus:ring-[#D4A373] transition-all text-[#1A1A1A] text-[14px] placeholder:text-[#82756A] font-medium shadow-sm"
             />
             {searchQuery && (
@@ -139,15 +141,15 @@ export default function MenuPage() {
         {filteredItems.length === 0 ? (
           <div className="text-center py-20 bg-[#FFFFFF] rounded-[16px] border border-[#EAE1DB] p-8 max-w-md mx-auto my-12 shadow-[0_4px_20px_rgba(26,26,26,0.04)]">
             <Search className="w-12 h-12 text-[#D4A373] mx-auto mb-4 opacity-50" />
-            <h3 className="font-serif text-2xl font-bold text-[#1A1A1A] mb-2">Niciun desert găsit</h3>
+            <h3 className="font-serif text-2xl font-bold text-[#1A1A1A] mb-2">{t('noDessertsFound')}</h3>
             <p className="text-[#50453B] text-[14px] font-medium mb-6">
-              Ups! Nu am găsit niciun produs care să conțină „<span className="font-bold text-[#1A1A1A]">{searchQuery}</span>”. Încearcă o altă denumire sau aruncă o privire peste categoriile de mai sus!
+              {t('noProductsFound_1')}<span className="font-bold text-[#1A1A1A]">{searchQuery}</span>{t('noProductsFound_2')}
             </p>
             <button
-              onClick={() => { setSearchQuery(""); setActiveCategory("Toate"); }}
+              onClick={() => { setSearchQuery(""); setActiveCategory(t('catAll')); }}
               className="bg-[#1A1A1A] hover:bg-[#342F2C] text-white font-bold text-[13px] uppercase tracking-widest px-6 py-3.5 rounded-full transition-all shadow-md min-h-[44px]"
             >
-              Resetează Căutarea
+              {t('resetSearch')}
             </button>
           </div>
         ) : (

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, CheckCircle, Clock, ShoppingBag, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface Notification {
   _id: string;
@@ -22,6 +23,7 @@ interface NotificationsDropdownProps {
 
 export default function NotificationsDropdown({ isScrolled = false }: NotificationsDropdownProps) {
   const { user, token, setIsAuthModalOpen } = useAuth();
+  const t = useTranslations("Notifications");
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -60,7 +62,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
           if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
             const latest = newUnread[0];
             if (latest) {
-              new window.Notification(latest.title === 'notifOrderPlacedTitle' ? 'Munchotella: Comandă Plasată' : latest.title, {
+              new window.Notification(latest.title === 'notifOrderPlacedTitle' ? t('orderPlaced') : latest.title, {
                 body: latest.body,
                 icon: "/favicon.ico"
               });
@@ -147,7 +149,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
             className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-[#E8E2D9] overflow-hidden z-50"
           >
             <div className="bg-[#1A120B] p-4 flex justify-between items-center text-white">
-              <h3 className="font-serif font-bold text-lg">Notificări</h3>
+              <h3 className="font-serif font-bold text-lg">{t('title')}</h3>
               <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors">
                 <X size={18} />
               </button>
@@ -155,12 +157,12 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
 
             {!hasPermission && (
               <div className="p-3 bg-[#D4A853]/10 border-b border-[#D4A853]/20 flex items-center justify-between gap-2 text-xs">
-                <span className="text-[#1A120B]/80 font-medium">Activează notificările pe desktop pentru comenzi!</span>
+                <span className="text-[#1A120B]/80 font-medium">{t('enableDesktop')}</span>
                 <button
                   onClick={requestNotificationPermission}
                   className="px-3 py-1 bg-[#D4A853] text-white rounded-full font-bold hover:bg-[#C29641] transition-colors shrink-0 text-[11px]"
                 >
-                  Activează
+                  {t('enable')}
                 </button>
               </div>
             )}
@@ -169,7 +171,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-[#736A60]">
                   <Bell size={32} className="mx-auto mb-3 text-[#E8E2D9]" />
-                  <p className="text-sm">Nu ai nicio notificare momentan.</p>
+                  <p className="text-sm">{t('empty')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-[#E8E2D9]">
@@ -191,9 +193,9 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
                           )}
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-bold text-[#1A120B] text-sm">{notif.title === 'notifOrderPlacedTitle' ? 'Comandă plasată' : notif.title === 'orderUpdates' ? 'Actualizare Comandă' : notif.title}</h4>
+                          <h4 className="font-bold text-[#1A120B] text-sm">{notif.title === 'notifOrderPlacedTitle' ? t('orderPlaced') : notif.title === 'orderUpdates' ? t('orderUpdate') : notif.title}</h4>
                           <p className="text-xs text-[#736A60] mt-1 leading-relaxed">
-                            {notif.body === 'notifOrderConfirmedBody' ? 'Comanda a fost confirmată și va fi pregătită.' : notif.body === 'notifOrderDeliveringBody' ? 'Comanda este pe drum spre tine.' : notif.body.split('|')[0] === 'notifOrderPlacedBody' ? 'Comanda a fost înregistrată cu succes.' : notif.body}
+                            {notif.body === 'notifOrderConfirmedBody' ? t('notifOrderConfirmedBody') : notif.body === 'notifOrderDeliveringBody' ? t('notifOrderDeliveringBody') : notif.body.split('|')[0] === 'notifOrderPlacedBody' ? t('notifOrderPlacedBody') : notif.body}
                           </p>
                           <div className="flex justify-between items-center mt-2">
                             <span className="text-[10px] font-bold text-[#736A60] flex items-center gap-1 uppercase tracking-wide">
@@ -206,7 +208,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
                                 onClick={() => setIsOpen(false)}
                                 className="text-[10px] font-bold text-[#D4A853] uppercase tracking-wide hover:underline"
                               >
-                                Vezi Comanda
+                                {t('viewOrder')}
                               </Link>
                             )}
                           </div>

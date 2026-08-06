@@ -43,8 +43,10 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 import { useToast } from "@/context/ToastContext";
+import { useTranslations } from "next-intl";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("Cart");
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { showToast } = useToast();
@@ -107,7 +109,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
     
     // În loc să deschidem tot coșul invaziv, doar arătăm un Toast fluid
-    showToast(`${input.name} adăugat în coș!`);
+    showToast(t('addedToCartToast', { name: input.name }));
   };
 
   const removeFromCart = (cartItemId: string) => {

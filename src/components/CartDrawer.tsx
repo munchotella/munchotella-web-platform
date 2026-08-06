@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ChevronLeft, CreditCard, Banknote, CheckCircle, MapPin, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useTranslations } from "next-intl";
 import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { auth } from "@/lib/firebase";
@@ -14,6 +15,7 @@ const libraries: any[] = ["places"];
 
 export default function CartDrawer() {
   const router = useRouter();
+  const t = useTranslations("CartDrawer");
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [view, setView] = useState<'cart' | 'checkout' | 'otp' | 'success'>('cart');
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', paymentMethod: 'cash' });
@@ -110,7 +112,7 @@ export default function CartDrawer() {
       }, 3000);
     } catch (error) {
       console.error("Cod incorect:", error);
-      setErrorMsg("Codul introdus este incorect.");
+      setErrorMsg(t("incorrectCode"));
       setIsSubmitting(false);
     }
   };
@@ -147,7 +149,7 @@ export default function CartDrawer() {
                   <ShoppingBag className="w-5 h-5 text-[#1A120B]" />
                 )}
                 <h2 className="font-serif text-2xl font-medium text-[#1A120B]">
-                  {view === 'checkout' ? 'Detalii Livrare' : view === 'otp' ? 'Validare Număr' : view === 'success' ? 'Comandă Primită' : 'Comanda Ta'}
+                  {view === 'checkout' ? t('deliveryDetails') : view === 'otp' ? t('validateNumber') : view === 'success' ? t('orderReceived') : t('yourOrder')}
                 </h2>
               </div>
               <button
@@ -172,7 +174,7 @@ export default function CartDrawer() {
                     {items.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-[#736A60] space-y-4 my-auto">
                         <ShoppingBag className="w-12 h-12 opacity-20" />
-                        <p className="font-sans text-lg">Coșul tău este gol</p>
+                        <p className="font-sans text-lg">{t('emptyCart')}</p>
                       </div>
                     ) : (
                       items.map((item) => (
@@ -241,29 +243,29 @@ export default function CartDrawer() {
                     )}
                     <form id="checkout-form" onSubmit={handleSubmitOrder} className="space-y-5">
                       <div>
-                        <label className="block text-sm font-bold text-[#1A120B] mb-2">Nume Complet</label>
+                        <label className="block text-sm font-bold text-[#1A120B] mb-2">{t('fullName')}</label>
                         <input 
                           type="text" 
                           required
-                          placeholder="Ion Popescu"
+                          placeholder={t('namePlaceholder')}
                           className="w-full bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.name}
                           onChange={e => setFormData({...formData, name: e.target.value})}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-[#1A120B] mb-2">Telefon</label>
+                        <label className="block text-sm font-bold text-[#1A120B] mb-2">{t('phone')}</label>
                         <input 
                           type="tel" 
                           required
-                          placeholder="ex: 079 xxx xxx"
+                          placeholder={t('phonePlaceholder')}
                           className="w-full bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.phone}
                           onChange={e => setFormData({...formData, phone: e.target.value})}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-[#1A120B] mb-2">Adresă Livrare</label>
+                        <label className="block text-sm font-bold text-[#1A120B] mb-2">{t('deliveryAddress')}</label>
                         {isLoaded ? (
                           <div className="relative">
                             <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#D4A853] z-10 pointer-events-none" />
@@ -275,7 +277,7 @@ export default function CartDrawer() {
                               <input 
                                 required
                                 type="text"
-                                placeholder="Caută adresa (ex: Stefan cel Mare...)"
+                                placeholder={t('addressPlaceholder')}
                                 className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-11 pr-4 py-3 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                                 value={formData.address}
                                 onChange={e => setFormData({...formData, address: e.target.value})}
@@ -288,27 +290,27 @@ export default function CartDrawer() {
                             <input 
                               required
                               type="text"
-                              placeholder="Se încarcă Google Maps..."
+                              placeholder={t('loadingMaps')}
                               disabled
                               className="w-full bg-gray-50 border border-[#E8E2D9] rounded-xl pl-11 pr-4 py-3 outline-none opacity-70"
                             />
                           </div>
                         )}
-                        <p className="text-[11px] text-[#736A60] mt-2 ml-1">* Autocompletare via Google Maps pentru o livrare precisă.</p>
+                        <p className="text-[11px] text-[#736A60] mt-2 ml-1">{t('mapsNote')}</p>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-bold text-[#1A120B] mb-3">Metodă de Plată</label>
+                        <label className="block text-sm font-bold text-[#1A120B] mb-3">{t('paymentMethod')}</label>
                         <div className="bg-[#D4A853]/10 border border-[#D4A853]/40 p-4 rounded-xl flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <Banknote className="w-6 h-6 text-[#D4A853]" />
                             <div>
-                              <p className="text-sm font-bold text-[#1A120B]">Cash la Livrare / Curier</p>
-                              <p className="text-[11px] text-[#736A60]">Achitare la primirea comenzii sau ridicare din local</p>
+                              <p className="text-sm font-bold text-[#1A120B]">{t('cashPayment')}</p>
+                              <p className="text-[11px] text-[#736A60]">{t('cashNote')}</p>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold uppercase tracking-widest bg-[#1A120B] text-[#D4A853] px-2.5 py-1 rounded-full">
-                            Activ
+                            {t('active')}
                           </span>
                         </div>
                       </div>
@@ -330,8 +332,8 @@ export default function CartDrawer() {
                         <Smartphone className="w-8 h-8 text-[#D4A853]" />
                       </div>
                       <div>
-                        <h3 className="font-serif text-2xl text-[#1A120B] mb-2">Introdu codul SMS</h3>
-                        <p className="text-[#736A60] text-sm">Am trimis un cod de verificare la numărul <br/><span className="font-bold">{formData.phone}</span></p>
+                        <h3 className="font-serif text-2xl text-[#1A120B] mb-2">{t('enterSms')}</h3>
+                        <p className="text-[#736A60] text-sm">{t('smsNote')} <br/><span className="font-bold">{formData.phone}</span></p>
                       </div>
                     </div>
 
@@ -368,9 +370,9 @@ export default function CartDrawer() {
                       <CheckCircle className="w-10 h-10 text-[#D4A853]" />
                     </div>
                     <div>
-                      <h3 className="font-serif text-3xl font-medium text-[#1A120B] mb-2">Comanda a fost trimisă!</h3>
+                      <h3 className="font-serif text-3xl font-medium text-[#1A120B] mb-2">{t('orderSent')}</h3>
                       <p className="text-[#736A60] font-sans">
-                        Îți mulțumim, {formData.name}.<br/> Te vom contacta în scurt timp pentru confirmare.
+                        {t('thanksName', {name: formData.name})}<br/> {t('contactShortly')}
                       </p>
                     </div>
                   </motion.div>
@@ -382,7 +384,7 @@ export default function CartDrawer() {
             {items.length > 0 && view !== 'success' && (
               <div className="p-6 bg-white border-t border-[#E8E2D9] shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-[#736A60] font-medium">Subtotal</span>
+                  <span className="text-[#736A60] font-medium">{t('subtotal')}</span>
                   <span className="font-serif text-2xl font-bold text-[#1A120B]">{totalPrice} MDL</span>
                 </div>
                 
@@ -391,7 +393,7 @@ export default function CartDrawer() {
                     onClick={handleCheckout}
                     className="w-full bg-[#D4A853] hover:bg-[#C09640] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-colors duration-300 shadow-lg shadow-[#D4A853]/20"
                   >
-                    Spre Finalizare
+                    {t('toCheckout')}
                   </button>
                 ) : view === 'checkout' ? (
                   <button 

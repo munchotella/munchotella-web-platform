@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, Phone, Calendar, Lock, Trash2, Camera } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from 'next-intl';
 
 export default function AccountSettings() {
+  const t = useTranslations('AccountSettings');
   const { user, token, updateUser, logout } = useAuth();
   
   const [form, setForm] = useState({
@@ -34,7 +36,7 @@ export default function AccountSettings() {
     if (!file || !token) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert("Imaginea este prea mare. Dimensiunea maximă admisă este de 5MB.");
+      alert(t('imageTooLarge'));
       return;
     }
 
@@ -55,11 +57,11 @@ export default function AccountSettings() {
       if (data.success && data.avatarUrl) {
         updateUser({ avatarUrl: data.avatarUrl });
       } else {
-        alert(data.message || "Eroare la încărcarea imaginii.");
+        alert(data.message || t('imageUploadError'));
       }
     } catch (err) {
       console.error("Avatar upload error:", err);
-      alert("A apărut o eroare la încărcarea fotografiei.");
+      alert(t('photoUploadError'));
     } finally {
       setUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -97,9 +99,9 @@ export default function AccountSettings() {
       
       if (data.success) {
         updateUser(payload);
-        alert("Profil actualizat cu succes!");
+        alert(t('profileUpdated'));
       } else {
-        alert(data.message || "Eroare la actualizare.");
+        alert(data.message || t('updateError'));
       }
     } catch (err) {
       console.error("Profile save error:", err);
@@ -113,10 +115,10 @@ export default function AccountSettings() {
     if (!token) return;
 
     if (passwordForm.newPass.length < 8) {
-      return alert("Parola nouă trebuie să aibă minim 8 caractere.");
+      return alert(t('passwordLength'));
     }
     if (passwordForm.newPass !== passwordForm.confirm) {
-      return alert("Parolele noi nu coincid.");
+      return alert(t('passwordMismatch'));
     }
 
     try {
@@ -136,9 +138,9 @@ export default function AccountSettings() {
       
       if (data.success) {
         setPasswordForm({ current: "", newPass: "", confirm: "" });
-        alert("Parola a fost schimbată cu succes!");
+        alert(t('passwordChanged'));
       } else {
-        alert(data.message || "Parola curentă incorectă.");
+        alert(data.message || t('incorrectPassword'));
       }
     } catch (err) {
       console.error("Password save error:", err);
@@ -148,8 +150,8 @@ export default function AccountSettings() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Ești absolut sigur că vrei să ștergi contul? Această acțiune este ireversibilă și vei pierde tot istoricul de comenzi.")) return;
-    if (!confirm("Confirmă din nou ștergerea definitivă a contului.")) return;
+    if (!confirm(t('deleteConfirm1'))) return;
+    if (!confirm(t('deleteConfirm2'))) return;
 
     try {
       setDeleting(true);
@@ -160,10 +162,10 @@ export default function AccountSettings() {
       const data = await res.json();
       
       if (data.success) {
-        alert("Contul a fost șters cu succes.");
+        alert(t('accountDeleted'));
         logout();
       } else {
-        alert(data.message || "Eroare la ștergerea contului.");
+        alert(data.message || t('deleteError'));
       }
     } catch (err) {
       console.error("Delete account error:", err);
@@ -176,7 +178,7 @@ export default function AccountSettings() {
     <div className="space-y-8">
       {/* Date Personale */}
       <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] shadow-sm">
-        <h2 className="text-2xl font-serif text-[#1A120B] mb-8">Date Personale</h2>
+        <h2 className="text-2xl font-serif text-[#1A120B] mb-8">{t('personalData')}</h2>
         
         {/* Avatar Display */}
         <div className="flex items-center gap-6 mb-8 pb-8 border-b border-[#E8E2D9]/50">
@@ -205,21 +207,21 @@ export default function AccountSettings() {
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingAvatar}
               className="absolute bottom-0 right-0 bg-[#1A120B] p-2 rounded-full text-white border-2 border-white hover:bg-[#D4A853] transition-all cursor-pointer shadow-md group-hover:scale-110" 
-              title="Schimbă poza de profil"
+              title={t('changeProfilePic')}
             >
               <Camera size={16} />
             </button>
           </div>
           <div>
             <h3 className="text-xl font-bold text-[#1A120B]">{user?.name}</h3>
-            <p className="text-[#1A120B]/60 text-sm">Poți modifica fotografia direct de aici.</p>
+            <p className="text-[#1A120B]/60 text-sm">{t('changePhoto')}</p>
           </div>
         </div>
 
         <form onSubmit={handleProfileSave} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Nume complet</label>
+              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('fullName')}</label>
               <div className="relative">
                 <User size={18} className="absolute top-4 left-4 text-[#1A120B]/40" />
                 <input
@@ -233,7 +235,7 @@ export default function AccountSettings() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Telefon</label>
+              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('phone')}</label>
               <div className="relative">
                 <Phone size={18} className="absolute top-4 left-4 text-[#1A120B]/40" />
                 <input
@@ -247,7 +249,7 @@ export default function AccountSettings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Email</label>
+              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('email')}</label>
               <div className="relative">
                 <Mail size={18} className="absolute top-4 left-4 text-[#1A120B]/40" />
                 <input
@@ -261,12 +263,12 @@ export default function AccountSettings() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Gen</label>
+              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('gender')}</label>
               <div className="flex gap-2">
                 {[
-                  { id: "male", label: "Masculin" },
-                  { id: "female", label: "Feminin" },
-                  { id: "other", label: "Altul" }
+                  { id: "male", label: t('male') },
+                  { id: "female", label: t('female') },
+                  { id: "other", label: t('other') }
                 ].map(g => (
                   <button
                     key={g.id}
@@ -285,7 +287,7 @@ export default function AccountSettings() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Data Nașterii</label>
+              <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('dateOfBirth')}</label>
               <div className="relative">
                 <Calendar size={18} className={`absolute top-4 left-4 ${user?.birthdayRewardSentAt ? 'text-[#D4A853]' : 'text-[#1A120B]/40'}`} />
                 <input
@@ -298,8 +300,8 @@ export default function AccountSettings() {
               </div>
               <p className={`text-xs mt-2 ${user?.birthdayRewardSentAt ? 'text-[#D4A853]' : 'text-[#1A120B]/50'}`}>
                 {user?.birthdayRewardSentAt 
-                  ? "Ai primit deja cadoul de ziua ta. Data nu mai poate fi modificată." 
-                  : "Adaugă data nașterii pentru a primi o surpriză dulce de ziua ta!"}
+                  ? t('giftReceived')
+                  : t('addDob')}
               </p>
             </div>
           </div>
@@ -310,7 +312,7 @@ export default function AccountSettings() {
               disabled={savingProfile}
               className="px-8 py-4 bg-[#1A120B] text-white rounded-full font-bold hover:bg-[#D4A853] transition-colors disabled:opacity-50"
             >
-              {savingProfile ? "Se salvează..." : "Salvează Modificările"}
+              {savingProfile ? t('saving') : t('saveChanges')}
             </button>
           </div>
         </form>
@@ -320,12 +322,12 @@ export default function AccountSettings() {
       <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] shadow-sm">
         <div className="flex items-center gap-3 mb-8">
           <Lock size={24} className="text-[#D4A853]" />
-          <h2 className="text-2xl font-serif text-[#1A120B]">Securitate</h2>
+          <h2 className="text-2xl font-serif text-[#1A120B]">{t('security')}</h2>
         </div>
         
         <form onSubmit={handlePasswordSave} className="space-y-6 max-w-lg">
           <div>
-            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Parola curentă</label>
+            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('currentPassword')}</label>
             <input
               type="password"
               value={passwordForm.current}
@@ -335,7 +337,7 @@ export default function AccountSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Parola nouă</label>
+            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('newPassword')}</label>
             <input
               type="password"
               value={passwordForm.newPass}
@@ -345,7 +347,7 @@ export default function AccountSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">Confirmă parola nouă</label>
+            <label className="block text-sm font-medium text-[#1A120B]/70 mb-2">{t('confirmNewPassword')}</label>
             <input
               type="password"
               value={passwordForm.confirm}
@@ -360,15 +362,15 @@ export default function AccountSettings() {
             disabled={savingPassword}
             className="px-8 py-4 bg-transparent border-2 border-[#D4A853] text-[#D4A853] rounded-full font-bold hover:bg-[#D4A853] hover:text-white transition-colors disabled:opacity-50"
           >
-            {savingPassword ? "Se schimbă..." : "Schimbă Parola"}
+            {savingPassword ? t('changing') : t('changePasswordBtn')}
           </button>
         </form>
       </div>
 
       {/* Zona Periculoasă */}
       <div className="bg-red-50/50 p-8 rounded-[32px] border border-red-100">
-        <h2 className="text-xl font-bold text-red-600 mb-2">Zona de Pericol</h2>
-        <p className="text-red-900/60 mb-6">Odată ce ștergi contul, toate datele tale, inclusiv istoricul de comenzi și punctele de loialitate, vor fi șterse definitiv.</p>
+        <h2 className="text-xl font-bold text-red-600 mb-2">{t('dangerZone')}</h2>
+        <p className="text-red-900/60 mb-6">{t('dangerDesc')}</p>
         
         <button
           onClick={handleDeleteAccount}
@@ -376,7 +378,7 @@ export default function AccountSettings() {
           className="flex items-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-full font-bold hover:bg-red-50 hover:border-red-300 transition-colors disabled:opacity-50"
         >
           <Trash2 size={18} />
-          <span>{deleting ? "Se șterge..." : "Șterge contul meu"}</span>
+          <span>{deleting ? t('deleting') : t('deleteMyAccount')}</span>
         </button>
       </div>
     </div>

@@ -14,8 +14,10 @@ import { useCart } from "@/context/CartContext";
 import ProductCustomizationModal, { ProductItem } from "@/components/ProductCustomizationModal";
 import ProductCard from "@/components/ProductCard";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
+import { useTranslations } from "next-intl";
 
 export default function MunchotellaBoutique() {
+  const t = useTranslations("Homepage");
   const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = React.useState<ProductItem | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -47,14 +49,14 @@ export default function MunchotellaBoutique() {
         <div className="max-w-[1400px] mx-auto px-4 flex flex-col lg:flex-row lg:flex-nowrap lg:whitespace-nowrap items-center justify-center gap-4 lg:gap-8 text-[11px] lg:text-xs font-bold uppercase tracking-widest text-center">
           <div className="flex items-center space-x-2.5">
             <span className="material-symbols-outlined text-sm text-[#D4A853]">location_on</span>
-            <span className="text-[#FFFDF8]">Strada Nicolae Testemițeanu 21/1, Chișinău</span>
+            <span className="text-[#FFFDF8]">{t('location')}</span>
           </div>
           <span className="hidden md:inline text-white/30">•</span>
           <LiveStoreStatus />
           <span className="hidden md:inline text-white/30">•</span>
           <div className="flex items-center space-x-2.5">
             <span className="material-symbols-outlined text-sm text-[#D4A853]">star</span>
-            <span className="text-[#FFFDF8]">4.4 ★ Evaluare pe Google Maps</span>
+            <span className="text-[#FFFDF8]">{t('rating')}</span>
           </div>
         </div>
       </div>
@@ -64,8 +66,8 @@ export default function MunchotellaBoutique() {
         <div className="max-w-[1200px] mx-auto px-4 md:px-8">
           <AnimateIn direction="up">
             <div className="text-center mb-16">
-              <span className="text-[12px] font-bold uppercase text-[#D4A853] tracking-widest mb-2 block">Ai poftă de ceva cu adevărat bun?</span>
-              <h2 className="font-serif text-4xl md:text-5xl font-semibold text-primary">Preferatele Clienților Noștri</h2>
+              <span className="text-[12px] font-bold uppercase text-[#D4A853] tracking-widest mb-2 block">{t('craving')}</span>
+              <h2 className="font-serif text-4xl md:text-5xl font-semibold text-primary">{t('favorites')}</h2>
             </div>
           </AnimateIn>
           
@@ -76,9 +78,9 @@ export default function MunchotellaBoutique() {
                   id: 20,
                   name: "Delux Crepe",
                   price: 165,
-                  desc: "Clătită fină franțuzească umplută generos cu Nutella®, ciocolată albă belgiană, Oreo, biscuiți Lotus, arahide și Kinder Bueno.",
+                  desc: t('deluxCrepeDesc'),
                   img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png",
-                  badge: "Top Seller",
+                  badge: t('badgeTopSeller'),
                 }}
                 onSelect={handleOpenCustomization}
               />
@@ -90,9 +92,9 @@ export default function MunchotellaBoutique() {
                   id: 2,
                   name: "Delux Mini Waffle",
                   price: 160,
-                  desc: "16 mini waffles fragede stropite cu Nutella® caldă, ciocolată albă belgiană și toppinguri la alegere (Oreo & Kinder Bueno).",
+                  desc: t('deluxWaffleDesc'),
                   img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png",
-                  badge: "Specialitatea Casei",
+                  badge: t('badgeSpecialty'),
                 }}
                 onSelect={handleOpenCustomization}
               />
@@ -104,7 +106,7 @@ export default function MunchotellaBoutique() {
                   id: 4,
                   name: "Lotus Mini Waffle",
                   price: 200,
-                  desc: "Mini waffles fragede scufundate în crema fină Lotus Biscoff caramelizată și presărate cu biscuiți crocanți sfărâmați.",
+                  desc: t('lotusMiniWaffleDesc'),
                   img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png",
                 }}
                 onSelect={handleOpenCustomization}
@@ -114,7 +116,7 @@ export default function MunchotellaBoutique() {
           
           <div className="mt-16 text-center">
             <a href="/menu" className="inline-flex items-center justify-center space-x-2 border-b-2 border-primary text-primary text-[14px] font-bold uppercase tracking-wider hover:text-[#D4A853] hover:border-[#D4A853] transition-colors duration-300 pb-1">
-              <span>Vezi tot meniul</span>
+              <span>{t('viewMenu')}</span>
               <span className="material-symbols-outlined text-sm">arrow_outward</span>
             </a>
             
@@ -130,7 +132,7 @@ export default function MunchotellaBoutique() {
         <div className="max-w-[1200px] mx-auto px-4 md:px-8 text-center">
           <AnimateIn direction="up">
 
-            <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1A120B] mb-16">Ce spun clienții noștri pe Google</h2>
+            <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1A120B] mb-16">{t('reviewsTitle')}</h2>
           </AnimateIn>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left">
@@ -151,7 +153,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Dr. Nawar</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">{t('verified')}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     DN
@@ -177,7 +179,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Krishna Rajendran</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">{t('verified')}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     KR
@@ -203,7 +205,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Rusu Victoria</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">{t('verified')}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     RV
@@ -229,7 +231,7 @@ export default function MunchotellaBoutique() {
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
                     <p className="text-[#1A120B] font-bold text-[14px]">Tatiana Moraru</p>
-                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">Client Verificat • Google</p>
+                    <p className="text-[#D4A853] text-[11px] uppercase tracking-widest font-semibold">{t('verified')}</p>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center font-bold text-xs">
                     TM

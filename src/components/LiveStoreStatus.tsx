@@ -2,39 +2,41 @@
 
 import React, { useState, useEffect } from "react";
 import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBackground?: boolean }) {
-  const [status, setStatus] = useState<{ isOpen: boolean; message: string }>({
+  const t = useTranslations("LiveStore");
+  const [status, setStatus] = useState<{ isOpen: boolean; key: string; openMsgKey?: string }>({
     isOpen: true,
-    message: "Deschis Acum • Preluăm comenzi",
+    key: 'openNow',
   });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const checkStatus = () => {
       const now = new Date();
       const day = now.getDay(); // 0: Sun, 1: Mon, ..., 3: Wed, ..., 6: Sat
       const hours = now.getHours();
 
-      // Wednesday closed
       if (day === 3) {
         setStatus({
           isOpen: false,
-          message: "Închis Miercuri • Deschidem Joi la 16:00",
+          key: 'closedWednesday',
         });
         return;
       }
 
-      // Working hours: 16:00 to 24:00 (00:00)
       if (hours >= 16 && hours < 24) {
         setStatus({
           isOpen: true,
-          message: "Deschis Acum • Preluăm comenzi",
+          key: 'openNow',
         });
       } else {
-        const openMsg = hours < 16 ? "Deschidem azi la 16:00" : "Deschidem mâine la 16:00";
         setStatus({
           isOpen: false,
-          message: `Închis Momentan • ${openMsg}`,
+          key: 'closedCurrently',
+          openMsgKey: hours < 16 ? 'openToday' : 'openTomorrow',
         });
       }
     };
@@ -43,6 +45,8 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
     const interval = setInterval(checkStatus, 60000); // Check every minute
     return () => clearInterval(interval);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <div
@@ -60,7 +64,9 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
             status.isOpen ? "bg-[#D4A853]" : "bg-[#9B8C7E]"
           }`}></span>
         </span>
-      <span>{status.message}</span>
+      <span>
+        {t(status.key)} {status.openMsgKey ? t(status.openMsgKey as any) : ""}
+      </span>
     </div>
   );
 }

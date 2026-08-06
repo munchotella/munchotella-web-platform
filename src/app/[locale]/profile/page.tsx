@@ -11,8 +11,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AddressManager from "@/components/profile/AddressManager";
 import AccountSettings from "@/components/profile/AccountSettings";
+import { useTranslations } from 'next-intl';
 
 export default function ProfilePage() {
+  const t = useTranslations('Profile');
   const { user, token, isLoading, logout } = useAuth();
   const { replaceCart } = useCart();
   const router = useRouter();
@@ -144,9 +146,9 @@ export default function ProfilePage() {
       if (data.success) {
         setOrders(orders.map(o => o._id === reviewOrder._id ? { ...o, rating: selectedRating, reviewText: reviewComment } : o));
         setReviewOrder(null);
-        alert("Îți mulțumim! Recenzia ta a fost salvată.");
+        alert(t('reviewSaved'));
       } else {
-        alert(data.message || "Eroare la trimiterea recenziei.");
+        alert(data.message || t('reviewError'));
       }
     } catch (err) {
       console.error(err);
@@ -166,15 +168,15 @@ export default function ProfilePage() {
           className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6"
         >
           <div>
-            <h1 className="text-4xl md:text-5xl font-serif text-[#1A120B] mb-2">Salut, {user.name.split(" ")[0]}!</h1>
-            <p className="text-[#1A120B]/60 font-medium">Bine ai revenit în contul tău Munchotella.</p>
+            <h1 className="text-4xl md:text-5xl font-serif text-[#1A120B] mb-2">{t('hello')}, {user.name.split(" ")[0]}!</h1>
+            <p className="text-[#1A120B]/60 font-medium">{t('welcomeBack')}</p>
           </div>
           <button 
             onClick={handleLogout}
             className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-full font-bold hover:bg-red-100 transition-colors self-start md:self-auto"
           >
             <LogOut size={18} />
-            <span>Deconectare</span>
+            <span>{t('logout')}</span>
           </button>
         </motion.div>
 
@@ -199,9 +201,9 @@ export default function ProfilePage() {
               </div>
 
               <nav className="space-y-2 relative">
-                {[{ id: "istoric", label: "Istoric Comenzi", icon: Package }, 
-                  { id: "adrese", label: "Adrese Livrare", icon: MapPin }, 
-                  { id: "setari", label: "Setări Cont", icon: Settings }].map((item) => {
+                {[{ id: "istoric", label: t('orderHistory'), icon: Package }, 
+                  { id: "adrese", label: t('deliveryAddresses'), icon: MapPin }, 
+                  { id: "setari", label: t('accountSettings'), icon: Settings }].map((item) => {
                   const isActive = activeTab === item.id;
                   const Icon = item.icon;
                   return (
@@ -237,7 +239,7 @@ export default function ProfilePage() {
               transition={{ delay: 0.2 }}
               className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] shadow-sm"
             >
-              <h3 className="font-bold text-[#1A120B] text-lg mb-6">Contact & Program</h3>
+              <h3 className="font-bold text-[#1A120B] text-lg mb-6">{t('contactSchedule')}</h3>
               
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
@@ -245,9 +247,9 @@ export default function ProfilePage() {
                     <Clock size={18} className="text-[#D4A853]" />
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">Program</p>
-                    <p className="text-sm font-bold text-[#1A120B]">Luni – Duminică: 16:00 – 00:00</p>
-                    <p className="text-sm font-bold text-red-600 mt-1">Miercuri - Închis</p>
+                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">{t('scheduleTitle')}</p>
+                    <p className="text-sm font-bold text-[#1A120B]">{t('scheduleMonSun')}</p>
+                    <p className="text-sm font-bold text-red-600 mt-1">{t('scheduleWed')}</p>
                   </div>
                 </div>
 
@@ -256,7 +258,7 @@ export default function ProfilePage() {
                     <Phone size={18} className="text-green-600" />
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">Telefon</p>
+                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">{t('phone')}</p>
                     <p className="text-sm font-bold text-[#1A120B] group-hover:text-green-600 transition-colors">060 912 289</p>
                   </div>
                 </a>
@@ -281,7 +283,7 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">Instagram</p>
+                    <p className="text-[11px] uppercase tracking-wider text-[#1A120B]/50 font-bold mb-1">{t('instagram')}</p>
                     <p className="text-sm font-bold text-[#1A120B] group-hover:text-pink-600 transition-colors">@munchotella</p>
                   </div>
                 </a>
@@ -303,16 +305,16 @@ export default function ProfilePage() {
               <div className="relative z-10 flex-1">
                 <div className="flex items-center gap-2 text-[#D4A853] text-sm font-bold uppercase tracking-widest mb-2">
                   <Clock size={16} />
-                  <span>Comandă în curs</span>
+                  <span>{t('activeOrder')}</span>
                 </div>
-                <h3 className="text-2xl font-serif text-[#FDF9F1] mb-2">Comanda ta se prepară!</h3>
-                <p className="text-white/70 text-sm">Crepe Dubai va fi gata în aproximativ 15 minute.</p>
+                <h3 className="text-2xl font-serif text-[#FDF9F1] mb-2">{t('orderPreparing')}</h3>
+                <p className="text-white/70 text-sm">Crepe Dubai {t('orderReadyIn')}</p>
               </div>
               <button 
                 onClick={() => router.push('/order-tracking/live-123')}
                 className="relative z-10 px-6 py-3 bg-[#D4A853] text-white rounded-full font-bold hover:bg-[#C29641] transition-colors w-full md:w-auto text-center"
               >
-                Urmărește Live
+                {t('trackLive')}
               </button>
             </motion.div>
 
@@ -327,7 +329,7 @@ export default function ProfilePage() {
                   transition={{ delay: 0.1 }}
                   className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] shadow-sm"
                 >
-                  <h2 className="text-2xl font-serif text-[#1A120B] mb-8">Ultimele comenzi</h2>
+                  <h2 className="text-2xl font-serif text-[#1A120B] mb-8">{t('recentOrders')}</h2>
               
               <motion.div 
                 variants={{
@@ -357,14 +359,14 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 ) : orders.length === 0 ? (
-                  <p className="text-[#1A120B]/60 text-center py-10">Nu ai plasat nicio comandă încă.</p>
+                  <p className="text-[#1A120B]/60 text-center py-10">{t('noOrders')}</p>
                 ) : (
                   orders.map((order, index) => {
                     const isExpanded = expandedOrderId === order._id;
                     const orderDate = new Date(order.createdAt).toLocaleDateString("ro-RO", { day: "numeric", month: "short", year: "numeric" });
                     
                     // Afișăm un rezumat din primele 2 produse pentru titlu
-                    const orderSummary = order.items.slice(0, 2).map((i: any) => `${i.name || i.menuItem?.name} x${i.quantity}`).join(", ") + (order.items.length > 2 ? ` + ${order.items.length - 2} altele` : "");
+                    const orderSummary = order.items.slice(0, 2).map((i: any) => `${i.name || i.menuItem?.name} x${i.quantity}`).join(", ") + (order.items.length > 2 ? ` + ${order.items.length - 2} ${t('others')}` : "");
                     
                     return (
                       <motion.div 
@@ -390,7 +392,7 @@ export default function ProfilePage() {
                           </div>
                           <div className="flex items-center justify-between md:justify-end gap-6 md:w-1/3">
                             <div className="text-right">
-                              <p className="text-[#1A120B]/60 text-[12px] uppercase tracking-widest mb-1">Total</p>
+                              <p className="text-[#1A120B]/60 text-[12px] uppercase tracking-widest mb-1">{t('total')}</p>
                               <p className="font-bold text-[#1A120B]">{order.totalPrice} MDL</p>
                             </div>
                             <button className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
@@ -415,7 +417,7 @@ export default function ProfilePage() {
                             >
                               <div className="py-6 flex flex-col md:flex-row gap-6 justify-between items-start">
                                 <div className="space-y-4 w-full md:w-2/3">
-                                  <p className="text-sm font-bold text-[#1A120B] uppercase tracking-wider">Detalii Comandă</p>
+                                  <p className="text-sm font-bold text-[#1A120B] uppercase tracking-wider">{t('orderDetails')}</p>
                                   <ul className="text-sm text-[#1A120B]/80 space-y-3">
                                     {order.items.map((item: any, idx: number) => (
                                       <li key={idx} className="flex flex-col border-b border-[#E8E2D9]/50 pb-2 last:border-0 last:pb-0">
@@ -434,11 +436,11 @@ export default function ProfilePage() {
                                     ))}
                                   </ul>
                                   <div className="pt-2 mt-2 flex justify-between md:max-w-[300px]">
-                                    <span className="font-bold text-[#1A120B]">Livrare</span>
-                                    <span className="font-bold text-[#1A120B]/70">{order.deliveryFee > 0 ? `${order.deliveryFee} MDL` : "Gratuit"}</span>
+                                    <span className="font-bold text-[#1A120B]">{t('delivery')}</span>
+                                    <span className="font-bold text-[#1A120B]/70">{order.deliveryFee > 0 ? `${order.deliveryFee} MDL` : t('free')}</span>
                                   </div>
                                   <div className="pt-2 border-t border-[#E8E2D9]/50 flex justify-between md:max-w-[300px]">
-                                    <span className="font-bold text-[#1A120B]">Cost Total</span>
+                                    <span className="font-bold text-[#1A120B]">{t('totalCost')}</span>
                                     <span className="font-bold text-[#D4A853] text-lg">{order.totalPrice} MDL</span>
                                   </div>
                                 </div>
@@ -448,14 +450,14 @@ export default function ProfilePage() {
                                     onClick={() => handleReorder(order)}
                                     className="w-full px-6 py-3 bg-[#1A120B] text-white rounded-full font-bold hover:bg-[#D4A853] transition-colors flex items-center justify-center gap-2"
                                   >
-                                    <span>Comandă din nou</span>
+                                    <span>{t('orderAgain')}</span>
                                     <Package size={16} />
                                   </button>
 
                                   {order.rating ? (
                                     <div className="w-full px-6 py-2.5 bg-[#D4A853]/10 border border-[#D4A853]/30 rounded-full flex items-center justify-center gap-1.5 text-[#D4A853] font-bold text-sm">
                                       <Star size={16} className="fill-[#D4A853]" />
-                                      <span>Ai oferit {order.rating}/5 stele</span>
+                                      <span>{t('youGaveStars', { rating: order.rating })}</span>
                                     </div>
                                   ) : (
                                     <button 
@@ -467,7 +469,7 @@ export default function ProfilePage() {
                                       className="w-full px-6 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-full font-bold hover:bg-amber-100 transition-colors flex items-center justify-center gap-2"
                                     >
                                       <Star size={16} className="text-amber-600" />
-                                      <span>Lasă o Recenzie</span>
+                                      <span>{t('leaveReview')}</span>
                                     </button>
                                   )}
 
@@ -475,7 +477,7 @@ export default function ProfilePage() {
                                     onClick={() => router.push(`/order-tracking/${order._id}`)}
                                     className="w-full px-6 py-3 bg-white border border-[#E8E2D9] text-[#1A120B] rounded-full font-bold hover:bg-[#1A120B]/5 transition-colors flex items-center justify-center gap-2"
                                   >
-                                    <span>Vezi Tracking Live</span>
+                                    <span>{t('viewTracking')}</span>
                                     <ChevronRight size={16} />
                                   </button>
                                 </div>

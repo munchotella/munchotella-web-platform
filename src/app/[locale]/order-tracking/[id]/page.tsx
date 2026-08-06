@@ -6,15 +6,17 @@ import { motion } from "framer-motion";
 import { ChevronLeft, CheckCircle2, Clock, ChefHat, Truck, MapPin, PackageOpen } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const STEPS = [
-  { id: "pending", label: "Comandă Plasată", icon: Clock },
-  { id: "preparing", label: "Se Prepară", icon: ChefHat },
-  { id: "delivering", label: "În Livrare", icon: Truck },
-  { id: "completed", label: "Livrată", icon: PackageOpen }
-];
+import { useTranslations } from 'next-intl';
 
 export default function OrderTrackingPage() {
+  const t = useTranslations('OrderTracking');
+  
+  const STEPS = [
+    { id: "pending", label: t('orderPlaced'), icon: Clock },
+    { id: "preparing", label: t('preparing'), icon: ChefHat },
+    { id: "delivering", label: t('delivering'), icon: Truck },
+    { id: "completed", label: t('delivered'), icon: PackageOpen }
+  ];
   const params = useParams();
   const router = useRouter();
   const [currentStepIndex, setCurrentStepIndex] = useState(1); // 1 = Preparing (Mock)
@@ -54,11 +56,11 @@ export default function OrderTrackingPage() {
           className="flex items-center gap-2 text-[#1A120B]/60 hover:text-[#D4A853] transition-colors mb-10"
         >
           <ChevronLeft size={20} />
-          <span className="font-medium">Înapoi</span>
+          <span className="font-medium">{t('back')}</span>
         </button>
 
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-2">Urmărire Comandă</h1>
+          <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-2">{t('orderTracking')}</h1>
           <p className="text-[#1A120B]/60">#{orderId.toUpperCase()}</p>
         </div>
 
@@ -118,7 +120,7 @@ export default function OrderTrackingPage() {
                         {step.label}
                       </p>
                       {isActive && (
-                        <p className="text-[12px] text-[#D4A853] mt-1 hidden md:block">În progres...</p>
+                        <p className="text-[12px] text-[#D4A853] mt-1 hidden md:block">{t('inProgress')}</p>
                       )}
                     </div>
                   </div>
@@ -133,14 +135,14 @@ export default function OrderTrackingPage() {
           <div className="bg-[#1A120B] p-8 rounded-[32px] text-white">
             <div className="flex items-center gap-3 mb-6">
               <MapPin size={24} className="text-[#D4A853]" />
-              <h3 className="font-bold text-lg">Adresa de livrare</h3>
+              <h3 className="font-bold text-lg">{t('deliveryAddress')}</h3>
             </div>
             <p className="text-white/80">Str. Nicolae Testemițeanu 29</p>
             <p className="text-white/60 text-sm mt-1">Ap. 45, Etaj 4</p>
             
             <div className="mt-8 pt-8 border-t border-white/10">
-              <p className="text-white/40 text-sm mb-2">Timp estimat de livrare</p>
-              <p className="text-3xl font-serif text-[#FDF9F1]">15 - 20 min</p>
+              <p className="text-white/40 text-sm mb-2">{t('estimatedTime')}</p>
+              <p className="text-3xl font-serif text-[#FDF9F1]">15 - 20 {t('min')}</p>
             </div>
           </div>
           
@@ -152,10 +154,10 @@ export default function OrderTrackingPage() {
             >
               <Truck size={28} />
             </motion.div>
-            <h3 className="font-bold text-[#1A120B] mb-2">Livrare prin curier propriu</h3>
-            <p className="text-[#1A120B]/60 text-sm mb-6">Curierul va fi alocat imediat ce comanda este gata.</p>
+            <h3 className="font-bold text-[#1A120B] mb-2">{t('ownCourier')}</h3>
+            <p className="text-[#1A120B]/60 text-sm mb-6">{t('courierAssigned')}</p>
             <button className="px-6 py-3 border border-[#E8E2D9] rounded-full font-bold text-[#1A120B] hover:bg-[#1A120B]/5 transition-colors">
-              Contactează suportul
+              {t('contactSupport')}
             </button>
           </div>
         </div>

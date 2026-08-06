@@ -25,6 +25,7 @@ import LiveStoreStatus from "@/components/LiveStoreStatus";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
 import { motion, AnimatePresence, Variants } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -45,6 +46,7 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 }
 
 export default function CheckoutPage() {
+  const t = useTranslations("Checkout");
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
 
@@ -264,15 +266,15 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 bg-[#D4A853]/10 text-[#D4A853] rounded-full flex items-center justify-center mx-auto">
             <ShoppingBag className="w-10 h-10" />
           </div>
-          <h2 className="font-serif text-3xl font-bold">Coșul tău este gol</h2>
+          <h2 className="font-serif text-3xl font-bold">{t('emptyCartTitle')}</h2>
           <p className="text-[#736A60] font-light text-sm">
-            Nu ai adăugat încă niciun desert delicios în coș. Vizitează meniul nostru!
+            {t('emptyCartDesc')}
           </p>
           <Link
             href="/menu"
             className="inline-block w-full bg-[#1A120B] hover:bg-[#3D3028] text-white py-4 rounded-full font-bold text-xs uppercase tracking-widest transition-colors shadow-md"
           >
-            Descoperă Meniul
+            {t('discoverMenu')}
           </Link>
         </div>
       </div>
@@ -298,7 +300,7 @@ export default function CheckoutPage() {
             </Link>
             <div>
               <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight">
-                Finalizează <span className="text-[#D4A853] italic font-normal">Comanda</span>
+                {t('title1')} <span className="text-[#D4A853] italic font-normal">{t('title2')}</span>
               </h1>
             </div>
           </div>
@@ -321,10 +323,10 @@ export default function CheckoutPage() {
                     1
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Cum îți livrăm bunătățile?</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step1Title')}</h3>
                     {activeStep !== 1 && (
                       <p className="text-xs text-[#736A60] font-medium mt-1">
-                        {deliveryType === 'delivery' ? 'Prin curier la adresa ta' : 'Treci tu pe la noi (Boutique)'}
+                        {deliveryType === 'delivery' ? t('step1Courier') : t('step1Boutique')}
                       </p>
                     )}
                   </div>
@@ -359,8 +361,8 @@ export default function CheckoutPage() {
                           </span>
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">Livrare la Adresă</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Calculat după distanță (km)</p>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('deliveryTitle')}</h4>
+                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('deliveryDesc')}</p>
                         </div>
                       </button>
 
@@ -381,14 +383,14 @@ export default function CheckoutPage() {
                           </span>
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">Preluare din Boutique</h4>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupTitle')}</h4>
                           <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițeanu 21/1</p>
                         </div>
                       </button>
                     </div>
                     <div className="mt-6 flex justify-end">
                       <button type="button" onClick={() => handleNextStep(2)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        Continuă
+                        {t('continueBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -408,7 +410,7 @@ export default function CheckoutPage() {
                     2
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Unde te găsim?</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step2Title')}</h3>
                     {activeStep > 2 && formData.name && (
                       <p className="text-xs text-[#736A60] font-medium mt-1 truncate max-w-[200px] md:max-w-[300px]">
                         {formData.name} • {deliveryType === 'delivery' ? formData.street : 'Te așteptăm la noi'}
@@ -430,7 +432,7 @@ export default function CheckoutPage() {
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Numele tău complet *</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('nameLabel')}</label>
                         <input
                           type="text"
                           required
@@ -441,7 +443,7 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Număr de contact *</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
                         <input
                           type="tel"
                           required
@@ -458,7 +460,7 @@ export default function CheckoutPage() {
                         {/* Saved Addresses (Optional) */}
                         {user && user.addresses && user.addresses.length > 0 && (
                           <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-3">Adrese Salvate</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-3">{t('savedAddresses')}</label>
                             <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
                               {user.addresses.map((addr: any) => {
                                 const isSelected = formData.street === addr.street;
@@ -491,14 +493,14 @@ export default function CheckoutPage() {
                         {/* Search Address Input & Map Button */}
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">Adresa de livrare *</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">{t('deliveryAddressLabel')}</label>
                             <button
                               type="button"
                               onClick={() => setIsMapModalOpen(true)}
                               className="text-xs font-bold text-[#D4A853] hover:text-[#1A120B] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#FFFCF6] transition-colors"
                             >
                               <MapPin size={14} />
-                              <span>Selectează pe Hartă</span>
+                              <span>{t('selectOnMap')}</span>
                             </button>
                           </div>
                           
@@ -519,7 +521,7 @@ export default function CheckoutPage() {
                         {/* Additional Address Info (Grid) */}
                         <div className="grid grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Detalii clădire</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('buildingDetails')}</label>
                             <input
                               type="text"
                               placeholder="Bloc/Scară"
@@ -529,7 +531,7 @@ export default function CheckoutPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Apartament</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('apartment')}</label>
                             <input
                               type="text"
                               placeholder="Ex: 45"
@@ -539,7 +541,7 @@ export default function CheckoutPage() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Interfon</label>
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('intercom')}</label>
                             <input
                               type="text"
                               placeholder="Ex: 45B"
@@ -562,8 +564,8 @@ export default function CheckoutPage() {
                               />
                             </div>
                             <div>
-                              <span className="text-sm font-bold text-[#1A120B] group-hover:text-[#D4A853] transition-colors">Livrare Până La Ușă (+20 MDL)</span>
-                              <p className="text-xs text-[#736A60] mt-1 leading-relaxed">Opțiune valabilă doar pentru distanțe scurte. Bifează dacă dorești ca șoferul/curierul să urce până la etaj și să livreze comanda direct la ușa ta.</p>
+                              <h4 className="font-bold text-[#1A120B] text-sm group-hover:text-[#D4A853] transition-colors">{t('doorDeliveryTitle')}</h4>
+                              <p className="text-xs text-[#736A60] mt-1 leading-relaxed">{t('doorDeliveryDesc')}</p>
                             </div>
                           </label>
                         )}
@@ -572,7 +574,7 @@ export default function CheckoutPage() {
                     
                     <div className="mt-6 flex justify-end pt-4 border-t border-[#E8E2D9]">
                       <button type="button" onClick={() => handleNextStep(3)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        Continuă
+                        {t('continueBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -592,10 +594,10 @@ export default function CheckoutPage() {
                     3
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Când să o pregătim?</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step3Title')}</h3>
                     {activeStep > 3 && (
                       <p className="text-xs text-[#736A60] font-medium mt-1 truncate">
-                        {timing === 'asap' ? 'Cât mai repede posibil' : `Voi fi acolo/aștept la ${scheduledTime}`}
+                        {timing === 'asap' ? t('asapDesc') : `${t('scheduledDesc')} ${scheduledTime}`}
                       </p>
                     )}
                   </div>
@@ -622,7 +624,7 @@ export default function CheckoutPage() {
                             : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50"
                         }`}
                       >
-                        Cât Mai Repede
+                        {t('btnAsap')}
                       </button>
                       <button
                         type="button"
@@ -633,13 +635,13 @@ export default function CheckoutPage() {
                             : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50"
                         }`}
                       >
-                        Programează
+                        {t('btnSchedule')}
                       </button>
                     </div>
 
                     {timing === "scheduled" && (
                       <div className="flex flex-col items-start gap-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">Ora dorită (Astăzi)</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">{t('desiredTime')}</label>
                         <input
                           type="time"
                           value={scheduledTime}
@@ -652,7 +654,7 @@ export default function CheckoutPage() {
 
                     <div className="mt-6 flex justify-end">
                       <button type="button" onClick={() => handleNextStep(4)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        Continuă
+                        {t('continueBtn')}
                       </button>
                     </div>
                   </motion.div>
@@ -672,7 +674,7 @@ export default function CheckoutPage() {
                     4
                   </div>
                   <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">Cum preferi să plătești?</h3>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step4Title')}</h3>
                   </div>
                 </div>
                 {activeStep === 4 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : null}
@@ -701,8 +703,8 @@ export default function CheckoutPage() {
                           <Banknote className={`w-6 h-6 ${paymentMethod === 'cash' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">Numerar la {deliveryType === 'delivery' ? 'Livrare' : 'Preluare'}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Plătești cash curierului/barista</p>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('cashTitle', { type: deliveryType === 'delivery' ? t('cashDelivery') : t('cashPickup') })}</h4>
+                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('cashDesc')}</p>
                         </div>
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
@@ -724,8 +726,8 @@ export default function CheckoutPage() {
                           <CreditCard className={`w-6 h-6 ${paymentMethod === 'pos' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">Card via POS</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Plata cu cardul la terminalul POS mobil</p>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('posTitle')}</h4>
+                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('posDesc')}</p>
                         </div>
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'pos' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
@@ -744,7 +746,7 @@ export default function CheckoutPage() {
                           <CreditCard className="w-6 h-6 text-[#736A60]" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">Plată Online (În Curând)</h4>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
                           <p className="text-[11px] text-[#736A60] mt-0.5">Stripe / Apple Pay / Google Pay</p>
                         </div>
                       </div>
@@ -764,7 +766,7 @@ export default function CheckoutPage() {
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#D4A853]/5 rounded-full blur-2xl pointer-events-none" />
               
               <h3 className="font-serif text-2xl font-bold text-[#1A120B] pb-6 flex items-center gap-2 relative z-10">
-                Sumar Comandă
+                {t('orderSummary')}
               </h3>
 
               {/* Items List */}
@@ -794,14 +796,14 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-1.5 mb-2.5">
                   <Tag className="w-3.5 h-3.5 text-[#D4A853]" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-[#736A60]">
-                    Cod Promoțional
+                    {t('promoCode')}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Introdu codul (ex: MUNCH10)"
+                      placeholder={t('enterPromoCode')}
                       className="flex-1 bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 text-xs outline-none uppercase font-bold text-[#1A120B] focus:border-[#D4A853]"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
@@ -811,12 +813,12 @@ export default function CheckoutPage() {
                       onClick={handleApplyCoupon}
                       className="bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer"
                     >
-                      Aplică
+                      {t('applyBtn')}
                     </button>
                   </div>
                   {discountPercent > 0 && (
                     <div className="flex items-center gap-1.5 text-xs text-[#D4A853] font-bold bg-[#D4A853]/10 px-3 py-2 rounded-lg">
-                      <CheckCircle2 className="w-4 h-4" /> Cupon activat: {discountPercent}% Reducere
+                      <CheckCircle2 className="w-4 h-4" /> {t('couponActive', { percent: discountPercent })}
                     </div>
                   )}
                   {couponError && <p className="text-[11px] text-red-500 font-medium ml-1">{couponError}</p>}
@@ -826,27 +828,27 @@ export default function CheckoutPage() {
               {/* Price Calculation Breakdown */}
               <div className="relative z-10 space-y-3 text-sm pt-2">
                 <div className="flex justify-between text-[#736A60] font-medium">
-                  <span>Subtotal produse</span>
+                  <span>{t('subtotal')}</span>
                   <span className="text-[#1A120B]">{totalPrice} MDL</span>
                 </div>
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[#D4A853] font-bold">
-                    <span>Reducere Promo</span>
+                    <span>{t('promoDiscount')}</span>
                     <span>-{discountAmount} MDL</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-[#736A60] font-medium items-end">
                   <div className="flex flex-col">
-                    <span>Livrare {deliveryType === 'delivery' ? (doorDelivery ? '(Ușă)' : '(Scară)') : '(Preluare)'}</span>
+                    <span>{t('delivery')} {deliveryType === 'delivery' ? (doorDelivery ? t('door') : t('entrance')) : t('pickupMethod')}</span>
                     {deliveryType === 'delivery' && deliveryCalc.distanceKm > 0 && (
                       <span className="text-[10px] mt-0.5">~{deliveryCalc.distanceKm} km (Taxi/Pietonal)</span>
                     )}
                   </div>
                   <span className="text-[#1A120B]">
                     {deliveryFee === 0 ? (
-                      <span className="text-[#D4A853] font-bold">Gratuit</span>
+                      <span className="text-[#D4A853] font-bold">{t('free')}</span>
                     ) : (
                       `${deliveryFee} MDL`
                     )}
@@ -856,7 +858,7 @@ export default function CheckoutPage() {
                 {!deliveryCalc.isDeliverable && (
                   <div className="bg-red-50/80 border border-red-200 text-red-700 p-3 rounded-xl text-xs mt-4 flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>Ne pare rău, dar adresa introdusă depășește raza maximă de livrare (10 km).</span>
+                    <span>{t('outOfRange')}</span>
                   </div>
                 )}
               </div>
@@ -864,7 +866,7 @@ export default function CheckoutPage() {
               {/* Grand Total & Final Button */}
               <div className="relative z-10 mt-8 pt-6 border-t border-[#E8E2D9]">
                 <div className="flex justify-between items-end mb-6">
-                  <span className="font-bold text-[#1A120B] uppercase tracking-wider text-xs">Total de Plată</span>
+                  <span className="font-bold text-[#1A120B] uppercase tracking-wider text-xs">{t('totalToPay')}</span>
                   <span className="font-serif text-3xl md:text-4xl font-bold text-[#D4A853] leading-none">{grandTotal} MDL</span>
                 </div>
 
@@ -878,16 +880,16 @@ export default function CheckoutPage() {
                   }`}
                 >
                   {isSubmitting ? (
-                    <span>Se trimite comanda...</span>
+                    <span>{t('sendingOrder')}</span>
                   ) : (
                     <>
-                      {activeStep < 4 ? "Completează Pașii Pentru Plată" : "Plasează Comanda"}
+                      {activeStep < 4 ? t('completeSteps') : t('placeOrderBtn')}
                     </>
                   )}
                 </button>
                 {activeStep < 4 && deliveryCalc.isDeliverable && (
                   <p className="text-center text-[10px] text-[#736A60] font-medium mt-3 uppercase tracking-wider">
-                    Mai ai de completat informații în pașii anteriori
+                    {t('missingInfo')}
                   </p>
                 )}
               </div>

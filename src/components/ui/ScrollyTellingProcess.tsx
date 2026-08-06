@@ -2,26 +2,28 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const steps = [
   {
     num: "01",
-    title: "Ciocolată Autentică",
-    desc: "Nu facem compromisuri la gust. Folosim doar Nutella® originală, Kinder, Oreo și fructe tăiate fix înainte de livrare pentru o experiență intensă și inconfundabilă.",
+    titleKey: "step1Title",
+    descKey: "step1Desc",
   },
   {
     num: "02",
-    title: "Zilnic proaspăt",
-    desc: "Secretul nostru e prospețimea pură. Pregătim aluatul în fiecare dimineață și îl folosim strict în acea zi, pentru un desert fraged, fierbinte și de neuitat.",
+    titleKey: "step2Title",
+    descKey: "step2Desc",
   },
   {
     num: "03",
-    title: "Ajunge la tine cald",
-    desc: "Ambalajele noastre termice protejează desertul pe drum, ca tu să te bucuri de el exact așa cum l-am scos noi din aparat, proaspăt și aburind.",
+    titleKey: "step3Title",
+    descKey: "step3Desc",
   },
 ];
 
 export default function ScrollyTellingProcess() {
+  const t = useTranslations("Process");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -113,7 +115,7 @@ export default function ScrollyTellingProcess() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
              >
-               Cum preparăm desertul tău?
+               {t('sectionTitle')}
              </motion.h2>
           </div>
 
@@ -125,9 +127,9 @@ export default function ScrollyTellingProcess() {
               style={{ opacity: opacity1, y: y1, scale: scale1 }}
             >
               <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[0].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{steps[0].title}</h3>
+              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[0].titleKey as any)}</h3>
               <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
-                {steps[0].desc}
+                {t(steps[0].descKey as any)}
               </p>
             </motion.div>
 
@@ -137,9 +139,9 @@ export default function ScrollyTellingProcess() {
               style={{ opacity: opacity2, y: y2, scale: scale2 }}
             >
               <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[1].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{steps[1].title}</h3>
+              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[1].titleKey as any)}</h3>
               <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
-                {steps[1].desc}
+                {t(steps[1].descKey as any)}
               </p>
             </motion.div>
 
@@ -149,9 +151,9 @@ export default function ScrollyTellingProcess() {
               style={{ opacity: opacity3, y: y3, scale: scale3 }}
             >
               <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[2].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{steps[2].title}</h3>
+              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[2].titleKey as any)}</h3>
               <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
-                {steps[2].desc}
+                {t(steps[2].descKey as any)}
               </p>
             </motion.div>
 

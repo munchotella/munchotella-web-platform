@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslations } from 'next-intl';
 
 // Coordonate aproximative pentru Nicolae Testemițeanu 21/1, Chișinău
 const center = {
@@ -34,33 +35,34 @@ const mapOptions = {
 };
 
 export default function MapSection() {
+  const t = useTranslations('Map');
   return (
     <section className="w-full bg-[#FCF9F4] py-16 md:py-24 border-t border-[#E8E2D9]">
       <div className="max-w-[1200px] mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div>
           <span className="text-[12px] font-bold uppercase text-[#D4A853] tracking-widest mb-4 block">
-            Locația Noastră
+            {t('subtitle')}
           </span>
           <h2 className="font-serif text-3xl md:text-5xl font-medium text-[#1A120B] mb-6">
-            Te așteptăm la Boutique
+            {t('title')}
           </h2>
           <p className="text-[#736A60] font-sans text-[16px] leading-relaxed mb-8 max-w-md">
-            Experimentează gustul premium chiar din inima orașului Chișinău. Spațiul nostru artizanal este gândit pentru a-ți oferi nu doar un desert, ci o adevărată experiență senzorială.
+            {t('desc')}
           </p>
           
           <div className="flex items-start gap-4 mb-6">
             <span className="material-symbols-outlined text-[#D4A853] text-[28px] mt-1">location_on</span>
             <div>
-              <h4 className="font-bold text-[#1A120B] text-lg">Munchotella Boutique</h4>
-              <p className="text-[#736A60] mt-1">Str. Nicolae Testemițeanu 21/1<br/>Chișinău, Republica Moldova</p>
+              <h4 className="font-bold text-[#1A120B] text-lg">{t('boutiqueName')}</h4>
+              <p className="text-[#736A60] mt-1">{t('address1')}<br/>{t('address2')}</p>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
             <span className="material-symbols-outlined text-[#D4A853] text-[28px] mt-1">schedule</span>
             <div>
-              <h4 className="font-bold text-[#1A120B] text-lg">Program</h4>
-              <p className="text-[#736A60] mt-1">Luni - Duminică: 16:00 - 00:00<br/><span className="text-[#D4A853] font-bold text-[14px]">Miercuri: Închis</span></p>
+              <h4 className="font-bold text-[#1A120B] text-lg">{t('scheduleTitle')}</h4>
+              <p className="text-[#736A60] mt-1">{t('schedule1')}<br/><span className="text-[#D4A853] font-bold text-[14px]">{t('schedule2')}</span></p>
             </div>
           </div>
         </div>

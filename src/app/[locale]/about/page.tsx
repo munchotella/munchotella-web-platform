@@ -4,8 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { useTranslations } from "next-intl";
 
 export default function AboutPage() {
+  const t = useTranslations("About");
   return (
     <div className="bg-[#fcf9f4] text-[#1c1c19] font-sans antialiased overflow-x-hidden selection:bg-[#d4af37] selection:text-white">
 
@@ -23,16 +25,15 @@ export default function AboutPage() {
         
         <div className="relative z-20 text-center px-4 max-w-4xl mx-auto mt-20">
           <AnimateIn direction="up">
-            <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-[0.2em] mb-6 block">Povestea Noastră</span>
+            <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-[0.2em] mb-6 block">{t('subtitle')}</span>
           </AnimateIn>
           <AnimateIn direction="up" delay={0.2}>
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal text-white mb-6 tracking-tight leading-[1.1]">
-              Pasiune pentru <br/> Gustul Autentic
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-normal text-white mb-6 tracking-tight leading-[1.1]" dangerouslySetInnerHTML={{ __html: t('title') }}>
             </h1>
           </AnimateIn>
           <AnimateIn direction="up" delay={0.4}>
             <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto font-sans font-light leading-relaxed">
-              Ne-am propus să aducem în Chișinău acel gust pe care să-l ții minte. Pregătim fiecare waffle și clătită de la zero, în fiecare dimineață, din dorința simplă de a-ți oferi un desert sincer, cald și delicios.
+              {t('desc1')}
             </p>
           </AnimateIn>
         </div>
@@ -54,16 +55,16 @@ export default function AboutPage() {
             
             <AnimateIn direction="right">
               <div>
-                <span className="text-[12px] font-bold uppercase text-[#93a67f] tracking-widest mb-4 block">Fără scurtături</span>
+                <span className="text-[12px] font-bold uppercase text-[#93a67f] tracking-widest mb-4 block">{t('section2Subtitle')}</span>
                 <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-8 leading-[1.2]">
-                  Ingrediente pe bune și aluat proaspăt
+                  {t('section2Title')}
                 </h2>
                 <div className="space-y-6 text-[16px] text-[#4e4540] font-sans leading-relaxed">
                   <p>
-                    Nu ne zgârcim când vine vorba de calitatea ingredientelor. Pentru crema de fistic, am ales să aducem fistic autentic din Sicilia, fără arome artificiale sau coloranți, tocmai pentru a păstra acel gust natural și bogat.
+                    {t('section2P1')}
                   </p>
                   <p>
-                    De asemenea, preparăm aluatul proaspăt în fiecare dimineață, chiar în locația noastră. Nu folosim prafuri la sac sau pre-mixuri cu apă. Facem totul după rețeta noastră proprie, cu ouă, lapte și multă răbdare.
+                    {t('section2P2')}
                   </p>
                 </div>
               </div>
@@ -76,9 +77,9 @@ export default function AboutPage() {
       <section className="py-24 md:py-32 bg-[#ffffff] border-y border-[#e5e2dd]">
         <div className="max-w-[1000px] mx-auto px-4 md:px-8 text-center">
           <AnimateIn direction="up">
-            <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-widest mb-4 block">Echipa Noastră</span>
+            <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-widest mb-4 block">{t('section3Subtitle')}</span>
             <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-16 leading-[1.2]">
-              Oamenii din spatele Munchotella
+              {t('section3Title')}
             </h2>
           </AnimateIn>
           
@@ -94,10 +95,10 @@ export default function AboutPage() {
           
           <AnimateIn direction="up" delay={0.3}>
             <blockquote className="font-serif text-2xl md:text-3xl text-[#1c1c19] italic mb-8 max-w-3xl mx-auto leading-normal">
-              "Munchotella s-a născut dintr-o poftă simplă de a mânca un desert cu adevărat bun, cu multă ciocolată și ingrediente de calitate. Nu am vrut să reinventăm roata, am vrut doar să facem cel mai bun waffle pe care l-ai mâncat vreodată."
+              {t('quote')}
             </blockquote>
             <p className="text-[12px] font-bold uppercase text-[#4e4540] tracking-widest">
-              — Familia Munchotella
+              {t('quoteAuthor')}
             </p>
           </AnimateIn>
         </div>

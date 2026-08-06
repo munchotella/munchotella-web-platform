@@ -4,8 +4,10 @@ import React from "react";
 import Link from "next/link";
 import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('Footer');
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (window.location.pathname === "/") {
       e.preventDefault();
@@ -40,26 +42,26 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Explorați</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('explore')}</h4>
             <ul className="space-y-4">
-              <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Povestea Noastră</Link></li>
-              <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Meniul Complet</Link></li>
-              <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Recenzii</Link></li>
+              <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('ourStory')}</Link></li>
+              <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('fullMenu')}</Link></li>
+              <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('reviews')}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Suport</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('support')}</h4>
             <ul className="space-y-4">
-              <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Contact</Link></li>
-              <li><Link href="/legal#privacy" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Politica de Confidențialitate</Link></li>
-              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Termeni și Condiții</Link></li>
-              <li><Link href="/legal#delivery" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">Informații Livrare</Link></li>
+              <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
+              <li><Link href="/legal#privacy" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('privacy')}</Link></li>
+              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('terms')}</Link></li>
+              <li><Link href="/legal#delivery" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('delivery')}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">Urmărește-ne</h4>
+            <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('followUs')}</h4>
             <div className="flex space-x-4">
               <a href="https://www.instagram.com/munchotella.md" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#D4A853] hover:text-[#D4A853] hover:bg-[#D4A853]/10 transition-all duration-300 group">
                 <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -78,16 +80,16 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-8">
-              <p className="text-white/50 text-[13px] uppercase tracking-widest font-bold mb-2">Program</p>
-              <p className="text-white/90 text-[16px]">Luni - Duminică: 16:00 - 00:00</p>
-              <p className="text-[#D4A853] text-[15px] font-bold mt-1">Miercuri: Închis</p>
+              <p className="text-white/50 text-[13px] uppercase tracking-widest font-bold mb-2">{t('schedule')}</p>
+              <p className="text-white/90 text-[16px]">{t('scheduleTime')}</p>
+              <p className="text-[#D4A853] text-[15px] font-bold mt-1">{t('scheduleClosed')}</p>
             </div>
           </div>
         </div>
         
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between">
           <p className="text-white/50 text-[14px] text-center md:text-left mb-4 md:mb-0">
-            © {new Date().getFullYear()} Munchotella. Toate drepturile rezervate.<br/>
+            © {new Date().getFullYear()} Munchotella. {t('rights')}<br/>
             <span className="text-[12px] mt-1 block">IDNO: 1017600046702, "Munchotella" S.R.L.</span>
           </p>
         </div>

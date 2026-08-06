@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Check, Sparkles } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
+import { useTranslations } from "next-intl";
 
 export type ProductItem = {
   id: number;
@@ -14,15 +15,6 @@ export type ProductItem = {
   category?: string;
 };
 
-const AVAILABLE_TOPPINGS: ToppingOption[] = [
-  { name: "Extra Nutella®", price: 15 },
-  { name: "Extra Ciocolată Albă", price: 15 },
-  { name: "Fistic Mărunțit & Sos", price: 20 },
-  { name: "Porție de Fructe Fresh", price: 15 },
-  { name: "Bilă de Înghețată", price: 20 },
-  { name: "Extra Biscuiți Oreo", price: 10 },
-  { name: "Extra Alune Prăjite", price: 10 },
-];
 
 type ProductCustomizationModalProps = {
   product: ProductItem | null;
@@ -36,8 +28,19 @@ export default function ProductCustomizationModal({
   onClose,
 }: ProductCustomizationModalProps) {
   const { addToCart } = useCart();
+  const t = useTranslations("Toppings");
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
+
+  const AVAILABLE_TOPPINGS: ToppingOption[] = [
+    { name: t("extraNutella"), price: 15 },
+    { name: t("extraWhiteChocolate"), price: 15 },
+    { name: t("pistachio"), price: 20 },
+    { name: t("freshFruit"), price: 15 },
+    { name: t("iceCream"), price: 20 },
+    { name: t("oreo"), price: 10 },
+    { name: t("hazelnuts"), price: 10 },
+  ];
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -155,9 +158,9 @@ export default function ProductCustomizationModal({
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <h4 className="text-[16px] font-bold text-[#1A1A1A]">
-                    Personalizează-ți desertul
+                    {t('customize')}
                   </h4>
-                  <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">Opțional</span>
+                  <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">{t('optional')}</span>
                 </div>
 
                 <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white mb-6">
@@ -195,7 +198,7 @@ export default function ProductCustomizationModal({
             <div className="p-5 sm:p-6 border-t border-[#EAE1DB] bg-[#FFFFFF] shrink-0 shadow-[0_-4px_20px_rgba(26,26,26,0.03)]">
               <div className="flex items-center justify-between mb-5">
                 <span className="text-[15px] font-semibold text-[#50453B]">
-                  Cantitate
+                  {t('quantity')}
                 </span>
                 <div className="flex items-center bg-[#FFFAF5] border border-[#EAE1DB] rounded-full p-1.5 shadow-inner">
                   <button
@@ -231,7 +234,7 @@ export default function ProductCustomizationModal({
                 onClick={handleAddToCart}
                 className="w-full bg-[#D4A373] hover:bg-[#7D562D] text-white py-4 px-6 rounded-full font-bold text-[15px] uppercase tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)]"
               >
-                <span>Adaugă în Coș</span>
+                <span>{t('addToCart')}</span>
                 <span className="bg-white/20 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-[14px] font-bold">
                   {totalPrice} MDL
                 </span>

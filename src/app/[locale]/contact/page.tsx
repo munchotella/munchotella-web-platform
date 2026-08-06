@@ -6,7 +6,10 @@ import { ChevronLeft, Phone, MapPin, Clock, Send, ShoppingBag, CheckCircle2, Arr
 import { motion } from "framer-motion";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import MapSection from "@/components/MapSection";
+import { useTranslations } from 'next-intl';
+
 export default function ContactPage() {
+  const t = useTranslations('Contact');
   const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -33,12 +36,12 @@ export default function ContactPage() {
           <div className="lg:col-span-5 space-y-10">
             <AnimateIn direction="up">
               <div>
-                <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">Suntem Aici</span>
+                <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">{t('weAreHere')}</span>
                 <h2 className="font-serif text-4xl md:text-5xl font-bold text-[#1A120B] mb-5 leading-tight">
-                  Hai să vorbim.
+                  {t('letsTalk')}
                 </h2>
                 <p className="text-[#736A60] font-light text-base leading-relaxed max-w-md">
-                  Vino pentru deserturi premium preparate pe loc sau scrie-ne pentru evenimente și comenzi speciale.
+                  {t('subtitle')}
                 </p>
               </div>
             </AnimateIn>
@@ -51,7 +54,7 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-serif text-lg font-bold text-[#1A120B] mb-1">Adresa Localului</h4>
+                    <h4 className="font-serif text-lg font-bold text-[#1A120B] mb-1">{t('addressTitle')}</h4>
                     <p className="text-[#736A60] text-sm font-light mb-3">Strada Nicolae Testemițeanu 21/1, Chișinău</p>
                     <a
                       href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Beanu+21%2F1+Chisinau"
@@ -59,7 +62,7 @@ export default function ContactPage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#D4A853] hover:text-[#1A120B] transition-colors"
                     >
-                      <span>Deschide Harta</span>
+                      <span>{t('openMap')}</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -71,7 +74,7 @@ export default function ContactPage() {
                       <Phone className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">Telefon & Email</p>
+                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('phoneEmailTitle')}</p>
                       <a href="tel:079006499" className="font-serif text-lg font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors block">
                         079 006 499
                       </a>
@@ -86,11 +89,11 @@ export default function ContactPage() {
                       <Clock className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">Program</p>
+                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('scheduleTitle')}</p>
                       <p className="font-serif text-[15px] font-bold text-[#1A120B]">
-                        Luni - Duminică: 16:00 - 00:00
+                        {t('scheduleTime')}
                       </p>
-                      <p className="text-[#D4A853] text-[13px] font-bold mt-1">Miercuri: Închis</p>
+                      <p className="text-[#D4A853] text-[13px] font-bold mt-1">{t('scheduleClosed')}</p>
                     </div>
                   </div>
                 </div>
@@ -103,9 +106,9 @@ export default function ContactPage() {
             <AnimateIn direction="up" delay={0.15}>
               <div className="bg-[#FFFCF6] p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center">
                 <div className="mb-8">
-                  <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">Suntem Aici</h3>
+                  <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
                   <p className="text-[#736A60] font-light text-sm">
-                    Fie că vrei o comandă mai mare pentru o petrecere sau doar ai o întrebare, scrie-ne și îți răspundem cât mai repede!
+                    {t('formSubtitle')}
                   </p>
                 </div>
 
@@ -116,29 +119,29 @@ export default function ContactPage() {
                     className="bg-[#FCF9F4] border border-[#E8E2D9] text-[#D4A853] p-8 rounded-2xl text-center space-y-3 my-4"
                   >
                     <CheckCircle2 className="w-12 h-12 text-[#D4A853] mx-auto" />
-                    <h4 className="font-serif text-2xl font-bold">Mesaj Trimis!</h4>
-                    <p className="text-sm font-light">Echipa Munchotella va reveni în cel mai scurt timp posibil.</p>
+                    <h4 className="font-serif text-2xl font-bold">{t('messageSent')}</h4>
+                    <p className="text-sm font-light">{t('messageSentDesc')}</p>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">Nume Complet</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('fullName')}</label>
                         <input
                           type="text"
                           required
-                          placeholder="Numele tău"
+                          placeholder={t('yourName')}
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">Număr Telefon</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('phoneNumber')}</label>
                         <input
                           type="tel"
                           required
-                          placeholder="ex: 079 xxx xxx"
+                          placeholder={t('phonePlaceholder')}
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
@@ -146,11 +149,11 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">Mesaj</label>
+                      <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('message')}</label>
                       <textarea
                         rows={4}
                         required
-                        placeholder="Scrie mesajul tău..."
+                        placeholder={t('messagePlaceholder')}
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         className="w-full bg-white border border-[#E8E2D9] rounded-2xl p-5 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm resize-none"
@@ -160,7 +163,7 @@ export default function ContactPage() {
                       type="submit"
                       className="w-full bg-[#1A120B] hover:bg-[#D4A853] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
                     >
-                      <span>Trimite Mesajul</span>
+                      <span>{t('sendMessage')}</span>
                       <Send className="w-4 h-4" />
                     </button>
                   </form>
@@ -174,8 +177,8 @@ export default function ContactPage() {
         <AnimateIn direction="up" delay={0.2}>
           <div className="mb-24 pt-8 border-t border-[#E8E2D9]/60">
             <div className="text-center mb-10">
-              <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">Comunitatea Noastră</span>
-              <h3 className="font-serif text-3xl font-bold text-[#1A120B]">Munchotella pe Social Media</h3>
+              <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">{t('community')}</span>
+              <h3 className="font-serif text-3xl font-bold text-[#1A120B]">{t('socialMedia')}</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -200,7 +203,7 @@ export default function ContactPage() {
                         <MessageSquare className="w-6 h-6 text-white" />
                         <Send className="w-6 h-6 text-white" />
                       </div>
-                      <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase border border-white/30 hover:bg-white hover:text-black transition-colors">Urmărește</div>
+                      <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase border border-white/30 hover:bg-white hover:text-black transition-colors">{t('follow')}</div>
                     </div>
                   </div>
                 </div>
@@ -221,9 +224,9 @@ export default function ContactPage() {
                     
                     <div className="flex flex-col gap-2">
                       <span className="text-white font-bold text-sm drop-shadow-md">@munchotella</span>
-                      <p className="text-white/90 text-xs line-clamp-2 leading-relaxed">Procesul nostru de preparare ✨ Cel mai bun desert din Chișinău! #waffles</p>
+                      <p className="text-white/90 text-xs line-clamp-2 leading-relaxed">{t('tiktokDesc')}</p>
                       <div className="mt-3 flex items-center gap-3">
-                         <div className="bg-[#fe2c55] px-5 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#e0264b] transition-colors">Urmărește</div>
+                         <div className="bg-[#fe2c55] px-5 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#e0264b] transition-colors">{t('follow')}</div>
                       </div>
                     </div>
                   </div>
@@ -243,7 +246,7 @@ export default function ContactPage() {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-white font-bold text-sm drop-shadow-md leading-tight">Munchotella</span>
-                        <span className="text-white/80 text-[10px]">Restaurant de deserturi</span>
+                        <span className="text-white/80 text-[10px]">{t('dessertRestaurant')}</span>
                       </div>
                     </div>
                     
@@ -253,7 +256,7 @@ export default function ContactPage() {
                         <MessageSquare className="w-6 h-6 text-white" />
                         <Share2 className="w-6 h-6 text-white" />
                       </div>
-                      <div className="bg-[#1877F2] px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#166fe5] transition-colors">Urmărește</div>
+                      <div className="bg-[#1877F2] px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#166fe5] transition-colors">{t('follow')}</div>
                     </div>
                   </div>
                 </div>

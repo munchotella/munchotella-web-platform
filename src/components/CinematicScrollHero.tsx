@@ -4,29 +4,31 @@ import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { useTranslations } from "next-intl";
 
 const HERO_PLAYLIST = [
   {
     src: "/videos/mini_waffle_video_hero.mp4",
     poster: "/delux_mini_waffle_official.png",
-    title: "Delux Mini Waffles",
-    subtitle: "Pufoase, Nutella, Fistic & Oreo"
+    titleKey: "video1Title",
+    subtitleKey: "video1Subtitle"
   },
   {
     src: "/Munchotella_Commercial_1785537195299.mp4",
     poster: "/royal_sushi_official.png",
-    title: "Royal Sushi Banana",
-    subtitle: "Clătite Subțiri, Nutella & Fructe Proaspete"
+    titleKey: "video2Title",
+    subtitleKey: "video2Subtitle"
   },
   {
     src: "/videos/waffles_biscoff.mp4",
     poster: "/lotus_biscoff_waffle_ref.png",
-    title: "Delux & Lotus Mini Waffles",
-    subtitle: "Pastă Biscoff Caramelizată & Ciocolată Albă"
+    titleKey: "video3Title",
+    subtitleKey: "video3Subtitle"
   }
 ];
 
 export default function CinematicScrollHero() {
+  const t = useTranslations("Hero");
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
@@ -86,7 +88,7 @@ export default function CinematicScrollHero() {
                 visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
               }}
             >
-              Artă dulce,
+              {t('title1')}
             </motion.div>
           </div>
           <div className="overflow-hidden pb-2 mt-2">
@@ -97,7 +99,7 @@ export default function CinematicScrollHero() {
               }}
               className="italic font-normal text-[#D4A853]"
             >
-              preparată cu pasiune
+              {t('title2')}
             </motion.div>
           </div>
         </motion.div>
@@ -108,7 +110,7 @@ export default function CinematicScrollHero() {
           transition={{ delay: 1, duration: 1, ease: "easeOut" }}
           className="text-[#E8E2D9] text-base md:text-lg max-w-lg leading-relaxed mb-8 font-light"
         >
-          Waffles și clătite proaspăt preparate cu ingrediente premium — Nutella®, Kinder Bueno, Lotus Biscoff și fructe proaspete.
+          {t('subtitle')}
         </motion.p>
 
         {/* CTA Buttons */}
@@ -123,7 +125,7 @@ export default function CinematicScrollHero() {
               href="#menu"
               className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer"
             >
-              <span>Descoperă Meniul</span>
+              <span>{t('cta')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
           </MagneticButton>
