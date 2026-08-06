@@ -12,14 +12,36 @@ export default function ContactPage() {
   const t = useTranslations('Contact');
   const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setFormData({ name: "", phone: "", message: "" });
-      setIsSubmitted(false);
-    }, 4000);
+    setIsSending(true);
+    
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setIsSubmitted(true);
+        setFormData({ name: "", phone: "", message: "" });
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 4000);
+      } else {
+        alert("A apărut o eroare la trimiterea mesajului. Te rog să încerci din nou.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("A apărut o eroare la trimiterea mesajului. Te rog să încerci din nou.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -161,10 +183,11 @@ export default function ContactPage() {
                     </div>
                     <button
                       type="submit"
-                      className="w-full bg-[#1A120B] hover:bg-[#D4A853] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
+                      disabled={isSending}
+                      className="w-full bg-[#1A120B] hover:bg-[#D4A853] disabled:opacity-70 disabled:hover:bg-[#1A120B] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
                     >
-                      <span>{t('sendMessage')}</span>
-                      <Send className="w-4 h-4" />
+                      <span>{isSending ? (t('submittingReview') || 'Se trimite...') : t('sendMessage')}</span>
+                      <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''}`} />
                     </button>
                   </form>
                 )}
