@@ -31,7 +31,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
 
   const [hasPermission, setHasPermission] = useState<boolean>(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {

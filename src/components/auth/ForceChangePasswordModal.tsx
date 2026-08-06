@@ -15,7 +15,7 @@ export default function ForceChangePasswordModal() {
 
   if (!user || !user.mustChangePassword) return null;
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -39,7 +39,7 @@ export default function ProfilePage() {
     const fetchOrders = async () => {
       if (!token) return;
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
         const res = await fetch(`${API_URL}/orders/myorders`, {
           headers: {
             "Authorization": `Bearer ${token}`
@@ -130,7 +130,7 @@ export default function ProfilePage() {
 
     try {
       setSubmittingReview(true);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
       const res = await fetch(`${API_URL}/orders/${reviewOrder._id}/review`, {
         method: "POST",
         headers: {
