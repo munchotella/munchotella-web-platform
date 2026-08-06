@@ -171,123 +171,193 @@ export default function ContactPage() {
           {/* Right Column: Contact Form */}
           <div className="lg:col-span-7">
             <AnimateIn direction="up" delay={0.15}>
-              <div className="bg-[#FFFCF6] p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center">
-                <div className="mb-8">
-                  <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
-                  <p className="text-[#736A60] font-light text-sm">
-                    {t('formSubtitle')}
-                  </p>
-                </div>
+              <div className="bg-[#FFFCF6] p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center relative min-h-[460px]">
+                {view === 'form' && (
+                  <div className="mb-8">
+                    <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
+                    <p className="text-[#736A60] font-light text-sm">
+                      {t('formSubtitle')}
+                    </p>
+                  </div>
+                )}
 
-                {view === 'success' ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ type: "spring", bounce: 0.4, duration: 0.7 }}
-                    className="bg-white border border-[#D4A853]/20 p-10 md:p-12 rounded-[2rem] text-center shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]"
-                  >
-                    {/* Ripple Background Effect */}
+                <AnimatePresence mode="wait">
+                  {view === 'success' ? (
                     <motion.div
-                      initial={{ scale: 0, opacity: 0.5 }}
-                      animate={{ scale: 4, opacity: 0 }}
-                      transition={{ duration: 1.2, ease: "easeOut" }}
-                      className="absolute w-40 h-40 bg-[#D4A853]/10 rounded-full"
-                    />
-                    
-                    {/* Animated Check Icon */}
-                    <div className="relative mb-6 z-10">
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                      transition={{ type: "spring", bounce: 0.4, duration: 0.7 }}
+                      className="bg-white border border-[#D4A853]/20 p-10 md:p-12 rounded-[2rem] text-center shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]"
+                    >
+                      {/* Ripple Background Effect */}
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", delay: 0.2, bounce: 0.6 }}
-                        className="w-24 h-24 bg-gradient-to-tr from-[#D4A853] to-[#F3D799] rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(212,168,83,0.3)]"
-                      >
-                        <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <motion.path
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </motion.div>
-                    </div>
-
-                    {/* Animated Text */}
-                    <motion.h4 
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7, duration: 0.5 }}
-                      className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3 z-10"
-                    >
-                      {t('messageSent') || "Mesaj trimis!"}
-                    </motion.h4>
-                    
-                    <motion.p 
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.9, duration: 0.5 }}
-                      className="text-base md:text-lg text-[#736A60] font-light max-w-sm mx-auto z-10"
-                    >
-                      {t('messageSentDesc') || "Îți mulțumim! Te vom contacta în cel mai scurt timp posibil."}
-                    </motion.p>
-                  </motion.div>
-
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('fullName')}</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder={t('yourName')}
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
-                        />
+                        initial={{ scale: 0, opacity: 0.5 }}
+                        animate={{ scale: 4, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="absolute w-40 h-40 bg-[#D4A853]/10 rounded-full"
+                      />
+                      
+                      {/* Animated Check Icon */}
+                      <div className="relative mb-6 z-10">
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", delay: 0.2, bounce: 0.6 }}
+                          className="w-24 h-24 bg-gradient-to-tr from-[#D4A853] to-[#F3D799] rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(212,168,83,0.3)]"
+                        >
+                          <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <motion.path
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: 1 }}
+                              transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </motion.div>
                       </div>
-                      <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('phoneNumber')}</label>
-                        <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
-                          <CountrySelector
-                            selectedCountry={selectedCountry}
-                            onSelect={(country) => setSelectedCountry(country)}
-                          />
-                          <input
-                            type="tel"
-                            required
-                            placeholder={t('phonePlaceholder') || "79 000 000"}
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full bg-transparent border-none px-4 py-4 outline-none text-[#1A120B] text-sm shadow-none"
-                          />
+
+                      {/* Animated Text */}
+                      <motion.h4 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7, duration: 0.5 }}
+                        className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3 z-10"
+                      >
+                        {t('messageSent') || "Mesaj trimis!"}
+                      </motion.h4>
+                      
+                      <motion.p 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9, duration: 0.5 }}
+                        className="text-base md:text-lg text-[#736A60] font-light max-w-sm mx-auto z-10"
+                      >
+                        {t('messageSentDesc') || "Îți mulțumim! Te vom contacta în cel mai scurt timp posibil."}
+                      </motion.p>
+                    </motion.div>
+                  ) : view === 'otp' ? (
+                    <motion.div
+                      key="otp"
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="space-y-6 py-2"
+                    >
+                      <div className="flex flex-col items-center justify-center text-center space-y-4 mb-6">
+                        <div className="w-16 h-16 bg-[#F5F2EC] rounded-full flex items-center justify-center shadow-inner">
+                          <Smartphone className="w-8 h-8 text-[#D4A853]" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('validateNumber')}</h3>
+                          <p className="text-[#736A60] text-sm leading-relaxed">{t('smsNote')} <br/><span className="font-bold text-[#1A120B] text-base">{selectedCountry.dialCode} {formData.phone.replace(/^0+/, '')}</span></p>
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('message')}</label>
-                      <textarea
-                        rows={4}
-                        required
-                        placeholder={t('messagePlaceholder')}
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                        className="w-full bg-white border border-[#E8E2D9] rounded-2xl p-5 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm resize-none"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={isSending}
-                      className="w-full bg-[#1A120B] hover:bg-[#D4A853] disabled:opacity-70 disabled:hover:bg-[#1A120B] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
+
+                      {errorMsg && (
+                        <div className="bg-red-50 text-red-600 p-3.5 rounded-2xl text-sm border border-red-100 text-center font-medium">
+                          {errorMsg}
+                        </div>
+                      )}
+
+                      <form onSubmit={handleVerifyOtp} className="space-y-6">
+                        <div>
+                          <input 
+                            type="text" 
+                            required
+                            maxLength={6}
+                            placeholder="000000"
+                            className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.4em] font-bold outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all shadow-sm text-[#1A120B]"
+                            value={otpCode}
+                            onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          />
+                        </div>
+                        <button 
+                          type="submit"
+                          disabled={isSending || otpCode.length < 6}
+                          className={`w-full text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${isSending || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] hover:shadow-xl hover:-translate-y-0.5'}`}
+                        >
+                          <span>{isSending ? (t('submittingReview') || 'Se verifică...') : (t('verifyCode') || 'Confirmă și Trimite')}</span>
+                          {!isSending && <CheckCircle2 className="w-4 h-4" />}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setView('form');
+                            setOtpCode('');
+                            setErrorMsg('');
+                          }}
+                          className="w-full text-center text-xs font-bold uppercase tracking-widest text-[#736A60] hover:text-[#D4A853] transition-colors py-2 block"
+                        >
+                          ← Înapoi la completare date
+                        </button>
+                      </form>
+                    </motion.div>
+                  ) : (
+                    <motion.form
+                      key="form"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onSubmit={handleSubmit}
+                      className="space-y-6"
                     >
-                      <span>{isSending ? (t('submittingReview') || 'Se trimite...') : t('sendMessage')}</span>
-                      <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''}`} />
-                    </button>
-                  </form>
-                )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('fullName')}</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder={t('yourName')}
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('phoneNumber')}</label>
+                          <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                            <CountrySelector
+                              selectedCountry={selectedCountry}
+                              onSelect={(country) => setSelectedCountry(country)}
+                            />
+                            <input
+                              type="tel"
+                              required
+                              placeholder={t('phonePlaceholder') || "79 000 000"}
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              className="w-full bg-transparent border-none px-4 py-4 outline-none text-[#1A120B] text-sm shadow-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('message')}</label>
+                        <textarea
+                          rows={4}
+                          required
+                          placeholder={t('messagePlaceholder')}
+                          value={formData.message}
+                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          className="w-full bg-white border border-[#E8E2D9] rounded-2xl p-5 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm resize-none"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isSending}
+                        className="w-full bg-[#1A120B] hover:bg-[#D4A853] disabled:opacity-70 disabled:hover:bg-[#1A120B] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
+                      >
+                        <span>{isSending ? (t('submittingReview') || 'Se trimite...') : t('sendMessage')}</span>
+                        <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''}`} />
+                      </button>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
                 
                 <div id="recaptcha-contact"></div>
               </div>
@@ -394,73 +464,6 @@ export default function ContactPage() {
       <AnimateIn direction="up">
         <MapSection />
       </AnimateIn>
-
-      {/* OTP Modal Overlay */}
-      <AnimatePresence>
-        {view === 'otp' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-[#FCF9F4] w-full max-w-md rounded-3xl p-8 relative shadow-2xl border border-[#D4A853]/20"
-            >
-              <button
-                onClick={() => {
-                  setView('form');
-                  setOtpCode('');
-                }}
-                className="absolute top-6 right-6 p-2 bg-white rounded-full hover:bg-gray-200 transition-colors shadow-sm"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-
-              <div className="flex flex-col items-center justify-center text-center space-y-4 mb-8 mt-4">
-                <div className="w-16 h-16 bg-[#F5F2EC] rounded-full flex items-center justify-center shadow-inner">
-                  <Smartphone className="w-8 h-8 text-[#D4A853]" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-2xl font-bold text-[#1A120B] mb-2">{t('validateNumber') || "Verificare Număr"}</h3>
-                  <p className="text-[#736A60] text-sm">{t('smsNote') || "Am trimis un cod de 6 cifre la"} <br/><span className="font-bold text-[#1A120B]">{selectedCountry.dialCode} {formData.phone.replace(/^0+/, '')}</span></p>
-                </div>
-              </div>
-
-              {errorMsg && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100 text-center mb-6">
-                  {errorMsg}
-                </div>
-              )}
-
-              <form onSubmit={handleVerifyOtp} className="space-y-6">
-                <div>
-                  <input 
-                    type="text" 
-                    required
-                    maxLength={6}
-                    placeholder="000000"
-                    className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.4em] font-bold outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all shadow-sm"
-                    value={otpCode}
-                    onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                  />
-                </div>
-                <button 
-                  type="submit"
-                  disabled={isSending || otpCode.length < 6}
-                  className={`w-full text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${isSending || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#D4A853] hover:shadow-xl hover:-translate-y-1'}`}
-                >
-                  {isSending ? (t('submittingReview') || 'Se verifică...') : 'Confirmă și Trimite'}
-                  {!isSending && <CheckCircle2 className="w-4 h-4" />}
-                </button>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
     </div>
   );
