@@ -357,7 +357,7 @@ export default function CheckoutPage() {
                         <div className="flex justify-between items-start">
                           <Truck className={`w-7 h-7 ${deliveryType === "delivery" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
                           <span className="text-[10px] font-bold uppercase tracking-widest bg-[#1A120B] text-white px-2.5 py-1 rounded-full">
-                            Curier
+                            {t('courier')}
                           </span>
                         </div>
                         <div>
@@ -379,7 +379,7 @@ export default function CheckoutPage() {
                         <div className="flex justify-between items-start">
                           <Store className={`w-7 h-7 ${deliveryType === "pickup" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
                           <span className="text-[10px] font-bold uppercase tracking-widest bg-[#D4A853] text-[#1A120B] px-2.5 py-1 rounded-full">
-                            Gratuit (0 MDL)
+                            {t('free')} (0 MDL)
                           </span>
                         </div>
                         <div>
@@ -436,7 +436,7 @@ export default function CheckoutPage() {
                         <input
                           type="text"
                           required
-                          placeholder="Ex: Ana Popescu"
+                          placeholder={t('placeholderName')}
                           className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -447,7 +447,7 @@ export default function CheckoutPage() {
                         <input
                           type="tel"
                           required
-                          placeholder="Ex: 079 123 456"
+                          placeholder={t('placeholderPhone')}
                           className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -512,7 +512,7 @@ export default function CheckoutPage() {
                               const roadDist = straightDist * 1.3;
                               setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
                             }}
-                            placeholder="Ex: Bulevardul Ștefan cel Mare și Sfînt 1"
+                            placeholder={t('placeholderAddress')}
                             className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl pl-12 pr-5 py-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                             required={true}
                           />
@@ -524,7 +524,7 @@ export default function CheckoutPage() {
                             <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('buildingDetails')}</label>
                             <input
                               type="text"
-                              placeholder="Bloc/Scară"
+                              placeholder={t('placeholderBuilding')}
                               className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
                               value={formData.house}
                               onChange={(e) => setFormData({ ...formData, house: e.target.value })}
@@ -534,7 +534,7 @@ export default function CheckoutPage() {
                             <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('apartment')}</label>
                             <input
                               type="text"
-                              placeholder="Ex: 45"
+                              placeholder={t('placeholderApartment')}
                               className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
                               value={formData.apartment}
                               onChange={(e) => setFormData({ ...formData, apartment: e.target.value })}
@@ -544,7 +544,7 @@ export default function CheckoutPage() {
                             <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('intercom')}</label>
                             <input
                               type="text"
-                              placeholder="Ex: 45B"
+                              placeholder={t('placeholderIntercom')}
                               className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
                               value={formData.intercom}
                               onChange={(e) => setFormData({ ...formData, intercom: e.target.value })}
