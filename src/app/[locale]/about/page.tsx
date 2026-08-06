@@ -75,32 +75,35 @@ export default function AboutPage() {
 
       {/* Meet the Pastry Chef */}
       <section className="py-24 md:py-32 bg-[#ffffff] border-y border-[#e5e2dd]">
-        <div className="max-w-[1000px] mx-auto px-4 md:px-8 text-center">
-          <AnimateIn direction="up">
-            <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-widest mb-4 block">{t('section3Subtitle')}</span>
-            <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-16 leading-[1.2]">
-              {t('section3Title')}
-            </h2>
-          </AnimateIn>
-          
-          <AnimateIn direction="up" delay={0.2}>
-            <div className="relative w-full max-w-md mx-auto mb-10 overflow-hidden rounded-2xl border-4 border-[#fcf9f4] shadow-2xl shadow-black/10">
-              <img 
-                src="/echipa.jpg" 
-                alt="Echipa Munchotella" 
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </AnimateIn>
-          
-          <AnimateIn direction="up" delay={0.3}>
-            <blockquote className="font-serif text-2xl md:text-3xl text-[#1c1c19] italic mb-8 max-w-3xl mx-auto leading-normal">
-              {t('quote')}
-            </blockquote>
-            <p className="text-[12px] font-bold uppercase text-[#4e4540] tracking-widest">
-              {t('quoteAuthor')}
-            </p>
-          </AnimateIn>
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
+            {/* Left side: Text */}
+            <AnimateIn direction="left">
+              <div>
+                <span className="text-[12px] font-bold uppercase text-[#d4af37] tracking-widest mb-4 block">{t('section3Subtitle')}</span>
+                <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#3d3028] mb-8 leading-[1.2]">
+                  {t('section3Title')}
+                </h2>
+                <blockquote className="font-serif text-2xl md:text-3xl text-[#1c1c19] italic mb-8 leading-normal border-l-4 border-[#d4af37] pl-6">
+                  {t('quote')}
+                </blockquote>
+                <p className="text-[12px] font-bold uppercase text-[#4e4540] tracking-widest pl-6">
+                  {t('quoteAuthor')}
+                </p>
+              </div>
+            </AnimateIn>
+            
+            {/* Right side: Image */}
+            <AnimateIn direction="right">
+              <div className="relative w-full h-[500px] md:h-[700px] overflow-hidden rounded-sm border border-[#e5e2dd] shadow-lg">
+                <img 
+                  src="/echipa.jpg" 
+                  alt="Echipa Munchotella" 
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            </AnimateIn>
+          </div>
         </div>
       </section>
 
