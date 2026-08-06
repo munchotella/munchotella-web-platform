@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { Plus } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 type ProductCardProps = {
   item: {
@@ -19,6 +20,7 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({ item, onSelect }: ProductCardProps) {
+  const t = useTranslations("Menu");
   const displayPrice = typeof item.price === "number" ? `${item.price} MDL` : item.price;
   const ingredients = item.desc ? item.desc.split(",").map(i => i.trim()).filter(i => i.length > 0 && !i.toLowerCase().includes("pieces")).slice(0, 3) : [];
 
@@ -107,7 +109,7 @@ export default function ProductCard({ item, onSelect }: ProductCardProps) {
           className="w-full bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-[14px] py-2.5 rounded-full transition-colors duration-300 flex items-center justify-center gap-2 mt-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Comandă Acum</span>
+          <span>{t('orderNow') || "Comandă Acum"}</span>
         </button>
       </div>
     </motion.div>

@@ -10,10 +10,11 @@ import rawMenuItems from "@/data/menu.json";
 import { useCart } from "@/context/CartContext";
 import ProductCustomizationModal, { ProductItem } from "@/components/ProductCustomizationModal";
 import ProductCard from "@/components/ProductCard";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function MenuPage() {
   const t = useTranslations("Menu");
+  const locale = useLocale();
   const [activeCategory, setActiveCategory] = useState(t('catAll'));
   const [searchQuery, setSearchQuery] = useState("");
   const { addToCart } = useCart();
@@ -43,16 +44,24 @@ export default function MenuPage() {
   const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
   
   // Authentic Munchotella Products mapped from database
-  const menuItems = rawMenuItems.map((item, index) => ({
-    id: index + 1,
-    name: item.name,
-    price: `${item.price} ${item.currency}`,
-    numericPrice: item.price,
-    category: categoryMap[item.category] || item.category,
-    desc: item.description,
-    img: item.image,
-    badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
-  }));
+  const menuItems = rawMenuItems.map((item: any, index: number) => {
+    const desc = locale === 'en' 
+      ? (item.descriptionEn || item.description) 
+      : locale === 'ru' 
+      ? (item.descriptionRu || item.description) 
+      : (item.descriptionRo || item.description);
+
+    return {
+      id: index + 1,
+      name: item.name,
+      price: `${item.price} ${item.currency}`,
+      numericPrice: item.price,
+      category: categoryMap[item.category] || item.category,
+      desc,
+      img: item.image,
+      badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
+    };
+  });
 
   const filteredItems = menuItems.filter(item => {
     // If there is an active search query, we want to search across ALL categories.

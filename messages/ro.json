@@ -55,7 +55,11 @@
     "catAll": "Toate",
     "catDrinks": "Băuturi",
     "badgeHouseSpecial": "Specialitatea Casei",
-    "badgeTopSeller": "Top Seller"
+    "badgeTopSeller": "Top Seller",
+    "orderNow": "Comandă Acum"
+  },
+  "Cart": {
+    "addedToCartToast": "{name} a fost adăugat în coș!"
   },
   "Checkout": {
     "emptyCartTitle": "Coșul tău este gol",

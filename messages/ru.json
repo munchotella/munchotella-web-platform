@@ -50,12 +50,16 @@
   "Menu": {
     "title1": "Наше",
     "title2": "Меню",
-    "subtitle": "Выберите свой любимый десерт. Всё готовится на месте из оригинальных ингредиентов.",
-    "searchPlaceholder": "Искать десерт...",
+    "subtitle": "Выберите ваше любимое лакомство. Все готовится на месте из оригинальных ингредиентов.",
+    "searchPlaceholder": "Поиск десерта...",
     "catAll": "Все",
     "catDrinks": "Напитки",
     "badgeHouseSpecial": "Фирменное блюдо",
-    "badgeTopSeller": "Хит продаж"
+    "badgeTopSeller": "Хит продаж",
+    "orderNow": "Заказать сейчас"
+  },
+  "Cart": {
+    "addedToCartToast": "{name} добавлен в корзину!"
   },
   "Checkout": {
     "emptyCartTitle": "Ваша корзина пуста",

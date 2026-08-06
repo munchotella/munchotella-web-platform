@@ -50,12 +50,16 @@
   "Menu": {
     "title1": "Our",
     "title2": "Menu",
-    "subtitle": "Choose your favorite. Everything is prepared on the spot from original ingredients.",
-    "searchPlaceholder": "Search for a dessert...",
+    "subtitle": "Choose your favorite. Everything is made on the spot using original ingredients.",
+    "searchPlaceholder": "Search a dessert...",
     "catAll": "All",
     "catDrinks": "Drinks",
     "badgeHouseSpecial": "House Special",
-    "badgeTopSeller": "Top Seller"
+    "badgeTopSeller": "Top Seller",
+    "orderNow": "Order Now"
+  },
+  "Cart": {
+    "addedToCartToast": "{name} added to cart!"
   },
   "Checkout": {
     "emptyCartTitle": "Your cart is empty",
