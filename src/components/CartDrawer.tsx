@@ -10,6 +10,8 @@ import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import CountrySelector from "@/components/ui/CountrySelector";
+import { ALL_COUNTRIES, Country } from "@/data/countries";
 
 const libraries: any[] = ["places"];
 
@@ -19,6 +21,7 @@ export default function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [view, setView] = useState<'cart' | 'checkout' | 'otp' | 'success'>('cart');
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', paymentMethod: 'cash' });
+  const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
@@ -71,7 +74,8 @@ export default function CartDrawer() {
       if (typeof window !== 'undefined' && auth) {
         initRecaptcha();
         const appVerifier = (window as any).recaptchaVerifier;
-        const phoneFormatted = formData.phone.startsWith('+') ? formData.phone : `+373${formData.phone.replace(/^0/, '')}`;
+        const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
+        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
         const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
         setConfirmationResult(confirmation);
         setIsSubmitting(false);
@@ -255,14 +259,20 @@ export default function CartDrawer() {
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-[#1A120B] mb-2">{t('phone')}</label>
-                        <input 
-                          type="tel" 
-                          required
-                          placeholder={t('phonePlaceholder')}
-                          className="w-full bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                          value={formData.phone}
-                          onChange={e => setFormData({...formData, phone: e.target.value})}
-                        />
+                        <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                          <CountrySelector
+                            selectedCountry={selectedCountry}
+                            onSelect={(country) => setSelectedCountry(country)}
+                          />
+                          <input 
+                            type="tel" 
+                            required
+                            placeholder={t('phonePlaceholder') || "79 000 000"}
+                            className="w-full bg-transparent border-none px-4 py-3 outline-none text-[#1A120B] text-sm"
+                            value={formData.phone}
+                            onChange={e => setFormData({...formData, phone: e.target.value})}
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-[#1A120B] mb-2">{t('deliveryAddress')}</label>
