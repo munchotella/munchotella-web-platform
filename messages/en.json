@@ -441,5 +441,32 @@
     "scheduleTime": "Monday - Sunday: 16:00 - 00:00",
     "scheduleClosed": "Wednesday: Closed",
     "rights": "All rights reserved."
+  },
+  "Contact": {
+    "weAreHere": "We are here",
+    "letsTalk": "Let's Talk",
+    "subtitle": "Have a question or want to know more? Leave us a message and we'll reply fast.",
+    "addressTitle": "Our Address",
+    "openMap": "Open in Maps",
+    "phoneEmailTitle": "Phone & Email",
+    "scheduleTitle": "Schedule",
+    "scheduleTime": "Daily: 16:00 - 00:00",
+    "scheduleClosed": "Wednesday: Closed",
+    "formSubtitle": "Fill out the details below",
+    "fullName": "Full Name *",
+    "yourName": "Your name",
+    "phoneNumber": "Phone Number *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Your Message *",
+    "messagePlaceholder": "How can we help you?",
+    "submittingReview": "Sending...",
+    "sendMessage": "Send Message",
+    "messageSent": "Message Sent!",
+    "messageSentDesc": "Thank you for reaching out. We will get back to you shortly.",
+    "community": "Community",
+    "socialMedia": "Follow Us",
+    "follow": "Follow",
+    "tiktokDesc": "See the latest desserts and behind the scenes.",
+    "dessertRestaurant": "Dessert Restaurant"
   }
 }

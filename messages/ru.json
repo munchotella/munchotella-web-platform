@@ -441,5 +441,32 @@
     "scheduleTime": "Понедельник - Воскресенье: 16:00 - 00:00",
     "scheduleClosed": "Среда: Закрыто",
     "rights": "Все права защищены."
+  },
+  "Contact": {
+    "weAreHere": "Мы здесь",
+    "letsTalk": "Давайте поговорим",
+    "subtitle": "У вас есть вопрос? Оставьте сообщение, и мы быстро ответим.",
+    "addressTitle": "Наш адрес",
+    "openMap": "Открыть карту",
+    "phoneEmailTitle": "Телефон и Email",
+    "scheduleTitle": "График",
+    "scheduleTime": "Ежедневно: 16:00 - 00:00",
+    "scheduleClosed": "Среда: Выходной",
+    "formSubtitle": "Заполните данные ниже",
+    "fullName": "Полное имя *",
+    "yourName": "Ваше имя",
+    "phoneNumber": "Номер телефона *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Ваше сообщение *",
+    "messagePlaceholder": "Как мы можем помочь?",
+    "submittingReview": "Отправка...",
+    "sendMessage": "Отправить",
+    "messageSent": "Сообщение отправлено!",
+    "messageSentDesc": "Спасибо за сообщение. Мы скоро вам ответим.",
+    "community": "Сообщество",
+    "socialMedia": "Следите за нами",
+    "follow": "Подписаться",
+    "tiktokDesc": "Смотрите наши десерты и закулисье.",
+    "dessertRestaurant": "Десертный ресторан"
   }
 }

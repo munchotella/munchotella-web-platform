@@ -442,5 +442,32 @@
     "scheduleTime": "Luni - Duminică: 16:00 - 00:00",
     "scheduleClosed": "Miercuri: Închis",
     "rights": "Toate drepturile rezervate."
+  },
+  "Contact": {
+    "weAreHere": "Suntem aici",
+    "letsTalk": "Hai să discutăm",
+    "subtitle": "Ai o întrebare sau vrei să afli mai multe? Lasă-ne un mesaj și îți răspundem rapid.",
+    "addressTitle": "Adresa noastră",
+    "openMap": "Deschide pe hartă",
+    "phoneEmailTitle": "Telefon & Email",
+    "scheduleTitle": "Program",
+    "scheduleTime": "Zilnic: 16:00 - 00:00",
+    "scheduleClosed": "Miercuri: Închis",
+    "formSubtitle": "Completează datele de mai jos",
+    "fullName": "Numele complet *",
+    "yourName": "Numele tău",
+    "phoneNumber": "Număr de telefon *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Mesajul tău *",
+    "messagePlaceholder": "Scrie-ne cum te putem ajuta...",
+    "submittingReview": "Se trimite...",
+    "sendMessage": "Trimite mesajul",
+    "messageSent": "Mesaj trimis cu succes!",
+    "messageSentDesc": "Îți mulțumim că ne-ai contactat. Vom reveni cu un răspuns în cel mai scurt timp.",
+    "community": "Comunitate",
+    "socialMedia": "Urmărește-ne",
+    "follow": "Urmărește",
+    "tiktokDesc": "Vezi cele mai noi deserturi și din spatele culiselor.",
+    "dessertRestaurant": "Restaurant de Deserturi"
   }
 }
