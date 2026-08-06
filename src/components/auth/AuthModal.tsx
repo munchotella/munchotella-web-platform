@@ -30,7 +30,7 @@ export default function AuthModal() {
     setErrorMsg("");
     setSuccessMsg("");
     
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+    const API_URL = "https://munchotella-api.onrender.com/api";
     
     // Normalizare telefon pentru compatibilitate cu aplicația mobilă (+373)
     let normalizedLoginId = loginId.trim();
@@ -100,7 +100,7 @@ export default function AuthModal() {
     setErrorMsg("");
     setSuccessMsg("");
     
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+    const API_URL = "https://munchotella-api.onrender.com/api";
     
     let normalizedLoginId = loginId.trim();
     if (normalizedLoginId.startsWith('0') && normalizedLoginId.length === 9) {

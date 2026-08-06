@@ -29,7 +29,7 @@ export default function AccountSettings() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+  const API_URL = "https://munchotella-api.onrender.com/api";
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

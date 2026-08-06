@@ -23,7 +23,7 @@ export default function AddressManager() {
   const [formLabel, setFormLabel] = useState(t('home'));
   const [saving, setSaving] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+  const API_URL = "https://munchotella-api.onrender.com/api";
 
   const fetchAddresses = async () => {
     if (!token) return;
