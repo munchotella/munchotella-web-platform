@@ -148,7 +148,7 @@ export default function MunchotellaBoutique() {
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
-                  "Absolutely best ☺️ No dieting here ✊ It was my first time trying pure Nutella based desserts and I love it so much also I recommend their iced mint lemonade too..."
+                  {t('review1Text')}
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
@@ -174,7 +174,7 @@ export default function MunchotellaBoutique() {
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
-                  "I tried the Waffle delux, and it was heavenly - crisp on the outside, fluffy inside, and generously topped!! Staff is super friendly. Loved the experience!"
+                  {t('review2Text')}
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
@@ -200,7 +200,7 @@ export default function MunchotellaBoutique() {
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
-                  "Very great place. From all Chișinău, this is the place with the best sweet food. Waffle exotic and Nutella mini waffles are the best!"
+                  {t('review3Text')}
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
@@ -226,7 +226,7 @@ export default function MunchotellaBoutique() {
                   <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
-                  "The most delicious place in chisinau, Luv it !!! I advice everyone to try it, Best service with lovely manager and workers 🥰"
+                  {t('review4Text')}
                 </p>
                 <div className="mt-auto pt-4 border-t border-[#1A120B]/10 flex items-center justify-between">
                   <div>
@@ -248,7 +248,7 @@ export default function MunchotellaBoutique() {
               rel="noopener noreferrer" 
               className="inline-flex items-center gap-3 bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-xl cursor-pointer min-h-[44px] hover:scale-105"
             >
-              <span>Lasă o recenzie pe Google Maps</span>
+              <span>{t('leaveReviewBtn')}</span>
               <div className="flex space-x-0.5">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-3.5 h-3.5 fill-[#1A120B] text-[#1A120B]" />

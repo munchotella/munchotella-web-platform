@@ -6,7 +6,12 @@
     "reviewsTitle": "Ce spun clienții noștri pe Google",
     "verified": "Client Verificat • Google",
     "location": "Strada Nicolae Testemițeanu 21/1, Chișinău",
-    "rating": "4.4 ★ Evaluare pe Google Maps"
+    "rating": "4.4 ★ Evaluare pe Google Maps",
+    "leaveReviewBtn": "Lasă o recenzie pe Google Maps",
+    "review1Text": "\"Absolut cel mai bun loc 😋 Fără diete aici 😋 A fost prima dată când am încercat deserturi pe bază de Nutella pură și îmi plac la nebunie, recomand și limonada lor cu mentă...\"",
+    "review2Text": "\"Am încercat Waffle Delux și a fost divin - crocant la exterior, pufos la interior și foarte generos asortat!! Personalul este super prietenos. Mi-a plăcut experiența!\"",
+    "review3Text": "\"Un loc extraordinar. Din tot Chișinăul, acesta este locul cu cele mai bune deserturi. Waffle-ul exotic și mini waffles cu Nutella sunt cele mai bune!\"",
+    "review4Text": "\"Cel mai delicios loc din Chișinău, îl ador !!! Sfătuiesc pe toată lumea să-l încerce, Cel mai bun serviciu cu un manager și angajați minunați 🥰\""
   },
   "Hero": {
     "title1": "Arta dulce,",
