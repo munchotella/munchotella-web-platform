@@ -7,6 +7,8 @@ import { ChevronLeft, CheckCircle2, Clock, ChefHat, Truck, MapPin, PackageOpen }
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useTranslations } from 'next-intl';
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export default function OrderTrackingPage() {
   const t = useTranslations('OrderTracking');
@@ -19,30 +21,60 @@ export default function OrderTrackingPage() {
   ];
   const params = useParams();
   const router = useRouter();
-  const [currentStepIndex, setCurrentStepIndex] = useState(1); // 1 = Preparing (Mock)
+  const [orderData, setOrderData] = useState<any>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const orderId = typeof params?.id === 'string' ? params.id : '...';
 
   useEffect(() => {
-    // Simulate API fetch for order status
-    setTimeout(() => {
+    if (!orderId || orderId === '...') return;
+
+    const docRef = doc(db, "orders", orderId);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setOrderData(data);
+        const status = data.status || "pending";
+        const stepIndex = STEPS.findIndex(s => s.id === status);
+        setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
+        setError(null);
+        setLoading(false);
+      } else {
+        setError("Comanda nu a fost găsită.");
+        setLoading(false);
+      }
+    }, (err) => {
+      console.error("Eroare la ascultarea comenzii:", err);
+      setError("Eroare la încărcarea comenzii.");
       setLoading(false);
-    }, 800);
+    });
 
-    // Simulate live update
-    const timer = setTimeout(() => {
-      setCurrentStepIndex(2);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
+    return () => unsubscribe();
+  }, [orderId]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FFFCF6] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
       </div>
+    );
+  }
+
+  if (error || !orderData) {
+    return (
+      <main className="min-h-screen bg-[#FFFCF6] flex flex-col">
+        <Navbar />
+        <div className="flex-1 pt-32 pb-24 max-w-[800px] mx-auto px-6 w-full flex flex-col items-center justify-center text-center">
+          <h1 className="text-3xl font-serif text-[#1A120B] mb-4">Ups!</h1>
+          <p className="text-[#1A120B]/60 mb-8">{error || "Comanda nu a fost găsită"}</p>
+          <button onClick={() => router.push('/menu')} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
+            Mergi la Meniu
+          </button>
+        </div>
+        <Footer />
+      </main>
     );
   }
 
@@ -137,12 +169,24 @@ export default function OrderTrackingPage() {
               <MapPin size={24} className="text-[#D4A853]" />
               <h3 className="font-bold text-lg">{t('deliveryAddress')}</h3>
             </div>
-            <p className="text-white/80">Str. Nicolae Testemițeanu 29</p>
-            <p className="text-white/60 text-sm mt-1">Ap. 45, Etaj 4</p>
-            
+            {orderData.deliveryType === "pickup" ? (
+              <>
+                <p className="text-white/80">Nicolae Testemițeanu 21/1</p>
+                <p className="text-white/60 text-sm mt-1">Preluare din Boutique</p>
+              </>
+            ) : (
+              <>
+                <p className="text-white/80">{orderData.customer?.address || "Str. Nicolae Testemițeanu 29"}</p>
+                {orderData.customer?.notes && (
+                  <p className="text-white/60 text-sm mt-1">Note: {orderData.customer.notes}</p>
+                )}
+              </>
+            )}
             <div className="mt-8 pt-8 border-t border-white/10">
               <p className="text-white/40 text-sm mb-2">{t('estimatedTime')}</p>
-              <p className="text-3xl font-serif text-[#FDF9F1]">15 - 20 {t('min')}</p>
+              <p className="text-3xl font-serif text-[#FDF9F1]">
+                {orderData.deliveryType === "pickup" ? "15 - 20" : "30 - 45"} {t('min')}
+              </p>
             </div>
           </div>
           
@@ -154,14 +198,19 @@ export default function OrderTrackingPage() {
             >
               <Truck size={28} />
             </motion.div>
-            <h3 className="font-bold text-[#1A120B] mb-2">{t('ownCourier')}</h3>
-            <p className="text-[#1A120B]/60 text-sm mb-6">{t('courierAssigned')}</p>
+            <h3 className="font-bold text-[#1A120B] mb-2">
+              {orderData.deliveryType === "pickup" ? "Gata pentru Preluare" : t('ownCourier')}
+            </h3>
+            <p className="text-[#1A120B]/60 text-sm mb-6">
+              {orderData.deliveryType === "pickup" 
+                ? "Te așteptăm cu drag în boutique-ul nostru!" 
+                : t('courierAssigned')}
+            </p>
             <button className="px-6 py-3 border border-[#E8E2D9] rounded-full font-bold text-[#1A120B] hover:bg-[#1A120B]/5 transition-colors">
               {t('contactSupport')}
             </button>
           </div>
         </div>
-
       </div>
       
       <Footer />
