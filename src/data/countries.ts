@@ -70,3 +70,5 @@ export const ALL_COUNTRIES: Country[] = [
   { nameRo: "Africa de Sud", nameEn: "South Africa", nameRu: "ЮАР", dialCode: "+27", code: "ZA", flag: "🇿🇦" },
   { nameRo: "Kazahstan", nameEn: "Kazakhstan", nameRu: "Казахстан", dialCode: "+7", code: "KZ", flag: "🇰🇿" },
 ];
+
+export const defaultCountry: Country = ALL_COUNTRIES[0];
