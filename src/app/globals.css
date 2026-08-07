@@ -6,9 +6,15 @@
 }
 
 @theme inline {
+  /* Warm Luxury Admin Tokens */
+  --color-cacao-dark: #1A120B;
+  --color-vanilla-porcelain: #FFFCF6;
+  --color-gold-saffron: #D4A853;
+  --color-soft-olive: #4A6B5D;
+  --color-warm-border: #E8E2D9;
+  --color-admin-bg: #FAF7F2;
+
   --color-on-surface-variant: #4d453f;
-  --color-on-primary-container: #8f8177;
-  --color-secondary-container: #fdcd74;
   --color-background: #fff8f5;
   --color-on-secondary: #ffffff;
   --color-surface-tint: #685c53;
@@ -129,5 +135,16 @@ body {
 }
 .hero-transition-mask {
   background: linear-gradient(to bottom, transparent, #FAF7F2);
+}
+.backdrop-blur-luxury {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(255, 252, 246, 0.6);
+}
+.glow-gold-hover {
+  transition: all 0.3s ease;
+}
+.glow-gold-hover:hover {
+  box-shadow: 0 0 20px rgba(212, 168, 83, 0.4);
 }
 

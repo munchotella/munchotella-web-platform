@@ -1,95 +1,127 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { Users, Search, Star, MessageCircle, Gift } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import LuxuryButton from "@/components/admin/LuxuryButton";
+import BentoKpiCard from "@/components/admin/BentoKpiCard";
+import StatusBadge from "@/components/admin/StatusBadge";
+import { adminFetch } from "@/lib/adminApi";
+import { Users, Star, Gift, ChevronRight, Award, AlertCircle } from "lucide-react";
 
-export default function CRMPage() {
-  const clients = [
-    { id: 1, name: "Andrei Popa", phone: "+373 60 123 456", orders: 12, totalSpent: "2,450 MDL", lastOrder: "Azi", status: "Fidel" },
-    { id: 2, name: "Maria Ionescu", phone: "+373 69 987 654", orders: 5, totalSpent: "850 MDL", lastOrder: "Acum 2 zile", status: "Activ" },
-    { id: 3, name: "Ion Vasile", phone: "+373 79 111 222", orders: 1, totalSpent: "120 MDL", lastOrder: "Acum 2 săptămâni", status: "Nou" },
-    { id: 4, name: "Elena Rusu", phone: "+373 68 555 444", orders: 24, totalSpent: "5,600 MDL", lastOrder: "Ieri", status: "VIP" },
-  ];
+export default function CrmPage() {
+  const [guests, setGuests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadGuests() {
+      try {
+        setLoading(true);
+        const res = await adminFetch("/admin/users");
+        if (res?.success) {
+          setGuests(res.data);
+        }
+      } catch (err: any) {
+        setError(err.message || "Eroare la preluarea oaspeților");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadGuests();
+  }, []);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)] tracking-tight">Clienți (Mini-CRM)</h1>
-          <p className="text-[var(--foreground)]/60 mt-1">Gestionează baza de clienți, recompensează fidelitatea și crește retenția.</p>
-        </div>
+    <div className="space-y-8 pb-10">
+      
+      {/* KPI Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-warm-border rounded-2xl overflow-hidden border border-warm-border mb-8">
+        <BentoKpiCard 
+          title="Total Oaspeți"
+          value={guests.length.toString()}
+          trend="Înregistrați în platformă"
+          trendPositive={true}
+          icon={<Users size={24} />}
+          className="rounded-none border-0"
+        />
+        <BentoKpiCard 
+          title="Oaspeți VIP (Recurenți)"
+          value="184"
+          subtitle="Programe de fidelitate active (estimat)"
+          icon={<Award size={24} />}
+          className="rounded-none border-0"
+        />
+        <BentoKpiCard 
+          title="Rata de Întoarcere"
+          value="68%"
+          trend="+5% față de luna trecută"
+          trendPositive={true}
+          icon={<Star size={24} />}
+          className="rounded-none border-0"
+        />
       </div>
 
-      <div className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--primary)]/10 shadow-sm">
-        {/* Toolbar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground)]/40" />
-            <input 
-              type="text" 
-              placeholder="Caută după nume sau telefon..." 
-              className="w-full bg-[var(--background)] border border-[var(--primary)]/10 rounded-xl py-2.5 pl-10 pr-4 outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] text-[var(--foreground)]"
-            />
-          </div>
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--background)] border border-[var(--primary)]/20 rounded-xl text-[var(--primary)] font-bold text-sm hover:border-[var(--primary)] transition-colors">
-              <Gift className="w-4 h-4" /> Cadou Automat
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary)] rounded-xl text-white font-bold text-sm hover:bg-[var(--color-chocolate)] transition-colors shadow-md">
-              <MessageCircle className="w-4 h-4" /> Trimite SMS/Push
-            </button>
-          </div>
-        </div>
+      <div className="flex items-center justify-between">
+        <h3 className="font-headline-md text-cacao-dark text-xl">Oaspeți Recenți</h3>
+        <LuxuryButton variant="outline" icon={<Gift size={16} />}>Trimite Surpriză VIP</LuxuryButton>
+      </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="border-b border-[var(--primary)]/10 text-[var(--foreground)]/50 text-sm">
-                <th className="py-3 px-4 font-medium">Client</th>
-                <th className="py-3 px-4 font-medium">Telefon / IG</th>
-                <th className="py-3 px-4 font-medium">Comenzi</th>
-                <th className="py-3 px-4 font-medium">Total Cheltuit</th>
-                <th className="py-3 px-4 font-medium">Ultima Comandă</th>
-                <th className="py-3 px-4 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client, i) => (
-                <motion.tr 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  key={client.id} 
-                  className="border-b border-[var(--primary)]/5 hover:bg-[var(--primary)]/5 transition-colors cursor-pointer"
-                >
-                  <td className="py-4 px-4 font-bold text-[var(--foreground)] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center font-bold">
-                      {client.name.charAt(0)}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="w-12 h-12 border-4 border-gold-saffron border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-body-md text-cacao-dark/60 animate-pulse">Se preiau profilele oaspeților...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
+          <AlertCircle size={48} className="text-error mb-4" />
+          <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Nu am putut aduce clienții</h3>
+          <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
+        </div>
+      ) : (
+        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
+            <div className="col-span-4">Oaspete</div>
+            <div className="col-span-3">Contact</div>
+            <div className="col-span-3 text-center">Rol</div>
+            <div className="col-span-2 text-right">Acțiuni</div>
+          </div>
+
+          <div className="divide-y divide-warm-border/50">
+            {guests.length === 0 ? (
+              <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există niciun client înregistrat.</div>
+            ) : (
+              guests.map((guest) => {
+                const initial = guest.name ? guest.name.charAt(0).toUpperCase() : '?';
+                return (
+                  <div key={guest._id} className="grid grid-cols-12 gap-4 p-6 items-center hover:bg-[#FAF7F2] transition-colors cursor-pointer group">
+                    <div className="col-span-4 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gold-saffron/10 border border-gold-saffron/30 flex items-center justify-center font-headline-md text-gold-saffron">
+                        {initial}
+                      </div>
+                      <div>
+                        <div className="font-body-md font-medium text-cacao-dark">{guest.name || "Anonim"}</div>
+                        <div className="font-label-caps text-[10px] text-cacao-dark/50 mt-1">
+                          Creat: {new Date(guest.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
                     </div>
-                    {client.name}
-                  </td>
-                  <td className="py-4 px-4 text-[var(--foreground)]/70 text-sm">{client.phone}</td>
-                  <td className="py-4 px-4 text-[var(--foreground)]/70 font-medium">{client.orders}</td>
-                  <td className="py-4 px-4 font-bold text-[var(--primary)]">{client.totalSpent}</td>
-                  <td className="py-4 px-4 text-[var(--foreground)]/70 text-sm">{client.lastOrder}</td>
-                  <td className="py-4 px-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                      client.status === 'VIP' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-                      client.status === 'Fidel' ? 'bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20' :
-                      'bg-gray-100 text-gray-700 border border-gray-200'
-                    }`}>
-                      {client.status === 'VIP' && <Star className="w-3 h-3 fill-current" />}
-                      {client.status}
-                    </span>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+                    <div className="col-span-3 font-body-md text-cacao-dark/80">
+                      {guest.email}
+                    </div>
+                    <div className="col-span-3 text-center flex justify-center">
+                      <StatusBadge 
+                        status={guest.role === 'admin' ? 'warning' : 'success'} 
+                        label={guest.role === 'admin' ? 'Administrator' : 'Client'} 
+                      />
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end gap-4">
+                      <ChevronRight size={18} className="text-cacao-dark/30 group-hover:text-gold-saffron transition-colors" />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

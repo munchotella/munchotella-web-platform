@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Outfit, Great_Vibes } from "next/font/google";
 import "../globals.css";
 import ClientProviders from "@/components/ClientProviders";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
@@ -128,11 +127,9 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-accent-gold selection:text-white">
         <NextIntlClientProvider messages={messages}>
           <ClientProviders>
-            <Navbar />
-            <main className="flex-1">
+            <LayoutWrapper>
               {children}
-            </main>
-            <Footer />
+            </LayoutWrapper>
           </ClientProviders>
         </NextIntlClientProvider>
       </body>

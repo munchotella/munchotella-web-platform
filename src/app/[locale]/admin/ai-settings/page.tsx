@@ -1,122 +1,127 @@
-"use client";
+import React from "react";
+import LuxuryButton from "@/components/admin/LuxuryButton";
+import StatusBadge from "@/components/admin/StatusBadge";
+import BentoKpiCard from "@/components/admin/BentoKpiCard";
+import { Bot, MessageSquare, Fingerprint, Activity, Zap, CheckCircle2 } from "lucide-react";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Bot, Save, MessageSquare, AlertCircle } from "lucide-react";
-
-export default function AISettingsPage() {
-  const [saving, setSaving] = useState(false);
-  
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => setSaving(false), 1000);
-  };
-
+export default function AiSettingsPage() {
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)] tracking-tight">Setări AI (Instagram)</h1>
-          <p className="text-[var(--foreground)]/60 mt-1">Configurează personalitatea și limitele asistentului virtual.</p>
+    <div className="space-y-8 pb-10">
+      
+      {/* Header Info */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <div className="w-24 h-24 bg-vanilla-porcelain border border-warm-border rounded-full flex items-center justify-center relative shadow-sm">
+            <Bot size={40} className="text-gold-saffron" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-[#FAF7F2] rounded-full"></div>
+          </div>
+          <div>
+            <h2 className="font-headline-lg text-cacao-dark text-3xl mb-1">Munchotella AI</h2>
+            <div className="flex items-center gap-3">
+              <StatusBadge status="success" label="Activ și Răspunde" />
+              <span className="font-label-caps text-xs text-cacao-dark/50">• Conectat la Instagram</span>
+            </div>
+          </div>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-full font-medium bg-[var(--primary)] text-[var(--primary-foreground)] shadow-lg hover:bg-[var(--color-chocolate)] transition-all disabled:opacity-70"
-        >
-          {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-          Salvează Modificările
-        </button>
+        
+        <LuxuryButton variant="primary">Salvează Personalitatea</LuxuryButton>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - System Prompt */}
-        <div className="lg:col-span-2 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--primary)]/10 shadow-sm"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center">
-                <Bot className="w-5 h-5" />
+      {/* KPI Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-warm-border rounded-2xl overflow-hidden border border-warm-border mb-8">
+        <BentoKpiCard 
+          title="Mesaje Răspunse Azi"
+          value="142"
+          trend="Timp mediu de răspuns: 4s"
+          trendPositive={true}
+          icon={<MessageSquare size={24} />}
+          className="rounded-none border-0"
+        />
+        <BentoKpiCard 
+          title="Comenzi Preluare AI"
+          value="18"
+          trend="+5 față de ieri"
+          trendPositive={true}
+          icon={<Zap size={24} />}
+          className="rounded-none border-0"
+        />
+        <BentoKpiCard 
+          title="Acuratețe"
+          value="99.2%"
+          subtitle="Nicio intervenție umană necesară"
+          icon={<Activity size={24} />}
+          className="rounded-none border-0"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column: Personality & Rules */}
+        <section className="bg-vanilla-porcelain border border-warm-border rounded-2xl p-8 flex flex-col h-full">
+          <div className="flex items-center gap-3 mb-6">
+            <Fingerprint className="text-gold-saffron" size={24} />
+            <h3 className="font-headline-md text-cacao-dark text-xl">Personalitate și Ton</h3>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-3">Tonul Vocii</label>
+              <div className="grid grid-cols-3 gap-3">
+                <button className="py-3 px-4 rounded-lg border border-gold-saffron bg-gold-saffron/5 text-gold-saffron font-body-md text-sm transition-colors text-center font-medium">
+                  Elegant / Premium
+                </button>
+                <button className="py-3 px-4 rounded-lg border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2] font-body-md text-sm transition-colors text-center">
+                  Prietenos
+                </button>
+                <button className="py-3 px-4 rounded-lg border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2] font-body-md text-sm transition-colors text-center">
+                  Formal
+                </button>
               </div>
-              <h3 className="text-xl font-bold text-[var(--foreground)]">System Prompt (Personalitate)</h3>
             </div>
-            
-            <textarea 
-              className="w-full h-64 p-4 bg-[var(--background)] border border-[var(--primary)]/20 rounded-xl resize-none outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] text-[var(--foreground)] leading-relaxed"
-              defaultValue="Ești asistentul virtual al cafenelei Munchotella. Tonul tău trebuie să fie prietenos, elegant și mereu de ajutor. Folosești emoji-uri (🍫, ☕, ✨) dar cu măsură. Când preiei o comandă, verifică întotdeauna disponibilitatea produselor folosind funcțiile tale. Dacă ești întrebat lucruri care nu țin de cafenea, refuză politicos. Dacă utilizatorul este frustrat, folosește funcția de escaladare către Telegram."
-            />
-            <p className="text-sm text-[var(--foreground)]/50 mt-3 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              Acest text definește comportamentul de bază al AI-ului (folosit de OpenAI/Gemini).
+
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-3">Instrucțiune de Bază (Prompt)</label>
+              <textarea 
+                className="w-full bg-[#FAF7F2] border border-warm-border rounded-xl p-4 font-body-md text-cacao-dark min-h-[150px] focus:outline-none focus:border-gold-saffron transition-colors resize-none"
+                defaultValue="Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală."
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Right Column: Knowledge Base */}
+        <section className="bg-vanilla-porcelain border border-warm-border rounded-2xl p-8 flex flex-col h-full">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Bot className="text-gold-saffron" size={24} />
+              <h3 className="font-headline-md text-cacao-dark text-xl">Baza de Cunoștințe</h3>
+            </div>
+            <LuxuryButton variant="outline" className="scale-90 origin-right">Încarcă Document</LuxuryButton>
+          </div>
+
+          <div className="flex-1 border border-warm-border/50 rounded-xl bg-[#FAF7F2]/50 p-6 flex flex-col justify-center items-center text-center">
+            <p className="font-body-md text-cacao-dark mb-2">Asistentul AI citește automat meniul tău.</p>
+            <p className="font-body-md text-cacao-dark/60 text-sm max-w-sm">
+              Pentru a-l învăța lucruri noi (ex: politica de retur, zonele exacte de livrare, prețurile per km), adaugă instrucțiuni aici.
             </p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--primary)]/10 shadow-sm"
-          >
-            <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">Recomandarea Zilei (Injectată dinamic)</h3>
-            <p className="text-[var(--foreground)]/60 text-sm mb-4">Ce produs vrei ca AI-ul să împingă în față astăzi clienților indeciși?</p>
-            <select className="w-full p-3 bg-[var(--background)] border border-[var(--primary)]/20 rounded-xl outline-none focus:border-[var(--primary)] text-[var(--foreground)]">
-              <option>Niciuna (Lasă AI-ul să decidă)</option>
-              <option>Croissant cu Fistic (Promo)</option>
-              <option>Iced Caramel Macchiato</option>
-              <option>Tiramisu</option>
-            </select>
-          </motion.div>
-        </div>
-
-        {/* Right Column - Rules & Limits */}
-        <div className="space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--primary)]/10 shadow-sm"
-          >
-            <h3 className="text-lg font-bold text-[var(--foreground)] mb-6">Reguli de Vânzare</h3>
             
-            <div className="space-y-5">
-              <div>
-                <label className="flex items-center justify-between text-sm font-bold text-[var(--foreground)] mb-2">
-                  <span>Permite Oferirea de Discounturi?</span>
-                  <input type="checkbox" className="toggle-checkbox" defaultChecked />
-                </label>
-                <p className="text-xs text-[var(--foreground)]/50">Dacă e activat, AI-ul poate oferi un discount mic clienților fideli sau supărați.</p>
+            <div className="mt-8 w-full space-y-3">
+              <div className="bg-vanilla-porcelain border border-warm-border p-4 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="text-success" size={18} />
+                  <span className="font-body-md text-sm text-cacao-dark">Meniu_Preturi_Azi.json</span>
+                </div>
+                <span className="font-label-caps text-[10px] text-cacao-dark/40">Sincronizat Automat</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-bold text-[var(--foreground)] mb-2">Discount Maxim Permis (%)</label>
-                <input 
-                  type="number" 
-                  defaultValue={15}
-                  className="w-full p-3 bg-[var(--background)] border border-[var(--primary)]/20 rounded-xl outline-none focus:border-[var(--primary)] text-[var(--foreground)]"
-                />
+              <div className="bg-vanilla-porcelain border border-warm-border p-4 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="text-success" size={18} />
+                  <span className="font-body-md text-sm text-cacao-dark">Zone_Livrare_Chisinau.txt</span>
+                </div>
+                <span className="font-label-caps text-[10px] text-cacao-dark/40">Acum 2 zile</span>
               </div>
             </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-[var(--primary)]/5 p-6 rounded-2xl border border-[var(--primary)]/20 shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="w-5 h-5 text-[var(--primary)]" />
-              <h3 className="text-lg font-bold text-[var(--foreground)]">Testare Bot</h3>
-            </div>
-            <p className="text-sm text-[var(--foreground)]/70 mb-4">Apasă aici pentru a simula o conversație de test înainte de a pune setările live pe Instagram.</p>
-            <button className="w-full bg-white text-[var(--primary)] border border-[var(--primary)]/20 py-2.5 rounded-xl font-bold hover:border-[var(--primary)] transition-colors">
-              Deschide Simulator
-            </button>
-          </motion.div>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );

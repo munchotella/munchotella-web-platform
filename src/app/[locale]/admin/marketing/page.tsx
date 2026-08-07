@@ -1,77 +1,124 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { Ticket, Plus, Percent, Copy, Calendar } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import LuxuryButton from "@/components/admin/LuxuryButton";
+import BentoKpiCard from "@/components/admin/BentoKpiCard";
+import StatusBadge from "@/components/admin/StatusBadge";
+import { adminFetch } from "@/lib/adminApi";
+import { Ticket, Percent, Plus, Share2, AlertCircle } from "lucide-react";
 
 export default function MarketingPage() {
-  const promos = [
-    { code: "LUNI20", discount: "20%", type: "Reducere Procentuală", expiry: "Astăzi, 23:59", uses: 45, status: "Activ" },
-    { code: "CAFEAGRATIS", discount: "100%", type: "Produs Gratuit (Cafea)", expiry: "31 Aug 2026", uses: 12, status: "Activ" },
-    { code: "BUNVENIT", discount: "15%", type: "Reducere Procentuală", expiry: "Nelimitat", uses: 342, status: "Activ" },
-  ];
+  const [promotions, setPromotions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadPromos() {
+      try {
+        setLoading(true);
+        const res = await adminFetch("/admin/promoCodes");
+        if (res?.success) {
+          setPromotions(res.data);
+        }
+      } catch (err: any) {
+        setError(err.message || "Eroare la preluarea promoțiilor");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPromos();
+  }, []);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)] tracking-tight">Marketing & Promoții</h1>
-          <p className="text-[var(--foreground)]/60 mt-1">Gestionează codurile de reducere pentru Aplicație, Web și Instagram.</p>
+    <div className="space-y-8 pb-10">
+      
+      {/* KPI Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-warm-border rounded-2xl overflow-hidden border border-warm-border mb-8">
+        <BentoKpiCard 
+          title="Total Promoții"
+          value={promotions.length.toString()}
+          trend="Înregistrate în sistem"
+          trendPositive={true}
+          icon={<Ticket size={24} />}
+          className="rounded-none border-0"
+        />
+        <BentoKpiCard 
+          title="Rata de Conversie Promo"
+          value="12.4%"
+          subtitle="Procentaj comenzi cu cod de reducere (estimat)"
+          icon={<Percent size={24} />}
+          className="rounded-none border-0"
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h3 className="font-headline-md text-cacao-dark text-xl">Promoții și Cupoane</h3>
+        <LuxuryButton variant="primary" icon={<Plus size={16} />}>Crează Campanie</LuxuryButton>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="w-12 h-12 border-4 border-gold-saffron border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-body-md text-cacao-dark/60 animate-pulse">Se preiau campaniile de marketing...</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-2.5 rounded-full font-medium bg-[var(--primary)] text-[var(--primary-foreground)] shadow-lg hover:bg-[var(--color-chocolate)] transition-all">
-          <Plus className="w-5 h-5" />
-          Promoție Nouă
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-[var(--primary)] to-[var(--color-chocolate)] p-6 rounded-2xl text-white shadow-lg"
-        >
-          <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <Percent className="w-6 h-6" />
-            </div>
-            <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm">Google Ads Sync</span>
+      ) : error ? (
+        <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
+          <AlertCircle size={48} className="text-error mb-4" />
+          <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Nu am putut aduce promoțiile</h3>
+          <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
+        </div>
+      ) : (
+        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
+            <div className="col-span-4">Campanie / Cod</div>
+            <div className="col-span-3">Ofertă</div>
+            <div className="col-span-2 text-center">Utilizări</div>
+            <div className="col-span-2 text-center">Status</div>
+            <div className="col-span-1 text-right">Acțiuni</div>
           </div>
-          <h3 className="text-white/80 font-medium mb-1">Coduri folosite (Luna aceasta)</h3>
-          <p className="text-4xl font-bold">399</p>
-        </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="md:col-span-2 bg-[var(--card)] p-6 rounded-2xl border border-[var(--primary)]/10 shadow-sm"
-        >
-          <h3 className="text-lg font-bold text-[var(--foreground)] mb-6">Promoții Active</h3>
-          
-          <div className="space-y-4">
-            {promos.map((promo, i) => (
-              <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-[var(--primary)]/10 hover:border-[var(--primary)]/30 transition-colors gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#FCF9F4] text-[#D4A853] flex items-center justify-center border border-[#E8E2D9]">
-                    <Ticket className="w-6 h-6" />
+          <div className="divide-y divide-warm-border/50">
+            {promotions.length === 0 ? (
+              <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există nicio campanie de marketing creată.</div>
+            ) : (
+              promotions.map((promo) => {
+                let statusProps = { status: 'neutral', label: 'Epuizat' };
+                if (promo.isActive) statusProps = { status: 'success', label: 'Activ' };
+                
+                const discountText = promo.discountType === 'percentage' 
+                  ? `${promo.discountValue}% Reducere`
+                  : `${promo.discountValue} MDL Reducere`;
+
+                return (
+                  <div key={promo._id} className="grid grid-cols-12 gap-4 p-6 items-center hover:bg-[#FAF7F2] transition-colors cursor-pointer group">
+                    <div className="col-span-4">
+                      <div className="font-headline-md text-cacao-dark text-lg">{promo.code}</div>
+                      <div className="font-label-caps text-[10px] text-cacao-dark/50 mt-1 uppercase tracking-widest">Creat: {new Date(promo.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div className="col-span-3 font-body-md text-cacao-dark/80">
+                      {discountText}
+                    </div>
+                    <div className="col-span-2 text-center font-body-md text-cacao-dark/70">
+                      {promo.usageCount} / {promo.usageLimit || "Nelimitat"}
+                    </div>
+                    <div className="col-span-2 text-center flex justify-center">
+                      <StatusBadge 
+                        status={statusProps.status as any} 
+                        label={statusProps.label} 
+                      />
+                    </div>
+                    <div className="col-span-1 flex items-center justify-end">
+                      <button className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors">
+                        <Share2 size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-[var(--foreground)] text-lg flex items-center gap-2">
-                      {promo.code}
-                      <button className="text-[var(--foreground)]/40 hover:text-[var(--primary)] transition-colors"><Copy className="w-4 h-4" /></button>
-                    </h4>
-                    <p className="text-sm text-[var(--foreground)]/60">{promo.discount} • {promo.type}</p>
-                  </div>
-                </div>
-                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto text-sm text-[var(--foreground)]/60">
-                  <div className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Expira: {promo.expiry}</div>
-                  <div className="font-bold text-[var(--primary)] mt-1">{promo.uses} utilizări</div>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
-        </motion.div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
