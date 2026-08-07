@@ -74,18 +74,19 @@ export default function MenuPage() {
           {menuItems.map((item) => (
             <div key={item._id} className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden group hover:border-gold-saffron/50 transition-colors flex flex-col cursor-pointer">
               
-              {/* Image Placeholder - 21st.dev style strict borders */}
+              {/* Image Container */}
               <div className="h-48 bg-[#FAF7F2] border-b border-warm-border relative overflow-hidden">
                 <img 
-                  src={item.image ? `${API_URL}/../${item.image}` : "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80"} 
+                  src={item.image ? (item.image.startsWith('http') ? item.image : `${API_URL}/../${item.image}`) : "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80"} 
                   alt={item.name} 
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" 
+                  onError={(e: any) => { e.target.src = "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80"; }}
                 />
                 
                 <div className="absolute top-4 right-4">
                   <StatusBadge 
-                    status={item.isAvailable ? 'success' : 'neutral'} 
-                    label={item.isAvailable ? 'Activ' : 'Ascuns'} 
+                    status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
+                    label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
                   />
                 </div>
               </div>
@@ -94,7 +95,7 @@ export default function MenuPage() {
               <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-headline-md text-cacao-dark text-xl">{item.name}</h3>
-                  {item.name.toLowerCase().includes("dubai") && (
+                  {item.name?.toLowerCase().includes("dubai") && (
                     <span className="text-gold-saffron" title="Produs Premium"><Sparkles size={18} /></span>
                   )}
                 </div>
@@ -104,7 +105,7 @@ export default function MenuPage() {
                 </p>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-warm-border/50 mt-auto">
-                  <span className="font-headline-md text-gold-saffron text-xl">{item.basePrice} MDL</span>
+                  <span className="font-headline-md text-gold-saffron text-xl">{item.price ?? item.basePrice} MDL</span>
                   <button className="text-cacao-dark/50 hover:text-gold-saffron font-label-caps text-xs transition-colors">
                     Editează
                   </button>

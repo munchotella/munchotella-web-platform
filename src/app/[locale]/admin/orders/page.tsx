@@ -77,7 +77,8 @@ export default function OrdersPage() {
               orders.map((order) => {
                 const orderId = order._id.substring(order._id.length - 4).toUpperCase();
                 const time = new Date(order.createdAt).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
-                const itemsText = order.items.map((i: any) => `${i.quantity}x ${i.variantName}`).join(', ');
+                const itemsText = order.items.map((i: any) => `${i.quantity || 1}x ${i.name || i.variantName || i.title || "Preparat"}`).join(', ');
+                const guestName = order.customer?.name || order.deliveryInfo?.name || order.user?.name || "Oaspete";
                 
                 let statusProps = { status: 'neutral', label: order.status };
                 if (order.status === 'pending') statusProps = { status: 'warning', label: 'Nouă' };
@@ -96,7 +97,7 @@ export default function OrdersPage() {
                       {itemsText}
                     </div>
                     <div className="col-span-2 font-body-md text-cacao-dark/70">
-                      {order.deliveryInfo?.name || "Oaspete"}
+                      {guestName}
                       <div className="text-xs text-cacao-dark/40 mt-1">{order.paymentMethod === 'cash' ? 'Cash' : 'Card'}</div>
                     </div>
                     <div className="col-span-2 text-right font-headline-md text-cacao-dark text-lg">
