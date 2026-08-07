@@ -25,8 +25,35 @@ const greatVibesFont = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "Munchotella | Sweet Art",
-  description: "Artă dulce, preparată cu pasiune. O experiență artizanală pentru gusturi fine.",
+  title: "Munchotella | Ceva Dulce în Chișinău — Waffles & Crepes Premium",
+  description: "Vrei ceva dulce în Chișinău? Munchotella îți aduce cele mai delicioase waffles americane, mini waffles, clătite franțuzești cu Nutella®, fructe proaspete și livrare rapidă la ușa ta!",
+  keywords: [
+    "ceva dulce",
+    "ceva dulce chisinau",
+    "waffles chisinau",
+    "crepes chisinau",
+    "deserturi chisinau",
+    "livrare desert chisinau",
+    "munchotella",
+    "nutella chisinau",
+    "clatite chisinau"
+  ],
+  openGraph: {
+    title: "Munchotella | Ceva Dulce în Chișinău",
+    description: "Waffles & Crepes proaspete cu Nutella® originală și livrare rapidă în Chișinău.",
+    url: "https://www.munchotella.md",
+    siteName: "Munchotella",
+    images: [
+      {
+        url: "https://www.munchotella.md/munchotella_favicon.png",
+        width: 512,
+        height: 512,
+        alt: "Munchotella Emblem",
+      },
+    ],
+    locale: "ro_MD",
+    type: "website",
+  },
   icons: {
     icon: [
       { url: "/munchotella_favicon.png", type: "image/png" },
