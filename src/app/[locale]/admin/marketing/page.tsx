@@ -6,6 +6,7 @@ import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch } from "@/lib/adminApi";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { Ticket, Percent, Plus, Share2, AlertCircle } from "lucide-react";
 
 export default function MarketingPage() {
@@ -110,11 +111,7 @@ export default function MarketingPage() {
           <p className="font-body-md text-cacao-dark/60 animate-pulse">Se preiau campaniile de marketing...</p>
         </div>
       ) : error ? (
-        <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
-          <AlertCircle size={48} className="text-error mb-4" />
-          <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Nu am putut aduce promoțiile</h3>
-          <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
-        </div>
+        <AdminLoginForm onSuccess={loadPromos} />
       ) : (
         <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
           <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">

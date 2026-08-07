@@ -5,7 +5,7 @@ import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import { adminFetch } from "@/lib/adminApi";
-import { TrendingUp, Clock, Store, Wallet, ChefHat, AlertCircle } from "lucide-react";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -13,23 +13,25 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadDashboardData() {
-      try {
-        setLoading(true);
-        const [statsRes, ordersRes] = await Promise.all([
-          adminFetch("/admin/stats"),
-          adminFetch("/orders/admin/live")
-        ]);
-        
-        if (statsRes?.data) setStats(statsRes.data);
-        if (ordersRes?.data) setLiveOrders(ordersRes.data.slice(0, 5)); // show latest 5
-      } catch (err: any) {
-        setError(err.message || "Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [statsRes, ordersRes] = await Promise.all([
+        adminFetch("/admin/stats"),
+        adminFetch("/orders/admin/live")
+      ]);
+      
+      if (statsRes?.data) setStats(statsRes.data);
+      if (ordersRes?.data) setLiveOrders(ordersRes.data.slice(0, 5));
+    } catch (err: any) {
+      setError(err.message || "Eroare de autentificare");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadDashboardData();
   }, []);
 
@@ -43,13 +45,7 @@ export default function AdminDashboardPage() {
   }
 
   if (error) {
-    return (
-      <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
-        <AlertCircle size={48} className="text-error mb-4" />
-        <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Eroare de Autentificare</h3>
-        <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
-      </div>
-    );
+    return <AdminLoginForm onSuccess={loadDashboardData} />;
   }
 
   const activeOrdersCount = liveOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;

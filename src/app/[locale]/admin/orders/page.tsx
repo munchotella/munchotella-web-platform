@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminFetch } from "@/lib/adminApi";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { Filter, Search, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function OrdersPage() {
@@ -111,11 +112,7 @@ export default function OrdersPage() {
           <p className="font-body-md text-cacao-dark/60 animate-pulse">Se preiau arhivele cu comenzi...</p>
         </div>
       ) : error ? (
-        <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
-          <AlertCircle size={48} className="text-error mb-4" />
-          <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Nu am putut aduce comenzile</h3>
-          <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
-        </div>
+        <AdminLoginForm onSuccess={loadOrders} />
       ) : (
         <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
           {/* Table Header */}

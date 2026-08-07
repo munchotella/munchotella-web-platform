@@ -5,6 +5,7 @@ import LuxuryButton from "@/components/admin/LuxuryButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch, API_URL } from "@/lib/adminApi";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { Plus, Search, Sparkles, AlertCircle, Edit3 } from "lucide-react";
 
 export default function MenuPage() {
@@ -153,11 +154,7 @@ export default function MenuPage() {
           <p className="font-body-md text-cacao-dark/60 animate-pulse">Se încarcă vitrina cu bunătăți...</p>
         </div>
       ) : error ? (
-        <div className="bg-[#FAF7F2] border border-error/20 p-8 rounded-2xl flex flex-col items-center text-center">
-          <AlertCircle size={48} className="text-error mb-4" />
-          <h3 className="font-headline-md text-cacao-dark text-xl mb-2">Nu am putut aduce meniul</h3>
-          <p className="font-body-md text-cacao-dark/70 max-w-md">{error}</p>
-        </div>
+        <AdminLoginForm onSuccess={loadMenu} />
       ) : filteredItems.length === 0 ? (
         <div className="p-12 text-center text-cacao-dark/60 font-body-md bg-vanilla-porcelain border border-warm-border rounded-2xl">
           Nu s-a găsit niciun preparat corespunzător căutării.
