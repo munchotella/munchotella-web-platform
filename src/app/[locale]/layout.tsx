@@ -87,6 +87,31 @@ export default async function RootLayout({
         <link rel="shortcut icon" href="/munchotella_favicon.png" />
         <link rel="apple-touch-icon" href="/munchotella_favicon.png" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Munchotella",
+              "alternateName": "Munchotella Waffle Boutique",
+              "url": "https://www.munchotella.md",
+              "logo": "https://www.munchotella.md/munchotella_favicon.png",
+              "sameAs": [
+                "https://www.instagram.com/munchotella.md/",
+                "https://www.tiktok.com/@munchotella",
+                "https://www.facebook.com/munchotella"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+37379006499",
+                "contactType": "customer service",
+                "areaServed": "MD",
+                "availableLanguage": ["Romanian", "English", "Russian"]
+              }
+            })
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-accent-gold selection:text-white">
         <NextIntlClientProvider messages={messages}>
