@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navigation = [
     { name: "Analytics & Vânzări", href: "/admin", icon: LayoutDashboard },
+    { name: "Gestionare Comenzi", href: "/admin/orders", icon: ShoppingBag },
     { name: "Marketing & Promoții", href: "/admin/marketing", icon: Megaphone },
     { name: "Stoc Inteligent", href: "/admin/inventory", icon: PackageSearch },
     { name: "Setări AI (Instagram)", href: "/admin/ai-settings", icon: Settings },
