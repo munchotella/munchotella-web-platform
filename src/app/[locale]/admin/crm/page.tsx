@@ -18,7 +18,8 @@ export default function CrmPage() {
         setLoading(true);
         const res = await adminFetch("/admin/users");
         if (res?.success) {
-          setGuests(res.data);
+          const list = Array.isArray(res.data) ? res.data : (res.data?.users || []);
+          setGuests(list);
         }
       } catch (err: any) {
         setError(err.message || "Eroare la preluarea oaspeților");
@@ -36,7 +37,7 @@ export default function CrmPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-warm-border rounded-2xl overflow-hidden border border-warm-border mb-8">
         <BentoKpiCard 
           title="Total Oaspeți"
-          value={guests.length.toString()}
+          value={(guests?.length || 0).toString()}
           trend="Înregistrați în platformă"
           trendPositive={true}
           icon={<Users size={24} />}
