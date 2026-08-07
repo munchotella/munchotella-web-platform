@@ -4,30 +4,72 @@ import React, { useState, useEffect } from "react";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import StatusBadge from "@/components/admin/StatusBadge";
+import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch } from "@/lib/adminApi";
 import { Ticket, Percent, Plus, Share2, AlertCircle } from "lucide-react";
 
 export default function MarketingPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
+  const [isSlideOverOpen, setSlideOverOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadPromos() {
-      try {
-        setLoading(true);
-        const res = await adminFetch("/admin/promoCodes");
-        if (res?.success) {
-          setPromotions(res.data);
-        }
-      } catch (err: any) {
-        setError(err.message || "Eroare la preluarea promoțiilor");
-      } finally {
-        setLoading(false);
+  // Form state
+  const [code, setCode] = useState("");
+  const [discountType, setDiscountType] = useState("percentage");
+  const [discountValue, setDiscountValue] = useState("");
+  const [usageLimit, setUsageLimit] = useState("");
+
+  const loadPromos = async () => {
+    try {
+      setLoading(true);
+      const res = await adminFetch("/admin/promoCodes");
+      if (res?.success) {
+        setPromotions(res.data);
       }
+    } catch (err: any) {
+      setError(err.message || "Eroare la preluarea promoțiilor");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadPromos();
   }, []);
+
+  const handleCreatePromo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!code || !discountValue) {
+      alert("Codul și valoarea reducerii sunt obligatorii.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await adminFetch("/admin/promoCodes", {
+        method: "POST",
+        body: JSON.stringify({
+          code: code.toUpperCase().trim(),
+          discountType,
+          discountValue: Number(discountValue),
+          usageLimit: usageLimit ? Number(usageLimit) : null,
+          isActive: true,
+        }),
+      });
+
+      setSlideOverOpen(false);
+      setCode("");
+      setDiscountValue("");
+      setUsageLimit("");
+      await loadPromos();
+    } catch (err: any) {
+      alert("Eroare la crearea promoției: " + (err.message || "Apel eșuat"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-10">
@@ -53,7 +95,13 @@ export default function MarketingPage() {
 
       <div className="flex items-center justify-between">
         <h3 className="font-headline-md text-cacao-dark text-xl">Promoții și Cupoane</h3>
-        <LuxuryButton variant="primary" icon={<Plus size={16} />}>Crează Campanie</LuxuryButton>
+        <LuxuryButton 
+          variant="primary" 
+          icon={<Plus size={16} />}
+          onClick={() => setSlideOverOpen(true)}
+        >
+          Crează Campanie
+        </LuxuryButton>
       </div>
 
       {loading ? (
@@ -99,7 +147,7 @@ export default function MarketingPage() {
                       {discountText}
                     </div>
                     <div className="col-span-2 text-center font-body-md text-cacao-dark/70">
-                      {promo.usageCount} / {promo.usageLimit || "Nelimitat"}
+                      {promo.usageCount || 0} / {promo.usageLimit || "Nelimitat"}
                     </div>
                     <div className="col-span-2 text-center flex justify-center">
                       <StatusBadge 
@@ -108,7 +156,10 @@ export default function MarketingPage() {
                       />
                     </div>
                     <div className="col-span-1 flex items-center justify-end">
-                      <button className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors">
+                      <button 
+                        onClick={() => alert(`Cod promoțional: ${promo.code}\nReducere: ${discountText}`)}
+                        className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors cursor-pointer"
+                      >
                         <Share2 size={14} />
                       </button>
                     </div>
@@ -119,6 +170,65 @@ export default function MarketingPage() {
           </div>
         </div>
       )}
+
+      <SlideOver
+        isOpen={isSlideOverOpen}
+        onClose={() => setSlideOverOpen(false)}
+        title="Campanie Promoțională Nouă"
+      >
+        <form onSubmit={handleCreatePromo} className="space-y-6">
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Cod Promoțional *</label>
+            <input 
+              type="text"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark uppercase focus:outline-none focus:border-gold-saffron transition-colors"
+              placeholder="Ex: PROMO2026"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Tip Reducere</label>
+              <select
+                value={discountType}
+                onChange={(e) => setDiscountType(e.target.value)}
+                className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+              >
+                <option value="percentage">Procentuală (%)</option>
+                <option value="fixed">Sumă Fixă (MDL)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Valoare *</label>
+              <input 
+                type="number"
+                required
+                value={discountValue}
+                onChange={(e) => setDiscountValue(e.target.value)}
+                className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+                placeholder="Ex: 15"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Limită Utilizări (Opțional)</label>
+            <input 
+              type="number"
+              value={usageLimit}
+              onChange={(e) => setUsageLimit(e.target.value)}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+              placeholder="Lăsați gol pentru nelimitat"
+            />
+          </div>
+          <div className="pt-6 border-t border-warm-border mt-8">
+            <LuxuryButton variant="primary" className="w-full" disabled={saving}>
+              {saving ? "Se creează..." : "Publică Cuponul"}
+            </LuxuryButton>
+          </div>
+        </form>
+      </SlideOver>
     </div>
   );
 }

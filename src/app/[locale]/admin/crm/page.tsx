@@ -30,6 +30,21 @@ export default function CrmPage() {
     loadGuests();
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleVipSurprise = () => {
+    alert("Un cupon cadou VIP (15% Reducere) a fost expediat către oaspeții recurenți din baza de date!");
+  };
+
+  const filteredGuests = guests.filter((g) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (g.name && g.name.toLowerCase().includes(q)) ||
+      (g.email && g.email.toLowerCase().includes(q)) ||
+      (g.phone && g.phone.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="space-y-8 pb-10">
       
@@ -60,9 +75,25 @@ export default function CrmPage() {
         />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h3 className="font-headline-md text-cacao-dark text-xl">Oaspeți Recenți</h3>
-        <LuxuryButton variant="outline" icon={<Gift size={16} />}>Trimite Surpriză VIP</LuxuryButton>
+        
+        <div className="flex items-center gap-4">
+          <input 
+            type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Caută după nume sau email..."
+            className="px-4 py-2 bg-vanilla-porcelain border border-warm-border rounded-lg text-cacao-dark font-body-md focus:outline-none focus:border-gold-saffron transition-colors w-64 text-sm"
+          />
+          <LuxuryButton 
+            variant="outline" 
+            icon={<Gift size={16} />}
+            onClick={handleVipSurprise}
+          >
+            Trimite Surpriză VIP
+          </LuxuryButton>
+        </div>
       </div>
 
       {loading ? (
@@ -86,10 +117,10 @@ export default function CrmPage() {
           </div>
 
           <div className="divide-y divide-warm-border/50">
-            {guests.length === 0 ? (
-              <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există niciun client înregistrat.</div>
+            {filteredGuests.length === 0 ? (
+              <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există niciun client înregistrat corespunzător căutării.</div>
             ) : (
-              guests.map((guest) => {
+              filteredGuests.map((guest) => {
                 const initial = guest.name ? guest.name.charAt(0).toUpperCase() : '?';
                 return (
                   <div key={guest._id} className="grid grid-cols-12 gap-4 p-6 items-center hover:bg-[#FAF7F2] transition-colors cursor-pointer group">

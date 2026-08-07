@@ -1,13 +1,27 @@
+"use client";
+
 import React from 'react';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { LayoutDashboard, ShoppingBag, Utensils, Users, Ticket, Bot, LogOut } from 'lucide-react';
+import { adminFetch } from '@/lib/adminApi';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   
   // Clean locale from pathname for exact matching (e.g., /ro/admin -> /admin)
   const isMatch = (path: string) => {
     return pathname.endsWith(path);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await adminFetch('/auth/logout', { method: 'POST' }).catch(() => {});
+    } finally {
+      localStorage.removeItem('munchotella_token');
+      localStorage.removeItem('munchotella_user');
+      window.location.href = '/ro/admin';
+    }
   };
 
   const navItems = [
@@ -52,7 +66,10 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="p-6 border-t border-[#2A1F18]">
-        <button className="flex items-center gap-4 px-4 py-3 rounded-lg text-vanilla-porcelain/70 hover:text-error transition-colors w-full font-body-md">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-4 px-4 py-3 rounded-lg text-vanilla-porcelain/70 hover:text-error hover:bg-error/10 transition-colors w-full font-body-md cursor-pointer"
+        >
           <LogOut size={18} />
           <span>Ieșire Cont</span>
         </button>

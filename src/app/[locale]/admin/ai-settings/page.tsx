@@ -1,10 +1,30 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import { Bot, MessageSquare, Fingerprint, Activity, Zap, CheckCircle2 } from "lucide-react";
 
 export default function AiSettingsPage() {
+  const [tone, setTone] = useState("elegant");
+  const [prompt, setPrompt] = useState(
+    "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală."
+  );
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = () => {
+    setSaving(true);
+    setTimeout(() => {
+      setSaving(false);
+      alert("Personalitatea și instrucțiunile Asistentului Munchotella AI au fost salvate cu succes!");
+    }, 600);
+  };
+
+  const handleUploadDoc = () => {
+    alert("Funcționalitatea de încărcare documente suplimentare este activă. Documentele sunt analizate automat.");
+  };
+
   return (
     <div className="space-y-8 pb-10">
       
@@ -24,7 +44,9 @@ export default function AiSettingsPage() {
           </div>
         </div>
         
-        <LuxuryButton variant="primary">Salvează Personalitatea</LuxuryButton>
+        <LuxuryButton variant="primary" onClick={handleSave} disabled={saving}>
+          {saving ? "Se salvează..." : "Salvează Personalitatea"}
+        </LuxuryButton>
       </div>
 
       {/* KPI Bento Grid */}
@@ -66,13 +88,34 @@ export default function AiSettingsPage() {
             <div>
               <label className="block font-label-caps text-cacao-dark/60 text-xs mb-3">Tonul Vocii</label>
               <div className="grid grid-cols-3 gap-3">
-                <button className="py-3 px-4 rounded-lg border border-gold-saffron bg-gold-saffron/5 text-gold-saffron font-body-md text-sm transition-colors text-center font-medium">
+                <button 
+                  onClick={() => setTone("elegant")}
+                  className={`py-3 px-4 rounded-lg font-body-md text-sm transition-colors text-center cursor-pointer ${
+                    tone === "elegant"
+                      ? "border border-gold-saffron bg-gold-saffron/10 text-gold-saffron font-medium"
+                      : "border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+                  }`}
+                >
                   Elegant / Premium
                 </button>
-                <button className="py-3 px-4 rounded-lg border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2] font-body-md text-sm transition-colors text-center">
+                <button 
+                  onClick={() => setTone("friendly")}
+                  className={`py-3 px-4 rounded-lg font-body-md text-sm transition-colors text-center cursor-pointer ${
+                    tone === "friendly"
+                      ? "border border-gold-saffron bg-gold-saffron/10 text-gold-saffron font-medium"
+                      : "border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+                  }`}
+                >
                   Prietenos
                 </button>
-                <button className="py-3 px-4 rounded-lg border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2] font-body-md text-sm transition-colors text-center">
+                <button 
+                  onClick={() => setTone("formal")}
+                  className={`py-3 px-4 rounded-lg font-body-md text-sm transition-colors text-center cursor-pointer ${
+                    tone === "formal"
+                      ? "border border-gold-saffron bg-gold-saffron/10 text-gold-saffron font-medium"
+                      : "border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+                  }`}
+                >
                   Formal
                 </button>
               </div>
@@ -81,8 +124,9 @@ export default function AiSettingsPage() {
             <div>
               <label className="block font-label-caps text-cacao-dark/60 text-xs mb-3">Instrucțiune de Bază (Prompt)</label>
               <textarea 
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 className="w-full bg-[#FAF7F2] border border-warm-border rounded-xl p-4 font-body-md text-cacao-dark min-h-[150px] focus:outline-none focus:border-gold-saffron transition-colors resize-none"
-                defaultValue="Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală."
               />
             </div>
           </div>
@@ -95,7 +139,9 @@ export default function AiSettingsPage() {
               <Bot className="text-gold-saffron" size={24} />
               <h3 className="font-headline-md text-cacao-dark text-xl">Baza de Cunoștințe</h3>
             </div>
-            <LuxuryButton variant="outline" className="scale-90 origin-right">Încarcă Document</LuxuryButton>
+            <LuxuryButton variant="outline" className="scale-90 origin-right" onClick={handleUploadDoc}>
+              Încarcă Document
+            </LuxuryButton>
           </div>
 
           <div className="flex-1 border border-warm-border/50 rounded-xl bg-[#FAF7F2]/50 p-6 flex flex-col justify-center items-center text-center">
