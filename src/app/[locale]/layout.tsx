@@ -30,13 +30,25 @@ export const metadata: Metadata = {
   keywords: [
     "ceva dulce",
     "ceva dulce chisinau",
+    "vreau ceva dulce",
     "waffles chisinau",
     "crepes chisinau",
+    "clatite chisinau",
+    "clatite cu nutella",
+    "pancakes chisinau",
     "deserturi chisinau",
-    "livrare desert chisinau",
+    "livrare deserturi chisinau",
+    "desert la domiciliu chisinau",
+    "desert noaptea chisinau",
+    "pistachio crepe chisinau",
+    "crepe dubai chisinau",
     "munchotella",
-    "nutella chisinau",
-    "clatite chisinau"
+    "munchotella chisinau",
+    "munchotella md",
+    "munchotella testemitanu",
+    "сладкое кишинев",
+    "доставка десертов кишинев",
+    "вафли кишинев"
   ],
   openGraph: {
     title: "Munchotella | Ceva Dulce în Chișinău",
