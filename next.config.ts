@@ -16,20 +16,6 @@ const nextConfig: NextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/ro/admin',
-        permanent: false,
-      },
-      {
-        source: '/login',
-        destination: '/ro/admin',
-        permanent: false,
-      }
-    ];
-  },
   async headers() {
     return [
       {
