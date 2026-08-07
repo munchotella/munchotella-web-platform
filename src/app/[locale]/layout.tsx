@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     locale: "ro_MD",
     type: "website",
   },
+  verification: {
+    google: "4ob3hpQuVAUL7TEPPFPkKPOjFTfINdz2VuH9Grelz6c",
+  },
   icons: {
     icon: [
       { url: "/munchotella_favicon.png", type: "image/png" },
