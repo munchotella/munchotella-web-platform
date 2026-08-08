@@ -26,6 +26,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname.includes("/crm")) title = "Oaspeți și Recunoștință";
   if (pathname.includes("/marketing")) title = "Promoții și Oferte";
 
+  // 1. Loading state while checking token on client mount
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F2] font-body-md flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-4 border-gold-saffron border-t-transparent rounded-full animate-spin"></div>
+        <p className="font-body-md text-cacao-dark/60 animate-pulse">Se verifică autentificarea...</p>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated state -> Show AdminLoginForm
   if (isAuthenticated === false) {
     return (
       <div className="min-h-screen bg-[#FAF7F2] font-body-md flex items-center justify-center p-6 relative">
