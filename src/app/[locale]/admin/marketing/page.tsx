@@ -25,9 +25,10 @@ export default function MarketingPage() {
   const loadPromos = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await adminFetch("/admin/promoCodes");
       if (res?.success) {
-        setPromotions(res.data);
+        setPromotions(res.data.promoCodes || res.data || []);
       }
     } catch (err: any) {
       const msg = err.message || "Eroare la preluarea promoțiilor";
