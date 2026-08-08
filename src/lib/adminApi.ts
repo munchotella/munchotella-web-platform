@@ -1,5 +1,5 @@
 const envUrl = process.env.NEXT_PUBLIC_API_URL;
-const rawUrl = (envUrl && envUrl.startsWith('http')) 
+const rawUrl = (envUrl && envUrl.startsWith('http') && !envUrl.includes('vercel.app')) 
   ? envUrl.replace(/\/$/, '') 
   : "https://munchotella-api.onrender.com";
 
