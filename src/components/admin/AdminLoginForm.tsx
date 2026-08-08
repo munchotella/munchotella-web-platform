@@ -23,7 +23,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
     }
 
     try {
-      const res = await fetch(${API_URL}/auth/login, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: normalized, password }),
@@ -31,7 +31,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
       const data = await res.json();
 
       if (!data.success) {
-        throw new Error(data.message || "Creden?iale incorecte.");
+        throw new Error(data.message || "Credentiale incorecte.");
       }
 
       if (data.data?.role !== "admin") {
@@ -89,14 +89,14 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
 
         <div>
           <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Parola Administrator</label>
-          <div className="relative">
+          <div className="relative font-body-md text-cacao-dark">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-cacao-dark/40" size={18} />
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Parola ta"
               className="w-full pl-12 pr-4 py-3.5 bg-[#FAF7F2] border border-warm-border rounded-xl font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
             />
           </div>
