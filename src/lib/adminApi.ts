@@ -1,5 +1,7 @@
-// src/lib/adminApi.ts
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+const envUrl = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = (envUrl && envUrl.startsWith('http')) 
+  ? envUrl.replace(/\/$/, '') 
+  : "https://munchotella-api.onrender.com/api";
 
 export async function adminFetch(endpoint: string, options: RequestInit = {}) {
   // Retrieve the token from localStorage
