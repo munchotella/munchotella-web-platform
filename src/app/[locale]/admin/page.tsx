@@ -26,7 +26,14 @@ export default function AdminDashboardPage() {
       if (statsRes?.data) setStats(statsRes.data);
       if (ordersRes?.data) setLiveOrders(ordersRes.data.slice(0, 5));
     } catch (err: any) {
-      setError(err.message || "Eroare de autentificare");
+      const msg = err.message || "Eroare de autentificare";
+      if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
+        localStorage.removeItem("munchotella_token");
+        localStorage.removeItem("munchotella_user");
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

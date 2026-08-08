@@ -8,13 +8,19 @@ import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(() => {
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("munchotella_token");
+    }
+    return null;
+  });
   
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("munchotella_token");
       setIsAuthenticated(!!token);
     };
+    // Sync check on mount
     checkAuth();
     window.addEventListener("storage", checkAuth);
     return () => window.removeEventListener("storage", checkAuth);
