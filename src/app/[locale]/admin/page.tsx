@@ -6,6 +6,7 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import { adminFetch } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
+import { TrendingUp, Clock, Store, Wallet, ChefHat, AlertCircle } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
