@@ -35,7 +35,14 @@ export default function MenuPage() {
         setMenuItems(res.data);
       }
     } catch (err: any) {
-      setError(err.message || "Eroare la preluarea meniului");
+      const msg = err.message || "Eroare la preluarea meniului";
+      if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
+        localStorage.removeItem("munchotella_token");
+        localStorage.removeItem("munchotella_user");
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -154,7 +161,12 @@ export default function MenuPage() {
           <p className="font-body-md text-cacao-dark/60 animate-pulse">Se încarcă vitrina cu bunătăți...</p>
         </div>
       ) : error ? (
-        <AdminLoginForm onSuccess={loadMenu} />
+        <div className="flex flex-col items-center justify-center h-64 space-y-4 bg-vanilla-porcelain border border-warm-border rounded-2xl">
+          <AlertCircle size={48} className="text-cacao-dark/20" />
+          <h3 className="font-headline-md text-xl text-cacao-dark">Eroare Meniu</h3>
+          <p className="font-body-md text-cacao-dark/60">{error}</p>
+          <LuxuryButton onClick={loadMenu}>Reîncearcă</LuxuryButton>
+        </div>
       ) : filteredItems.length === 0 ? (
         <div className="p-12 text-center text-cacao-dark/60 font-body-md bg-vanilla-porcelain border border-warm-border rounded-2xl">
           Nu s-a găsit niciun preparat corespunzător căutării.

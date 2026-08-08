@@ -23,7 +23,14 @@ export default function OrdersPage() {
         setOrders(res.data);
       }
     } catch (err: any) {
-      setError(err.message || "Eroare la preluarea comenzilor");
+      const msg = err.message || "Eroare la preluarea comenzilor";
+      if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
+        localStorage.removeItem("munchotella_token");
+        localStorage.removeItem("munchotella_user");
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -112,7 +119,12 @@ export default function OrdersPage() {
           <p className="font-body-md text-cacao-dark/60 animate-pulse">Se preiau arhivele cu comenzi...</p>
         </div>
       ) : error ? (
-        <AdminLoginForm onSuccess={loadOrders} />
+        <div className="flex flex-col items-center justify-center h-64 space-y-4 bg-vanilla-porcelain border border-warm-border rounded-2xl">
+          <AlertCircle size={48} className="text-cacao-dark/20" />
+          <h3 className="font-headline-md text-xl text-cacao-dark">Eroare la preluarea comenzilor</h3>
+          <p className="font-body-md text-cacao-dark/60">{error}</p>
+          <LuxuryButton onClick={loadOrders}>Reîncearcă</LuxuryButton>
+        </div>
       ) : (
         <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
           {/* Table Header */}

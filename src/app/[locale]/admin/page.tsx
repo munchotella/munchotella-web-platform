@@ -53,7 +53,14 @@ export default function AdminDashboardPage() {
   }
 
   if (error) {
-    return <AdminLoginForm onSuccess={loadDashboardData} />;
+    return (
+      <div className="flex flex-col items-center justify-center h-96 space-y-4 bg-vanilla-porcelain border border-warm-border rounded-2xl">
+        <AlertCircle size={48} className="text-cacao-dark/20" />
+        <h3 className="font-headline-md text-xl text-cacao-dark">Eroare la preluarea datelor</h3>
+        <p className="font-body-md text-cacao-dark/60">{error}</p>
+        <LuxuryButton onClick={loadDashboardData}>Reîncearcă</LuxuryButton>
+      </div>
+    );
   }
 
   const activeOrdersCount = liveOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
