@@ -13,28 +13,29 @@ export default function CrmPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadGuests() {
-      try {
-        setLoading(true);
-        const res = await adminFetch("/admin/users");
-        if (res?.success) {
-          const list = Array.isArray(res.data) ? res.data : (res.data?.users || []);
-          setGuests(list);
-        }
-      } catch (err: any) {
-        const msg = err.message || "Eroare la preluarea oaspeților";
-        if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
-          localStorage.removeItem("munchotella_token");
-          localStorage.removeItem("munchotella_user");
-          window.dispatchEvent(new Event("storage"));
-        } else {
-          setError(msg);
-        }
-      } finally {
-        setLoading(false);
+  const loadGuests = async () => {
+    try {
+      setLoading(true);
+      const res = await adminFetch("/admin/users");
+      if (res?.success) {
+        const list = Array.isArray(res.data) ? res.data : (res.data?.users || []);
+        setGuests(list);
       }
+    } catch (err: any) {
+      const msg = err.message || "Eroare la preluarea oaspeților";
+      if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
+        localStorage.removeItem("munchotella_token");
+        localStorage.removeItem("munchotella_user");
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadGuests();
   }, []);
 
