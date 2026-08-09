@@ -6,7 +6,7 @@ import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminFetch } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
-import { Users, Star, Gift, ChevronRight, Award, AlertCircle } from "lucide-react";
+import { Users, Star, Gift, ChevronRight, Award, AlertCircle, ShieldCheck } from "lucide-react";
 
 export default function CrmPage() {
   const [guests, setGuests] = useState<any[]>([]);
@@ -40,8 +40,27 @@ export default function CrmPage() {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-
   const [sendingNotification, setSendingNotification] = useState(false);
+
+  const handleToggleRole = async (guest: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newRole = guest.role === "admin" ? "customer" : "admin";
+    const roleText = newRole === "admin" ? "Administrator" : "Client Normal";
+    if (!confirm(`Ești sigur că vrei să schimbi rolul utilizatorului ${guest.name || guest.email} în ${roleText}?`)) return;
+
+    try {
+      const res = await adminFetch(`/admin/users/${guest._id}/role`, {
+        method: "PUT",
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (res?.success) {
+        alert(res.message || "Rol actualizat cu succes!");
+        await loadGuests();
+      }
+    } catch (err: any) {
+      alert("Eroare la schimbarea rolului: " + (err.message || "Apel eșuat"));
+    }
+  };
 
   const handleVipSurprise = async () => {
     try {
@@ -174,8 +193,15 @@ export default function CrmPage() {
                         label={guest.role === 'admin' ? 'Administrator' : 'Client'} 
                       />
                     </div>
-                    <div className="col-span-2 flex items-center justify-end gap-4">
-                      <ChevronRight size={18} className="text-cacao-dark/30 group-hover:text-gold-saffron transition-colors" />
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      <button
+                        onClick={(e) => handleToggleRole(guest, e)}
+                        className="px-3 py-1.5 bg-gold-saffron/10 hover:bg-gold-saffron/20 border border-gold-saffron/40 rounded-lg text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                        title={guest.role === 'admin' ? 'Revocă Acces Administrator' : 'Acordă Acces Administrator'}
+                      >
+                        <ShieldCheck size={14} />
+                        <span>{guest.role === 'admin' ? 'Revocă Admin' : 'Acordă Admin'}</span>
+                      </button>
                     </div>
                   </div>
                 );
