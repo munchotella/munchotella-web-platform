@@ -47,20 +47,28 @@ export default function MenuPage() {
   // 1. Initial State: Hybrid Fallback cu menu.json (0ms)
   const initialItems = rawMenuItems.map((item: any, index: number) => {
     let desc = item.description;
-    const nameLower = item.name.toLowerCase();
+    let name = item.name;
+    const nameLower = name.toLowerCase();
     if (item.category === "drinks" && (nameLower.includes("coca") || nameLower.includes("fanta") || nameLower.includes("dorna") || nameLower.includes("sprite"))) {
       desc = "";
     }
+    
+    if (nameLower.includes("dorna")) {
+      if (locale === 'en') name = name.replace(/apă|apa/i, "Water");
+      else if (locale === 'ru') name = name.replace(/apă|apa/i, "Вода");
+      else name = name.replace(/apa/i, "Apă"); // Correct diacritics in RO
+    }
+
     return {
       id: index + 1,
-      name: item.name,
+      name,
       price: `${item.price} ${item.currency}`,
       numericPrice: item.price,
       category: categoryMap[item.category] || item.category,
       rawCategory: item.category,
       desc,
       img: item.image,
-      badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
+      badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
     };
   });
 
@@ -76,25 +84,33 @@ export default function MenuPage() {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           const liveItems = data.data.map((item: any, index: number) => {
             let desc = item.description;
+            let name = item.name;
             const cat = item.category?.toLowerCase() || "";
-            const nameLower = item.name.toLowerCase();
+            const nameLower = name.toLowerCase();
             
             // Remove description for commercial bottled drinks
             if ((cat === "drinks" || cat === "băuturi" || cat === "напитки") && 
                 (nameLower.includes("coca") || nameLower.includes("fanta") || nameLower.includes("dorna") || nameLower.includes("sprite"))) {
               desc = "";
             }
+            
+            // Translate 'Apa' but keep 'Dorna'
+            if (nameLower.includes("dorna")) {
+              if (locale === 'en') name = name.replace(/apă|apa/i, "Water");
+              else if (locale === 'ru') name = name.replace(/apă|apa/i, "Вода");
+              else name = name.replace(/apa/i, "Apă");
+            }
 
             return {
               id: item._id || index + 1,
-              name: item.name,
+              name,
               price: `${item.price} ${item.currency || 'MDL'}`,
               numericPrice: item.price,
               category: categoryMap[item.category] || item.category,
               rawCategory: item.category?.toLowerCase() || "",
               desc,
               img: item.imageUrl || item.image,
-              badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
+              badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
             };
           });
           setMenuItems(liveItems);
