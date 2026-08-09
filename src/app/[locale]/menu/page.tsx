@@ -145,11 +145,11 @@ export default function MenuPage() {
         onClose={() => setIsModalOpen(false)}
       />
       
-      {/* Sticky Header Nav matching Stitch UI */}
-      <div className="sticky top-0 z-40 bg-[#F9F9FB]/95 backdrop-blur-xl border-b border-[#EAE1DB]/60 pt-24 pb-4 px-6 md:px-12 transition-all">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col mb-12">
-            <h1 className="font-serif text-[42px] leading-[1.1] font-bold text-[#1A1A1A] tracking-tight mb-3">
+      {/* Static Header Section (Title + Search) */}
+      <div className="bg-[#F9F9FB] pt-32 pb-6 px-6 md:px-12">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex flex-col">
+            <h1 className="font-serif text-[42px] leading-[1.1] font-bold text-[#1A1A1A] tracking-tight mb-2">
               {t('title1')} <span className="text-[#1A1A1A] italic font-normal">{t('title2')}</span>
             </h1>
             <p className="text-[#82756A] text-[14px] font-medium hidden md:block">
@@ -181,10 +181,12 @@ export default function MenuPage() {
             )}
           </div>
         </div>
+      </div>
         
-        {/* Elegant Pill Category Slider inside Sticky Header */}
-        <div className="max-w-[1200px] mx-auto mt-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 min-w-max pb-2">
+      {/* Sticky Category Pills */}
+      <div className="sticky top-[80px] z-40 bg-[#F9F9FB]/95 backdrop-blur-xl border-b border-[#EAE1DB]/60 py-3 px-6 md:px-12 transition-all">
+        <div className="max-w-[1200px] mx-auto overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 min-w-max pb-1">
             {categories.map((cat) => {
               const isActive = activeCategory === cat;
               return (
