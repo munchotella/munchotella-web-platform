@@ -6,12 +6,13 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch, API_URL } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
-import { Plus, Search, Sparkles, AlertCircle, Edit3, Trash2 } from "lucide-react";
+import { Plus, Search, Sparkles, AlertCircle, Edit3, Trash2, Archive, ArchiveRestore, PackageCheck } from "lucide-react";
 
 export default function MenuPage() {
   const [isSlideOverOpen, setSlideOverOpen] = useState(false);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewTab, setViewTab] = useState<"active" | "archived">("active");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export default function MenuPage() {
   const loadMenu = async () => {
     try {
       setLoading(true);
-      const res = await adminFetch("/menu");
+      const res = await adminFetch("/menu?isArchived=all");
       if (res?.success) {
         setMenuItems(res.data);
       }
@@ -131,26 +132,48 @@ export default function MenuPage() {
     }
   };
 
-  const handleDelete = async (id: string, name: string, e: React.MouseEvent) => {
+  const handleArchiveToggle = async (item: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(`Ești sigur că vrei să ștergi preparatul "${name}"?`)) return;
+    const willArchive = !item.isArchived;
+    const actionText = willArchive ? "arhivezi" : "dezarhivezi";
+    if (!confirm(`Ești sigur că vrei să ${actionText} preparatul "${item.name}"?`)) return;
+
+    try {
+      await adminFetch(`/menu/${item._id}`, {
+        method: "PUT",
+        body: JSON.stringify({ isArchived: willArchive }),
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert(`Eroare la ${actionText}: ` + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const handleDeletePermanent = async (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Ești sigur că vrei să ștergi DEFINITIV preparatul "${name}" din baza de date?`)) return;
     try {
       await adminFetch(`/menu/${id}`, {
         method: "DELETE",
       });
       await loadMenu();
     } catch (err: any) {
-      alert("Eroare la ștergerea preparatului: " + (err.message || "Apel eșuat"));
+      alert("Eroare la ștergere: " + (err.message || "Apel eșuat"));
     }
   };
 
+  const activeCount = menuItems.filter(i => !i.isArchived).length;
+  const archivedCount = menuItems.filter(i => !!i.isArchived).length;
+
   const filteredItems = menuItems.filter((item) => {
+    const isArchived = !!item.isArchived;
+    const matchesTab = viewTab === "archived" ? isArchived : !isArchived;
     const q = searchQuery.toLowerCase();
-    return (
+    const matchesSearch =
       item.name?.toLowerCase().includes(q) ||
       item.description?.toLowerCase().includes(q) ||
-      item.category?.toLowerCase().includes(q)
-    );
+      item.category?.toLowerCase().includes(q);
+    return matchesTab && matchesSearch;
   });
 
   return (
@@ -182,6 +205,32 @@ export default function MenuPage() {
         </div>
       </div>
 
+      {/* Tab Selector */}
+      <div className="flex items-center gap-3 border-b border-warm-border pb-4">
+        <button
+          onClick={() => setViewTab("active")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-label-caps text-xs transition-colors cursor-pointer ${
+            viewTab === "active"
+              ? "bg-gold-saffron text-cacao-dark font-bold shadow-sm"
+              : "bg-vanilla-porcelain border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+          }`}
+        >
+          <PackageCheck size={16} />
+          <span>Preparate Active ({activeCount})</span>
+        </button>
+        <button
+          onClick={() => setViewTab("archived")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-label-caps text-xs transition-colors cursor-pointer ${
+            viewTab === "archived"
+              ? "bg-gold-saffron text-cacao-dark font-bold shadow-sm"
+              : "bg-vanilla-porcelain border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+          }`}
+        >
+          <Archive size={16} />
+          <span>Arhivă Preparate ({archivedCount})</span>
+        </button>
+      </div>
+
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="w-12 h-12 border-4 border-gold-saffron border-t-transparent rounded-full animate-spin"></div>
@@ -196,7 +245,9 @@ export default function MenuPage() {
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="p-12 text-center text-cacao-dark/60 font-body-md bg-vanilla-porcelain border border-warm-border rounded-2xl">
-          Nu s-a găsit niciun preparat corespunzător căutării.
+          {viewTab === "archived" 
+            ? "Nu există niciun preparat arhivat." 
+            : "Nu s-a găsit niciun preparat corespunzător căutării."}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -213,16 +264,20 @@ export default function MenuPage() {
                 />
                 
                 <div className="absolute top-4 right-4">
-                  <button 
-                    onClick={(e) => handleToggleAvailability(item, e)}
-                    title="Apasă pentru a schimba statusul (Activ / Ascuns)"
-                    className="cursor-pointer hover:scale-105 transition-transform"
-                  >
-                    <StatusBadge 
-                      status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
-                      label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
-                    />
-                  </button>
+                  {item.isArchived ? (
+                    <StatusBadge status="neutral" label="Arhivat" />
+                  ) : (
+                    <button 
+                      onClick={(e) => handleToggleAvailability(item, e)}
+                      title="Apasă pentru a schimba statusul (Activ / Ascuns)"
+                      className="cursor-pointer hover:scale-105 transition-transform"
+                    >
+                      <StatusBadge 
+                        status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
+                        label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
+                      />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -242,22 +297,45 @@ export default function MenuPage() {
                 <div className="flex items-center justify-between pt-4 border-t border-warm-border/50 mt-auto">
                   <span className="font-headline-md text-gold-saffron text-xl">{item.price ?? item.basePrice} MDL</span>
                   <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => handleOpenEdit(item)}
-                      className="flex items-center gap-1 text-cacao-dark/60 hover:text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer"
-                      title="Editează Preparat"
-                    >
-                      <Edit3 size={14} />
-                      <span>Editează</span>
-                    </button>
-                    <button 
-                      onClick={(e) => handleDelete(item._id, item.name, e)}
-                      className="flex items-center gap-1 text-cacao-dark/40 hover:text-red-500 font-label-caps text-xs transition-colors cursor-pointer"
-                      title="Șterge Preparat"
-                    >
-                      <Trash2 size={14} />
-                      <span>Șterge</span>
-                    </button>
+                    {!item.isArchived ? (
+                      <>
+                        <button 
+                          onClick={() => handleOpenEdit(item)}
+                          className="flex items-center gap-1 text-cacao-dark/70 hover:text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Editează Preparat"
+                        >
+                          <Edit3 size={14} />
+                          <span>Editează</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleArchiveToggle(item, e)}
+                          className="flex items-center gap-1 text-cacao-dark/60 hover:text-amber-700 font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Arhivează Preparat"
+                        >
+                          <Archive size={14} />
+                          <span>Arhivează</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={(e) => handleArchiveToggle(item, e)}
+                          className="flex items-center gap-1 text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer font-bold"
+                          title="Dezarhivează Preparat"
+                        >
+                          <ArchiveRestore size={14} />
+                          <span>Dezarhivează</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleDeletePermanent(item._id, item.name, e)}
+                          className="flex items-center gap-1 text-cacao-dark/40 hover:text-red-500 font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Șterge Definitiv"
+                        >
+                          <Trash2 size={14} />
+                          <span>Șterge</span>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
