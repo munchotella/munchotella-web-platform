@@ -19,8 +19,8 @@ const ContentSecurityPolicy = [
   "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://cdn.prod.website-files.com",
   // connect-src: API Munchotella (Render) + Firebase + Sentry
   "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com",
-  // frame-src: Firebase auth popup (Google, Facebook login)
-  "frame-src 'self' https://munchotella-91a83.firebaseapp.com https://accounts.google.com",
+  // frame-src: Firebase auth popup (Google, Facebook login) and Google Maps iframe
+  "frame-src 'self' https://munchotella-91a83.firebaseapp.com https://accounts.google.com https://www.google.com",
   // media-src: video/audio propriu
   "media-src 'self'",
   // object-src: blochează complet plugin-urile (Flash etc.)
