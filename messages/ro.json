@@ -50,13 +50,17 @@
   "Menu": {
     "title1": "Meniul",
     "title2": "Nostru",
+    "title": "Meniul Nostru",
+    "desc": "Descoperă deserturile noastre delicioase preparate cu ingrediente premium.",
     "subtitle": "Alege-ți preferatul. Totul este preparat pe loc, din ingrediente originale.",
     "searchPlaceholder": "Caută un desert...",
     "catAll": "Toate",
     "catDrinks": "Băuturi",
     "badgeHouseSpecial": "Specialitatea Casei",
     "badgeTopSeller": "Top Seller",
-    "orderNow": "Comandă Acum"
+    "orderNow": "Comandă Acum",
+    "noResults": "Nu am găsit deserturi care să corespundă căutării tale.",
+    "resetFilters": "Resetează Filtrele"
   },
   "Cart": {
     "addedToCartToast": "{name} a fost adăugat în coș!"
