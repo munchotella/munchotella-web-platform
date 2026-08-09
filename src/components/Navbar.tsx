@@ -173,9 +173,10 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-[#FFFCF6] flex flex-col pt-6 px-6"
+            style={{ backgroundColor: '#FFFCF6', opacity: 1, zIndex: 99999 }}
+            className="fixed inset-0 w-screen h-screen min-h-screen z-[99999] bg-[#FFFCF6] flex flex-col pt-6 px-6 overflow-y-auto text-[#1A120B]"
           >
-            <div className="flex justify-between items-center mb-12">
+            <div className="flex justify-between items-center mb-8 shrink-0">
               <Link 
                 href="/" 
                 onClick={(e) => {
@@ -201,7 +202,7 @@ export default function Navbar() {
               </div>
             </div>
             
-            <div className="flex flex-col space-y-6 text-2xl font-serif text-[#1A120B]">
+            <div className="flex flex-col space-y-6 text-2xl font-serif text-[#1A120B] my-auto">
               <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("home")}</Link>
               <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("story")}</Link>
               <Link href="/menu" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("menu")}</Link>
@@ -230,8 +231,8 @@ export default function Navbar() {
               )}
             </div>
 
-            <div className="mt-auto mb-10 border-t border-[#E8E2D9] pt-8">
-              <a href="tel:+37379006499" className="flex items-center gap-3 text-lg font-bold text-[#1A120B] mb-4">
+            <div className="mt-auto pb-10 border-t border-[#E8E2D9] pt-6 shrink-0">
+              <a href="tel:+37379006499" className="flex items-center gap-3 text-lg font-bold text-[#1A120B]">
                 <div className="w-10 h-10 rounded-full bg-[#D4A853]/10 flex items-center justify-center text-[#D4A853]">
                   <span className="material-symbols-outlined text-xl">call</span>
                 </div>
