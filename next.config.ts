@@ -15,8 +15,8 @@ const ContentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // font-src: Google Fonts
   "font-src 'self' https://fonts.gstatic.com data:",
-  // img-src: Cloudinary pentru imagini produse, Google pentru avatare sociale
-  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com",
+  // img-src: Cloudinary pentru imagini produse, Google pentru avatare sociale, Webflow CDN pentru imagini statice
+  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://cdn.prod.website-files.com",
   // connect-src: API Munchotella (Render) + Firebase + Sentry
   "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com",
   // frame-src: Firebase auth popup (Google, Facebook login)
