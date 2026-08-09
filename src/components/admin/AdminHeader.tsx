@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
+import { adminFetch } from '@/lib/adminApi';
 
 interface AdminHeaderProps {
   title: string;
@@ -18,11 +19,21 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
         setUser(JSON.parse(stored));
       }
     } catch (e) {
-      console.error("Eroare la citirea utilizatorului:", e);
+      console.error("Eroare la citirea utilizatorului din localStorage:", e);
     }
+
+    // Încărcare profil proaspăt din MongoDB pentru preluarea pozei avatarUrl actualizate
+    adminFetch('/auth/me')
+      .then(res => {
+        if (res?.success && res.data) {
+          setUser(res.data);
+          localStorage.setItem("munchotella_user", JSON.stringify(res.data));
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const avatarUrl = user?.avatar || user?.image || user?.profileImage;
+  const avatarUrl = user?.avatarUrl || user?.avatar || user?.image || user?.profileImage;
   const userInitial = (user?.name || user?.email || user?.phone || "Admin").charAt(0).toUpperCase();
 
   return (

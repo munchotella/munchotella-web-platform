@@ -279,9 +279,18 @@ export default function CrmPage() {
                     </div>
 
                     <div className="col-span-4 flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gold-saffron/10 border border-gold-saffron/30 flex items-center justify-center font-headline-md text-gold-saffron font-bold">
-                        {initial}
-                      </div>
+                      {guest.avatarUrl ? (
+                        <img 
+                          src={guest.avatarUrl} 
+                          alt={guest.name || "Oaspete"} 
+                          className="w-10 h-10 rounded-full border border-gold-saffron/30 object-cover shrink-0" 
+                          onError={(e: any) => { e.target.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gold-saffron/10 border border-gold-saffron/30 flex items-center justify-center font-headline-md text-gold-saffron font-bold shrink-0">
+                          {initial}
+                        </div>
+                      )}
                       <div>
                         <div className="font-body-md font-medium text-cacao-dark">{guest.name || "Anonim"}</div>
                         <div className="font-label-caps text-[10px] text-cacao-dark/50 mt-1">
