@@ -6,7 +6,7 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch, API_URL } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
-import { Plus, Search, Sparkles, AlertCircle, Edit3 } from "lucide-react";
+import { Plus, Search, Sparkles, AlertCircle, Edit3, Trash2 } from "lucide-react";
 
 export default function MenuPage() {
   const [isSlideOverOpen, setSlideOverOpen] = useState(false);
@@ -117,6 +117,33 @@ export default function MenuPage() {
     }
   };
 
+  const handleToggleAvailability = async (item: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentVal = item.available ?? item.isAvailable ?? true;
+    try {
+      await adminFetch(`/menu/${item._id}`, {
+        method: "PUT",
+        body: JSON.stringify({ available: !currentVal }),
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert("Eroare la schimbarea disponibilității: " + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const handleDelete = async (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Ești sigur că vrei să ștergi preparatul "${name}"?`)) return;
+    try {
+      await adminFetch(`/menu/${id}`, {
+        method: "DELETE",
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert("Eroare la ștergerea preparatului: " + (err.message || "Apel eșuat"));
+    }
+  };
+
   const filteredItems = menuItems.filter((item) => {
     const q = searchQuery.toLowerCase();
     return (
@@ -186,10 +213,16 @@ export default function MenuPage() {
                 />
                 
                 <div className="absolute top-4 right-4">
-                  <StatusBadge 
-                    status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
-                    label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
-                  />
+                  <button 
+                    onClick={(e) => handleToggleAvailability(item, e)}
+                    title="Apasă pentru a schimba statusul (Activ / Ascuns)"
+                    className="cursor-pointer hover:scale-105 transition-transform"
+                  >
+                    <StatusBadge 
+                      status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
+                      label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
+                    />
+                  </button>
                 </div>
               </div>
 
@@ -208,13 +241,24 @@ export default function MenuPage() {
                 
                 <div className="flex items-center justify-between pt-4 border-t border-warm-border/50 mt-auto">
                   <span className="font-headline-md text-gold-saffron text-xl">{item.price ?? item.basePrice} MDL</span>
-                  <button 
-                    onClick={() => handleOpenEdit(item)}
-                    className="flex items-center gap-1 text-cacao-dark/50 hover:text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer"
-                  >
-                    <Edit3 size={14} />
-                    <span>Editează</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => handleOpenEdit(item)}
+                      className="flex items-center gap-1 text-cacao-dark/60 hover:text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer"
+                      title="Editează Preparat"
+                    >
+                      <Edit3 size={14} />
+                      <span>Editează</span>
+                    </button>
+                    <button 
+                      onClick={(e) => handleDelete(item._id, item.name, e)}
+                      className="flex items-center gap-1 text-cacao-dark/40 hover:text-red-500 font-label-caps text-xs transition-colors cursor-pointer"
+                      title="Șterge Preparat"
+                    >
+                      <Trash2 size={14} />
+                      <span>Șterge</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

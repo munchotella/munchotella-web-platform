@@ -41,8 +41,26 @@ export default function CrmPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleVipSurprise = () => {
-    alert("Un cupon cadou VIP (15% Reducere) a fost expediat către oaspeții recurenți din baza de date!");
+  const [sendingNotification, setSendingNotification] = useState(false);
+
+  const handleVipSurprise = async () => {
+    try {
+      setSendingNotification(true);
+      const res = await adminFetch("/admin/notifications/send", {
+        method: "POST",
+        body: JSON.stringify({
+          title: "Surpriză VIP Munchotella 🎁",
+          body: "Ai primit o reducere specială VIP la următoarea ta comandă!",
+          audience: "all",
+          promoCode: "VIP15",
+        }),
+      });
+      alert(res?.message || "Notificare VIP expediată cu succes către oaspeți!");
+    } catch (err: any) {
+      alert("Eroare la expedierea notificării VIP: " + (err.message || "Apel eșuat"));
+    } finally {
+      setSendingNotification(false);
+    }
   };
 
   const filteredGuests = guests.filter((g) => {
@@ -99,8 +117,9 @@ export default function CrmPage() {
             variant="outline" 
             icon={<Gift size={16} />}
             onClick={handleVipSurprise}
+            disabled={sendingNotification}
           >
-            Trimite Surpriză VIP
+            {sendingNotification ? "Se trimite..." : "Trimite Surpriză VIP"}
           </LuxuryButton>
         </div>
       </div>

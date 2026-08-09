@@ -7,7 +7,7 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import SlideOver from "@/components/admin/SlideOver";
 import { adminFetch } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
-import { Ticket, Percent, Plus, Share2, AlertCircle } from "lucide-react";
+import { Ticket, Percent, Plus, Share2, AlertCircle, Edit3, Trash2 } from "lucide-react";
 
 export default function MarketingPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
@@ -17,10 +17,12 @@ export default function MarketingPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Form state
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [discountType, setDiscountType] = useState("percentage");
   const [discountValue, setDiscountValue] = useState("");
   const [usageLimit, setUsageLimit] = useState("");
+  const [isActive, setIsActive] = useState(true);
 
   const loadPromos = async () => {
     try {
@@ -48,35 +50,98 @@ export default function MarketingPage() {
     loadPromos();
   }, []);
 
-  const handleCreatePromo = async (e: React.FormEvent) => {
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setCode("");
+    setDiscountType("percentage");
+    setDiscountValue("");
+    setUsageLimit("");
+    setIsActive(true);
+    setSlideOverOpen(true);
+  };
+
+  const handleOpenEdit = (promo: any) => {
+    setEditingId(promo._id);
+    setCode(promo.code || "");
+    setDiscountType(promo.discountType || "percentage");
+    setDiscountValue(promo.discountValue?.toString() || "");
+    setUsageLimit(promo.usageLimit?.toString() || "");
+    setIsActive(promo.isActive !== false);
+    setSlideOverOpen(true);
+  };
+
+  const handleSavePromo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code || !discountValue) {
       alert("Codul și valoarea reducerii sunt obligatorii.");
       return;
     }
 
+    const val = Number(discountValue);
+    if (isNaN(val) || val <= 0) {
+      alert("Valoarea reducerii trebuie să fie un număr pozitiv.");
+      return;
+    }
+
+    if (discountType === "percentage" && val > 100) {
+      alert("Procentul de reducere nu poate depăși 100%.");
+      return;
+    }
+
     try {
       setSaving(true);
-      await adminFetch("/admin/promoCodes", {
-        method: "POST",
-        body: JSON.stringify({
-          code: code.toUpperCase().trim(),
-          discountType,
-          discountValue: Number(discountValue),
-          usageLimit: usageLimit ? Number(usageLimit) : null,
-          isActive: true,
-        }),
-      });
+      const payload = {
+        code: code.toUpperCase().trim(),
+        discountType,
+        discountValue: val,
+        usageLimit: usageLimit ? Math.max(1, parseInt(usageLimit, 10)) : null,
+        isActive,
+      };
+
+      if (editingId) {
+        await adminFetch(`/admin/promoCodes/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await adminFetch("/admin/promoCodes", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
 
       setSlideOverOpen(false);
-      setCode("");
-      setDiscountValue("");
-      setUsageLimit("");
       await loadPromos();
     } catch (err: any) {
-      alert("Eroare la crearea promoției: " + (err.message || "Apel eșuat"));
+      alert("Eroare la salvarea promoției: " + (err.message || "Apel eșuat"));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleStatus = async (promo: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await adminFetch(`/admin/promoCodes/${promo._id}`, {
+        method: "PUT",
+        body: JSON.stringify({ isActive: !promo.isActive }),
+      });
+      await loadPromos();
+    } catch (err: any) {
+      alert("Eroare la schimbarea statusului: " + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const handleDeletePromo = async (id: string, codeName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Ești sigur că vrei să ștergi cuponul promoțional ${codeName}?`)) return;
+    try {
+      await adminFetch(`/admin/promoCodes/${id}`, {
+        method: "DELETE",
+      });
+      await loadPromos();
+    } catch (err: any) {
+      alert("Eroare la ștergerea promoției: " + (err.message || "Apel eșuat"));
     }
   };
 
@@ -107,7 +172,7 @@ export default function MarketingPage() {
         <LuxuryButton 
           variant="primary" 
           icon={<Plus size={16} />}
-          onClick={() => setSlideOverOpen(true)}
+          onClick={handleOpenAdd}
         >
           Crează Campanie
         </LuxuryButton>
@@ -132,7 +197,7 @@ export default function MarketingPage() {
               <div className="col-span-4">Campanie / Cod</div>
               <div className="col-span-3">Ofertă</div>
               <div className="col-span-2 text-center">Utilizări</div>
-              <div className="col-span-2 text-center">Status</div>
+              <div className="col-span-2 text-center">Status (Apasă pt comutare)</div>
               <div className="col-span-1 text-right">Acțiuni</div>
             </div>
 
@@ -141,18 +206,20 @@ export default function MarketingPage() {
               <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există nicio campanie de marketing creată.</div>
             ) : (
               promotions.map((promo) => {
-                let statusProps = { status: 'neutral', label: 'Epuizat' };
+                let statusProps = { status: 'neutral', label: 'Inactiv' };
                 if (promo.isActive) statusProps = { status: 'success', label: 'Activ' };
                 
                 const discountText = promo.discountType === 'percentage' 
                   ? `${promo.discountValue}% Reducere`
                   : `${promo.discountValue} MDL Reducere`;
 
+                const formattedDate = promo.createdAt ? new Date(promo.createdAt).toLocaleDateString('ro-RO') : "N/A";
+
                 return (
                   <div key={promo._id} className="grid grid-cols-12 gap-4 p-6 items-center hover:bg-[#FAF7F2] transition-colors cursor-pointer group">
                     <div className="col-span-4">
                       <div className="font-headline-md text-cacao-dark text-lg">{promo.code}</div>
-                      <div className="font-label-caps text-[10px] text-cacao-dark/50 mt-1 uppercase tracking-widest">Creat: {new Date(promo.createdAt).toLocaleDateString()}</div>
+                      <div className="font-label-caps text-[10px] text-cacao-dark/50 mt-1 uppercase tracking-widest">Creat: {formattedDate}</div>
                     </div>
                     <div className="col-span-3 font-body-md text-cacao-dark/80">
                       {discountText}
@@ -161,17 +228,31 @@ export default function MarketingPage() {
                       {promo.usageCount || 0} / {promo.usageLimit || "Nelimitat"}
                     </div>
                     <div className="col-span-2 text-center flex justify-center">
-                      <StatusBadge 
-                        status={statusProps.status as any} 
-                        label={statusProps.label} 
-                      />
-                    </div>
-                    <div className="col-span-1 flex items-center justify-end">
                       <button 
-                        onClick={() => alert(`Cod promoțional: ${promo.code}\nReducere: ${discountText}`)}
-                        className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors cursor-pointer"
+                        onClick={(e) => handleToggleStatus(promo, e)}
+                        title="Apasă pentru a activa / dezactiva cuponul"
+                        className="cursor-pointer hover:scale-105 transition-transform"
                       >
-                        <Share2 size={14} />
+                        <StatusBadge 
+                          status={statusProps.status as any} 
+                          label={statusProps.label} 
+                        />
+                      </button>
+                    </div>
+                    <div className="col-span-1 flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => handleOpenEdit(promo)}
+                        title="Editează Cupon"
+                        className="p-2 rounded-lg border border-warm-border text-cacao-dark/70 hover:bg-gold-saffron/10 hover:border-gold-saffron hover:text-gold-saffron transition-colors cursor-pointer"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button 
+                        onClick={(e) => handleDeletePromo(promo._id, promo.code, e)}
+                        title="Șterge Cupon"
+                        className="p-2 rounded-lg border border-warm-border text-cacao-dark/70 hover:bg-red-500/10 hover:border-red-500 hover:text-red-500 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -186,9 +267,9 @@ export default function MarketingPage() {
       <SlideOver
         isOpen={isSlideOverOpen}
         onClose={() => setSlideOverOpen(false)}
-        title="Campanie Promoțională Nouă"
+        title={editingId ? "Editează Cupon Promoțional" : "Campanie Promoțională Nouă"}
       >
-        <form onSubmit={handleCreatePromo} className="space-y-6">
+        <form onSubmit={handleSavePromo} className="space-y-6">
           <div>
             <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Cod Promoțional *</label>
             <input 
@@ -234,9 +315,20 @@ export default function MarketingPage() {
               placeholder="Lăsați gol pentru nelimitat"
             />
           </div>
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Status Cupon</label>
+            <select
+              value={isActive ? "true" : "false"}
+              onChange={(e) => setIsActive(e.target.value === "true")}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+            >
+              <option value="true">Activ</option>
+              <option value="false">Inactiv</option>
+            </select>
+          </div>
           <div className="pt-6 border-t border-warm-border mt-8">
             <LuxuryButton variant="primary" className="w-full" disabled={saving}>
-              {saving ? "Se creează..." : "Publică Cuponul"}
+              {saving ? "Se salvează..." : editingId ? "Actualizează Cuponul" : "Publică Cuponul"}
             </LuxuryButton>
           </div>
         </form>

@@ -52,7 +52,7 @@ export default function OrdersPage() {
 
     try {
       setUpdatingId(orderId);
-      await adminFetch(`/orders/admin/${orderId}/status`, {
+      await adminFetch(`/orders/${orderId}/status`, {
         method: "PUT",
         body: JSON.stringify({ status: nextStatus }),
       });

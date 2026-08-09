@@ -7,18 +7,36 @@ import BentoKpiCard from "@/components/admin/BentoKpiCard";
 import { Bot, MessageSquare, Fingerprint, Activity, Zap, CheckCircle2 } from "lucide-react";
 
 export default function AiSettingsPage() {
-  const [tone, setTone] = useState("elegant");
-  const [prompt, setPrompt] = useState(
-    "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală."
-  );
+  const [tone, setTone] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("munchotella_ai_tone") || "elegant";
+    }
+    return "elegant";
+  });
+  const [prompt, setPrompt] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("munchotella_ai_prompt") || 
+        "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală.";
+    }
+    return "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic originală.";
+  });
   const [saving, setSaving] = useState(false);
 
   const handleSave = () => {
     setSaving(true);
-    setTimeout(() => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("munchotella_ai_tone", tone);
+        localStorage.setItem("munchotella_ai_prompt", prompt);
+      }
+      setTimeout(() => {
+        setSaving(false);
+        alert("Personalitatea și instrucțiunile Asistentului Munchotella AI au fost salvate cu succes!");
+      }, 300);
+    } catch (e) {
       setSaving(false);
-      alert("Personalitatea și instrucțiunile Asistentului Munchotella AI au fost salvate cu succes!");
-    }, 600);
+      alert("Eroare la salvarea locală a setărilor.");
+    }
   };
 
   const handleUploadDoc = () => {
