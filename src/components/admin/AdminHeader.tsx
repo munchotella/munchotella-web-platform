@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, Menu } from 'lucide-react';
-import Link from 'next/link';
+import { Menu } from 'lucide-react';
 
 interface AdminHeaderProps {
   title: string;
@@ -48,37 +47,22 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 lg:gap-8">
-        <div className="hidden lg:flex items-center gap-6 text-cacao-dark/60 font-label-caps text-xs tracking-wider">
-          <Link href="/ro/admin/orders" className="hover:text-gold-saffron transition-colors">VÂNZĂRI DIRECTE</Link>
-          <Link href="/ro/admin/orders" className="hover:text-gold-saffron transition-colors">COMENZI PERSONALIZATE</Link>
-          <Link href="/ro/admin/marketing" className="hover:text-gold-saffron transition-colors">EVENIMENTE</Link>
-        </div>
-        
-        <div className="hidden lg:block w-[1px] h-8 bg-warm-border"></div>
-        
-        <div className="flex items-center gap-2 lg:gap-4">
-          <Link href="/ro/admin/orders" className="w-10 h-10 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors text-cacao-dark" title="Căutare Globală Comenzi">
-            <Search size={20} />
-          </Link>
-          <Link href="/ro/admin/crm" className="w-10 h-10 rounded-full hover:bg-black/5 flex items-center justify-center transition-colors text-cacao-dark relative" title="Notificări & Oaspeți">
-            <Bell size={20} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-gold-saffron rounded-full border border-vanilla-porcelain"></span>
-          </Link>
-
-          {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
-              alt={user?.name || "Profil Admin"}
-              className="w-10 h-10 rounded-full border border-gold-saffron/50 object-cover ml-2"
-              onError={(e: any) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gold-saffron/20 border border-gold-saffron/50 flex items-center justify-center font-headline-md text-gold-saffron ml-2 font-bold" title={user?.name || user?.email || "Admin"}>
-              {userInitial}
-            </div>
-          )}
-        </div>
+      <div className="flex items-center gap-4">
+        {avatarUrl ? (
+          <img 
+            src={avatarUrl} 
+            alt={user?.name || "Profil Admin"}
+            className="w-10 h-10 rounded-full border border-gold-saffron/50 object-cover shadow-sm"
+            onError={(e: any) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <div 
+            className="w-10 h-10 rounded-full bg-gold-saffron/20 border border-gold-saffron/50 flex items-center justify-center font-headline-md text-gold-saffron font-bold shadow-sm" 
+            title={user?.name || user?.email || "Administrator"}
+          >
+            {userInitial}
+          </div>
+        )}
       </div>
     </header>
   );
