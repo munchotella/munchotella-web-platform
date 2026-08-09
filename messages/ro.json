@@ -137,7 +137,10 @@
     "home": "Acasă",
     "menu": "Meniu",
     "contact": "Contact",
-    "story": "Povestea"
+    "story": "Povestea",
+    "myProfile": "Profilul Meu",
+    "myAccount": "Contul Meu",
+    "logout": "Deconectare"
   },
   "Profile": {
     "hello": "Salut",

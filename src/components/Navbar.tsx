@@ -106,13 +106,13 @@ export default function Navbar() {
                   <p className="text-[13px] font-bold text-[#1A120B] truncate">{user.name}</p>
                 </div>
                 <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-[14px] text-[#1A120B]/80 hover:bg-[#1A120B]/5 hover:text-[#D4A853] transition-colors">
-                  <User size={16} /> Profilul meu
+                  <User size={16} /> {t("myProfile")}
                 </Link>
                 <button 
                   onClick={logout}
                   className="w-full text-left flex items-center gap-2 px-4 py-2 text-[14px] text-red-500 hover:bg-red-50 transition-colors"
                 >
-                  <LogOut size={16} /> Deconectare
+                  <LogOut size={16} /> {t("logout")}
                 </button>
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function Navbar() {
             <button 
               onClick={() => setIsCartOpen(true)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 active:scale-95 ml-2 shadow-md ${
-                effectiveIsScrolled ? "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]" : "bg-white text-[#1A1A1A] hover:bg-white/90"
+                effectiveIsScrolled ? "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]" : "bg-white text-[#1A120B] hover:bg-white/90"
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
@@ -146,7 +146,7 @@ export default function Navbar() {
               onClick={() => setIsCartOpen(true)}
               aria-label="Cart" 
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ${
-                effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A1A1A]" : "hover:bg-white/10 text-white"
+                effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A120B]" : "hover:bg-white/10 text-white"
               }`}
             >
               <span className="material-symbols-outlined">shopping_bag</span>
@@ -157,7 +157,7 @@ export default function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ml-1 ${
-              effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A]" : "bg-white/10 hover:bg-white/20 text-white"
+              effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B]" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
             <Menu size={20} />
@@ -195,7 +195,7 @@ export default function Navbar() {
                 
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A1A1A] transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B] transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -212,13 +212,13 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors pt-4 border-t border-[#E8E2D9]">
-                    Profilul Meu
+                    {t("myProfile")}
                   </Link>
                   <button 
                     onClick={() => { logout(); setIsMobileMenuOpen(false); }} 
                     className="text-left text-red-500/90 hover:text-red-500 transition-colors"
                   >
-                    Deconectare
+                    {t("logout")}
                   </button>
                 </>
               ) : (
@@ -226,7 +226,7 @@ export default function Navbar() {
                   onClick={() => { setIsAuthModalOpen(true); setIsMobileMenuOpen(false); }} 
                   className="text-left hover:text-[#D4A853] transition-colors pt-4 border-t border-[#E8E2D9]"
                 >
-                  Contul Meu
+                  {t("myAccount")}
                 </button>
               )}
             </div>

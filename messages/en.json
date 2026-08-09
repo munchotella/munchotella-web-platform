@@ -137,7 +137,10 @@
     "home": "Home",
     "menu": "Menu",
     "contact": "Contact",
-    "story": "Story"
+    "story": "Story",
+    "myProfile": "My Profile",
+    "myAccount": "My Account",
+    "logout": "Logout"
   },
   "Profile": {
     "hello": "Hello",
