@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 const HERO_PLAYLIST = [
   {
@@ -121,13 +122,13 @@ export default function CinematicScrollHero() {
           className="flex flex-wrap items-center gap-4"
         >
           <MagneticButton>
-            <a
-              href="#menu"
+            <Link
+              href="/menu"
               className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer"
             >
               <span>{t('cta')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </MagneticButton>
         </motion.div>
       </div>
