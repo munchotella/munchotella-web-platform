@@ -30,6 +30,7 @@ export default function MenuPage() {
       desc: item.desc,
       img: item.img,
       category: item.category,
+      rawCategory: item.rawCategory,
     });
     setIsModalOpen(true);
   };
@@ -44,16 +45,24 @@ export default function MenuPage() {
   const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
   
   // 1. Initial State: Hybrid Fallback cu menu.json (0ms)
-  const initialItems = rawMenuItems.map((item: any, index: number) => ({
-    id: index + 1,
-    name: item.name,
-    price: `${item.price} ${item.currency}`,
-    numericPrice: item.price,
-    category: categoryMap[item.category] || item.category,
-    desc: item.description,
-    img: item.image,
-    badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
-  }));
+  const initialItems = rawMenuItems.map((item: any, index: number) => {
+    let desc = item.description;
+    const nameLower = item.name.toLowerCase();
+    if (item.category === "drinks" && (nameLower.includes("coca") || nameLower.includes("fanta") || nameLower.includes("dorna") || nameLower.includes("sprite"))) {
+      desc = "";
+    }
+    return {
+      id: index + 1,
+      name: item.name,
+      price: `${item.price} ${item.currency}`,
+      numericPrice: item.price,
+      category: categoryMap[item.category] || item.category,
+      rawCategory: item.category,
+      desc,
+      img: item.image,
+      badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
+    };
+  });
 
   const [menuItems, setMenuItems] = useState<any[]>(initialItems);
   const [isSyncedWithDb, setIsSyncedWithDb] = useState(false);
@@ -65,16 +74,29 @@ export default function MenuPage() {
         const res = await fetch("https://munchotella-api.onrender.com/api/menu");
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          const liveItems = data.data.map((item: any, index: number) => ({
-            id: item._id || index + 1,
-            name: item.name,
-            price: `${item.price} ${item.currency || 'MDL'}`,
-            numericPrice: item.price,
-            category: categoryMap[item.category] || item.category,
-            desc: item.description,
-            img: item.imageUrl || item.image,
-            badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
-          }));
+          const liveItems = data.data.map((item: any, index: number) => {
+            let desc = item.description;
+            const cat = item.category?.toLowerCase() || "";
+            const nameLower = item.name.toLowerCase();
+            
+            // Remove description for commercial bottled drinks
+            if ((cat === "drinks" || cat === "băuturi" || cat === "напитки") && 
+                (nameLower.includes("coca") || nameLower.includes("fanta") || nameLower.includes("dorna") || nameLower.includes("sprite"))) {
+              desc = "";
+            }
+
+            return {
+              id: item._id || index + 1,
+              name: item.name,
+              price: `${item.price} ${item.currency || 'MDL'}`,
+              numericPrice: item.price,
+              category: categoryMap[item.category] || item.category,
+              rawCategory: item.category?.toLowerCase() || "",
+              desc,
+              img: item.imageUrl || item.image,
+              badge: item.name.includes("Dubai") ? t('badgeHouseSpecial') : item.name.includes("Delux") ? t('badgeTopSeller') : undefined
+            };
+          });
           setMenuItems(liveItems);
           setIsSyncedWithDb(true);
         }

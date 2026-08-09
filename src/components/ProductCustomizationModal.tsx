@@ -13,6 +13,7 @@ export type ProductItem = {
   desc?: string;
   img: string;
   category?: string;
+  rawCategory?: string;
 };
 
 
@@ -158,44 +159,46 @@ export default function ProductCustomizationModal({
                 )}
               </div>
 
-              {/* Toppings Selection */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <h4 className="text-[16px] font-bold text-[#1A1A1A]">
-                    {t('customize')}
-                  </h4>
-                  <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">{t('optional')}</span>
-                </div>
+              {/* Toppings Selection (Hidden for Drinks) */}
+              {product.rawCategory !== "drinks" && product.rawCategory !== "băuturi" && product.rawCategory !== "напитки" && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h4 className="text-[16px] font-bold text-[#1A1A1A]">
+                      {t('customize')}
+                    </h4>
+                    <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">{t('optional')}</span>
+                  </div>
 
-                <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white mb-6">
-                  {AVAILABLE_TOPPINGS.map((topping, index) => {
-                    const isSelected = selectedToppings.some((t) => t.name === topping.name);
-                    return (
-                      <div
-                        key={topping.name}
-                        onClick={(e) => toggleTopping(e, topping)}
-                        className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
-                          index !== AVAILABLE_TOPPINGS.length - 1 ? "border-b border-[#EAE1DB]" : ""
-                        } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
-                      >
-                        <div className="flex flex-row items-center gap-3">
-                          <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
-                            {topping.name}
-                          </span>
-                          <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
-                            (+{topping.price} MDL)
-                          </span>
+                  <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white mb-6">
+                    {AVAILABLE_TOPPINGS.map((topping, index) => {
+                      const isSelected = selectedToppings.some((t) => t.name === topping.name);
+                      return (
+                        <div
+                          key={topping.name}
+                          onClick={(e) => toggleTopping(e, topping)}
+                          className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
+                            index !== AVAILABLE_TOPPINGS.length - 1 ? "border-b border-[#EAE1DB]" : ""
+                          } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
+                        >
+                          <div className="flex flex-row items-center gap-3">
+                            <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
+                              {topping.name}
+                            </span>
+                            <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
+                              (+{topping.price} MDL)
+                            </span>
+                          </div>
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
+                            isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
+                          }`}>
+                            {isSelected && <Check className="w-5 h-5 text-white stroke-[3]" />}
+                          </div>
                         </div>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
-                          isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
-                        }`}>
-                          {isSelected && <Check className="w-5 h-5 text-white stroke-[3]" />}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Fixed Bottom CTA & Quantity Footer */}
