@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     // 2. Send Email via Resend
     if (process.env.RESEND_API_KEY) {
       const resendRes = await fetch('https://api.resend.com/emails', {
+        credentials: "include",
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

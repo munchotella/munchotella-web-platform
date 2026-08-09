@@ -46,6 +46,7 @@ export default function AccountSettings() {
       formData.append("avatar", file);
 
       const res = await fetch(`${API_URL}/users/avatar`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -88,6 +89,7 @@ export default function AccountSettings() {
       }
 
       const res = await fetch(`${API_URL}/users/profile`, {
+        credentials: "include",
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -124,6 +126,7 @@ export default function AccountSettings() {
     try {
       setSavingPassword(true);
       const res = await fetch(`${API_URL}/users/change-password`, {
+        credentials: "include",
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -156,6 +159,7 @@ export default function AccountSettings() {
     try {
       setDeleting(true);
       const res = await fetch(`${API_URL}/users/account`, {
+        credentials: "include",
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });

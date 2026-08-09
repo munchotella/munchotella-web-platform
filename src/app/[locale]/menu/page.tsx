@@ -88,7 +88,7 @@ export default function MenuPage() {
   useEffect(() => {
     const syncMenuFromBackend = async () => {
       try {
-        const res = await fetch("https://munchotella-api.onrender.com/api/menu");
+        const res = await fetch("https://munchotella-api.onrender.com/api/menu", { credentials: "include" });
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           const liveItems = data.data.map((item: any, index: number) => {

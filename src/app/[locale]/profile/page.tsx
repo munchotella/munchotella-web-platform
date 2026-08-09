@@ -41,6 +41,7 @@ export default function ProfilePage() {
       try {
         const API_URL = "https://munchotella-api.onrender.com/api";
         const res = await fetch(`${API_URL}/orders/myorders`, {
+        credentials: "include",
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -132,6 +133,7 @@ export default function ProfilePage() {
       setSubmittingReview(true);
       const API_URL = "https://munchotella-api.onrender.com/api";
       const res = await fetch(`${API_URL}/orders/${reviewOrder._id}/review`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",

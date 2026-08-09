@@ -220,6 +220,7 @@ export default function CheckoutPage() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
       
       const res = await fetch(`${API_URL}/orders`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -237,6 +238,7 @@ export default function CheckoutPage() {
       if (user) {
          try {
            const profileRes = await fetch(`${API_URL}/auth/me`, {
+        credentials: "include",
              headers: { "Authorization": `Bearer ${token}` }
            });
            const profileData = await profileRes.json();

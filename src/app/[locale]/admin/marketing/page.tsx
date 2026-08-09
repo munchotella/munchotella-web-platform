@@ -33,12 +33,9 @@ export default function MarketingPage() {
         setPromotions(res.data.promoCodes || res.data || []);
       }
     } catch (err: any) {
+      // adminFetch gestionează automat erorile 401 (sesiune expirată) — VUL-001 fix
       const msg = err.message || "Eroare la preluarea promoțiilor";
-      if (msg.includes("autentificat") || msg.includes("401") || msg.includes("Unauthorized")) {
-        localStorage.removeItem("munchotella_token");
-        localStorage.removeItem("munchotella_user");
-        window.dispatchEvent(new Event("storage"));
-      } else {
+      if (!msg.includes("expirat")) {
         setError(msg);
       }
     } finally {

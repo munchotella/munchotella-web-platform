@@ -52,6 +52,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
     if (!user || !token) return;
     try {
       const res = await fetch(`${API_URL}/users/notifications`, {
+        credentials: "include",
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
@@ -101,6 +102,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
     if (!token || unreadCount === 0) return;
     try {
       await fetch(`${API_URL}/users/notifications/read`, {
+        credentials: "include",
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });

@@ -67,6 +67,7 @@ export default function ContactPage() {
       
       // Dacă codul e corect, trimitem efectiv mesajul pe server
       const res = await fetch("/api/contact", {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

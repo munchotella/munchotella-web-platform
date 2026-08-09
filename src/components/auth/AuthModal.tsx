@@ -44,6 +44,7 @@ export default function AuthModal() {
       if (isLogin) {
         // Logica de Login
         const res = await fetch(`${API_URL}/auth/login`, {
+        credentials: "include",
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone: normalizedLoginId, password })
@@ -68,6 +69,7 @@ export default function AuthModal() {
         }
         
         const res = await fetch(`${API_URL}/auth/register`, {
+        credentials: "include",
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, phone: normalizedRegisterPhone, email: loginId, password })
@@ -111,6 +113,7 @@ export default function AuthModal() {
     
     try {
       const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: normalizedLoginId, method: "email" })

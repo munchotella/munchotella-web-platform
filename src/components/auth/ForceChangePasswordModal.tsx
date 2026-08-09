@@ -37,6 +37,7 @@ export default function ForceChangePasswordModal() {
 
     try {
       const res = await fetch(`${API_URL}/auth/force-change-password`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",

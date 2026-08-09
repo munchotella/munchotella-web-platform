@@ -30,6 +30,7 @@ export default function AddressManager() {
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/auth/me`, {
+        credentials: "include",
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
@@ -81,6 +82,7 @@ export default function AddressManager() {
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(endpoint, {
+        credentials: "include",
         method,
         headers: {
           "Content-Type": "application/json",
@@ -113,6 +115,7 @@ export default function AddressManager() {
 
     try {
       const res = await fetch(`${API_URL}/users/addresses/${id}`, {
+        credentials: "include",
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });

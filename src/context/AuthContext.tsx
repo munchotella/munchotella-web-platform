@@ -38,12 +38,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check localStorage for existing session on mount
     const storedUser = localStorage.getItem("munchotella_user");
-    const storedToken = localStorage.getItem("munchotella_token");
+    // Eliminat (SEC-HIGH-03): Tokenul trăiește acum în HttpOnly Cookie
     
-    if (storedUser && storedToken) {
+    if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-        setToken(storedToken);
+        // Nu mai setăm tokenul explicit în state din localStorage
       } catch (e) {
         console.error("Failed to parse stored user", e);
       }
@@ -51,11 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = (userData: User, token: string) => {
+  const login = (userData: User, receivedToken: string) => {
     setUser(userData);
-    setToken(token);
+    setToken(receivedToken); // Îl menținem în memorie doar pentru Mobile RN back-compat dacă e necesar
     localStorage.setItem("munchotella_user", JSON.stringify(userData));
-    localStorage.setItem("munchotella_token", token);
+    // Eliminat (SEC-HIGH-03): localStorage.setItem("munchotella_token", token);
     setIsAuthModalOpen(false); // Close modal on successful login
   };
 
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem("munchotella_user");
-    localStorage.removeItem("munchotella_token");
+    // Eliminat (SEC-HIGH-03): localStorage.removeItem("munchotella_token");
   };
 
   return (

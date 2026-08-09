@@ -21,9 +21,10 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
 
   const handleLogout = async () => {
     try {
+      // Backend revocă refresh token-ul și șterge cookie-ul HttpOnly access_token
       await adminFetch('/auth/logout', { method: 'POST' }).catch(() => {});
     } finally {
-      localStorage.removeItem('munchotella_token');
+      // Ștergem DOAR datele de profil din localStorage (tokenul nu mai e acolo — VUL-001 fix)
       localStorage.removeItem('munchotella_user');
       window.location.href = '/ro/admin';
     }

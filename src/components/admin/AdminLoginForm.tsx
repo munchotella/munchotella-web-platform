@@ -24,6 +24,7 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
 
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: normalized, password }),
@@ -38,7 +39,10 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
         throw new Error("Acces refuzat: Contul tau nu are rol de Administrator.");
       }
 
-      localStorage.setItem("munchotella_token", data.token);
+      // SEC-HIGH-03 FIX (VUL-001): NU stocăm JWT-ul în localStorage.
+      // Tokenul de acces este exclusiv în HttpOnly Cookie (setat de backend pe /api/auth/login).
+      // Orice token în localStorage poate fi furat prin atacuri XSS — complet eliminat.
+      // Stocăm DOAR datele de profil (fără secret) pentru hidratarea UI.
       localStorage.setItem("munchotella_user", JSON.stringify(data.data));
 
       if (onSuccess) {
