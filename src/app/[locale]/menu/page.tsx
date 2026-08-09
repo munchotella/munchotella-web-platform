@@ -44,6 +44,13 @@ export default function MenuPage() {
   
   const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
   
+  // Sort helper based on category bar order
+  const categoryOrder = ["waffles", "crepes", "pancakes", "drinks", "băuturi", "напитки"];
+  const getCategoryIndex = (cat: string) => {
+    const index = categoryOrder.indexOf(cat.toLowerCase());
+    return index === -1 ? 999 : index;
+  };
+
   // 1. Initial State: Hybrid Fallback cu menu.json (0ms)
   const initialItems = rawMenuItems.map((item: any, index: number) => {
     let desc = item.description;
@@ -65,12 +72,12 @@ export default function MenuPage() {
       price: `${item.price} ${item.currency}`,
       numericPrice: item.price,
       category: categoryMap[item.category] || item.category,
-      rawCategory: item.category,
+      rawCategory: item.category?.toLowerCase() || "",
       desc,
       img: item.image,
       badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
     };
-  });
+  }).sort((a: any, b: any) => getCategoryIndex(a.rawCategory) - getCategoryIndex(b.rawCategory));
 
   const [menuItems, setMenuItems] = useState<any[]>(initialItems);
   const [isSyncedWithDb, setIsSyncedWithDb] = useState(false);
@@ -112,7 +119,7 @@ export default function MenuPage() {
               img: item.imageUrl || item.image,
               badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
             };
-          });
+          }).sort((a: any, b: any) => getCategoryIndex(a.rawCategory) - getCategoryIndex(b.rawCategory));
           setMenuItems(liveItems);
           setIsSyncedWithDb(true);
         }
