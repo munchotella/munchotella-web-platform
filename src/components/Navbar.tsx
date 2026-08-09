@@ -193,6 +193,9 @@ export default function Navbar() {
                 {/* Notifications in Mobile Menu */}
                 <NotificationsDropdown isScrolled={true} />
                 
+                {/* Language Switcher in Mobile Menu */}
+                <LanguageSwitcher />
+                
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B] transition-colors"
