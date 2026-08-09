@@ -118,15 +118,16 @@ export default function CrmPage() {
           <LuxuryButton onClick={loadGuests}>Reîncearcă</LuxuryButton>
         </div>
       ) : (
-        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
-            <div className="col-span-4">Oaspete</div>
-            <div className="col-span-3">Contact</div>
-            <div className="col-span-3 text-center">Rol</div>
-            <div className="col-span-2 text-right">Acțiuni</div>
-          </div>
+        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
+              <div className="col-span-4">Oaspete</div>
+              <div className="col-span-3">Contact</div>
+              <div className="col-span-3 text-center">Rol</div>
+              <div className="col-span-2 text-right">Acțiuni</div>
+            </div>
 
-          <div className="divide-y divide-warm-border/50">
+            <div className="divide-y divide-warm-border/50">
             {filteredGuests.length === 0 ? (
               <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există niciun client înregistrat corespunzător căutării.</div>
             ) : (
@@ -161,6 +162,7 @@ export default function CrmPage() {
                 );
               })
             )}
+          </div>
           </div>
         </div>
       )}

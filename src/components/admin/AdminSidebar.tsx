@@ -2,10 +2,15 @@
 
 import React from 'react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
-import { LayoutDashboard, ShoppingBag, Utensils, Users, Ticket, Bot, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, Users, Ticket, Bot, LogOut, X } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   
@@ -34,15 +39,35 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-72 bg-cacao-dark text-vanilla-porcelain h-screen flex flex-col fixed left-0 top-0 border-r border-[#2A1F18] z-20">
-      <div className="p-8 pb-4">
-        <h1 className="font-headline-md text-2xl tracking-tight text-gold-saffron mb-2">
-          Munchotella
-        </h1>
-        <p className="font-label-caps text-[10px] text-vanilla-porcelain/60 uppercase tracking-widest">
-          Boutique Admin Suite
-        </p>
-      </div>
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-cacao-dark/80 backdrop-blur-sm z-30 lg:hidden"
+          onClick={onClose}
+        ></div>
+      )}
+      
+      <aside className={`
+        fixed left-0 top-0 h-screen w-72 bg-cacao-dark text-vanilla-porcelain flex flex-col border-r border-[#2A1F18] z-40
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-8 pb-4 flex items-center justify-between">
+          <div>
+            <h1 className="font-headline-md text-2xl tracking-tight text-gold-saffron mb-2">
+              Munchotella
+            </h1>
+            <p className="font-label-caps text-[10px] text-vanilla-porcelain/60 uppercase tracking-widest">
+              Boutique Admin Suite
+            </p>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="lg:hidden text-vanilla-porcelain/60 hover:text-vanilla-porcelain">
+              <X size={24} />
+            </button>
+          )}
+        </div>
 
       <nav className="flex-1 px-4 py-8 space-y-2">
         {navItems.map((item) => {
@@ -75,5 +100,6 @@ export default function AdminSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

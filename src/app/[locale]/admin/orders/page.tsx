@@ -66,8 +66,8 @@ export default function OrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     const guestName = (order.customer?.name || order.deliveryInfo?.name || order.user?.name || "").toLowerCase();
-    const itemsText = order.items?.map((i: any) => i.name || i.variantName || "").join(" ").toLowerCase();
-    const orderId = order._id.toLowerCase();
+    const itemsText = (order.items || []).map((i: any) => i.name || i.variantName || "").join(" ").toLowerCase();
+    const orderId = (order._id || "").toLowerCase();
     const q = searchQuery.toLowerCase();
 
     const matchesSearch = guestName.includes(q) || itemsText.includes(q) || orderId.includes(q);
@@ -126,25 +126,26 @@ export default function OrdersPage() {
           <LuxuryButton onClick={loadOrders}>Reîncearcă</LuxuryButton>
         </div>
       ) : (
-        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
-            <div className="col-span-2">Comandă</div>
-            <div className="col-span-4">Detalii Produse</div>
-            <div className="col-span-2">Oaspete</div>
-            <div className="col-span-2 text-right">Total</div>
-            <div className="col-span-2 text-right">Acțiune / Status</div>
-          </div>
+        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="min-w-[800px]">
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
+              <div className="col-span-2">Comandă</div>
+              <div className="col-span-4">Detalii Produse</div>
+              <div className="col-span-2">Oaspete</div>
+              <div className="col-span-2 text-right">Total</div>
+              <div className="col-span-2 text-right">Acțiune / Status</div>
+            </div>
 
-          {/* Table Body */}
-          <div className="divide-y divide-warm-border/50">
+            {/* Table Body */}
+            <div className="divide-y divide-warm-border/50">
             {filteredOrders.length === 0 ? (
               <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu s-a găsit nicio comandă.</div>
             ) : (
               filteredOrders.map((order) => {
-                const orderId = order._id.substring(order._id.length - 4).toUpperCase();
-                const time = new Date(order.createdAt).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
-                const itemsText = order.items?.map((i: any) => `${i.quantity || 1}x ${i.name || i.variantName || i.title || "Preparat"}`).join(', ');
+                const orderId = (order._id || "UNKNOWN").substring((order._id || "UNKNOWN").length - 4).toUpperCase();
+                const time = order.createdAt ? new Date(order.createdAt).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }) : "Acum";
+                const itemsText = (order.items || []).map((i: any) => `${i.quantity || 1}x ${i.name || i.variantName || i.title || "Preparat"}`).join(', ');
                 const guestName = order.customer?.name || order.deliveryInfo?.name || order.user?.name || "Oaspete";
                 
                 let statusProps = { status: 'neutral', label: order.status };
@@ -184,6 +185,7 @@ export default function OrdersPage() {
                 );
               })
             )}
+          </div>
           </div>
         </div>
       )}

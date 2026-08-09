@@ -120,11 +120,11 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             liveOrders.map(order => {
-              const orderId = order._id.substring(order._id.length - 4).toUpperCase();
-              const time = new Date(order.createdAt).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+              const orderId = (order._id || "UNKNOWN").substring((order._id || "UNKNOWN").length - 4).toUpperCase();
+              const time = order.createdAt ? new Date(order.createdAt).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) : "Acum";
               
               // Simplify items text
-              const itemsText = order.items.map((i: any) => `${i.quantity}x ${i.variantName}`).join(', ');
+              const itemsText = (order.items || []).map((i: any) => `${i.quantity || 1}x ${i.variantName || i.name || "Preparat"}`).join(', ');
               
               // Map status
               let statusProps = { status: 'neutral', label: order.status };
@@ -135,26 +135,28 @@ export default function AdminDashboardPage() {
               if (order.status === 'delivered') statusProps = { status: 'neutral', label: 'Livrată' };
               
               return (
-                <div key={order._id} className="bg-vanilla-porcelain p-4 flex items-center justify-between hover:bg-[#FAF7F2] transition-colors cursor-pointer group">
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <div className="font-headline-md text-cacao-dark text-lg">#{orderId}</div>
+                <div key={order._id} className="bg-vanilla-porcelain p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#FAF7F2] transition-colors cursor-pointer group">
+                  <div className="flex items-start md:items-center gap-4 md:gap-6">
+                    <div className="text-left md:text-center shrink-0">
+                      <div className="font-headline-md text-cacao-dark text-lg md:text-xl">#{orderId}</div>
                       <div className="font-label-caps text-[10px] text-cacao-dark/50">{time}</div>
                     </div>
                     <div>
-                      <div className="font-body-md font-medium text-cacao-dark max-w-sm truncate">{itemsText}</div>
+                      <div className="font-body-md font-medium text-cacao-dark max-w-sm truncate whitespace-normal md:whitespace-nowrap line-clamp-2 md:line-clamp-none">{itemsText}</div>
                       <div className="font-body-md text-sm text-cacao-dark/60 mt-1">
                         {order.deliveryInfo?.name || "Oaspete"} • {order.paymentMethod === 'cash' ? 'Cash' : 'Card'}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-6">
-                    <div className="font-headline-md text-gold-saffron text-lg">{order.totalPrice} MDL</div>
-                    <StatusBadge status={statusProps.status as any} label={statusProps.label} />
-                    <button className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors">
-                      <ChefHat size={14} />
-                    </button>
+                  <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto pt-4 md:pt-0 border-t md:border-0 border-warm-border">
+                    <div className="font-headline-md text-gold-saffron text-lg md:text-xl">{order.totalPrice} MDL</div>
+                    <div className="flex items-center gap-4">
+                      <StatusBadge status={statusProps.status as any} label={statusProps.label} />
+                      <button className="w-8 h-8 rounded-full border border-warm-border flex items-center justify-center text-cacao-dark group-hover:bg-gold-saffron/10 group-hover:border-gold-saffron group-hover:text-gold-saffron transition-colors shrink-0">
+                        <ChefHat size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

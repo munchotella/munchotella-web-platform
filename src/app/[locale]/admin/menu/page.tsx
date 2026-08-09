@@ -129,13 +129,13 @@ export default function MenuPage() {
   return (
     <div className="space-y-8 pb-10">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
         <div>
           <h2 className="font-headline-lg text-cacao-dark text-3xl mb-2">Meniu și Oferte</h2>
           <p className="font-body-md text-cacao-dark/60">Controlează vitrina cu preparate artizanale vizibilă clienților.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cacao-dark/40" size={18} />
             <input 
               type="text" 

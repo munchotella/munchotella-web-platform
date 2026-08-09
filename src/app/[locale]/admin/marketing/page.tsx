@@ -126,16 +126,17 @@ export default function MarketingPage() {
           <LuxuryButton onClick={loadPromos}>Reîncearcă</LuxuryButton>
         </div>
       ) : (
-        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
-            <div className="col-span-4">Campanie / Cod</div>
-            <div className="col-span-3">Ofertă</div>
-            <div className="col-span-2 text-center">Utilizări</div>
-            <div className="col-span-2 text-center">Status</div>
-            <div className="col-span-1 text-right">Acțiuni</div>
-          </div>
+        <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-12 gap-4 p-6 border-b border-warm-border bg-[#FAF7F2]/50 font-label-caps text-cacao-dark/60 text-xs">
+              <div className="col-span-4">Campanie / Cod</div>
+              <div className="col-span-3">Ofertă</div>
+              <div className="col-span-2 text-center">Utilizări</div>
+              <div className="col-span-2 text-center">Status</div>
+              <div className="col-span-1 text-right">Acțiuni</div>
+            </div>
 
-          <div className="divide-y divide-warm-border/50">
+            <div className="divide-y divide-warm-border/50">
             {promotions.length === 0 ? (
               <div className="p-8 text-center text-cacao-dark/60 font-body-md">Nu există nicio campanie de marketing creată.</div>
             ) : (
@@ -177,6 +178,7 @@ export default function MarketingPage() {
                 );
               })
             )}
+          </div>
           </div>
         </div>
       )}

@@ -14,6 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     return null;
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   useEffect(() => {
     const checkAuth = () => {
@@ -65,12 +66,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
       ></div>
 
-      <AdminSidebar />
+      <AdminSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       
-      <main className="ml-72 flex-1 relative z-10 flex flex-col h-screen overflow-hidden">
-        <AdminHeader title={title} />
+      <main className="lg:ml-72 flex-1 relative z-10 flex flex-col h-screen overflow-hidden">
+        <AdminHeader title={title} onMenuClick={() => setIsMobileMenuOpen(true)} />
         
-        <div className="flex-1 overflow-y-auto p-10">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-10">
           <div className="max-w-[1440px] mx-auto">
             {children}
           </div>
