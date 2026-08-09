@@ -25,6 +25,7 @@ export default function AdminHeader({ title, onMenuClick }: AdminHeaderProps) {
           <span className="font-label-caps text-soft-olive text-[11px] tracking-wider uppercase">
             Sincronizare Activă: App + Web
           </span>
+          </div>
         </div>
       </div>
 
