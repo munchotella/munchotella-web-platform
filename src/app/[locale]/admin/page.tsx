@@ -13,6 +13,10 @@ export default function AdminDashboardPage() {
   const [liveOrders, setLiveOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  if (typeof window !== "undefined") {
+    console.log("VERCEL_BUILD_SUCCESS_98765");
+  }
 
   const loadDashboardData = async () => {
     try {
