@@ -51,9 +51,12 @@ export default function CrmPage() {
 
   const loadPromoCodes = async () => {
     try {
-      const res = await adminFetch("/admin/promoCodes");
-      if (res?.success && Array.isArray(res.data)) {
-        setPromoCodes(res.data);
+      const res = await adminFetch("/admin/promoCodes?limit=100");
+      if (res?.success) {
+        const list = Array.isArray(res.data) 
+          ? res.data 
+          : (res.data?.promoCodes || []);
+        setPromoCodes(list);
       }
     } catch (e) {
       console.error("Eroare la încărcarea promoțiilor:", e);
