@@ -223,13 +223,12 @@ export default function MenuPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item, idx) => (
-              <AnimateIn key={item.id} direction="up" delay={idx * 0.05}>
-                <ProductCard
-                  item={item}
-                  onSelect={handleOpenCustomization}
-                />
-              </AnimateIn>
+            {filteredItems.map((item) => (
+              <ProductCard
+                key={item.id}
+                item={item}
+                onSelect={handleOpenCustomization}
+              />
             ))}
           </div>
         )}
