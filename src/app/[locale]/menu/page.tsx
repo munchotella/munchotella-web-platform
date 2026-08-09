@@ -45,10 +45,12 @@ export default function MenuPage() {
   const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
   
   // Sort helper based on category bar order
-  const categoryOrder = ["waffles", "crepes", "pancakes", "drinks", "băuturi", "напитки"];
+  const categoryOrder = ["waffles", "crepes", "pancakes", "specials"];
   const getCategoryIndex = (cat: string) => {
-    const index = categoryOrder.indexOf(cat.toLowerCase());
-    return index === -1 ? 999 : index;
+    const lowerCat = cat.toLowerCase();
+    if (lowerCat.includes("drink") || lowerCat.includes("băutur") || lowerCat.includes("напитки")) return 1000;
+    const index = categoryOrder.indexOf(lowerCat);
+    return index === -1 ? 500 : index;
   };
 
   // 1. Initial State: Hybrid Fallback cu menu.json (0ms)
