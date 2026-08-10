@@ -1,0 +1,425 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import LuxuryButton from "@/components/admin/LuxuryButton";
+import StatusBadge from "@/components/admin/StatusBadge";
+import SlideOver from "@/components/admin/SlideOver";
+import { adminFetch, API_URL } from "@/lib/adminApi";
+import AdminLoginForm from "@/components/admin/AdminLoginForm";
+import { Plus, Search, Sparkles, AlertCircle, Edit3, Trash2, Archive, ArchiveRestore, PackageCheck } from "lucide-react";
+
+export default function MenuPage() {
+  const [isSlideOverOpen, setSlideOverOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewTab, setViewTab] = useState<"active" | "archived">("active");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Form State
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "waffles",
+    image: "",
+    available: true,
+  });
+
+  const loadMenu = async () => {
+    try {
+      setLoading(true);
+      const res = await adminFetch("/menu?isArchived=all");
+      if (res?.success) {
+        setMenuItems(res.data);
+      }
+    } catch (err: any) {
+      // adminFetch gestionează automat erorile 401 (sesiune expirată) — VUL-001 fix
+      const msg = err.message || "Eroare la preluarea meniului";
+      if (!msg.includes("expirat")) {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMenu();
+  }, []);
+
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setFormData({
+      name: "",
+      description: "",
+      price: "",
+      category: "waffles",
+      image: "",
+      available: true,
+    });
+    setSlideOverOpen(true);
+  };
+
+  const handleOpenEdit = (item: any) => {
+    setEditingId(item._id);
+    setFormData({
+      name: item.name || "",
+      description: item.description || "",
+      price: (item.price ?? item.basePrice ?? "").toString(),
+      category: item.category || "waffles",
+      image: item.image || "",
+      available: item.available ?? item.isAvailable ?? true,
+    });
+    setSlideOverOpen(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.price) {
+      alert("Completarea numelui și a prețului este obligatorie.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        price: Number(formData.price),
+        category: formData.category,
+        image: formData.image || "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80",
+        available: formData.available,
+      };
+
+      if (editingId) {
+        await adminFetch(`/menu/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await adminFetch("/menu", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
+
+      setSlideOverOpen(false);
+      await loadMenu();
+    } catch (err: any) {
+      alert("Eroare la salvare: " + (err.message || "Apel eșuat"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleAvailability = async (item: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentVal = item.available ?? item.isAvailable ?? true;
+    try {
+      await adminFetch(`/menu/${item._id}`, {
+        method: "PUT",
+        body: JSON.stringify({ available: !currentVal }),
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert("Eroare la schimbarea disponibilității: " + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const handleArchiveToggle = async (item: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const willArchive = !item.isArchived;
+    const actionText = willArchive ? "arhivezi" : "dezarhivezi";
+    if (!confirm(`Ești sigur că vrei să ${actionText} preparatul "${item.name}"?`)) return;
+
+    try {
+      await adminFetch(`/menu/${item._id}/archive`, {
+        method: "PATCH",
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert(`Eroare la ${actionText}: ` + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const handleDeletePermanent = async (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Ești sigur că vrei să ștergi DEFINITIV preparatul "${name}" din baza de date?`)) return;
+    try {
+      await adminFetch(`/menu/${id}`, {
+        method: "DELETE",
+      });
+      await loadMenu();
+    } catch (err: any) {
+      alert("Eroare la ștergere: " + (err.message || "Apel eșuat"));
+    }
+  };
+
+  const activeCount = menuItems.filter(i => !i.isArchived).length;
+  const archivedCount = menuItems.filter(i => !!i.isArchived).length;
+
+  const filteredItems = menuItems.filter((item) => {
+    const isArchived = !!item.isArchived;
+    const matchesTab = viewTab === "archived" ? isArchived : !isArchived;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch =
+      item.name?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      item.category?.toLowerCase().includes(q);
+    return matchesTab && matchesSearch;
+  });
+
+  return (
+    <div className="space-y-8 pb-10">
+      {/* Header Actions */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
+        <div>
+          <h2 className="font-headline-lg text-cacao-dark text-3xl mb-2">Meniu și Oferte</h2>
+          <p className="font-body-md text-cacao-dark/60">Controlează vitrina cu preparate artizanale vizibilă clienților.</p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cacao-dark/40" size={18} />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Caută în meniu..." 
+              className="pl-12 pr-6 py-3 bg-vanilla-porcelain border border-warm-border rounded-lg text-cacao-dark font-body-md focus:outline-none focus:border-gold-saffron transition-colors w-72"
+            />
+          </div>
+          <LuxuryButton 
+            variant="primary" 
+            icon={<Plus size={16} />}
+            onClick={handleOpenAdd}
+          >
+            Adaugă Preparat
+          </LuxuryButton>
+        </div>
+      </div>
+
+      {/* Tab Selector */}
+      <div className="flex items-center gap-3 border-b border-warm-border pb-4">
+        <button
+          onClick={() => setViewTab("active")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-label-caps text-xs transition-colors cursor-pointer ${
+            viewTab === "active"
+              ? "bg-gold-saffron text-cacao-dark font-bold shadow-sm"
+              : "bg-vanilla-porcelain border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+          }`}
+        >
+          <PackageCheck size={16} />
+          <span>Preparate Active ({activeCount})</span>
+        </button>
+        <button
+          onClick={() => setViewTab("archived")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-label-caps text-xs transition-colors cursor-pointer ${
+            viewTab === "archived"
+              ? "bg-gold-saffron text-cacao-dark font-bold shadow-sm"
+              : "bg-vanilla-porcelain border border-warm-border text-cacao-dark/60 hover:bg-[#FAF7F2]"
+          }`}
+        >
+          <Archive size={16} />
+          <span>Arhivă Preparate ({archivedCount})</span>
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="w-12 h-12 border-4 border-gold-saffron border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-body-md text-cacao-dark/60 animate-pulse">Se încarcă vitrina cu bunătăți...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center h-64 space-y-4 bg-vanilla-porcelain border border-warm-border rounded-2xl">
+          <AlertCircle size={48} className="text-cacao-dark/20" />
+          <h3 className="font-headline-md text-xl text-cacao-dark">Eroare Meniu</h3>
+          <p className="font-body-md text-cacao-dark/60">{error}</p>
+          <LuxuryButton onClick={loadMenu}>Reîncearcă</LuxuryButton>
+        </div>
+      ) : filteredItems.length === 0 ? (
+        <div className="p-12 text-center text-cacao-dark/60 font-body-md bg-vanilla-porcelain border border-warm-border rounded-2xl">
+          {viewTab === "archived" 
+            ? "Nu există niciun preparat arhivat." 
+            : "Nu s-a găsit niciun preparat corespunzător căutării."}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredItems.map((item) => (
+            <div key={item._id} className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden group hover:border-gold-saffron/50 transition-colors flex flex-col cursor-pointer">
+              
+              {/* Image Container */}
+              <div className="h-48 bg-[#FAF7F2] border-b border-warm-border relative overflow-hidden">
+                <img 
+                  src={item.image ? (item.image.startsWith('http') ? item.image : `${API_URL}/../${item.image}`) : "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80"} 
+                  alt={item.name} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" 
+                  onError={(e: any) => { e.target.src = "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=80"; }}
+                />
+                
+                <div className="absolute top-4 right-4">
+                  {item.isArchived ? (
+                    <StatusBadge status="neutral" label="Arhivat" />
+                  ) : (
+                    <button 
+                      onClick={(e) => handleToggleAvailability(item, e)}
+                      title="Apasă pentru a schimba statusul (Activ / Ascuns)"
+                      className="cursor-pointer hover:scale-105 transition-transform"
+                    >
+                      <StatusBadge 
+                        status={(item.available ?? item.isAvailable) ? 'success' : 'neutral'} 
+                        label={(item.available ?? item.isAvailable) ? 'Activ' : 'Ascuns'} 
+                      />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <div className="p-6 flex flex-col flex-1">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-headline-md text-cacao-dark text-xl">{item.name}</h3>
+                  {item.name?.toLowerCase().includes("dubai") && (
+                    <span className="text-gold-saffron" title="Produs Premium"><Sparkles size={18} /></span>
+                  )}
+                </div>
+                
+                <p className="font-body-md text-cacao-dark/60 text-sm line-clamp-2 mb-6 flex-1">
+                  {item.description || "Nicio descriere adăugată."}
+                </p>
+                
+                <div className="flex items-center justify-between pt-4 border-t border-warm-border/50 mt-auto">
+                  <span className="font-headline-md text-gold-saffron text-xl">{item.price ?? item.basePrice} MDL</span>
+                  <div className="flex items-center gap-3">
+                    {!item.isArchived ? (
+                      <>
+                        <button 
+                          onClick={() => handleOpenEdit(item)}
+                          className="flex items-center gap-1 text-cacao-dark/70 hover:text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Editează Preparat"
+                        >
+                          <Edit3 size={14} />
+                          <span>Editează</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleArchiveToggle(item, e)}
+                          className="flex items-center gap-1 text-cacao-dark/60 hover:text-amber-700 font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Arhivează Preparat"
+                        >
+                          <Archive size={14} />
+                          <span>Arhivează</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={(e) => handleArchiveToggle(item, e)}
+                          className="flex items-center gap-1 text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer font-bold"
+                          title="Dezarhivează Preparat"
+                        >
+                          <ArchiveRestore size={14} />
+                          <span>Dezarhivează</span>
+                        </button>
+                        <button 
+                          onClick={(e) => handleDeletePermanent(item._id, item.name, e)}
+                          className="flex items-center gap-1 text-cacao-dark/40 hover:text-red-500 font-label-caps text-xs transition-colors cursor-pointer"
+                          title="Șterge Definitiv"
+                        >
+                          <Trash2 size={14} />
+                          <span>Șterge</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <SlideOver 
+        isOpen={isSlideOverOpen} 
+        onClose={() => setSlideOverOpen(false)}
+        title={editingId ? "Editează Preparat" : "Preparat Nou"}
+      >
+        <form onSubmit={handleSave} className="space-y-6">
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Nume Preparat *</label>
+            <input 
+              type="text" 
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors" 
+              placeholder="Ex: Waffle Praline" 
+            />
+          </div>
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Descriere Artisanală</label>
+            <textarea 
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark min-h-[100px] focus:outline-none focus:border-gold-saffron transition-colors resize-none" 
+              placeholder="Descrierea delicioasă..."
+            />
+          </div>
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">URL Imagine (Cloudinary / Web)</label>
+            <input 
+              type="text" 
+              value={formData.image}
+              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors" 
+              placeholder="https://..." 
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Preț (MDL) *</label>
+              <input 
+                type="number" 
+                required
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors" 
+                placeholder="0.00" 
+              />
+            </div>
+            <div>
+              <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Categorie</label>
+              <select 
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+              >
+                <option value="waffles">Waffles</option>
+                <option value="crepes">Crepes</option>
+                <option value="pancakes">Pancakes</option>
+                <option value="bauturi">Băuturi</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block font-label-caps text-cacao-dark/60 text-xs mb-2">Status Disponibilitate</label>
+            <select 
+              value={formData.available ? "true" : "false"}
+              onChange={(e) => setFormData({ ...formData, available: e.target.value === "true" })}
+              className="w-full bg-vanilla-porcelain border border-warm-border rounded-lg p-3 font-body-md text-cacao-dark focus:outline-none focus:border-gold-saffron transition-colors"
+            >
+              <option value="true">Activ</option>
+              <option value="false">Ascuns</option>
+            </select>
+          </div>
+          <div className="pt-6 border-t border-warm-border mt-8">
+            <LuxuryButton variant="primary" className="w-full" disabled={saving}>
+              {saving ? "Se salvează..." : editingId ? "Actualizează Preparatul" : "Salvează Preparatul"}
+            </LuxuryButton>
+          </div>
+        </form>
+      </SlideOver>
+    </div>
+  );
+}
