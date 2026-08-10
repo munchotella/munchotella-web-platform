@@ -15,26 +15,29 @@ export default function OrdersPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadOrders = async () => {
+  const loadOrders = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const res = await adminFetch("/orders/admin/all?period=month");
       if (res?.success) {
         setOrders(res.data);
       }
     } catch (err: any) {
-      // adminFetch gestionează automat erorile 401 (sesiune expirată) — VUL-001 fix
       const msg = err.message || "Eroare la preluarea comenzilor";
-      if (!msg.includes("expirat")) {
+      if (!msg.includes("expirat") && isInitial) {
         setError(msg);
       }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadOrders();
+    loadOrders(true);
+    const interval = setInterval(() => {
+      loadOrders(false);
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdateStatus = async (orderId: string, currentStatus: string) => {

@@ -18,9 +18,26 @@ export default function AdminDashboardPage() {
     console.log("VERCEL_BUILD_SUCCESS_98765");
   }
 
-  const loadDashboardData = async () => {
+  const playOrderChime = () => {
     try {
-      setLoading(true);
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch (e) {}
+  };
+
+  const loadDashboardData = async (isInitial = false) => {
+    try {
+      if (isInitial) setLoading(true);
       setError(null);
       const [statsRes, ordersRes] = await Promise.all([
         adminFetch("/admin/stats"),
@@ -28,21 +45,34 @@ export default function AdminDashboardPage() {
       ]);
       
       if (statsRes?.data) setStats(statsRes.data);
-      if (ordersRes?.data) setLiveOrders(ordersRes.data.slice(0, 5));
+      if (ordersRes?.data) {
+        const newOrders = ordersRes.data.slice(0, 5);
+        setLiveOrders((prevOrders) => {
+          if (prevOrders.length > 0 && newOrders.length > 0) {
+            const hasNew = newOrders.some((no: any) => !prevOrders.some((po: any) => po._id === no._id));
+            if (hasNew) {
+              playOrderChime();
+            }
+          }
+          return newOrders;
+        });
+      }
     } catch (err: any) {
-      // adminFetch gestionează automat erorile 401 (sesiune expirată) — VUL-001 fix
-      // Orice altă eroare (rețea, server) este afișată utilizatorului
       const msg = err.message || "Eroare la preluarea datelor";
-      if (!msg.includes("expirat")) {
+      if (!msg.includes("expirat") && isInitial) {
         setError(msg);
       }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDashboardData();
+    loadDashboardData(true);
+    const interval = setInterval(() => {
+      loadDashboardData(false);
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
