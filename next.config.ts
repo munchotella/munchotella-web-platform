@@ -39,8 +39,8 @@ const nextConfig: any = {
         destination: 'https://munchotella-api.onrender.com/api/:path*',
       },
       {
-        source: '/__/auth/:path*',
-        destination: 'https://munchotella-d67f1.firebaseapp.com/__/auth/:path*',
+        source: '/__/:path*',
+        destination: 'https://munchotella-d67f1.firebaseapp.com/__/:path*',
       },
     ];
   },
