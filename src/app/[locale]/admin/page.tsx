@@ -135,7 +135,7 @@ export default function AdminDashboardPage() {
       <section className="bg-vanilla-porcelain border border-warm-border rounded-2xl p-8">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-headline-md text-cacao-dark text-xl">Ultimele Comenzi ({activeOrdersCount} active)</h3>
-          <LuxuryButton variant="outline" className="scale-90 origin-right">
+          <LuxuryButton variant="outline" className="scale-90 origin-right" onClick={() => window.location.href = window.location.pathname + '/orders'}>
             Vezi Tot Istoricul
           </LuxuryButton>
         </div>
