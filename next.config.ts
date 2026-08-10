@@ -32,6 +32,14 @@ const ContentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig: any = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://munchotella-api.onrender.com/api/:path*',
+      },
+    ];
+  },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
