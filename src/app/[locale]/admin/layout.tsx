@@ -6,6 +6,7 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { usePathname } from "next/navigation";
 import { Outfit, Playfair_Display } from "next/font/google";
+import { API_URL } from "@/lib/adminApi";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -18,8 +19,6 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   display: "swap",
 });
-
-const API_URL = "https://munchotella-api.onrender.com/api";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

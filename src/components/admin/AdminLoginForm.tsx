@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { User, Lock, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import LuxuryButton from "./LuxuryButton";
+import { API_URL } from "@/lib/adminApi";
 
 export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const [phoneOrEmail, setPhoneOrEmail] = useState("");
@@ -14,8 +15,6 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess?: () => void }
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
-
-    const API_URL = "https://munchotella-api.onrender.com/api";
 
     let normalized = phoneOrEmail.trim();
     if (normalized.startsWith('0') && normalized.length === 9) {
