@@ -21,7 +21,17 @@ export async function adminFetch(endpoint: string, options: RequestInit = {}) {
     throw new Error("Sesiune expirată. Te rugăm să te autentifici din nou.");
   }
 
-  const data = await res.json();
+  const responseText = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(responseText);
+  } catch (err) {
+    if (!res.ok) {
+      throw new Error(`Serverul API Render se inițializează sau a returnat o eroare (${res.status}). Te rugăm să reîncerci în 10 secunde.`);
+    }
+    throw new Error("Răspuns invalid primita de la serverul backend.");
+  }
+
   if (!res.ok) {
     throw new Error(data.message || "A apărut o eroare la apelul API.");
   }
