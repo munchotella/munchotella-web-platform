@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 import { useTranslations } from 'next-intl';
