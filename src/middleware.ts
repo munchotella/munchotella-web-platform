@@ -6,6 +6,13 @@ const intlMiddleware = createMiddleware(routing);
 
 export default function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
+  const { pathname } = req.nextUrl;
+
+  // Bypass middleware for all API routes
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
   const hostname = req.headers.get('host') || '';
 
   // Daca domeniul contine "admin" (ex: munchotella-admin.vercel.app)
