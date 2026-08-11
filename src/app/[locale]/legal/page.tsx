@@ -3,7 +3,8 @@ import { Shield, BookOpen, Truck } from "lucide-react";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import { useTranslations } from 'next-intl';
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await import(`../../../../messages/${locale}.json`);
   return {
     title: t.Legal.title,
