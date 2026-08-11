@@ -70,11 +70,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/munchotella_favicon.png", type: "image/png" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
       { url: "/favicon.ico" }
     ],
-    shortcut: "/munchotella_favicon.png",
-    apple: "/munchotella_favicon.png",
+    shortcut: "/favicon-48x48.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -94,9 +96,11 @@ export default async function RootLayout({
       className={`${playfairFont.variable} ${outfitFont.variable} ${greatVibesFont.variable} h-full antialiased`}
     >
       <head>
-        <link rel="icon" type="image/png" href="/munchotella_favicon.png" />
-        <link rel="shortcut icon" href="/munchotella_favicon.png" />
-        <link rel="apple-touch-icon" href="/munchotella_favicon.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+        <link rel="shortcut icon" href="/favicon-48x48.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
         <script
           type="application/ld+json"
@@ -107,7 +111,7 @@ export default async function RootLayout({
               "name": "Munchotella",
               "alternateName": "Munchotella Waffle Boutique",
               "url": "https://www.munchotella.md",
-              "logo": "https://www.munchotella.md/munchotella_favicon.png",
+              "logo": "https://www.munchotella.md/icon-512.png",
               "sameAs": [
                 "https://www.instagram.com/munchotella.md/",
                 "https://www.tiktok.com/@munchotella",
