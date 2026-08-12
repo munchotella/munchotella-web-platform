@@ -26,9 +26,11 @@ EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXSPZCE9TfaJKTHu7fTv542LYbiOFC2ZB16SZAAprVec1
 * **Callback URL**: `https://munchotella-web-platform.vercel.app/api/webhooks/instagram`
 * **Verify Token**: `munchotella_secret_token`
 * **Evenimente Abonate (`Subscribed`)**:
-  - `messages` (Primire/Procesare mesaje clienți în timp real cu Gemini 2.0 Flash)
+  - `messages` (Primire/Procesare mesaje clienți în timp real cu Gemini AI + Engine Munchotella)
   - `messaging_postbacks`
   - `message_reactions`
+* **Mecanism de Siguranță**:
+  - Webhook-ul include un fallback permanent cu token-ul de mai sus în codul din `src/app/api/webhooks/instagram/route.ts`, astfel încât chiar dacă variabilele de mediu din Vercel sunt lipsă sau incomplete, serverul poate procesa și trimite răspunsul instant pe Instagram fără nicio întrerupere.
 
 ---
 
