@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
 async function processMessage(senderId: string, messageText: string) {
   try {
-    let systemPrompt = "Ești asistentul virtual Munchotella Waffle Boutique în Chișinău (Strada Nicolae Testemițeanu 21/1). Oferă răspunsuri amabile, elegante și scurte despre meniul nostru de waffles americane, mini waffles, clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană, fructe proaspete și băuturi. Prețuri orientative: Waffle cu Ciocolată 120 MDL, Waffle cu Fistic 150 MDL, Cafea 40 MDL. Livrăm rapid prin serviciul nostru de curierat și taxi. Site oficial: www.munchotella.md.";
+    let systemPrompt = "Ești asistentul virtual Munchotella Waffle Boutique în Chișinău (Strada Nicolae Testemițeanu 21/1). Oferă răspunsuri amabile, elegante și scurte despre meniul nostru de waffles americane, mini waffles, clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană, fructe proaspete și băuturi. Prețuri orientative: Waffle cu Ciocolată 120 MDL, Waffle cu Fistic 150 MDL, Cafea 40 MDL. Livrăm rapid prin serviciul nostru de curierat și taxi. Nu include link-uri text brute în corp dacă menționezi site-ul, deoarece un buton interactiv va fi atașat automat.";
     let tone = "elegant";
 
     // Citește setările de personalitate salvate din Admin Dashboard (Firestore)
@@ -132,10 +132,9 @@ async function processMessage(senderId: string, messageText: string) {
         const data = settingsSnap.data();
         if (data.prompt) systemPrompt = data.prompt;
         if (data.tone) tone = data.tone;
-        console.log("Setări AI încărcate din Admin Dashboard:", { tone, promptLength: systemPrompt.length });
       }
     } catch (dbErr) {
-      console.warn("Nu s-au putut încărca setările AI din Admin Dashboard, se folosește configurarea implicită:", dbErr);
+      console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
     }
 
     let finalPrompt = systemPrompt + `\n\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde într-un mod ${tone === 'friendly' ? 'prietenos, cald și cu emoji-uri drăguțe' : tone === 'formal' ? 'formal, scurt și foarte politicos' : 'elegant, luxos și amabil'}, scurt și clar:`;
@@ -169,31 +168,68 @@ async function processMessage(senderId: string, messageText: string) {
     if (!replyText) {
       const lower = messageText.toLowerCase();
       if (lower.includes('pret') || lower.includes('preț') || lower.includes('meniu') || lower.includes('waffle') || lower.includes('clatite') || lower.includes('clătite') || lower.includes('dulce') || lower.includes('desert') || lower.includes('mancare') || lower.includes('mâncare')) {
-        replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles americane, Mini Waffles și Clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Vezi meniul complet și comanda direct pe www.munchotella.md ✨";
+        replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles americane, Mini Waffles și Clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a vedea tot meniul și a plasa comanda online! ✨";
       } else if (lower.includes('livrare') || lower.includes('comanda') || lower.includes('comandă') || lower.includes('livrati') || lower.includes('livrați') || lower.includes('curier') || lower.includes('taxi')) {
-        replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul! Poți plasa comanda simplu și rapid direct pe site-ul nostru www.munchotella.md! Ce bunătăți ai dori să-ți trimitem?";
+        replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul! Poți plasa comanda simplu și rapid direct de pe butonul de mai jos! Ce bunătăți ai dori să-ți trimitem?";
       } else if (lower.includes('adresa') || lower.includes('adresă') || lower.includes('locatie') || lower.includes('locație') || lower.includes('unde') || lower.includes('strada') || lower.includes('chisinau') || lower.includes('chișinău')) {
-        replyText = "Ne găsești în Chișinău pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag pentru o experiență dulce de neuitat! Sau comandați online pe www.munchotella.md 🛵";
+        replyText = "Ne găsești în Chișinău pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag pentru o experiență dulce de neuitat sau comandați online accesând meniul de mai jos! 🛵";
       } else if (lower.includes('salut') || lower.includes('buna') || lower.includes('bună') || lower.includes('hei') || lower.includes('hello') || lower.includes('hi')) {
-        replyText = "Bună ziua! 👋 Bine ați venit la Munchotella Waffle Boutique! Cu ce vă putem îndulci ziua? Puteți explora meniul nostru special pe www.munchotella.md 🧇✨";
+        replyText = "Bună ziua! 👋 Bine ați venit la Munchotella Waffle Boutique! Cu ce vă putem îndulci ziua? Puteți explora meniul nostru special apăsând pe butonul de mai jos 🧇✨";
       } else {
-        replyText = "Bună ziua! 🧇 Vă mulțumim că ați contactat Munchotella Waffle Boutique! Cu ce vă putem ajuta azi? Puteți consulta meniul nostru complet și comanda pe www.munchotella.md!";
+        replyText = "Bună ziua! 🧇 Vă mulțumim că ați contactat Munchotella Waffle Boutique! Cu ce vă putem ajuta azi? Puteți consulta meniul nostru complet apăsând butonul de mai jos!";
       }
     }
 
     let sendResult = null;
     const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
 
+    // Curățăm link-urile text brute dacă există, pentru a folosi exclusiv butonul interactiv
+    const cleanText = replyText.replace(/https?:\/\/(www\.)?munchotella\.md\/?/gi, '').trim();
+
+    // 1. Încercăm să trimitem cu Button Template Meta (buton interactiv ușor de apăsat)
     try {
+      const buttonPayload = {
+        recipient: { id: senderId },
+        message: {
+          attachment: {
+            type: "template",
+            payload: {
+              template_type: "button",
+              text: cleanText || replyText,
+              buttons: [
+                {
+                  type: "web_url",
+                  url: "https://www.munchotella.md/",
+                  title: "🧇 Deschide Meniul"
+                }
+              ]
+            }
+          }
+        }
+      };
+
       const metaRes = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipient: { id: senderId },
-          message: { text: replyText }
-        })
+        body: JSON.stringify(buttonPayload)
       });
       sendResult = await metaRes.json();
+
+      // Dacă Meta returnează eroare la șablonul cu buton, facem fallback automat la mesajul text simplu
+      if (sendResult?.error) {
+        console.warn("Trimiterea cu buton a returnat atenționare, se încearcă fallback la text simplu:", sendResult.error);
+        const textPayload = {
+          recipient: { id: senderId },
+          message: { text: replyText.includes('munchotella.md') ? replyText : `${replyText}\n\n🌐 https://www.munchotella.md/` }
+        };
+        const fallbackRes = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(textPayload)
+        });
+        sendResult = await fallbackRes.json();
+      }
+
       console.log(`Răspuns trimis cu succes prin Meta Graph API către ${senderId}:`, sendResult);
     } catch (metaErr) {
       console.error("Eroare la trimiterea prin Meta Graph API:", metaErr);
