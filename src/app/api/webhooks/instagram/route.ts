@@ -137,7 +137,7 @@ async function processMessage(senderId: string, messageText: string) {
   try {
     const lang = detectLanguage(messageText);
 
-    let systemPrompt = `Ești asistentul virtual al Munchotella Waffle Boutique în Chișinău (Str. Nicolae Testemițeanu 21/1). Website oficial: www.munchotella.md.
+    const baseMenuPrompt = `Ești asistentul virtual al Munchotella Waffle Boutique în Chișinău (Str. Nicolae Testemițeanu 21/1). Website oficial: www.munchotella.md.
 
 DENUMIRI OFICIALE DE PRODUSE (folosește-le exact așa cum sunt scrise mai jos):
 - WAFFLES: "Waffle sticks" (145 MDL), "Delux mini waffle" (160 MDL), "Nutella Mini waffles" (145 MDL), "Lotus Mini waffles" (200 MDL), "Fruits waffle" (155 MDL), "Classic waffle" (145 MDL), "Belgian panda waffle" (160 MDL), "Biscoff waffle" (195 MDL).
@@ -155,21 +155,22 @@ Dacă clientul scrie în Limba Engleză, răspunde în Engleză.
 Nu include link-uri text brute în corp, deoarece un buton va fi atașat automat.`;
 
     let tone = "elegant";
+    let adminCustomPrompt = "";
 
-    // Citește setările de personalitate salvate din Admin Dashboard (Firestore)
+    // Citește setările de personalitate salvate din Admin Dashboard (Firestore) fără a suprascrie baza de date de produse
     try {
       const settingsRef = doc(db, 'settings', 'ai_instagram');
       const settingsSnap = await getDoc(settingsRef);
       if (settingsSnap.exists()) {
         const data = settingsSnap.data();
-        if (data.prompt) systemPrompt = data.prompt;
+        if (data.prompt) adminCustomPrompt = data.prompt;
         if (data.tone) tone = data.tone;
       }
     } catch (dbErr) {
       console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
     }
 
-    let finalPrompt = systemPrompt + `\n\n[Limba detectată a clientului: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Nu folosi deloc cuvântul 'americane'. Folosește denumirile exacte ale produselor din meniu]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde scurt, elegant și clar în limba ${lang === 'ru' ? 'rusă' : lang === 'en' ? 'engleză' : 'română'}:`;
+    let finalPrompt = baseMenuPrompt + "\n\n" + (adminCustomPrompt ? `[Instrucțiuni suplimentare Admin: ${adminCustomPrompt}]\n` : "") + `\n[Limba detectată a clientului: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Nu folosi deloc cuvântul 'americane'. Folosește denumirile exacte ale produselor din meniu]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde scurt, elegant și clar în limba ${lang === 'ru' ? 'rusă' : lang === 'en' ? 'engleză' : 'română'}:`;
 
     let replyText = "";
     const apiKey = process.env.GEMINI_API_KEY;
@@ -201,7 +202,7 @@ Nu include link-uri text brute în corp, deoarece un buton va fi atașat automat
       const lower = messageText.toLowerCase();
       if (lang === 'ru') {
         if (lower.includes('цена') || lower.includes('цены') || lower.includes('меню') || lower.includes('сладости') || lower.includes('вафли') || lower.includes('блины')) {
-          replyText = "Здравствуйте! 🧇 В Munchotella у нас самые вкусные Waffles (Waffle sticks, Delux mini waffle), Crepes (Crepe Dubai, Delux crepe) с Nutella®, фисташковым кремом, Kinder и свежими фруктами! 🍓 Нажмите кнопку ниже, чтобы открыть меню и оформить заказ! ✨";
+          replyText = "Здравствуйте! 🧇 В Munchotella у нас самые вкусные Waffles (Waffle sticks, Delux mini waffle, Biscoff waffle), Crepes (Crepe Dubai, Delux crepe) с Nutella®, фисташковым кремом, Kinder и свежими фруктами! 🍓 Нажмите кнопку ниже, чтобы открыть меню и оформить заказ! ✨";
         } else if (lower.includes('доставка') || lower.includes('заказ') || lower.includes('такси')) {
           replyText = "Здравствуйте! 🛵 Доставляем быстро по всему Кишиневу! Вы можете легко оформить заказ онлайн, нажав на кнопку ниже! 🧇";
         } else if (lower.includes('адрес') || lower.includes('где')) {
@@ -210,7 +211,7 @@ Nu include link-uri text brute în corp, deoarece un buton va fi atașat automat
           replyText = "Здравствуйте! 🧇 Спасибо, что связались с Munchotella Waffle Boutique! Нажмите кнопку ниже, чтобы открыть наше полное меню!";
         }
       } else if (lang === 'en') {
-        replyText = "Hello! 🧇 Welcome to Munchotella Waffle Boutique! We serve delicious Waffles, Mini Waffles, Crepes, Crepe Dubai, and Pancakes with Nutella®, pistachio, and fresh fruits! 🍓 Click the button below to open our menu and order online! ✨";
+        replyText = "Hello! 🧇 Welcome to Munchotella Waffle Boutique! We serve delicious Waffles (Waffle sticks, Delux mini waffle), Crepes (Crepe Dubai, Delux crepe), and Pancakes with Nutella®, pistachio, and fresh fruits! 🍓 Click the button below to open our menu and order online! ✨";
       } else {
         if (lower.includes('pret') || lower.includes('preț') || lower.includes('meniu') || lower.includes('waffle') || lower.includes('clatite') || lower.includes('clătite') || lower.includes('dulce') || lower.includes('desert') || lower.includes('mancare') || lower.includes('mâncare')) {
           replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles (Waffle sticks, Delux mini waffle, Biscoff waffle), Crepes (Crepe Dubai, Delux crepe) și Pancakes cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a deschide meniul și a comanda online! ✨";
