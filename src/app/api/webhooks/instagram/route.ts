@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const PERMANENT_META_PAGE_ACCESS_TOKEN = "EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXSPZCE9TfaJKTHu7fTv542LYbiOFC2ZB16SZAAprVec1Dvx8db6ydyU4shHOb8ZAI6wxLsF9mep5cKYjQivMxLbRp21qoOsdwZBZCe2yc5vZBTwA4noZArn3edbYSs8b9ZA8IDHP4H5l73BuM7xQvhYfXe1TF3Gj8zWVi8kL";
 const INSTAGRAM_ACCOUNT_ID = "17841407196466279";
@@ -120,8 +122,23 @@ export async function POST(request: Request) {
 async function processMessage(senderId: string, messageText: string) {
   try {
     let systemPrompt = "Ești asistentul virtual Munchotella Waffle Boutique în Chișinău (Strada Nicolae Testemițeanu 21/1). Oferă răspunsuri amabile, elegante și scurte despre meniul nostru de waffles americane, mini waffles, clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană, fructe proaspete și băuturi. Prețuri orientative: Waffle cu Ciocolată 120 MDL, Waffle cu Fistic 150 MDL, Cafea 40 MDL. Livrăm rapid prin serviciul nostru de curierat și taxi. Site oficial: www.munchotella.md.";
+    let tone = "elegant";
 
-    let finalPrompt = systemPrompt + `\nMesajul clientului: "${messageText}"\nRăspunde într-un mod elegant, cald și foarte politicos, scurt și clar:`;
+    // Citește setările de personalitate salvate din Admin Dashboard (Firestore)
+    try {
+      const settingsRef = doc(db, 'settings', 'ai_instagram');
+      const settingsSnap = await getDoc(settingsRef);
+      if (settingsSnap.exists()) {
+        const data = settingsSnap.data();
+        if (data.prompt) systemPrompt = data.prompt;
+        if (data.tone) tone = data.tone;
+        console.log("Setări AI încărcate din Admin Dashboard:", { tone, promptLength: systemPrompt.length });
+      }
+    } catch (dbErr) {
+      console.warn("Nu s-au putut încărca setările AI din Admin Dashboard, se folosește configurarea implicită:", dbErr);
+    }
+
+    let finalPrompt = systemPrompt + `\n\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde într-un mod ${tone === 'friendly' ? 'prietenos, cald și cu emoji-uri drăguțe' : tone === 'formal' ? 'formal, scurt și foarte politicos' : 'elegant, luxos și amabil'}, scurt și clar:`;
 
     let replyText = "";
     const apiKey = process.env.GEMINI_API_KEY;
@@ -182,7 +199,7 @@ async function processMessage(senderId: string, messageText: string) {
       console.error("Eroare la trimiterea prin Meta Graph API:", metaErr);
     }
 
-    return { success: true, sendResult, replyText };
+    return { success: true, sendResult, replyText, tone };
 
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
