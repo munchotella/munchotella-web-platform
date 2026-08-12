@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
 async function processMessage(senderId: string, messageText: string) {
   try {
-    let systemPrompt = "Ești asistentul virtual Munchotella Waffle Boutique în Chișinău (Strada Nicolae Testemițeanu 21/1). Oferă răspunsuri amabile, elegante și scurte despre meniul nostru de waffles americane, mini waffles, clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană, fructe proaspete și băuturi. Prețuri orientative: Waffle cu Ciocolată 120 MDL, Waffle cu Fistic 150 MDL, Cafea 40 MDL. Livrăm rapid prin serviciul nostru de curierat și taxi. Nu include link-uri text brute în corp dacă menționezi site-ul, deoarece un buton interactiv va fi atașat automat.";
+    let systemPrompt = "Ești asistentul virtual Munchotella Waffle Boutique în Chișinău (Strada Nicolae Testemițeanu 21/1). Oferă răspunsuri amabile, elegante și scurte despre meniul nostru de waffles, mini waffles, clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană, fructe proaspete și băuturi. Prețuri orientative: Waffle cu Ciocolată 120 MDL, Waffle cu Fistic 150 MDL, Cafea 40 MDL. Livrăm rapid prin serviciul nostru de curierat și taxi. REGULĂ STRICTĂ: Nu spune NICIODATĂ 'waffles americane' sau 'waffle americane'. Folosește DOAR cuvântul 'waffle' sau 'waffles'. Nu include link-uri text brute în corp dacă menționezi site-ul, deoarece un buton interactiv va fi atașat automat.";
     let tone = "elegant";
 
     // Citește setările de personalitate salvate din Admin Dashboard (Firestore)
@@ -137,7 +137,7 @@ async function processMessage(senderId: string, messageText: string) {
       console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
     }
 
-    let finalPrompt = systemPrompt + `\n\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde într-un mod ${tone === 'friendly' ? 'prietenos, cald și cu emoji-uri drăguțe' : tone === 'formal' ? 'formal, scurt și foarte politicos' : 'elegant, luxos și amabil'}, scurt și clar:`;
+    let finalPrompt = systemPrompt + `\n\n[REGULĂ OBLIGATORIE: Nu folosi deloc cuvântul 'americane'. Spune doar 'waffle' sau 'waffles']\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde într-un mod ${tone === 'friendly' ? 'prietenos, cald și cu emoji-uri drăguțe' : tone === 'formal' ? 'formal, scurt și foarte politicos' : 'elegant, luxos și amabil'}, scurt și clar:`;
 
     let replyText = "";
     const apiKey = process.env.GEMINI_API_KEY;
@@ -168,7 +168,7 @@ async function processMessage(senderId: string, messageText: string) {
     if (!replyText) {
       const lower = messageText.toLowerCase();
       if (lower.includes('pret') || lower.includes('preț') || lower.includes('meniu') || lower.includes('waffle') || lower.includes('clatite') || lower.includes('clătite') || lower.includes('dulce') || lower.includes('desert') || lower.includes('mancare') || lower.includes('mâncare')) {
-        replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles americane, Mini Waffles și Clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a vedea tot meniul și a plasa comanda online! ✨";
+        replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles, Mini Waffles și Clătite franțuzești cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a vedea tot meniul și a plasa comanda online! ✨";
       } else if (lower.includes('livrare') || lower.includes('comanda') || lower.includes('comandă') || lower.includes('livrati') || lower.includes('livrați') || lower.includes('curier') || lower.includes('taxi')) {
         replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul! Poți plasa comanda simplu și rapid direct de pe butonul de mai jos! Ce bunătăți ai dori să-ți trimitem?";
       } else if (lower.includes('adresa') || lower.includes('adresă') || lower.includes('locatie') || lower.includes('locație') || lower.includes('unde') || lower.includes('strada') || lower.includes('chisinau') || lower.includes('chișinău')) {
@@ -179,6 +179,9 @@ async function processMessage(senderId: string, messageText: string) {
         replyText = "Bună ziua! 🧇 Vă mulțumim că ați contactat Munchotella Waffle Boutique! Cu ce vă putem ajuta azi? Puteți consulta meniul nostru complet apăsând butonul de mai jos!";
       }
     }
+
+    // Eliminăm forțat 'americane' dacă cumva a fost generat de AI
+    replyText = replyText.replace(/waffles?\s+americane/gi, 'waffles').replace(/waffle\s+american/gi, 'waffle');
 
     let sendResult = null;
     const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
