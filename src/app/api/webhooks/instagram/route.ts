@@ -139,6 +139,13 @@ async function processMessage(senderId: string, messageText: string) {
 
     const baseMenuPrompt = `Ești asistentul virtual al Munchotella Waffle Boutique în Chișinău (Str. Nicolae Testemițeanu 21/1). Website oficial: www.munchotella.md.
 
+PERSONALITATE ȘI TONUL VOCII (OBLIGATORIU):
+- Răspunde întotdeauna ca o persoană reală, extrem de amabilă, caldă, politicoasă, empatică și profesională.
+- Salută călduros clienții ("Bună ziua! 👋", "Здравствуйте! 🧇").
+- Folosește un ton primitor și emoji-uri drăguțe (🧇, 🍓, ✨, 🥰, 🛵, 📍).
+- Dacă un client întreabă de livrare în suburbii, explică amabil că în Chișinău livrăm prin curier propriu, iar în suburbii trimitem bucuroși prin taxi partener!
+- Nu fi brusc niciodată! Oferă mereu soluții și recomandări delicioase cu zâmbetul pe buze.
+
 DENUMIRI OFICIALE DE PRODUSE (folosește-le exact așa cum sunt scrise mai jos):
 - WAFFLES: "Waffle sticks" (145 MDL), "Delux mini waffle" (160 MDL), "Nutella Mini waffles" (145 MDL), "Lotus Mini waffles" (200 MDL), "Fruits waffle" (155 MDL), "Classic waffle" (145 MDL), "Belgian panda waffle" (160 MDL), "Biscoff waffle" (195 MDL).
 - CREPES & SPECIALITĂȚI: "Delux crepe" (165 MDL), "Biscoff crepe" (205 MDL), "Fruits crepe" (145 MDL), "Oreo crepe" (145 MDL), "Kinder crepe" (145 MDL), "Crepe Dubai" (265 MDL), "Chocolate bites" (165 MDL), "Royal sushi" (155 MDL), "Sushi banana" (140 MDL).
@@ -170,7 +177,7 @@ Nu include link-uri text brute în corp, deoarece un buton va fi atașat automat
       console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
     }
 
-    let finalPrompt = baseMenuPrompt + "\n\n" + (adminCustomPrompt ? `[Instrucțiuni suplimentare Admin: ${adminCustomPrompt}]\n` : "") + `\n[Limba detectată a clientului: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Nu folosi deloc cuvântul 'americane'. Folosește denumirile exacte ale produselor din meniu]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde scurt, elegant și clar în limba ${lang === 'ru' ? 'rusă' : lang === 'en' ? 'engleză' : 'română'}:`;
+    let finalPrompt = baseMenuPrompt + "\n\n" + (adminCustomPrompt ? `[Instrucțiuni suplimentare Admin: ${adminCustomPrompt}]\n` : "") + `\n[Limba detectată a clientului: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Fii extrem de amabil, cald și profesionist! Nu folosi deloc cuvântul 'americane'. Folosește denumirile exacte ale produselor din meniu]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspunde scurt, cald, amabil și clar în limba ${lang === 'ru' ? 'rusă' : lang === 'en' ? 'engleză' : 'română'}:`;
 
     let replyText = "";
     const apiKey = process.env.GEMINI_API_KEY;
@@ -204,23 +211,23 @@ Nu include link-uri text brute în corp, deoarece un buton va fi atașat automat
         if (lower.includes('цена') || lower.includes('цены') || lower.includes('меню') || lower.includes('сладости') || lower.includes('вафли') || lower.includes('блины')) {
           replyText = "Здравствуйте! 🧇 В Munchotella у нас самые вкусные Waffles (Waffle sticks, Delux mini waffle, Biscoff waffle), Crepes (Crepe Dubai, Delux crepe) с Nutella®, фисташковым кремом, Kinder и свежими фруктами! 🍓 Нажмите кнопку ниже, чтобы открыть меню и оформить заказ! ✨";
         } else if (lower.includes('доставка') || lower.includes('заказ') || lower.includes('такси')) {
-          replyText = "Здравствуйте! 🛵 Доставляем быстро по всему Кишиневу! Вы можете легко оформить заказ онлайн, нажав на кнопку ниже! 🧇";
+          replyText = "Здравствуйте! 🛵 Доставляем быстро по всему Кишиневу через нашего курьера, а в пригороды с удовольствием отправляем через партнерское такси! Вы можете легко оформить заказ онлайн, нажав на кнопку ниже! 🧇";
         } else if (lower.includes('адрес') || lower.includes('где')) {
-          replyText = "Мы находимся в Кишиневе по адресу ул. Николая Тестемицану 21/1! 📍 Ждем вас с нетерпением или заказывайте онлайн через меню ниже! 🛵";
+          replyText = "Мы находимся с радостью в Кишиневе по адресу ул. Николая Тестемицану 21/1! 📍 Ждем вас с нетерпением или заказывайте онлайн через меню ниже! 🛵";
         } else {
-          replyText = "Здравствуйте! 🧇 Спасибо, что связались с Munchotella Waffle Boutique! Нажмите кнопку ниже, чтобы открыть наше полное меню!";
+          replyText = "Здравствуйте! 🧇 Спасибо большое, что связались с Munchotella Waffle Boutique! Чем мы можем вам помочь сегодня? Нажмите кнопку ниже, чтобы открыть наше полное меню!";
         }
       } else if (lang === 'en') {
         replyText = "Hello! 🧇 Welcome to Munchotella Waffle Boutique! We serve delicious Waffles (Waffle sticks, Delux mini waffle), Crepes (Crepe Dubai, Delux crepe), and Pancakes with Nutella®, pistachio, and fresh fruits! 🍓 Click the button below to open our menu and order online! ✨";
       } else {
         if (lower.includes('pret') || lower.includes('preț') || lower.includes('meniu') || lower.includes('waffle') || lower.includes('clatite') || lower.includes('clătite') || lower.includes('dulce') || lower.includes('desert') || lower.includes('mancare') || lower.includes('mâncare')) {
-          replyText = "Bună! 🧇 La Munchotella avem cele mai delicioase Waffles (Waffle sticks, Delux mini waffle, Biscoff waffle), Crepes (Crepe Dubai, Delux crepe) și Pancakes cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a deschide meniul și a comanda online! ✨";
+          replyText = "Bună ziua! 🥰 La Munchotella avem cele mai delicioase Waffles (Waffle sticks, Delux mini waffle, Biscoff waffle), Crepes (Crepe Dubai, Delux crepe) și Pancakes cu Nutella®, fistic, ciocolată Belgiană și fructe proaspete! 🍓 Apasă pe butonul de mai jos pentru a deschide meniul și a comanda online! ✨";
         } else if (lower.includes('livrare') || lower.includes('comanda') || lower.includes('comandă') || lower.includes('livrati') || lower.includes('livrați') || lower.includes('curier') || lower.includes('taxi')) {
-          replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul! Poți plasa comanda simplu și rapid direct de pe butonul de mai jos! Ce bunătăți ai dori să-ți trimitem?";
+          replyText = "Bună ziua! 🛵 Livrăm rapid în tot Chișinăul prin curierat propriu, iar în suburbii vă trimitem cu drag prin taxi partener! Poți plasa comanda simplu direct de pe butonul de mai jos! Ce bunătăți dorești să-ți pregătim?";
         } else if (lower.includes('adresa') || lower.includes('adresă') || lower.includes('locatie') || lower.includes('locație') || lower.includes('unde') || lower.includes('strada') || lower.includes('chisinau') || lower.includes('chișinău')) {
-          replyText = "Ne găsești în Chișinău pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag pentru o experiență dulce de neuitat sau comandați online accesând meniul de mai jos! 🛵";
+          replyText = "Ne găsești cu mare drag în Chișinău pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag pentru o experiență dulce de neuitat sau comandați online accesând meniul de mai jos! 🛵";
         } else {
-          replyText = "Bună ziua! 🧇 Vă mulțumim că ați contactat Munchotella Waffle Boutique! Cu ce vă putem ajuta azi? Puteți consulta meniul nostru complet apăsând butonul de mai jos!";
+          replyText = "Bună ziua! 🧇 Vă mulțumim din suflet că ați contactat Munchotella Waffle Boutique! Cu ce vă putem îndulci ziua? Puteți consulta meniul nostru complet apăsând butonul de mai jos!";
         }
       }
     }
