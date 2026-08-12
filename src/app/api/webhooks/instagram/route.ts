@@ -137,19 +137,30 @@ async function processMessage(senderId: string, messageText: string) {
   try {
     const lang = detectLanguage(messageText);
 
-    const baseMenuPrompt = `Ești asistentul virtual al Munchotella Waffle Boutique în Chișinău (Str. Nicolae Testemițeanu 21/1). Website oficial: www.munchotella.md.
+    let replyText = "";
+    const lowerMsg = messageText.toLowerCase();
+
+    // Verificare rapidă a termenilor de argou non-standard ai clienților
+    if (lowerMsg.includes('fashafish') || lowerMsg.includes('fasa') || lowerMsg.includes('fașa') || lowerMsg.includes('fashafisha')) {
+      replyText = lang === 'ru' 
+        ? "Здравствуйте! 👋 Вы имеете в виду: 1. Chocolate bites или 2. Sushi banana? 🍓"
+        : "Bună! 👋 Vă doriți: 1. Chocolate bites sau 2. Sushi banana? 🍓";
+    } else if (lowerMsg.includes('garuz') || lowerMsg.includes('garose') || lowerMsg.includes('garuzh')) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🍋 Заказать освежающий Ice Lemonade со льдом можно в меню ниже!"
+        : "Bună! 🍋 Puteți comanda un Ice Lemonade rece cu gheață direct din meniul de mai jos!";
+    } else if (lowerMsg.includes('mini pancake') || lowerMsg.includes('pancakes mici')) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🧇 Наша вкуснотища Nutella Mini waffles доступна в меню ниже!"
+        : "Bună! 🧇 Delicioasele noastre Nutella Mini waffles le găsiți în meniul de mai jos!";
+    }
+
+    if (!replyText) {
+      const baseMenuPrompt = `Ești asistentul virtual al Munchotella Waffle Boutique în Chișinău (Str. Nicolae Testemițeanu 21/1). Website oficial: www.munchotella.md.
 
 REGULĂ STRICTĂ DE CONCIZIE & SCURTIME:
 - Răspunde SCURT, CLAR și LA OBIECT (maxim 1-3 propoziții). Nu lungi textul cu introduceri lungi pentru că clienții nu vor să citească mesaje uriașe.
 - Păstrează amabilitatea primitoare, dar fii direct la întrebări simple (ex: "cât e livrarea?" -> "Bună! 👋 Livrarea este 60 MDL 🛵.").
-
-DICȚIONAR DE CUVINTE NON-STANDARD & ARGOU CLIENȚI:
-- "fashafish" / "fașa" / "fashafisha": Se referă la "Chocolate bites" sau "Sushi banana". Dacă clientul folosește acest termen, întreabă-l scurt în TEXT (fără butoane UI): "Vă doriți: 1. Chocolate bites sau 2. Sushi banana? 🍓"
-- "garuz" / "garose" / "garuzh": Se referă la "Ice Lemonade" (băutură răcoritoare cu gheață).
-- "mini pancake" / "pancakes mici": Se referă la "Nutella Mini waffles" (145 MDL).
-- "kunafe" / "kunafa" / "knafe": Se referă la "Crepe Dubai" (265 MDL - cu kataif și fistic).
-- "gofre" / "vafli": Se referă la "Waffles".
-- "clătite pe băț": Se referă la "Waffle sticks" (145 MDL).
 
 DENUMIRI OFICIALE DE PRODUSE (folosește-le exact așa cum sunt scrise mai jos):
 - WAFFLES: "Waffle sticks" (145 MDL), "Delux mini waffle" (160 MDL), "Nutella Mini waffles" (145 MDL), "Lotus Mini waffles" (200 MDL), "Fruits waffle" (155 MDL), "Classic waffle" (145 MDL), "Belgian panda waffle" (160 MDL), "Biscoff waffle" (195 MDL).
@@ -162,87 +173,72 @@ Dacă clientul scrie în Limba Română, răspunde în Română.
 Dacă clientul scrie în Limba Rusă (Русский), răspunde în Rusă.
 Dacă clientul scrie în Limba Engleză, răspunde în Engleză.`;
 
-    let tone = "elegant";
-    let adminCustomPrompt = "";
+      let tone = "elegant";
+      let adminCustomPrompt = "";
 
-    // Citește setările de personalitate salvate din Admin Dashboard (Firestore) fără a suprascrie baza de date de produse
-    try {
-      const settingsRef = doc(db, 'settings', 'ai_instagram');
-      const settingsSnap = await getDoc(settingsRef);
-      if (settingsSnap.exists()) {
-        const data = settingsSnap.data();
-        if (data.prompt) adminCustomPrompt = data.prompt;
-        if (data.tone) tone = data.tone;
-      }
-    } catch (dbErr) {
-      console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
-    }
-
-    let finalPrompt = baseMenuPrompt + "\n\n" + (adminCustomPrompt ? `[Instrucțiuni suplimentare Admin: ${adminCustomPrompt}]\n` : "") + `\n[Limba detectată: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Răspunde SCURT (1-3 propoziții), amabil și direct! Fără lungimi inutile! Nu folosi deloc cuvântul 'americane'.]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspuns scurt:`;
-
-    let replyText = "";
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (apiKey) {
+      // Citește setările de personalitate salvate din Admin Dashboard (Firestore) fără a suprascrie baza de date de produse
       try {
-        const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: finalPrompt,
-        });
-        replyText = response.text || "";
-      } catch (genAiErr: any) {
-        console.warn("GoogleGenAI SDK call failed, falling back to REST API:", genAiErr?.message);
+        const settingsRef = doc(db, 'settings', 'ai_instagram');
+        const settingsSnap = await getDoc(settingsRef);
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data();
+          if (data.prompt) adminCustomPrompt = data.prompt;
+          if (data.tone) tone = data.tone;
+        }
+      } catch (dbErr) {
+        console.warn("Nu s-au putut încărca setările AI din Admin Dashboard:", dbErr);
+      }
+
+      let finalPrompt = baseMenuPrompt + "\n\n" + (adminCustomPrompt ? `[Instrucțiuni suplimentare Admin: ${adminCustomPrompt}]\n` : "") + `\n[Limba detectată: ${lang.toUpperCase()}]\n[REGULĂ OBLIGATORIE: Răspunde SCURT (1-3 propoziții), amabil și direct! Fără lungimi inutile! Nu folosi deloc cuvântul 'americane'.]\n[Ton dorit: ${tone}]\nMesajul clientului: "${messageText}"\nRăspuns scurt:`;
+
+      const apiKey = process.env.GEMINI_API_KEY;
+
+      if (apiKey) {
         try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+          const ai = new GoogleGenAI({ apiKey });
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: finalPrompt,
           });
-          const restData = await restRes.json();
-          replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        } catch (_) {}
+          replyText = response.text || "";
+        } catch (genAiErr: any) {
+          console.warn("GoogleGenAI SDK call failed, falling back to REST API:", genAiErr?.message);
+          try {
+            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+            });
+            const restData = await restRes.json();
+            replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          } catch (_) {}
+        }
       }
     }
 
-    // Handlere de argou directe dacă AI-ul nu este activat sau pentru răspuns ultra-rapid
+    // Fallback-uri concise în caz că Gemini nu a generat răspuns
     if (!replyText) {
-      const lower = messageText.toLowerCase();
-
-      // Detectare argou fashafish
-      if (lower.includes('fashafish') || lower.includes('fasa') || lower.includes('fașa') || lower.includes('fashafisha')) {
-        replyText = lang === 'ru' 
-          ? "Здравствуйте! 👋 Вы имеете в виду: 1. Chocolate bites или 2. Sushi banana? 🍓"
-          : "Bună! 👋 Vă doriți: 1. Chocolate bites sau 2. Sushi banana? 🍓";
-      } else if (lower.includes('garuz') || lower.includes('garose') || lower.includes('garuzh')) {
-        replyText = lang === 'ru'
-          ? "Здравствуйте! 🍋 Заказать освежающий Ice Lemonade со льдом можно в меню ниже!"
-          : "Bună! 🍋 Puteți comanda un Ice Lemonade rece cu gheață direct din meniul de mai jos!";
-      } else if (lower.includes('mini pancake') || lower.includes('pancakes mici')) {
-        replyText = lang === 'ru'
-          ? "Здравствуйте! 🧇 Наша вкуснотища Nutella Mini waffles доступна в меню ниже!"
-          : "Bună! 🧇 Delicioasele noastre Nutella Mini waffles le găsiți în meniul de mai jos!";
-      } else if (lang === 'ru') {
-        if (lower.includes('цена') || lower.includes('цены') || lower.includes('меню') || lower.includes('сладости') || lower.includes('вафли') || lower.includes('блины')) {
-          replyText = "Здравствуйте! 🧇 В Munchotella у нас самые вкусные Waffles и Crepes! Нажмите кнопку ниже, чтобы открыть меню! ✨";
-        } else if (lower.includes('доставка') || lower.includes('заказ') || lower.includes('такси')) {
-          replyText = "Здравствуйте! 🛵 Доставляем быстро по Кишиневу курьером, а в пригороды — через такси! Нажмите кнопку ниже для заказа!";
-        } else if (lower.includes('адрес') || lower.includes('где')) {
-          replyText = "Мы находимся по адресу ул. Н. Тестемицану 21/1! 📍 Ждем вас или заказывайте онлайн ниже! 🛵";
+      if (lang === 'ru') {
+        if (lowerMsg.includes('цена') || lowerMsg.includes('цены') || lowerMsg.includes('меню') || lowerMsg.includes('сладости') || lowerMsg.includes('вафли') || lowerMsg.includes('блины')) {
+          replyText = "Здравствуйте! 🧇 Нажмите кнопку ниже, чтобы открыть полное меню! ✨";
+        } else if (lowerMsg.includes('доставка') || lowerMsg.includes('заказ') || lowerMsg.includes('такси')) {
+          replyText = "Здравствуйте! 🛵 Доставляем курьером по Кишиневу и такси в пригороды! Нажмите ниже для заказа!";
+        } else if (lowerMsg.includes('адрес') || lowerMsg.includes('где')) {
+          replyText = "Мы по адресу ул. Н. Тестемицану 21/1! 📍 Ждем вас или заказывайте онлайн ниже! 🛵";
         } else {
-          replyText = "Здравствуйте! 🧇 Спасибо, что написали в Munchotella! Нажмите кнопку ниже, чтобы открыть наше меню!";
+          replyText = "Здравствуйте! 🧇 Спасибо за обращение в Munchotella! Откройте меню по кнопке ниже!";
         }
       } else if (lang === 'en') {
-        replyText = "Hello! 🧇 Welcome to Munchotella Waffle Boutique! Click the button below to open our menu and order online! ✨";
+        replyText = "Hello! 🧇 Welcome to Munchotella! Click the button below to view our menu and order! ✨";
       } else {
-        if (lower.includes('pret') || lower.includes('preț') || lower.includes('meniu') || lower.includes('waffle') || lower.includes('clatite') || lower.includes('clătite') || lower.includes('dulce') || lower.includes('desert') || lower.includes('mancare') || lower.includes('mâncare')) {
-          replyText = "Bună! 🧇 Avem cele mai delicioase Waffles, Crepes și Pancakes! Apasă pe butonul de mai jos pentru meniu și comandă! ✨";
-        } else if (lower.includes('livrare') || lower.includes('comanda') || lower.includes('comandă') || lower.includes('livrati') || lower.includes('livrați') || lower.includes('curier') || lower.includes('taxi')) {
-          replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul prin curier, iar în suburbii prin taxi! Poți comanda direct pe butonul de mai jos!";
-        } else if (lower.includes('adresa') || lower.includes('adresă') || lower.includes('locatie') || lower.includes('locație') || lower.includes('unde') || lower.includes('strada') || lower.includes('chisinau') || lower.includes('chișinău')) {
-          replyText = "Ne găsești în Chișinău pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag sau comandați online mai jos! 🛵";
+        if (lowerMsg.includes('pret') || lowerMsg.includes('preț') || lowerMsg.includes('meniu') || lowerMsg.includes('waffle') || lowerMsg.includes('clatite') || lowerMsg.includes('clătite') || lowerMsg.includes('dulce') || lowerMsg.includes('desert') || lowerMsg.includes('mancare') || lowerMsg.includes('mâncare')) {
+          replyText = "Bună! 🧇 Avem cele mai delicioase Waffles și Crepes! Apasă butonul de mai jos pentru meniu și comandă! ✨";
+        } else if (lowerMsg.includes('livrare') || lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('livrati') || lowerMsg.includes('livrați') || lowerMsg.includes('curier') || lowerMsg.includes('taxi')) {
+          replyText = "Bună! 🛵 Livrăm rapid în tot Chișinăul prin curier, iar în suburbii prin taxi! Poți comanda direct mai jos!";
+        } else if (lowerMsg.includes('adresa') || lowerMsg.includes('adresă') || lowerMsg.includes('locatie') || lowerMsg.includes('locație') || lowerMsg.includes('unde') || lowerMsg.includes('strada') || lowerMsg.includes('chisinau') || lowerMsg.includes('chișinău')) {
+          replyText = "Ne găsești pe Str. Nicolae Testemițeanu 21/1! 📍 Vă așteptăm cu drag sau comandați online mai jos! 🛵";
         } else {
-          replyText = "Bună ziua! 🧇 Vă mulțumim că ați contactat Munchotella! Cu ce vă putem ajuta azi? Puteți consulta meniul mai jos!";
+          replyText = "Bună ziua! 🧇 Cu ce vă putem ajuta azi? Consultați meniul nostru mai jos!";
         }
       }
     }
