@@ -140,7 +140,7 @@ async function processMessage(senderId: string, messageText: string) {
     let replyText = "";
     const lowerMsg = messageText.toLowerCase();
 
-    // Verificare rapidă a termenilor de argou non-standard ai clienților
+    // Verificare rapidă a termenilor de argou non-standard ai clienților extrase din istoric
     if (lowerMsg.includes('fashafish') || lowerMsg.includes('fasa') || lowerMsg.includes('fașa') || lowerMsg.includes('fashafisha')) {
       replyText = lang === 'ru' 
         ? "Здравствуйте! 👋 Вы имеете в виду: 1. Chocolate bites или 2. Sushi banana? 🍓"
@@ -153,6 +153,18 @@ async function processMessage(senderId: string, messageText: string) {
       replyText = lang === 'ru'
         ? "Здравствуйте! 🧇 Наша вкуснотища Nutella Mini waffles доступна в меню ниже!"
         : "Bună! 🧇 Delicioasele noastre Nutella Mini waffles le găsiți în meniul de mai jos!";
+    } else if (lowerMsg.includes('kunafe') || lowerMsg.includes('kunafa') || lowerMsg.includes('knafe') || lowerMsg.includes('кунафе') || lowerMsg.includes('кенефе')) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! ✨ Наш фирменный Crepe Dubai с катаифом и фисташковым кремом можно заказать ниже!"
+        : "Bună! ✨ Deliciosul nostru Crepe Dubai cu cataif crocant și fistic îl găsiți în meniul de mai jos!";
+    } else if (lowerMsg.includes('pantcheki') || lowerMsg.includes('панкейки') || lowerMsg.includes('оладьи')) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🥞 Пышные Pancakes (Biskoff, Fruits, Royal) ждут вас в меню ниже!"
+        : "Bună! 🥞 Pancakes pufoase (Biskoff, Fruits, Royal) le găsiți în meniul de mai jos!";
+    } else if (lowerMsg.includes('milsheic') || lowerMsg.includes('milsheik') || lowerMsg.includes('коктейль')) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🥤 Густые Milkshake (Oreo, Kinder, Nutella, Strawberry) доступны ниже!"
+        : "Bună! 🥤 Milkshake-urile noastre cremoase (Oreo, Kinder, Nutella, Strawberry) le găsiți mai jos!";
     }
 
     if (!replyText) {
@@ -161,6 +173,17 @@ async function processMessage(senderId: string, messageText: string) {
 REGULĂ STRICTĂ DE CONCIZIE & SCURTIME:
 - Răspunde SCURT, CLAR și LA OBIECT (maxim 1-3 propoziții). Nu lungi textul cu introduceri lungi pentru că clienții nu vor să citească mesaje uriașe.
 - Păstrează amabilitatea primitoare, dar fii direct la întrebări simple (ex: "cât e livrarea?" -> "Bună! 👋 Livrarea este 60 MDL 🛵.").
+
+DICȚIONAR DE CUVINTE NON-STANDARD & ARGOU CLIENȚI:
+- "fashafish" / "fașa" / "fashafisha": Se referă la "Chocolate bites" sau "Sushi banana". Întreabă scurt în TEXT: "Vă doriți: 1. Chocolate bites sau 2. Sushi banana? 🍓"
+- "garuz" / "garose" / "garuzh": Se referă la "Ice Lemonade".
+- "mini pancake" / "pancakes mici": Se referă la "Nutella Mini waffles" (145 MDL).
+- "kunafe" / "kunafa" / "knafe" / "кунафе": Se referă la "Crepe Dubai" (265 MDL - cu kataif și fistic).
+- "pantcheki" / "панкейки" / "оладьи": Se referă la "Pancakes".
+- "milsheic" / "коктейль": Se referă la "Milkshake-uri".
+- "gofre" / "vafli": Se referă la "Waffles".
+- "clătite pe băț": Se referă la "Waffle sticks" (145 MDL).
+- "gogoși mini" / "пончики": Se referă la "Nutella Mini waffles".
 
 DENUMIRI OFICIALE DE PRODUSE (folosește-le exact așa cum sunt scrise mai jos):
 - WAFFLES: "Waffle sticks" (145 MDL), "Delux mini waffle" (160 MDL), "Nutella Mini waffles" (145 MDL), "Lotus Mini waffles" (200 MDL), "Fruits waffle" (155 MDL), "Classic waffle" (145 MDL), "Belgian panda waffle" (160 MDL), "Biscoff waffle" (195 MDL).
