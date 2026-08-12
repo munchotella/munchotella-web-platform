@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyC3ZUWbXA6OAjpYwwLLhmEj0yqsxLqOcCE",
-    authDomain: typeof window !== "undefined" ? window.location.hostname : "munchotella.md",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "munchotella-d67f1.firebaseapp.com",
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "munchotella-d67f1",
     storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "munchotella-d67f1"}.firebasestorage.app`,
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "949904130254",
