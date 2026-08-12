@@ -180,8 +180,13 @@ async function processMessage(senderId: string, messageText: string) {
       }
     }
 
-    // Eliminăm forțat 'americane' dacă cumva a fost generat de AI
-    replyText = replyText.replace(/waffles?\s+americane/gi, 'waffles').replace(/waffle\s+american/gi, 'waffle');
+    // Eliminăm forțat absolut orice apariție a cuvântului 'americane' sau 'american'
+    replyText = replyText
+      .replace(/waffles?\s+americane?/gi, 'waffles')
+      .replace(/waffle\s+american[aăe]?/gi, 'waffle')
+      .replace(/americane?/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
 
     let sendResult = null;
     const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
