@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
 
-  const VERIFY_TOKEN = "munchotella_secret_token";
+  const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "munchotella_secret_token";
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
     console.log("WEBHOOK_VERIFIED");
