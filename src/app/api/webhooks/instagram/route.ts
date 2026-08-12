@@ -142,6 +142,7 @@ async function processMessage(senderId: string, messageText: string) {
       const composioApiKey = process.env.COMPOSIO_API_KEY;
       if (composioApiKey) {
         try {
+          // @ts-ignore
           const composio = new Composio({ apiKey: composioApiKey });
           sendResult = await composio.tools.execute('INSTAGRAM_SEND_TEXT_MESSAGE', {
             params: {

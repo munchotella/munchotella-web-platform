@@ -107,7 +107,7 @@ export default function OrdersPage() {
               {statusKey === "all" ? "Toate" : statusKey === "pending" ? "Noi" : statusKey === "preparing" ? "Pe plită" : statusKey === "ready" ? "Gata" : "Livrate"}
             </button>
           ))}
-          <LuxuryButton variant="outline" icon={<RefreshCw size={14} />} onClick={loadOrders}>
+          <LuxuryButton variant="outline" icon={<RefreshCw size={14} />} onClick={() => loadOrders(false)}>
             Reîmprospătează
           </LuxuryButton>
         </div>
@@ -123,7 +123,7 @@ export default function OrdersPage() {
           <AlertCircle size={48} className="text-cacao-dark/20" />
           <h3 className="font-headline-md text-xl text-cacao-dark">Eroare la preluarea comenzilor</h3>
           <p className="font-body-md text-cacao-dark/60">{error}</p>
-          <LuxuryButton onClick={loadOrders}>Reîncearcă</LuxuryButton>
+          <LuxuryButton onClick={() => loadOrders(false)}>Reîncearcă</LuxuryButton>
         </div>
       ) : (
         <div className="bg-vanilla-porcelain border border-warm-border rounded-2xl overflow-hidden overflow-x-auto">

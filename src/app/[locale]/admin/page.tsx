@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
         <AlertCircle size={48} className="text-cacao-dark/20" />
         <h3 className="font-headline-md text-xl text-cacao-dark">Eroare la preluarea datelor</h3>
         <p className="font-body-md text-cacao-dark/60">{error}</p>
-        <LuxuryButton onClick={loadDashboardData}>Reîncearcă</LuxuryButton>
+        <LuxuryButton onClick={() => loadDashboardData()}>Reîncearcă</LuxuryButton>
       </div>
     );
   }
