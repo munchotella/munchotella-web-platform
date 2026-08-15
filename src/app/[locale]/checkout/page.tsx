@@ -189,22 +189,30 @@ export default function CheckoutPage() {
         fullAddress += ` (${extras.join(', ')})`;
       }
 
+      const aggregatedNotes = [
+        formData.notes,
+        ...items.filter(i => (i as any).customization).map(i => `Notă ${i.name}: ${(i as any).customization}`)
+      ].filter(Boolean).join(" | ");
+
       const orderPayload = {
         customer: {
           name: formData.name,
           phone: formData.phone,
           address: fullAddress,
-          notes: formData.notes,
+          notes: aggregatedNotes,
           coordinates: { lat: formData.lat, lng: formData.lng }
         },
         items: menuItems.map(i => ({
           menuItemId: i.id || i.cartItemId,
           quantity: i.quantity,
           variantName: (i as any).selectedVariant,
-          modifiers: i.selectedToppings?.map((t: any) => ({
-            title: t.groupName || 'Topping',
-            optionName: t.name
-          })) || []
+          modifiers: [
+            ...(i.selectedToppings?.map((t: any) => ({
+              title: t.groupName || 'Topping',
+              optionName: t.name
+            })) || []),
+            ...((i as any).customization ? [{ title: 'Preferință', optionName: (i as any).customization }] : [])
+          ]
         })),
         drinks: drinkItems.map(i => ({
           name: i.name,

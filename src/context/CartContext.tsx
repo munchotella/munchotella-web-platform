@@ -8,7 +8,7 @@ export type ToppingOption = {
 };
 
 export type CartItem = {
-  cartItemId: string; // Unique identifier (id + selected toppings)
+  cartItemId: string; // Unique identifier (id + selected toppings + customization)
   id: string | number; // Suportă ID-uri Mongoose (string)
   name: string;
   basePrice: number;
@@ -16,6 +16,7 @@ export type CartItem = {
   image: string;
   quantity: number;
   selectedToppings?: ToppingOption[];
+  customization?: string; // Mentiuni/preferinte client (ex: "Fără arahide")
 };
 
 type AddToCartInput = {
@@ -25,6 +26,7 @@ type AddToCartInput = {
   image: string;
   selectedToppings?: ToppingOption[];
   quantity?: number;
+  customization?: string;
 };
 
 type CartContextType = {
@@ -51,23 +53,67 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { showToast } = useToast();
 
-  // Load from localStorage on mount
+  // Load from localStorage or URL query parameters on mount
   useEffect(() => {
-    const saved = localStorage.getItem("munchotella_cart");
+    let initialItems: CartItem[] = [];
+    const saved = typeof window !== 'undefined' ? localStorage.getItem("munchotella_cart") : null;
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Migration helper for old cart items without cartItemId
-        const migrated = parsed.map((item: any) => ({
+        initialItems = parsed.map((item: any) => ({
           ...item,
-          cartItemId: item.cartItemId || `${item.id}-${(item.selectedToppings || []).map((t: any) => t.name).sort().join('-')}`,
+          cartItemId: item.cartItemId || `${item.id}-${(item.selectedToppings || []).map((t: any) => t.name).sort().join('-')}${item.customization ? '-' + item.customization : ''}`,
           basePrice: item.basePrice || item.price,
         }));
-        setItems(migrated);
       } catch (e) {
         console.error("Failed to parse cart", e);
       }
     }
+
+    // Auto-hydration from URL params (e.g. from Instagram Bot Link: ?preloadedCart=...&openCart=true)
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const preloadedParam = urlParams.get('preloadedCart');
+        const openCartParam = urlParams.get('openCart');
+        const notesParam = urlParams.get('notes');
+
+        if (preloadedParam) {
+          let decodedJson = "";
+          try {
+            decodedJson = decodeURIComponent(escape(atob(preloadedParam)));
+          } catch (_) {
+            decodedJson = decodeURIComponent(preloadedParam);
+          }
+          const preloadedList = JSON.parse(decodedJson);
+          if (Array.isArray(preloadedList) && preloadedList.length > 0) {
+            const formattedPreloaded = preloadedList.map((item: any) => ({
+              cartItemId: `${item.id || item.name}-${item.customization || ''}-${Date.now()}`,
+              id: item.id || item.name,
+              name: item.name,
+              basePrice: Number(item.price || item.basePrice || 0),
+              price: Number(item.price || item.basePrice || 0),
+              image: item.image || "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png",
+              quantity: Number(item.quantity || 1),
+              selectedToppings: item.selectedToppings || [],
+              customization: item.customization || notesParam || undefined,
+            }));
+            initialItems = formattedPreloaded;
+            localStorage.setItem("munchotella_cart", JSON.stringify(formattedPreloaded));
+          }
+        }
+
+        if (openCartParam === 'true') {
+          setTimeout(() => {
+            setIsCartOpen(true);
+          }, 400);
+        }
+      } catch (err) {
+        console.error("Error processing preloaded cart from URL:", err);
+      }
+    }
+
+    setItems(initialItems);
   }, []);
 
   // Save to localStorage whenever items change
@@ -78,7 +124,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (input: AddToCartInput) => {
     const toppings = input.selectedToppings || [];
     const toppingsKey = toppings.map((t) => t.name).sort().join("-");
-    const cartItemId = `${input.id}-${toppingsKey}`;
+    const custKey = input.customization ? `-${input.customization}` : "";
+    const cartItemId = `${input.id}-${toppingsKey}${custKey}`;
     const toppingsCost = toppings.reduce((sum, t) => sum + t.price, 0);
     const unitPrice = input.price + (toppingsCost > 0 && input.price === input.price ? toppingsCost : 0);
     const qty = input.quantity || 1;
@@ -104,6 +151,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           image: input.image,
           quantity: qty,
           selectedToppings: toppings,
+          customization: input.customization,
         },
       ];
     });

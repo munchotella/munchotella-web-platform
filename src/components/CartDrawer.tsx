@@ -203,6 +203,12 @@ export default function CartDrawer() {
                               </p>
                             )}
 
+                            {item.customization && (
+                              <p className="text-[11px] text-[#C47E2B] mt-1 font-sans font-medium bg-[#FDF6EC] px-2 py-0.5 rounded border border-[#E8D5B0] inline-block">
+                                📝 {item.customization}
+                              </p>
+                            )}
+
                             <p className="text-[#D4A853] font-bold text-sm mt-1">{item.price} MDL</p>
                             
                             <div className="flex items-center justify-between mt-auto pt-2">
