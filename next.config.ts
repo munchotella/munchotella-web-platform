@@ -33,9 +33,6 @@ const ContentSecurityPolicy = [
 
 const nextConfig: any = {
   serverExternalPackages: ['mongodb'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -50,14 +47,6 @@ const nextConfig: any = {
         destination: 'https://munchotella-d67f1.firebaseapp.com/__/:path*',
       },
     ];
-  },
-
-  typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
   },
   async headers() {
     return [
