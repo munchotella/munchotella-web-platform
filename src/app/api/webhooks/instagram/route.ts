@@ -381,11 +381,45 @@ async function processMessage(senderId: string, messageText: string) {
       return { success: true, status: 'awaiting_product', replyText };
     }
 
+    // Helper pentru generarea linkului de checkout preîncărcat
+    const generateCheckoutReply = async () => {
+      const currentCart = session.cart || [];
+      const totalSum = currentCart.reduce((sum: number, item: any) => sum + (item.price * (item.quantity || 1)), 0);
+
+      const cartJsonString = JSON.stringify(currentCart);
+      const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
+      
+      const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
+      const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
+
+      customMenuUrl = `https://www.munchotella.md/${lang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}`;
+
+      if (lang === 'ru') {
+        replyText = `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите кнопку ниже, чтобы открыть корзину и заполнить адрес доставки на сайте! ✨`;
+        customButtonTitle = `🛍️ Открыть Корзину (${totalSum} MDL)`;
+      } else {
+        replyText = `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Puteți continua completarea adresei și finalizarea comenzii pe butonul de mai jos! ✨`;
+        customButtonTitle = `🛍️ Deschide Coșul (${totalSum} MDL)`;
+      }
+
+      session.state = 'IDLE';
+      await saveSession(senderId, session);
+
+      await sendMetaResponse(senderId, replyText, customMenuUrl, customButtonTitle);
+      return { success: true, status: 'order_completed_link_generated', cart: currentCart, totalSum, customMenuUrl, replyText };
+    };
+
+    // Verificare checkout direct dacă există produse în coș
+    const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
+
+    if ((session.cart && session.cart.length > 0) && isCheckoutIntent && !matchProductInText(messageText).product) {
+      return await generateCheckoutReply();
+    }
+
     // Detectare produs în text
     const matched = matchProductInText(messageText);
 
     if (matched.product) {
-      // Adăugare produs în coșul sesiunii
       const itemToAdd = {
         id: matched.product.id,
         name: matched.product.name,
@@ -402,18 +436,31 @@ async function processMessage(senderId: string, messageText: string) {
         session.cart = [...(session.cart || []), itemToAdd];
       }
 
-      session.state = 'AWAITING_MORE_DESSERTS';
-      await saveSession(senderId, session);
-
       let customNoteText = "";
       if (matched.customization) {
         customNoteText = ` (${matched.customization})`;
       }
 
-      if (lang === 'ru') {
-        replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 Хотите добавить еще что-нибудь сладкое?`;
+      const isDrink = matched.product.category === 'drinks';
+
+      if (isDrink) {
+        session.state = 'AWAITING_DRINKS';
+        await saveSession(senderId, session);
+
+        if (lang === 'ru') {
+          replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL)! 🥤 Хотите оформить заказ или добавить еще что-нибудь?`;
+        } else {
+          replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL)! 🥤 Doriți să finalizăm comanda sau mai adăugăm ceva?`;
+        }
       } else {
-        replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 Mai doriți încă ceva dulce sau un alt preparat?`;
+        session.state = 'AWAITING_MORE_DESSERTS';
+        await saveSession(senderId, session);
+
+        if (lang === 'ru') {
+          replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 Хотите добавить еще что-нибудь сладкое?`;
+        } else {
+          replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 Mai doriți încă ceva dulce sau un alt preparat?`;
+        }
       }
 
       await sendMetaResponse(senderId, replyText, `https://www.munchotella.md/${lang}/menu`, lang === 'ru' ? "🧇 Меню" : "🧇 Meniu");
@@ -436,32 +483,8 @@ async function processMessage(senderId: string, messageText: string) {
     }
 
     // Dacă suntem în starea AWAITING_DRINKS și clientul refuză băuturile sau cere finalizarea
-    if (session.state === 'AWAITING_DRINKS' && (isNegative || lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout'))) {
-      const currentCart = session.cart || [];
-      const totalSum = currentCart.reduce((sum: number, item: any) => sum + (item.price * (item.quantity || 1)), 0);
-
-      // Codificare base64 sigură pentru URL
-      const cartJsonString = JSON.stringify(currentCart);
-      const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
-      
-      const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
-      const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
-
-      customMenuUrl = `https://www.munchotella.md/${lang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}`;
-
-      if (lang === 'ru') {
-        replyText = `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите кнопку ниже, чтобы открыть корзину и заполнить адрес доставки на сайте! ✨`;
-        customButtonTitle = `🛍️ Открыть Корзину (${totalSum} MDL)`;
-      } else {
-        replyText = `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Puteți continua completarea adresei și finalizarea comenzii pe butonul de mai jos! ✨`;
-        customButtonTitle = `🛍️ Deschide Coșul (${totalSum} MDL)`;
-      }
-
-      session.state = 'IDLE';
-      await saveSession(senderId, session);
-
-      await sendMetaResponse(senderId, replyText, customMenuUrl, customButtonTitle);
-      return { success: true, status: 'order_completed_link_generated', cart: currentCart, totalSum, customMenuUrl, replyText };
+    if (session.state === 'AWAITING_DRINKS' && (isNegative || isCheckoutIntent || lowerMsg.includes('da') || lowerMsg.includes('da finalizam') || lowerMsg.includes('da finalizăm') || lowerMsg.includes('da trimite'))) {
+      return await generateCheckoutReply();
     }
 
     // 6. Gemini Generative AI cu Ghidul de Scenarii Oficial
