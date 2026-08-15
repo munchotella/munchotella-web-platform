@@ -3,6 +3,9 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const PERMANENT_META_PAGE_ACCESS_TOKEN = "EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXSPZCE9TfaJKTHu7fTv542LYbiOFC2ZB16SZAAprVec1Dvx8db6ydyU4shHOb8ZAI6wxLsF9mep5cKYjQivMxLbRp21qoOsdwZBZCe2yc5vZBTwA4noZArn3edbYSs8b9ZA8IDHP4H5l73BuM7xQvhYfXe1TF3Gj8zWVi8kL";
 const INSTAGRAM_ACCOUNT_ID = "17841407196466279";
 const FACEBOOK_PAGE_ID = "2033309050260259";

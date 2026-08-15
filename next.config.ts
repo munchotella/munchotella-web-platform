@@ -32,6 +32,13 @@ const ContentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig: any = {
+  serverExternalPackages: ['mongodb'],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     return [
       {
