@@ -271,6 +271,8 @@ function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | n
   return { product: null, quantity, customization };
 }
 
+import { connectToDatabase } from '@/lib/mongodb';
+
 const inMemorySessions = new Map<string, any>();
 
 async function getSession(senderId: string) {
@@ -280,17 +282,16 @@ async function getSession(senderId: string) {
   }
 
   try {
-    const sessionRef = doc(db, 'instagram_order_sessions', senderId);
-    const snap = await getDoc(sessionRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      if (data.lastUpdated && (Date.now() - data.lastUpdated < 2 * 60 * 60 * 1000)) {
-        inMemorySessions.set(senderId, data);
-        return data;
+    const { db: mongoDb } = await connectToDatabase();
+    const doc = await mongoDb.collection('instagram_order_sessions').findOne({ senderId });
+    if (doc) {
+      if (doc.lastUpdated && (Date.now() - doc.lastUpdated < 2 * 60 * 60 * 1000)) {
+        inMemorySessions.set(senderId, doc);
+        return doc;
       }
     }
   } catch (err) {
-    console.warn("Atenționare citire sesiune Firestore (se folosește memoria locală):", err);
+    console.warn("Atenționare citire sesiune MongoDB (se folosește memoria locală):", err);
   }
 
   const initial = {
@@ -312,10 +313,14 @@ async function saveSession(senderId: string, sessionData: any) {
   inMemorySessions.set(senderId, updatedData);
 
   try {
-    const sessionRef = doc(db, 'instagram_order_sessions', senderId);
-    await setDoc(sessionRef, updatedData);
+    const { db: mongoDb } = await connectToDatabase();
+    await mongoDb.collection('instagram_order_sessions').updateOne(
+      { senderId },
+      { $set: updatedData },
+      { upsert: true }
+    );
   } catch (err) {
-    console.warn("Atenționare salvare sesiune Firestore:", err);
+    console.warn("Atenționare salvare sesiune MongoDB:", err);
   }
 }
 
