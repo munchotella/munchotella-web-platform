@@ -160,17 +160,26 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   if (cyrillicPattern.test(text)) {
     return 'ru';
   }
-  const enKeywords = ['hello', 'hi', 'menu', 'price', 'delivery', 'location', 'pancake', 'crepe', 'sweet', 'sweets', 'where', 'address'];
-  const lower = text.toLowerCase();
-  const isEn = enKeywords.some(w => lower.includes(w)) && !lower.includes('buna') && !lower.includes('salut') && !lower.includes('pret') && !lower.includes('preturi');
-  if (isEn && !/(\b(ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât)\b)/i.test(text)) {
+  const lower = text.toLowerCase().trim();
+  
+  const enPhrases = [
+    'i want to order', 'can i order', 'how much is', 'what is the price', 
+    'do you deliver', 'where are you located', 'open menu', 'english please', 
+    'good afternoon', 'good evening', 'hello there', 'hi there'
+  ];
+  
+  const hasEnPhrase = enPhrases.some(p => lower.includes(p));
+  const hasRoIndicators = /(\b(vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi)\b)/i.test(text);
+
+  if (hasEnPhrase && !hasRoIndicators) {
     return 'en';
   }
+
   return 'ro';
 }
 
 function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | null, quantity: number, customization?: string } {
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().trim();
   
   // Detectare cantitate
   let quantity = 1;
@@ -193,8 +202,8 @@ function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | n
     customization = "Fără zahăr adăugat";
   }
 
-  // Slang & Argou Mapping
-  if (lower.includes('fashafish') || lower.includes('fașa') || lower.includes('fasa') || lower.includes('fashafisha') || lower.includes('mini pancake') || lower.includes('pancakes mici') || lower.includes('gogosi mini') || lower.includes('gogoși mini') || lower.includes('пончики')) {
+  // 1. Matcher Argou & Sinonime Speciale
+  if (lower.includes('fashafish') || lower.includes('fașa') || lower.includes('fasa') || lower.includes('fashafisha') || lower.includes('gogosi mini') || lower.includes('gogoși mini') || lower.includes('пончики')) {
     const p = MENU_CATALOG.find(m => m.id === 'nutella_mini_waffles');
     return { product: p || null, quantity, customization };
   }
@@ -209,41 +218,93 @@ function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | n
     return { product: p || null, quantity, customization };
   }
 
-  if (lower.includes('clatite pe bat') || lower.includes('clătite pe băț') || lower.includes('waffle stick') || lower.includes('sticks') || lower.includes('палочки')) {
+  // 2. Pancakes Matching (inclusiv "pancake delux")
+  if (lower.includes('pancake delux') || lower.includes('pancakes delux') || lower.includes('delux pancake') || lower.includes('deluxe pancake') || lower.includes('royal pancake') || lower.includes('royal pancakes') || lower.includes('панкейк роял') || lower.includes('панкейки делюкс')) {
+    const p = MENU_CATALOG.find(m => m.id === 'royal_pancakes');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('biscoff pancake') || lower.includes('biskoff pancake') || lower.includes('lotus pancake') || lower.includes('панкейк бискофф')) {
+    const p = MENU_CATALOG.find(m => m.id === 'biskoff_pancakes');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('fruits pancake') || lower.includes('pancake cu fructe') || lower.includes('pancakes fructe') || lower.includes('панкейк с фруктами')) {
+    const p = MENU_CATALOG.find(m => m.id === 'fruits_pancakes');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('pancake') || lower.includes('pancakes') || lower.includes('панкейк') || lower.includes('панкейки')) {
+    const p = MENU_CATALOG.find(m => m.id === 'royal_pancakes');
+    return { product: p || null, quantity, customization };
+  }
+
+  // 3. Waffles Matching
+  if (lower.includes('clatite pe bat') || lower.includes('clătite pe băț') || lower.includes('waffle stick') || lower.includes('waffles stick') || lower.includes('waffle sticks') || lower.includes('sticks') || lower.includes('палочки')) {
     const p = MENU_CATALOG.find(m => m.id === 'waffle_sticks');
     return { product: p || null, quantity, customization };
   }
-
-  if (lower.includes('delux mini') || lower.includes('deluxe mini')) {
+  if (lower.includes('delux mini') || lower.includes('deluxe mini') || lower.includes('mini waffle delux')) {
     const p = MENU_CATALOG.find(m => m.id === 'delux_mini_waffle');
     return { product: p || null, quantity, customization };
   }
-
-  if (lower.includes('lotus mini')) {
+  if (lower.includes('lotus mini') || lower.includes('mini lotus')) {
     const p = MENU_CATALOG.find(m => m.id === 'lotus_mini_waffles');
     return { product: p || null, quantity, customization };
   }
-
-  if (lower.includes('delux crepe') || lower.includes('delux clatita')) {
-    const p = MENU_CATALOG.find(m => m.id === 'delux_crepe');
+  if (lower.includes('nutella mini') || lower.includes('mini waffle') || lower.includes('mini waffles')) {
+    const p = MENU_CATALOG.find(m => m.id === 'nutella_mini_waffles');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('fruits waffle') || lower.includes('waffle cu fructe')) {
+    const p = MENU_CATALOG.find(m => m.id === 'fruits_waffle');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('classic waffle') || lower.includes('waffle clasic')) {
+    const p = MENU_CATALOG.find(m => m.id === 'classic_waffle');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('panda waffle') || lower.includes('belgian panda')) {
+    const p = MENU_CATALOG.find(m => m.id === 'belgian_panda_waffle');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('biscoff waffle') || lower.includes('waffle biscoff') || lower.includes('waffle lotus')) {
+    const p = MENU_CATALOG.find(m => m.id === 'biscoff_waffle');
     return { product: p || null, quantity, customization };
   }
 
+  // 4. Crepes Matching
+  if (lower.includes('delux crepe') || lower.includes('crepe delux') || lower.includes('delux clatita') || lower.includes('clatita delux') || lower.includes('clătită delux')) {
+    const p = MENU_CATALOG.find(m => m.id === 'delux_crepe');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('biscoff crepe') || lower.includes('crepe biscoff') || lower.includes('clatita lotus') || lower.includes('clatita biscoff')) {
+    const p = MENU_CATALOG.find(m => m.id === 'biscoff_crepe');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('fruits crepe') || lower.includes('crepe cu fructe') || lower.includes('clatita cu fructe')) {
+    const p = MENU_CATALOG.find(m => m.id === 'fruits_crepe');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('oreo crepe') || lower.includes('crepe oreo') || lower.includes('clatita oreo')) {
+    const p = MENU_CATALOG.find(m => m.id === 'oreo_crepe');
+    return { product: p || null, quantity, customization };
+  }
+  if (lower.includes('kinder crepe') || lower.includes('crepe kinder') || lower.includes('clatita kinder')) {
+    const p = MENU_CATALOG.find(m => m.id === 'kinder_crepe');
+    return { product: p || null, quantity, customization };
+  }
   if (lower.includes('chocolate bites') || lower.includes('bites')) {
     const p = MENU_CATALOG.find(m => m.id === 'chocolate_bites');
     return { product: p || null, quantity, customization };
   }
-
-  if (lower.includes('royal sushi') || lower.includes('sushi clatita')) {
+  if (lower.includes('royal sushi') || lower.includes('sushi clatita') || lower.includes('sushi royal')) {
     const p = MENU_CATALOG.find(m => m.id === 'royal_sushi');
     return { product: p || null, quantity, customization };
   }
-
   if (lower.includes('sushi banana') || lower.includes('banana sushi')) {
     const p = MENU_CATALOG.find(m => m.id === 'sushi_banana');
     return { product: p || null, quantity, customization };
   }
 
+  // 5. Drinks Matching
   if (lower.includes('milkshake oreo') || lower.includes('milsheic oreo') || lower.includes('коктейль орео')) {
     const p = MENU_CATALOG.find(m => m.id === 'drink_milkshake_oreo');
     return { product: p || null, quantity, customization };
@@ -261,7 +322,7 @@ function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | n
     return { product: p || null, quantity, customization };
   }
 
-  // Căutare directă după nume din catalog
+  // 6. Căutare directă după nume din catalog
   for (const item of MENU_CATALOG) {
     if (lower.includes(item.name.toLowerCase())) {
       return { product: item, quantity, customization };

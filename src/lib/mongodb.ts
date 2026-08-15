@@ -1,6 +1,10 @@
 import { MongoClient, Db } from "mongodb";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://Munchotella_db_user:A6dn0m0iBM2Z9v3w@ac-d76ybty-shard-00-00.a7mevdd.mongodb.net:27017,ac-d76ybty-shard-00-01.a7mevdd.mongodb.net:27017,ac-d76ybty-shard-00-02.a7mevdd.mongodb.net:27017/munchotella?ssl=true&authSource=admin&retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error("Variabila de mediu MONGODB_URI lipsește. Vă rugăm să o configurați în variabilele de mediu.");
+}
 
 let cachedClient: MongoClient | null = null;
 let cachedDb: Db | null = null;

@@ -80,23 +80,28 @@ export const metadata: Metadata = {
   },
 };
 
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 export default async function RootLayout({
   children,
-  params
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
-}>) {
-  const resolvedParams = await params;
+}) {
+  const { locale } = await params;
   const messages = await getMessages();
-  
+
   return (
-    <html
-      lang={resolvedParams.locale}
-      className={`${playfairFont.variable} ${outfitFont.variable} ${greatVibesFont.variable} h-full antialiased`}
-    >
+    <html lang={locale} className={`h-full ${outfitFont.variable} ${playfairFont.variable} ${greatVibesFont.variable}`}>
       <head>
-        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+        {/* Resource Hints for High Performance Web Vitals */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://munchotella-api.onrender.com" />
+        
+        {/* Favicon & Web App Icons */}
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
         <link rel="shortcut icon" href="/favicon-48x48.png" />
@@ -136,6 +141,8 @@ export default async function RootLayout({
             </LayoutWrapper>
           </ClientProviders>
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
