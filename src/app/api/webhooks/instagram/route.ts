@@ -844,7 +844,7 @@ CATALOG MENIU OFICIAL:
 - Crepes & Specialități: Delux crepe (165 MDL), Biscoff crepe (205 MDL), Fruits crepe (145 MDL), Oreo crepe (145 MDL), Kinder crepe (145 MDL), Crepe Dubai (265 MDL), Chocolate bites (165 MDL), Royal sushi (155 MDL), Sushi banana (140 MDL).
 - Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
-- Program oficial: Zilnic 16:00 - 00:00 (miezul nopții).
+- Program oficial: 16:00 - 00:00 (Miercuri: Închis).
 - Locație: Chișinău, Str. Nicolae Testemițeanu 21/1.
 - Livrare & Reguli:
   * Livrăm în tot orașul Chișinău (toate sectoarele). Prețul livrării se calculează pe site la checkout (în medie 50-70 lei).
@@ -923,9 +923,9 @@ CATALOG MENIU OFICIAL:
         }
       } else if (isHoursQ) {
         if (lang === 'ru') {
-          replyText = "Мы открыты ежедневно с 16:00 до 00:00! Ждем вас с радостью! ✨";
+          replyText = "Мы открыты с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью! ✨";
         } else {
-          replyText = "Suntem deschiși zilnic de la 16:00 până la 00:00! Vă așteptăm cu drag! ✨";
+          replyText = "Suntem deschiși de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu drag! ✨";
         }
       } else if (isAddressQ) {
         if (lang === 'ru') {
