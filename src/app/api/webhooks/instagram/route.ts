@@ -10,40 +10,290 @@ const PERMANENT_META_PAGE_ACCESS_TOKEN = "EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXS
 const INSTAGRAM_ACCOUNT_ID = "17841407196466279";
 const FACEBOOK_PAGE_ID = "2033309050260259";
 
-// Catalogul oficial de produse cu ingrediente exacte
+// Catalogul oficial de produse cu ingrediente exacte și alias-uri extinse
 const MENU_CATALOG = [
   // Waffles
-  { id: "waffle_sticks", name: "Waffle sticks", price: 145, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb3799de38d298ead5916_Waffle%20sticks%2095%20lei.png", ingredients: "2 waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "delux_mini_waffle", name: "Delux mini waffle", price: 160, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png", ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, fistic, arahide", hasFistic: true, hasArahide: true },
-  { id: "nutella_mini_waffles", name: "Nutella Mini waffles", price: 145, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png", ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "lotus_mini_waffles", name: "Lotus Mini waffles", price: 200, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png", ingredients: "16 mini waffles, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Baby", hasFistic: false, hasArahide: false },
-  { id: "fruits_waffle", name: "Fruits waffle", price: 155, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf696f40c3d241e1d7e_Fruits%20waffle%20100%20lei.png", ingredients: "Waffle, Nutella®, ciocolată albă Belgiană, banane, căpșuni, kiwi", hasFistic: false, hasArahide: false },
-  { id: "classic_waffle", name: "Classic waffle", price: 145, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf7b1acf26632f25e9f_Classic%20waffle%2095%20lei.png", ingredients: "Waffle, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "belgian_panda_waffle", name: "Belgian panda waffle", price: 160, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf7c1ee0c7aa2016335_Belgian%20panda%20waffle%20100%20lei.png", ingredients: "Waffle, Nutella®, ciocolată albă Belgiană", hasFistic: false, hasArahide: false },
-  { id: "biscoff_waffle", name: "Biscoff waffle", price: 195, category: "waffles", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf830eec8a3d52670e3_Biscoff%20waffle%20120%20lei.png", ingredients: "Waffle, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", hasFistic: false, hasArahide: false },
+  { 
+    id: "waffle_sticks", 
+    name: "Waffle sticks", 
+    price: 145, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb3799de38d298ead5916_Waffle%20sticks%2095%20lei.png", 
+    ingredients: "2 waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["waffle sticks", "waffle stick", "waffles stick", "wafflesticks", "clatite pe bat", "clatita pe bat", "clătite pe băț", "clătită pe băț", "wafa pe bat", "vafle pe bat", "sticks", "wafel stiks", "wafel stick", "палочки", "вафли на палочке"]
+  },
+  { 
+    id: "delux_mini_waffle", 
+    name: "Delux mini waffle", 
+    price: 160, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png", 
+    ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, fistic, arahide", 
+    hasFistic: true, 
+    hasArahide: true,
+    aliases: ["delux mini waffle", "delux mini waffles", "deluxe mini", "mini waffle delux", "delux mini", "mini vafli delux", "deluxe mini waffle", "делюкс мини", "мини вафли делюкс"]
+  },
+  { 
+    id: "nutella_mini_waffles", 
+    name: "Nutella Mini waffles", 
+    price: 145, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png", 
+    ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["nutella mini waffles", "nutella mini waffle", "mini waffle", "mini waffles", "fashafish", "fashafisha", "fasa", "fașa", "fasa fish", "fashafis", "gogosi mini", "gogoși mini", "mini clatite", "пончики", "нутелла мини вафли"]
+  },
+  { 
+    id: "lotus_mini_waffles", 
+    name: "Lotus Mini waffles", 
+    price: 200, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png", 
+    ingredients: "16 mini waffles, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Baby", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["lotus mini waffles", "lotus mini waffle", "mini lotus", "lotus mini", "mini waffle lotus", "лотус мини"]
+  },
+  { 
+    id: "fruits_waffle", 
+    name: "Fruits waffle", 
+    price: 155, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf696f40c3d241e1d7e_Fruits%20waffle%20100%20lei.png", 
+    ingredients: "Waffle, Nutella®, ciocolată albă Belgiană, banane, căpșuni, kiwi", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["fruits waffle", "fruit waffle", "fruits waffles", "fuits waflle", "fuit waffle", "waffle cu fructe", "vafli cu fructe", "wafa cu fructe", "fructe waffle", "fructe vafle", "waffle fruits", "waffles fruits", "вафли с фруктами"]
+  },
+  { 
+    id: "classic_waffle", 
+    name: "Classic waffle", 
+    price: 145, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf7b1acf26632f25e9f_Classic%20waffle%2095%20lei.png", 
+    ingredients: "Waffle, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["classic waffle", "classic waffles", "waffle clasic", "waffle simpla", "vafle clasic", "clasic waffle", "vafli simpla", "классические вафли"]
+  },
+  { 
+    id: "belgian_panda_waffle", 
+    name: "Belgian panda waffle", 
+    price: 160, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf7c1ee0c7aa2016335_Belgian%20panda%20waffle%20100%20lei.png", 
+    ingredients: "Waffle, Nutella®, ciocolată albă Belgiană", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["belgian panda waffle", "panda waffle", "panda waffles", "belgian panda", "waffle panda", "vafli panda", "панда вафли"]
+  },
+  { 
+    id: "biscoff_waffle", 
+    name: "Biscoff waffle", 
+    price: 195, 
+    category: "waffles", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbbf830eec8a3d52670e3_Biscoff%20waffle%20120%20lei.png", 
+    ingredients: "Waffle, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["biscoff waffle", "biscoff waffles", "waffle biscoff", "waffle lotus", "vafli biscoff", "vafle lotus", "biskof waffle", "бискофф вафли"]
+  },
 
   // Crepes
-  { id: "crepe_dubai", name: "Crepe Dubai", price: 265, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc4465b822d64f0b2f15_Delux%20crepe%20110%20lei.png", ingredients: "Clătită, kataif crocant, cremă de fistic, Nutella®", hasFistic: true, hasArahide: false },
-  { id: "delux_crepe", name: "Delux crepe", price: 165, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc4465b822d64f0b2f15_Delux%20crepe%20110%20lei.png", ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, fistic, arahide", hasFistic: true, hasArahide: true },
-  { id: "biscoff_crepe", name: "Biscoff crepe", price: 205, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc434f3c051ae7a296b1_Biscoff%20crepe%20125%20lei.png", ingredients: "Clătită, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "fruits_crepe", name: "Fruits crepe", price: 145, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc44c1ee0c7aa201b1cb_Fruits%20crepe%20100%20lei.png", ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, banane, căpșuni, kiwi", hasFistic: false, hasArahide: false },
-  { id: "oreo_crepe", name: "Oreo crepe", price: 145, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc440cf1d670ba35b2e9_Oreo%20crepe%20100%20lei.png", ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo", hasFistic: false, hasArahide: false },
-  { id: "kinder_crepe", name: "Kinder crepe", price: 145, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc453efae2800d3bb6b6_Kinder%20crepe%20100%20lei.png", ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, Kinder Bueno", hasFistic: false, hasArahide: false },
-  { id: "chocolate_bites", name: "Chocolate bites", price: 165, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc45479cb20349a2a7a4_Chocolate%20bites%20110%20lei.png", ingredients: "Bucățele clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "royal_sushi", name: "Royal sushi", price: 155, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc45479cb20349a2a78f_Royal%20sushi%20105%20lei.png", ingredients: "Sushi clătită, Nutella®, căpșuni proaspete, banane", hasFistic: false, hasArahide: false },
-  { id: "sushi_banana", name: "Sushi banana", price: 140, category: "crepes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc46dfc093a105ae3fc4_Sushi%20banana%2090%20lei.png", ingredients: "Sushi clătită cu banană întreagă, Nutella®, ciocolată albă Belgiană", hasFistic: false, hasArahide: false },
+  { 
+    id: "crepe_dubai", 
+    name: "Crepe Dubai", 
+    price: 265, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc4465b822d64f0b2f15_Delux%20crepe%20110%20lei.png", 
+    ingredients: "Clătită, kataif crocant, cremă de fistic, Nutella®", 
+    hasFistic: true, 
+    hasArahide: false,
+    aliases: ["crepe dubai", "clatita dubai", "crepes dubai", "dubai", "kunafa", "kunafe", "knafe", "clatite dubai", "kataif", "ciocolata dubai", "clatita dubay", "кунафе", "дубай", "блинчик дубай"]
+  },
+  { 
+    id: "delux_crepe", 
+    name: "Delux crepe", 
+    price: 165, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc4465b822d64f0b2f15_Delux%20crepe%20110%20lei.png", 
+    ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, fistic, arahide", 
+    hasFistic: true, 
+    hasArahide: true,
+    aliases: ["delux crepe", "deluxe crepe", "crepe delux", "delux clatita", "clatita delux", "clatite delux", "deluxe clatita", "clătită delux", "делюкс блинчик"]
+  },
+  { 
+    id: "biscoff_crepe", 
+    name: "Biscoff crepe", 
+    price: 205, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc434f3c051ae7a296b1_Biscoff%20crepe%20125%20lei.png", 
+    ingredients: "Clătită, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["biscoff crepe", "biscoff crepes", "crepe biscoff", "clatita lotus", "clatita biscoff", "clatite biscoff", "clatite lotus", "biskof crepe", "бискофф блинчик"]
+  },
+  { 
+    id: "fruits_crepe", 
+    name: "Fruits crepe", 
+    price: 145, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc44c1ee0c7aa201b1cb_Fruits%20crepe%20100%20lei.png", 
+    ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, banane, căpșuni, kiwi", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["fruits crepe", "fruit crepe", "fruits crepes", "fuits crepe", "crepe cu fructe", "clatita cu fructe", "clatite cu fructe", "crepe fruits", "блинчик с фруктами"]
+  },
+  { 
+    id: "oreo_crepe", 
+    name: "Oreo crepe", 
+    price: 145, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc440cf1d670ba35b2e9_Oreo%20crepe%20100%20lei.png", 
+    ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["oreo crepe", "oreo crepes", "crepe oreo", "clatita oreo", "clatite oreo", "clatita cu oreo", "орео блинчик"]
+  },
+  { 
+    id: "kinder_crepe", 
+    name: "Kinder crepe", 
+    price: 145, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/651fbc453efae2800d3bb6b6_Kinder%20crepe%20100%20lei.png", 
+    ingredients: "Clătită, Nutella®, ciocolată albă Belgiană, Kinder Bueno", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["kinder crepe", "kinder crepes", "crepe kinder", "clatita kinder", "clatite kinder", "clatita cu kinder", "киндер блинчик"]
+  },
+  { 
+    id: "chocolate_bites", 
+    name: "Chocolate bites", 
+    price: 165, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc45479cb20349a2a7a4_Chocolate%20bites%20110%20lei.png", 
+    ingredients: "Bucățele clătită, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["chocolate bites", "chocobites", "bites", "chocolate bite", "bucatele clatita", "ciocolata bites", "шоколадные байтсы"]
+  },
+  { 
+    id: "royal_sushi", 
+    name: "Royal sushi", 
+    price: 155, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc45479cb20349a2a78f_Royal%20sushi%20105%20lei.png", 
+    ingredients: "Sushi clătită, Nutella®, căpșuni proaspete, banane", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["royal sushi", "sushi royal", "sushi clatita", "sushi clatite", "clatita sushi", "роял суши"]
+  },
+  { 
+    id: "sushi_banana", 
+    name: "Sushi banana", 
+    price: 140, 
+    category: "crepes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbc46dfc093a105ae3fc4_Sushi%20banana%2090%20lei.png", 
+    ingredients: "Sushi clătită cu banană întreagă, Nutella®, ciocolată albă Belgiană", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["sushi banana", "banana sushi", "sushi cu banana", "clatita cu banana sushi", "банановые суши"]
+  },
 
   // Pancakes
-  { id: "biskoff_pancakes", name: "Biskoff pancakes", price: 190, category: "pancakes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd00839e55d5bb2c73eb_Biskoff%20pancakes%20120%20lei.png", ingredients: "Pancakes, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", hasFistic: false, hasArahide: false },
-  { id: "fruits_pancakes", name: "Fruits pancakes", price: 170, category: "pancakes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd0155b9e59d9c24e8d3_Fruits%20pancakes%20110%20lei.png", ingredients: "Pancakes, Nutella®, ciocolată albă Belgiană, fructe proaspete", hasFistic: false, hasArahide: false },
-  { id: "royal_pancakes", name: "Royal pancakes", price: 165, category: "pancakes", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd0168340d2a45d064cf_Royal%20pancakes%20105%20lei.png", ingredients: "Pancakes, Nutella®, ciocolată albă Belgiană, biscuiți Oreo & Lotus", hasFistic: false, hasArahide: false },
+  { 
+    id: "biskoff_pancakes", 
+    name: "Biskoff pancakes", 
+    price: 190, 
+    category: "pancakes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd00839e55d5bb2c73eb_Biskoff%20pancakes%20120%20lei.png", 
+    ingredients: "Pancakes, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["biskoff pancakes", "biscoff pancakes", "biscoff pancake", "pancake biscoff", "pancakes biscoff", "lotus pancake", "pancakes lotus", "панкейк бискофф"]
+  },
+  { 
+    id: "fruits_pancakes", 
+    name: "Fruits pancakes", 
+    price: 170, 
+    category: "pancakes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd0155b9e59d9c24e8d3_Fruits%20pancakes%20110%20lei.png", 
+    ingredients: "Pancakes, Nutella®, ciocolată albă Belgiană, fructe proaspete", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["fruits pancakes", "fruit pancake", "fruits pancake", "fuits pancake", "pancake cu fructe", "pancakes cu fructe", "pancakes fructe", "панкейк с фруктами"]
+  },
+  { 
+    id: "royal_pancakes", 
+    name: "Royal pancakes", 
+    price: 165, 
+    category: "pancakes", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbd0168340d2a45d064cf_Royal%20pancakes%20105%20lei.png", 
+    ingredients: "Pancakes, Nutella®, ciocolată albă Belgiană, biscuiți Oreo & Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["royal pancakes", "royal pancake", "pancake royal", "pancake delux", "pancakes delux", "delux pancake", "deluxe pancake", "pancake", "pancakes", "панкейк роял", "панкейки делюкс", "панкейк", "панкейки"]
+  },
 
   // Drinks
-  { id: "drink_milkshake_oreo", name: "Milkshake Oreo", price: 135, category: "drinks", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd865b822d64f0ca2cf_Milk%20shake%20Oreo%2075%20lei.png", ingredients: "Lapte, înghețată, biscuiți Oreo, frișcă", hasFistic: false, hasArahide: false },
-  { id: "drink_milkshake_kinder", name: "Milkshake Kinder", price: 135, category: "drinks", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd8479cb20349a40552_Milk%20shake%20Kinder%2075%20lei.png", ingredients: "Lapte, înghețată, Kinder Bueno, frișcă", hasFistic: false, hasArahide: false },
-  { id: "drink_milkshake_nutella", name: "Milkshake Nutella", price: 135, category: "drinks", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd9f83a48e77ce0ea33_Milk%20shake%20Nutella%2075%20lei.png", ingredients: "Lapte, înghețată, Nutella®, frișcă", hasFistic: false, hasArahide: false },
-  { id: "drink_milkshake_strawberry", name: "Milkshake Strawberry", price: 135, category: "drinks", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd9479cb20349a4066f_Milk%20shake%20Strawberry%2075%20lei.png", ingredients: "Lapte, înghețată, piure căpșuni proaspete, frișcă", hasFistic: false, hasArahide: false },
-  { id: "drink_ice_lemonade", name: "Ice Lemonade", price: 90, category: "drinks", image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbe4d96f40c3d242045e7_Ice%20Lemonade%2050%20lei.png", ingredients: "Lămâie proaspătă, mentă, gheață, apă minerală", hasFistic: false, hasArahide: false }
+  { 
+    id: "drink_milkshake_oreo", 
+    name: "Milkshake Oreo", 
+    price: 135, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd865b822d64f0ca2cf_Milk%20shake%20Oreo%2075%20lei.png", 
+    ingredients: "Lapte, înghețată, biscuiți Oreo, frișcă", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["milkshake oreo", "milsheic oreo", "shake oreo", "milsheik oreo", "milcsec oreo", "milsheic orio", "коктейль орео"]
+  },
+  { 
+    id: "drink_milkshake_kinder", 
+    name: "Milkshake Kinder", 
+    price: 135, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd8479cb20349a40552_Milk%20shake%20Kinder%2075%20lei.png", 
+    ingredients: "Lapte, înghețată, Kinder Bueno, frișcă", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["milkshake kinder", "milsheic kinder", "shake kinder", "milsheik kinder", "milcsec kinder", "коктейль киндер"]
+  },
+  { 
+    id: "drink_milkshake_nutella", 
+    name: "Milkshake Nutella", 
+    price: 135, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd9f83a48e77ce0ea33_Milk%20shake%20Nutella%2075%20lei.png", 
+    ingredients: "Lapte, înghețată, Nutella®, frișcă", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["milkshake nutella", "milsheic nutella", "shake nutella", "milsheik nutella", "milcsec nutella", "коктейль нутелла"]
+  },
+  { 
+    id: "drink_milkshake_strawberry", 
+    name: "Milkshake Strawberry", 
+    price: 135, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbdd9479cb20349a4066f_Milk%20shake%20Strawberry%2075%20lei.png", 
+    ingredients: "Lapte, înghețată, piure căpșuni proaspete, frișcă", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["milkshake strawberry", "milkshake capsuni", "milsheic capsuni", "shake capsuni", "milsheik capsuni", "клубничный коктейль"]
+  },
+  { 
+    id: "drink_ice_lemonade", 
+    name: "Ice Lemonade", 
+    price: 90, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fbe4d96f40c3d242045e7_Ice%20Lemonade%2050%20lei.png", 
+    ingredients: "Lămâie proaspătă, mentă, gheață, apă minerală", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["ice lemonade", "lemonade", "limonada", "limonada naturala", "garuz", "garose", "garuzh", "limonada rece", "лимонад"]
+  }
 ];
 
 export async function GET(request: Request) {
@@ -181,7 +431,81 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   return 'ro';
 }
 
-function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | null, quantity: number, customization?: string } {
+// ─── ALGORITM FUZZY MATCHING (LEVENSHTEIN + DICE COEFFICIENT) ───
+function levenshtein(a: string, b: string): number {
+  const an = a ? a.length : 0;
+  const bn = b ? b.length : 0;
+  if (an === 0) return bn;
+  if (bn === 0) return an;
+  const matrix: number[][] = Array.from({ length: bn + 1 }, (_, i) => [i]);
+  for (let i = 1; i <= an; i++) matrix[0][i] = i;
+  for (let i = 1; i <= bn; i++) {
+    for (let j = 1; j <= an; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[bn][an];
+}
+
+function diceCoefficient(a: string, b: string): number {
+  if (a === b) return 1;
+  if (a.length < 2 || b.length < 2) return 0;
+  const getBigrams = (str: string) => {
+    const s = new Set<string>();
+    for (let i = 0; i < str.length - 1; i++) s.add(str.substring(i, i + 2));
+    return s;
+  };
+  const aBigrams = getBigrams(a);
+  const bBigrams = getBigrams(b);
+  let intersection = 0;
+  for (const item of aBigrams) {
+    if (bBigrams.has(item)) intersection++;
+  }
+  return (2.0 * intersection) / (aBigrams.size + bBigrams.size);
+}
+
+function calculateSimilarity(str1: string, str2: string): number {
+  const s1 = str1.toLowerCase().trim();
+  const s2 = str2.toLowerCase().trim();
+  if (s1 === s2) return 1.0;
+  if (s1.includes(s2) || s2.includes(s1)) {
+    const lenRatio = Math.min(s1.length, s2.length) / Math.max(s1.length, s2.length);
+    return Math.max(0.85, lenRatio);
+  }
+  const levDist = levenshtein(s1, s2);
+  const maxLen = Math.max(s1.length, s2.length);
+  const levScore = 1 - (levDist / maxLen);
+  const diceScore = diceCoefficient(s1, s2);
+  return Math.max(levScore, diceScore);
+}
+
+function cleanTextForMatching(text: string): string {
+  let t = text.toLowerCase().trim();
+  const stopwords = [
+    /\b(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)\b/gi,
+    /\b(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
+  ];
+  for (const sw of stopwords) {
+    t = t.replace(sw, ' ');
+  }
+  return t.replace(/\s+/g, ' ').trim();
+}
+
+function matchProductInText(text: string): { 
+  product: typeof MENU_CATALOG[0] | null, 
+  quantity: number, 
+  customization?: string,
+  score: number,
+  suggestedProduct?: typeof MENU_CATALOG[0] | null
+} {
   const lower = text.toLowerCase().trim();
   
   // Detectare cantitate
@@ -205,134 +529,50 @@ function matchProductInText(text: string): { product: typeof MENU_CATALOG[0] | n
     customization = "Fără zahăr adăugat";
   }
 
-  // 1. Matcher Argou & Sinonime Speciale
-  if (lower.includes('fashafish') || lower.includes('fașa') || lower.includes('fasa') || lower.includes('fashafisha') || lower.includes('gogosi mini') || lower.includes('gogoși mini') || lower.includes('пончики')) {
-    const p = MENU_CATALOG.find(m => m.id === 'nutella_mini_waffles');
-    return { product: p || null, quantity, customization };
-  }
+  const cleaned = cleanTextForMatching(text);
+  let bestMatch: typeof MENU_CATALOG[0] | null = null;
+  let bestScore = 0;
 
-  if (lower.includes('garuz') || lower.includes('garose') || lower.includes('garuzh') || lower.includes('limonada') || lower.includes('limonadă') || lower.includes('lemonade') || lower.includes('лимонад')) {
-    const p = MENU_CATALOG.find(m => m.id === 'drink_ice_lemonade');
-    return { product: p || null, quantity, customization };
-  }
-
-  if (lower.includes('kunafe') || lower.includes('kunafa') || lower.includes('knafe') || lower.includes('кунафе') || lower.includes('dubai') || lower.includes('kataif') || lower.includes('дубай')) {
-    const p = MENU_CATALOG.find(m => m.id === 'crepe_dubai');
-    return { product: p || null, quantity, customization };
-  }
-
-  // 2. Pancakes Matching (inclusiv "pancake delux")
-  if (lower.includes('pancake delux') || lower.includes('pancakes delux') || lower.includes('delux pancake') || lower.includes('deluxe pancake') || lower.includes('royal pancake') || lower.includes('royal pancakes') || lower.includes('панкейк роял') || lower.includes('панкейки делюкс')) {
-    const p = MENU_CATALOG.find(m => m.id === 'royal_pancakes');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('biscoff pancake') || lower.includes('biskoff pancake') || lower.includes('lotus pancake') || lower.includes('панкейк бискофф')) {
-    const p = MENU_CATALOG.find(m => m.id === 'biskoff_pancakes');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('fruits pancake') || lower.includes('pancake cu fructe') || lower.includes('pancakes fructe') || lower.includes('панкейк с фруктами')) {
-    const p = MENU_CATALOG.find(m => m.id === 'fruits_pancakes');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('pancake') || lower.includes('pancakes') || lower.includes('панкейк') || lower.includes('панкейки')) {
-    const p = MENU_CATALOG.find(m => m.id === 'royal_pancakes');
-    return { product: p || null, quantity, customization };
-  }
-
-  // 3. Waffles Matching
-  if (lower.includes('clatite pe bat') || lower.includes('clătite pe băț') || lower.includes('waffle stick') || lower.includes('waffles stick') || lower.includes('waffle sticks') || lower.includes('sticks') || lower.includes('палочки')) {
-    const p = MENU_CATALOG.find(m => m.id === 'waffle_sticks');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('delux mini') || lower.includes('deluxe mini') || lower.includes('mini waffle delux')) {
-    const p = MENU_CATALOG.find(m => m.id === 'delux_mini_waffle');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('lotus mini') || lower.includes('mini lotus')) {
-    const p = MENU_CATALOG.find(m => m.id === 'lotus_mini_waffles');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('nutella mini') || lower.includes('mini waffle') || lower.includes('mini waffles')) {
-    const p = MENU_CATALOG.find(m => m.id === 'nutella_mini_waffles');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('fruits waffle') || lower.includes('waffle cu fructe')) {
-    const p = MENU_CATALOG.find(m => m.id === 'fruits_waffle');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('classic waffle') || lower.includes('waffle clasic')) {
-    const p = MENU_CATALOG.find(m => m.id === 'classic_waffle');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('panda waffle') || lower.includes('belgian panda')) {
-    const p = MENU_CATALOG.find(m => m.id === 'belgian_panda_waffle');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('biscoff waffle') || lower.includes('waffle biscoff') || lower.includes('waffle lotus')) {
-    const p = MENU_CATALOG.find(m => m.id === 'biscoff_waffle');
-    return { product: p || null, quantity, customization };
-  }
-
-  // 4. Crepes Matching
-  if (lower.includes('delux crepe') || lower.includes('crepe delux') || lower.includes('delux clatita') || lower.includes('clatita delux') || lower.includes('clătită delux')) {
-    const p = MENU_CATALOG.find(m => m.id === 'delux_crepe');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('biscoff crepe') || lower.includes('crepe biscoff') || lower.includes('clatita lotus') || lower.includes('clatita biscoff')) {
-    const p = MENU_CATALOG.find(m => m.id === 'biscoff_crepe');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('fruits crepe') || lower.includes('crepe cu fructe') || lower.includes('clatita cu fructe')) {
-    const p = MENU_CATALOG.find(m => m.id === 'fruits_crepe');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('oreo crepe') || lower.includes('crepe oreo') || lower.includes('clatita oreo')) {
-    const p = MENU_CATALOG.find(m => m.id === 'oreo_crepe');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('kinder crepe') || lower.includes('crepe kinder') || lower.includes('clatita kinder')) {
-    const p = MENU_CATALOG.find(m => m.id === 'kinder_crepe');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('chocolate bites') || lower.includes('bites')) {
-    const p = MENU_CATALOG.find(m => m.id === 'chocolate_bites');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('royal sushi') || lower.includes('sushi clatita') || lower.includes('sushi royal')) {
-    const p = MENU_CATALOG.find(m => m.id === 'royal_sushi');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('sushi banana') || lower.includes('banana sushi')) {
-    const p = MENU_CATALOG.find(m => m.id === 'sushi_banana');
-    return { product: p || null, quantity, customization };
-  }
-
-  // 5. Drinks Matching
-  if (lower.includes('milkshake oreo') || lower.includes('milsheic oreo') || lower.includes('коктейль орео')) {
-    const p = MENU_CATALOG.find(m => m.id === 'drink_milkshake_oreo');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('milkshake kinder') || lower.includes('milsheic kinder') || lower.includes('коктейль киндер')) {
-    const p = MENU_CATALOG.find(m => m.id === 'drink_milkshake_kinder');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('milkshake nutella') || lower.includes('milsheic nutella') || lower.includes('коктейль нутелла')) {
-    const p = MENU_CATALOG.find(m => m.id === 'drink_milkshake_nutella');
-    return { product: p || null, quantity, customization };
-  }
-  if (lower.includes('milkshake strawberry') || lower.includes('milkshake capsuni') || lower.includes('milsheic capsuni') || lower.includes('клубничный коктейль')) {
-    const p = MENU_CATALOG.find(m => m.id === 'drink_milkshake_strawberry');
-    return { product: p || null, quantity, customization };
-  }
-
-  // 6. Căutare directă după nume din catalog
   for (const item of MENU_CATALOG) {
-    if (lower.includes(item.name.toLowerCase())) {
-      return { product: item, quantity, customization };
+    const allAliases = [item.name.toLowerCase(), ...(item.aliases || [])];
+    for (const alias of allAliases) {
+      if (cleaned === alias || cleaned.includes(alias) || alias.includes(cleaned)) {
+        const score = alias === cleaned ? 1.0 : 0.90;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = item;
+        }
+      } else {
+        const fullScore = calculateSimilarity(cleaned, alias);
+        if (fullScore > bestScore) {
+          bestScore = fullScore;
+          bestMatch = item;
+        }
+
+        const words = cleaned.split(' ');
+        if (words.length > 1) {
+          for (let i = 0; i < words.length; i++) {
+            for (let j = i + 1; j <= words.length; j++) {
+              const phrase = words.slice(i, j).join(' ');
+              const phraseScore = calculateSimilarity(phrase, alias);
+              if (phraseScore > bestScore) {
+                bestScore = phraseScore;
+                bestMatch = item;
+              }
+            }
+          }
+        }
+      }
     }
   }
 
-  return { product: null, quantity, customization };
+  return {
+    product: bestScore >= 0.65 ? bestMatch : null,
+    suggestedProduct: bestScore >= 0.40 && bestScore < 0.65 ? bestMatch : null,
+    score: bestScore,
+    quantity,
+    customization
+  };
 }
 
 import { connectToDatabase } from '@/lib/mongodb';
@@ -393,16 +633,13 @@ async function processMessage(senderId: string, messageText: string) {
     const lang = detectLanguage(messageText);
     const lowerMsg = messageText.toLowerCase().trim();
 
-    // 1. Încărcare sesiune client
     let session = await getSession(senderId);
 
-    // 2. Verificare Human Handoff (Pauză strictă doar pentru această conversație)
     if (session.isHumanAssistedUntil && session.isHumanAssistedUntil > Date.now()) {
       console.log(`Conversația cu ${senderId} este preluată de un operator uman. Botul rămâne în pauză.`);
       return { success: true, status: 'human_assisted_pause_active' };
     }
 
-    // 3. Verificare cerere explicită de operator uman
     if (lowerMsg.includes('operator') || lowerMsg.includes('om real') || lowerMsg.includes('persoana') || lowerMsg.includes('persoană') || lowerMsg.includes('человек') || lowerMsg.includes('оператор') || lowerMsg.includes('human')) {
       session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
       await saveSession(senderId, session);
@@ -415,7 +652,6 @@ async function processMessage(senderId: string, messageText: string) {
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
-    // 4. Verificare resetare / anulare comandă
     if (lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
       session.cart = [];
       session.state = 'IDLE';
@@ -429,15 +665,10 @@ async function processMessage(senderId: string, messageText: string) {
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
 
-    // 5. State Machine: Conversational Ordering Flow
     let replyText = "";
-    let shouldSendCartButton = false;
-    let customMenuUrl: string | null = null;
-    let customButtonTitle: string | null = null;
 
     const isOrderIntent = lowerMsg.includes('vreau sa comand') || lowerMsg.includes('vreau să comand') || lowerMsg.includes('as dori sa comand') || lowerMsg.includes('aș dori să comand') || lowerMsg.includes('fac o comanda') || lowerMsg.includes('fac o comandă') || lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('хочу заказать') || lowerMsg.includes('сделать заказ') || lowerMsg.includes('i want to order');
 
-    // Helper pentru URL și titlu de buton cu coșul preîncărcat
     const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
       const currentCart = currentSession.cart || [];
       if (!currentCart || currentCart.length === 0) {
@@ -457,36 +688,35 @@ async function processMessage(senderId: string, messageText: string) {
 
       const url = `https://www.munchotella.md/${currentLang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}`;
       const buttonTitle = currentLang === 'ru' 
-        ? `🛍️ Открыть Корзину (${totalSum} MDL)` 
+        ? `🛍️ Корзина (${totalSum} MDL)` 
         : currentLang === 'en' 
-        ? `🛍️ Open Cart (${totalSum} MDL)` 
-        : `🛍️ Deschide Coșul (${totalSum} MDL)`;
+        ? `🛍️ Cart (${totalSum} MDL)` 
+        : `🛍️ Coș (${totalSum} MDL)`;
 
       return { url, buttonTitle, totalSum };
     };
 
-    // Helper pentru generarea linkului de checkout final
     const generateCheckoutReply = async () => {
       const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
 
       if (lang === 'ru') {
-        replyText = `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите кнопку ниже, чтобы открыть корзину и заполнить адрес доставки на сайте! ✨`;
+        replyText = `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`;
       } else {
-        replyText = `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Puteți continua completarea adresei și finalizarea comenzii pe butonul de mai jos! ✨`;
+        replyText = `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
       }
 
       session.state = 'IDLE';
       await saveSession(senderId, session);
 
       await sendMetaResponse(senderId, replyText, finalCartUrl, finalButtonTitle);
-      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, customMenuUrl: finalCartUrl, replyText };
+      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText };
     };
 
-    // Verificare checkout direct dacă există produse în coș
     const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
 
-    // Scenariu: Clientul inițiază comanda din stare IDLE
-    if (session.state === 'IDLE' && isOrderIntent && !matchProductInText(messageText).product) {
+    const matched = matchProductInText(messageText);
+
+    if (session.state === 'IDLE' && isOrderIntent && !matched.product && !matched.suggestedProduct) {
       session.state = 'AWAITING_PRODUCT';
       await saveSession(senderId, session);
 
@@ -499,12 +729,9 @@ async function processMessage(senderId: string, messageText: string) {
       return { success: true, status: 'awaiting_product', replyText };
     }
 
-    if ((session.cart && session.cart.length > 0) && isCheckoutIntent && !matchProductInText(messageText).product) {
+    if ((session.cart && session.cart.length > 0) && isCheckoutIntent && !matched.product) {
       return await generateCheckoutReply();
     }
-
-    // Detectare produs în text
-    const matched = matchProductInText(messageText);
 
     if (matched.product) {
       const itemToAdd = {
@@ -529,33 +756,36 @@ async function processMessage(senderId: string, messageText: string) {
       }
 
       const isDrink = matched.product.category === 'drinks';
+      session.state = isDrink ? 'AWAITING_DRINKS' : 'AWAITING_MORE_DESSERTS';
+      await saveSession(senderId, session);
 
-      if (isDrink) {
-        session.state = 'AWAITING_DRINKS';
-        await saveSession(senderId, session);
-
-        if (lang === 'ru') {
-          replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL)! 🥤 Хотите оформить заказ или добавить еще что-нибудь?`;
-        } else {
-          replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL)! 🥤 Doriți să finalizăm comanda sau mai adăugăm ceva?`;
-        }
+      if (lang === 'ru') {
+        replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 ${isDrink ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое?'}`;
       } else {
-        session.state = 'AWAITING_MORE_DESSERTS';
-        await saveSession(senderId, session);
-
-        if (lang === 'ru') {
-          replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 Хотите добавить еще что-нибудь сладкое?`;
-        } else {
-          replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 Mai doriți încă ceva dulce sau un alt preparat?`;
-        }
+        replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 ${isDrink ? 'Doriți să finalizăm comanda sau mai adăugăm ceva?' : 'Mai doriți încă ceva dulce sau un alt preparat?'}`;
       }
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendMetaResponse(senderId, replyText, cartUrl, cartButtonTitle);
-      return { success: true, status: 'product_added', cart: session.cart, replyText, cartUrl, cartButtonTitle };
+      const menuUrl = `https://www.munchotella.md/${lang}/menu`;
+      await sendMetaGenericCard(senderId, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
+      return { success: true, status: 'product_added', cart: session.cart, replyText, cartUrl, cartButtonTitle, score: matched.score };
     }
 
-    // Dacă suntem în starea AWAITING_MORE_DESSERTS și clientul zice "nu"
+    if (!matched.product && matched.suggestedProduct) {
+      const suggested = matched.suggestedProduct;
+      let clarifyReply = "";
+      if (lang === 'ru') {
+        clarifyReply = `Вы имели в виду ${suggested.name} (${suggested.price} MDL)? 🧇 Нажмите ниже, чтобы открыть и оформить заказ! ✨`;
+      } else {
+        clarifyReply = `Ați dorit să spuneți ${suggested.name} (${suggested.price} MDL)? 🧇 Puteți continua mai jos cu coșul sau accesați meniul complet! ✨`;
+      }
+
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      const menuUrl = `https://www.munchotella.md/${lang}/menu`;
+      await sendMetaGenericCard(senderId, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
+      return { success: true, status: 'product_clarification_sent', suggestedProduct: suggested.name, replyText: clarifyReply, score: matched.score };
+    }
+
     const isNegative = lowerMsg === 'nu' || lowerMsg.startsWith('nu ') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('atat') || lowerMsg.includes('atât') || lowerMsg.includes('nimic') || lowerMsg.includes('mersi') || lowerMsg === 'нет' || lowerMsg.startsWith('нет ') || lowerMsg.includes('больше ничего') || lowerMsg.includes('спасибо') || lowerMsg === 'no';
 
     if (session.state === 'AWAITING_MORE_DESSERTS' && isNegative) {
@@ -571,12 +801,10 @@ async function processMessage(senderId: string, messageText: string) {
       return { success: true, status: 'awaiting_drinks', replyText, cartUrl, cartButtonTitle };
     }
 
-    // Dacă suntem în starea AWAITING_DRINKS și clientul refuză băuturile sau cere finalizarea
     if (session.state === 'AWAITING_DRINKS' && (isNegative || isCheckoutIntent || lowerMsg.includes('da') || lowerMsg.includes('da finalizam') || lowerMsg.includes('da finalizăm') || lowerMsg.includes('da trimite'))) {
       return await generateCheckoutReply();
     }
 
-    // 6. Gemini Generative AI cu Ghidul de Scenarii Oficial
     const baseMenuPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1). Website: www.munchotella.md.
 
 REGULI STRICTE DE AUR:
@@ -598,12 +826,11 @@ CATALOG MENIU OFICIAL:
     let adminCustomPrompt = "";
 
     try {
-      const settingsRef = doc(db, 'settings', 'ai_instagram');
-      const settingsSnap = await getDoc(settingsRef);
-      if (settingsSnap.exists()) {
-        const data = settingsSnap.data();
-        if (data.prompt) adminCustomPrompt = data.prompt;
-        if (data.tone) tone = data.tone;
+      const { db: mongoDb } = await connectToDatabase();
+      const settingsDoc = await mongoDb.collection('settings').findOne({ _id: 'ai' as any });
+      if (settingsDoc) {
+        if (settingsDoc.systemPrompt) adminCustomPrompt = settingsDoc.systemPrompt;
+        if (settingsDoc.tone) tone = settingsDoc.tone;
       }
     } catch (dbErr) {
       console.warn("Nu s-au putut încărca setările AI din Admin:", dbErr);
@@ -653,8 +880,8 @@ CATALOG MENIU OFICIAL:
       .replace(/\s+/g, ' ')
       .trim();
 
-    const menuUrl = customMenuUrl || `https://www.munchotella.md/${lang}/menu`;
-    const buttonTitle = customButtonTitle || (lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul");
+    const menuUrl = `https://www.munchotella.md/${lang}/menu`;
+    const buttonTitle = lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul";
 
     const sendResult = await sendMetaResponse(senderId, replyText, menuUrl, buttonTitle);
     return { success: true, sendResult, replyText, menuUrl, buttonTitle };
@@ -662,6 +889,68 @@ CATALOG MENIU OFICIAL:
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
     return { error: err?.message || String(err), stack: err?.stack };
+  }
+}
+
+async function sendMetaGenericCard(
+  senderId: string,
+  product: typeof MENU_CATALOG[0],
+  text: string,
+  cartUrl: string,
+  cartButtonTitle: string,
+  menuUrl: string
+) {
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
+
+  try {
+    const genericPayload = {
+      recipient: { id: senderId },
+      message: {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "generic",
+            elements: [
+              {
+                title: `${product.name} (${product.price} MDL)`,
+                subtitle: cleanText || product.ingredients || "Munchotella Waffle Boutique",
+                image_url: product.image,
+                buttons: [
+                  {
+                    type: "web_url",
+                    url: cartUrl,
+                    title: cartButtonTitle
+                  },
+                  {
+                    type: "web_url",
+                    url: menuUrl,
+                    title: "🧇 Meniu"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    const metaRes = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(genericPayload)
+    });
+    let sendResult = await metaRes.json();
+
+    if (sendResult?.error) {
+      console.warn("Meta generic card template warning, fallback to button template:", sendResult.error);
+      return await sendMetaResponse(senderId, text, cartUrl, cartButtonTitle);
+    }
+
+    return sendResult;
+  } catch (err) {
+    console.error("Eroare trimitere Meta generic card:", err);
+    return await sendMetaResponse(senderId, text, cartUrl, cartButtonTitle);
   }
 }
 
