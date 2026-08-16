@@ -955,7 +955,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
       const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
       const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
       const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
-      const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|tichete|оплата|как оплатить)\b)/i.test(messageText);
+      const isPaymentQ = /(plata|plată|achitare|achita|achit|plătesc|platesc|plati|plăti|card|cash|numerar|transfer|cum platesc|cum plătesc|cum achit|cum pot achita|tichete|оплата|как оплатить)/i.test(messageText);
       const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
 
       if (isCurrencyQ) {
