@@ -846,12 +846,12 @@ CATALOG MENIU OFICIAL:
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
 - Program: Zilnic 16:00 - 01:00 noaptea.
 - Locație: Chișinău, Str. Nicolae Testemițeanu 21/1 (Boutique Munchotella).
-- Reguli de Livrare & Tarife:
-  * Livrăm în Chișinău și suburbii pe o rază de până la 10 km prin serviciu de taxi partener (formula dinamică: 30 MDL tarif de pornire + 6.45 MDL/km, costul mediu fiind de 35-75 MDL în funcție de sector).
+- Reguli Stricte de Livrare & Tarife:
+  * Livrăm EXCLUSIV în raza orașului Chișinău (toate sectoarele: Centru, Botanica, Rîșcani, Ciocana, Buiucani, Telecentru, Poșta Veche).
+  * NU livrăm în suburbii (Trușeni, Colonița, Cricova, Ialoveni, Stăuceni, Bubuieci etc.).
   * În zona imediată a cafenelei (< 1 km pe jos): tarif pietonal de 20-40 MDL.
-  * Preluare gratuită din boutique (Takeaway): 0 MDL.
-  * Peste 10 km (localități îndepărtate): este în afara ariei standard de livrare pe site.
-  * Taxa exactă se calculează automat la checkout pe www.munchotella.md când clientul selectează adresa pe hartă.
+  * Preluare gratuită direct din boutique (Takeaway): 0 MDL.
+  * Taxa exactă de livrare în Chișinău se calculează automat pe www.munchotella.md la checkout când clientul introduce adresa.
 - Metode de plată: Online cu cardul securizat pe site, Cash la livrare sau Card/POS la curier.`;
 
     let tone = "elegant";
@@ -895,16 +895,25 @@ CATALOG MENIU OFICIAL:
 
     // Fallback inteligent structurat pe subiecte dacă Gemini nu este disponibil
     if (!replyText) {
-      const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|ciocana|botanica|durlesti|durlești|ialoveni|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете)\b)/i.test(messageText);
+      const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
       const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
       const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
       const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|оплата|как оплатить)\b)/i.test(messageText);
 
       if (isDeliveryQ) {
-        if (lang === 'ru') {
-          replyText = "Мы доставляем по Кишиневу и в пригороды (в радиусе до 10 км) через службу такси-партнера (30 MDL посадка + 6.45 MDL/км, средняя цена 35-75 MDL). Рядом с нами (<1 км) действует пешая доставка (20-40 MDL), а самовывоз — бесплатно! Точная стоимость рассчитывается автоматически на сайте при выборе адреса на карте! 🛵";
+        const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
+        if (isSuburbMention) {
+          if (lang === 'ru') {
+            replyText = "К сожалению, мы не осуществляем доставку в пригороды (Трушены, Колоница, Крикова, Яловены и т.д.). Доставка работает исключительно по городу Кишинев! 🛵";
+          } else {
+            replyText = "Din păcate nu facem livrare în suburbii (Trușeni, Colonița, Cricova, Ialoveni etc.). Livrăm exclusiv în raza orașului Chișinău! 🛵";
+          }
         } else {
-          replyText = "Livrăm cu drag în Chișinău și suburbii pe o rază de până la 10 km prin serviciu de taxi partener (tarif dinamic: 30 MDL pornire + 6.45 MDL/km, cost mediu aprox. 35-75 MDL în funcție de sector). Pentru zona apropiată (<1 km) avem livrare pietonală (20-40 MDL), iar preluarea din boutique este gratuită! Taxa exactă se calculează automat pe site la selectarea adresei pe hartă! 🛵";
+          if (lang === 'ru') {
+            replyText = "Мы доставляем по всему городу Кишинев (все секторы: Центр, Ботаника, Рышкановка, Чеканы, Буюканы, Телецентр). Вблизи нас действует пешая доставка (20-40 MDL), а самовывоз — бесплатно! Точная стоимость рассчитывается на сайте при вводе адреса! 🛵";
+          } else {
+            replyText = "Livrăm cu drag în tot orașul Chișinău (toate sectoarele: Centru, Botanica, Rîșcani, Ciocana, Buiucani, Telecentru, Poșta Veche). Pentru zona apropiată avem livrare pietonală (20-40 MDL), iar preluarea din boutique este gratuită! Taxa exactă se calculează automat pe site la introducerea adresei! 🛵";
+          }
         }
       } else if (isHoursQ) {
         if (lang === 'ru') {
