@@ -889,6 +889,10 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
 - Program oficial: 16:00 - 00:00 (Miercuri: Închis).
 - Locație: Chișinău, Str. Nicolae Testemițeanu 21/1.
+- Mese / Cafenea / Terasă: Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului.
+- Timp preparare & Livrare: Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute.
+- Valută / Schimb (Euro, Dolari etc.): Răspunde strict: "Bună, precizăm și revenim cu un răspuns."
+- Metode de plată: Online cu cardul pe site sau numerar la curier la livrare (NU menționa POS la curier).
 - Livrare & Reguli:
   * Livrăm în tot orașul Chișinău (toate sectoarele). Prețul livrării se calculează pe site la checkout (în medie 50-70 lei).
   * NU facem livrare în suburbii (Trușeni, Colonița, Cricova, Ialoveni, Durlești, Stăuceni etc.).
@@ -936,14 +940,34 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 
     // Fallback inteligent, scurt și uman dacă Gemini nu este disponibil
     if (!replyText) {
+      const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
+      const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
+      const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
       const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
       const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
       const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
-      const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|оплата|как оплатить)\b)/i.test(messageText);
-
+      const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|tichete|оплата|как оплатить)\b)/i.test(messageText);
       const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
 
-      if (isDeliveryQ) {
+      if (isCurrencyQ) {
+        if (lang === 'ru') {
+          replyText = "Здравствуйте! Уточняем и вернемся с ответом.";
+        } else {
+          replyText = "Bună, precizăm și revenim cu un răspuns.";
+        }
+      } else if (isTimeQ) {
+        if (lang === 'ru') {
+          replyText = "Приготовление десерта занимает в среднем 20-30 минут, а доставка курьером обычно занимает 30-45 минут! 🛵";
+        } else {
+          replyText = "Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute! 🛵";
+        }
+      } else if (isSeatingQ) {
+        if (lang === 'ru') {
+          replyText = "У нас есть уютное кафе, специально обустроенное для приятного отдыха и наслаждения нашими десертами. Также мы осуществляем доставку по Кишиневу! 🧇";
+        } else {
+          replyText = "Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului! 🧇";
+        }
+      } else if (isDeliveryQ) {
         const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
         if (isSuburbMention) {
           if (lang === 'ru') {
@@ -978,9 +1002,9 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
         }
       } else if (isPaymentQ) {
         if (lang === 'ru') {
-          replyText = "Можно оплатить онлайн картой на сайте, либо наличными или картой курьеру при доставке! 💳";
+          replyText = "Можно оплатить онлайн картой на сайте или наличными курьеру при доставке! 💳";
         } else {
-          replyText = "Puteți achita online cu cardul pe site, ori numerar/card la curier la livrare! 💳";
+          replyText = "Puteți achita online cu cardul pe site sau numerar la curier la livrare! 💳";
         }
       } else {
         if (lang === 'ru') {
