@@ -476,14 +476,24 @@ function calculateSimilarity(str1: string, str2: string): number {
   const s1 = str1.toLowerCase().trim();
   const s2 = str2.toLowerCase().trim();
   if (s1 === s2) return 1.0;
-  if (s1.includes(s2) || s2.includes(s1)) {
-    const lenRatio = Math.min(s1.length, s2.length) / Math.max(s1.length, s2.length);
+  
+  const minLen = Math.min(s1.length, s2.length);
+  const maxLen = Math.max(s1.length, s2.length);
+  const lenRatio = minLen / maxLen;
+
+  // Substring matching doar dacă lungimea este relevantă (minim 4 caractere) și raportul e rezonabil (minim 60%)
+  if (minLen >= 4 && (s1.includes(s2) || s2.includes(s1)) && lenRatio >= 0.6) {
     return Math.max(0.85, lenRatio);
   }
+
   const levDist = levenshtein(s1, s2);
-  const maxLen = Math.max(s1.length, s2.length);
   const levScore = 1 - (levDist / maxLen);
   const diceScore = diceCoefficient(s1, s2);
+  
+  if (minLen < 4) {
+    return levScore >= 0.8 ? levScore : 0;
+  }
+
   return Math.max(levScore, diceScore);
 }
 
@@ -508,6 +518,10 @@ function matchProductInText(text: string): {
 } {
   const lower = text.toLowerCase().trim();
   
+  // Detectare dacă mesajul este o întrebare generală FAQ (livrare, program, adresă etc.) fără intenție explicită de comandă
+  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|metode de plata|pana la|până la|до скольки|где находитесь|доставка|сколько стоит)\b)/i.test(text);
+  const isExplicitOrder = /(\b(vreau|sa comand|să comand|comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție)\b)/i.test(text);
+
   // Detectare cantitate
   let quantity = 1;
   const qtyMatch = lower.match(/\b(\d+)\s*(porți[ie]?|buc[aă]ți?|x)?\b/);
@@ -536,24 +550,24 @@ function matchProductInText(text: string): {
   for (const item of MENU_CATALOG) {
     const allAliases = [item.name.toLowerCase(), ...(item.aliases || [])];
     for (const alias of allAliases) {
-      if (cleaned === alias || cleaned.includes(alias) || alias.includes(cleaned)) {
-        const score = alias === cleaned ? 1.0 : 0.90;
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = item;
-        }
-      } else {
-        const fullScore = calculateSimilarity(cleaned, alias);
-        if (fullScore > bestScore) {
-          bestScore = fullScore;
-          bestMatch = item;
-        }
+      if (cleaned === alias) {
+        bestScore = 1.0;
+        bestMatch = item;
+        break;
+      }
 
-        const words = cleaned.split(' ');
-        if (words.length > 1) {
-          for (let i = 0; i < words.length; i++) {
-            for (let j = i + 1; j <= words.length; j++) {
-              const phrase = words.slice(i, j).join(' ');
+      const fullScore = calculateSimilarity(cleaned, alias);
+      if (fullScore > bestScore) {
+        bestScore = fullScore;
+        bestMatch = item;
+      }
+
+      const words = cleaned.split(' ').filter(w => w.length >= 3);
+      if (words.length > 1) {
+        for (let i = 0; i < words.length; i++) {
+          for (let j = i + 1; j <= words.length; j++) {
+            const phrase = words.slice(i, j).join(' ');
+            if (phrase.length >= 4) {
               const phraseScore = calculateSimilarity(phrase, alias);
               if (phraseScore > bestScore) {
                 bestScore = phraseScore;
@@ -566,9 +580,20 @@ function matchProductInText(text: string): {
     }
   }
 
+  // Dacă e întrebare generală FAQ și nu e comandă explicită, nu declanșăm potrivire forțată sub 0.85
+  if (isGeneralQuestion && !isExplicitOrder && bestScore < 0.85) {
+    return {
+      product: null,
+      suggestedProduct: null,
+      score: 0,
+      quantity,
+      customization
+    };
+  }
+
   return {
-    product: bestScore >= 0.65 ? bestMatch : null,
-    suggestedProduct: bestScore >= 0.40 && bestScore < 0.65 ? bestMatch : null,
+    product: bestScore >= 0.70 ? bestMatch : null,
+    suggestedProduct: bestScore >= 0.50 && bestScore < 0.70 ? bestMatch : null,
     score: bestScore,
     quantity,
     customization
