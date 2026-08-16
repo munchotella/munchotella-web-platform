@@ -924,103 +924,107 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 
     const finalPrompt = `${baseMenuPrompt}\n\n${adminCustomPrompt ? `[Instrucțiuni Admin: ${adminCustomPrompt}]\n` : ""}\n[Limbă: ${lang.toUpperCase()}]\n[Mesaj client: "${messageText}"]\n[Răspuns scurt, cald, uman (1-2 propoziții)]:`;
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      try {
-        const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.0-flash',
-          contents: finalPrompt,
-        });
-        replyText = response.text || "";
-      } catch (genAiErr: any) {
-        console.warn("GoogleGenAI SDK fallback to REST:", genAiErr?.message);
-        try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
-          });
-          const restData = await restRes.json();
-          replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        } catch (_) {}
+    // 1. Verificare deterministă pentru întrebările frecvente esențiale (FAQ oficiale)
+    const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
+    const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
+    const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
+    const isPaymentQ = /(plata|plată|achitare|achita|achit|plătesc|platesc|plati|plăti|card|cash|numerar|transfer|cum platesc|cum plătesc|cum achit|cum pot achita|tichete|оплата|как оплатить)/i.test(messageText);
+    const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
+    const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
+    const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
+    const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
+
+    if (isCurrencyQ) {
+      if (lang === 'ru') {
+        replyText = "Здравствуйте! Уточняем и вернемся с ответом.";
+      } else {
+        replyText = "Bună, precizăm și revenim cu un răspuns.";
       }
-    }
-
-    // Fallback inteligent, scurt și uman dacă Gemini nu este disponibil
-    if (!replyText) {
-      const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
-      const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
-      const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
-      const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
-      const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
-      const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
-      const isPaymentQ = /(plata|plată|achitare|achita|achit|plătesc|platesc|plati|plăti|card|cash|numerar|transfer|cum platesc|cum plătesc|cum achit|cum pot achita|tichete|оплата|как оплатить)/i.test(messageText);
-      const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
-
-      if (isCurrencyQ) {
+    } else if (isTimeQ) {
+      if (lang === 'ru') {
+        replyText = "Приготовление десерта занимает в среднем 20-30 минут, а доставка курьером обычно занимает 30-45 минут! 🛵";
+      } else {
+        replyText = "Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute! 🛵";
+      }
+    } else if (isSeatingQ) {
+      if (lang === 'ru') {
+        replyText = "У нас есть уютное кафе, специально обустроенное для приятного отдыха и наслаждения нашими десертами. Также мы осуществляем доставку по Кишиневу! 🧇";
+      } else {
+        replyText = "Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului! 🧇";
+      }
+    } else if (isPaymentQ) {
+      if (lang === 'ru') {
+        replyText = "Можно оплатить онлайн картой на сайте или наличными курьеру при доставке! 💳";
+      } else {
+        replyText = "Puteți achita online cu cardul pe site sau numerar la curier la livrare! 💳";
+      }
+    } else if (isDeliveryQ) {
+      const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
+      if (isSuburbMention) {
         if (lang === 'ru') {
-          replyText = "Здравствуйте! Уточняем и вернемся с ответом.";
+          replyText = "Здравствуйте! 🥰 К сожалению, доставляем только по Кишиневу, в пригороды доставки нет.";
         } else {
-          replyText = "Bună, precizăm și revenim cu un răspuns.";
+          replyText = "Bună! 🥰 Nu, din păcate facem livrare doar în Chișinău.";
         }
-      } else if (isTimeQ) {
+      } else if (isCostQ) {
         if (lang === 'ru') {
-          replyText = "Приготовление десерта занимает в среднем 20-30 минут, а доставка курьером обычно занимает 30-45 минут! 🛵";
+          replyText = "Доставка по Кишиневу в среднем 50-70 лей (рассчитывается на сайте при вводе адреса)! 🛵";
         } else {
-          replyText = "Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute! 🛵";
-        }
-      } else if (isSeatingQ) {
-        if (lang === 'ru') {
-          replyText = "У нас есть уютное кафе, специально обустроенное для приятного отдыха и наслаждения нашими десертами. Также мы осуществляем доставку по Кишиневу! 🧇";
-        } else {
-          replyText = "Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului! 🧇";
-        }
-      } else if (isDeliveryQ) {
-        const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
-        if (isSuburbMention) {
-          if (lang === 'ru') {
-            replyText = "Здравствуйте! 🥰 К сожалению, доставляем только по Кишиневу, в пригороды доставки нет.";
-          } else {
-            replyText = "Bună! 🥰 Nu, din păcate facem livrare doar în Chișinău.";
-          }
-        } else if (isCostQ) {
-          if (lang === 'ru') {
-            replyText = "Доставка по Кишиневу в среднем 50-70 лей (рассчитывается на сайте при вводе адреса)! 🛵";
-          } else {
-            replyText = "Livrarea în Chișinău este în medie 50-70 lei (se calculează exact pe site la introducerea adresei)! 🛵";
-          }
-        } else {
-          if (lang === 'ru') {
-            replyText = "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Меню и заказ доступны по кнопке ниже! 🧇";
-          } else {
-            replyText = "Bună! 🥰 Da, facem livrare în tot Chișinăul! Puteți vedea meniul și comanda pe butonul de mai jos! 🧇";
-          }
-        }
-      } else if (isHoursQ) {
-        if (lang === 'ru') {
-          replyText = "Мы открыты с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью! ✨";
-        } else {
-          replyText = "Suntem deschiși de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu drag! ✨";
-        }
-      } else if (isAddressQ) {
-        if (lang === 'ru') {
-          replyText = "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇";
-        } else {
-          replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
-        }
-      } else if (isPaymentQ) {
-        if (lang === 'ru') {
-          replyText = "Можно оплатить онлайн картой на сайте или наличными курьеру при доставке! 💳";
-        } else {
-          replyText = "Puteți achita online cu cardul pe site sau numerar la curier la livrare! 💳";
+          replyText = "Livrarea în Chișinău este în medie 50-70 lei (se calculează exact pe site la introducerea adresei)! 🛵";
         }
       } else {
         if (lang === 'ru') {
-          replyText = "Здравствуйте! 🥰 С удовольствием поможем вам выбрать десерт! Откройте меню по кнопке ниже! 🧇";
+          replyText = "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Меню и заказ доступны по кнопке ниже! 🧇";
         } else {
-          replyText = "Bună! 🥰 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți deschide meniul mai jos! 🧇";
+          replyText = "Bună! 🥰 Da, facem livrare în tot Chișinăul! Puteți vedea meniul și comanda pe butonul de mai jos! 🧇";
         }
+      }
+    } else if (isHoursQ) {
+      if (lang === 'ru') {
+        replyText = "Мы открыты с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью! ✨";
+      } else {
+        replyText = "Suntem deschiși de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu drag! ✨";
+      }
+    } else if (isAddressQ) {
+      if (lang === 'ru') {
+        replyText = "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇";
+      } else {
+        replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
+      }
+    }
+
+    // 2. Procesare conversațională inteligentă cu Gemini dacă nu este o întrebare FAQ de bază
+    if (!replyText) {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        try {
+          const ai = new GoogleGenAI({ apiKey });
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: finalPrompt,
+          });
+          replyText = response.text || "";
+        } catch (genAiErr: any) {
+          console.warn("GoogleGenAI SDK fallback to REST:", genAiErr?.message);
+          try {
+            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+            });
+            const restData = await restRes.json();
+            replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          } catch (_) {}
+        }
+      }
+    }
+
+    // 3. Fallback generic prietenos dacă nu s-a generat niciun răspuns
+    if (!replyText) {
+      if (lang === 'ru') {
+        replyText = "Здравствуйте! 🥰 С удовольствием поможем вам выбрать десерт! Откройте меню по кнопке ниже! 🧇";
+      } else {
+        replyText = "Bună! 🥰 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți deschide meniul mai jos! 🧇";
       }
     }
 
