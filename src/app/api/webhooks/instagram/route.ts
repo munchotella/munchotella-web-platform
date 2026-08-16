@@ -893,12 +893,43 @@ CATALOG MENIU OFICIAL:
       }
     }
 
-    // Fallback de siguranță dacă Gemini nu răspunde
+    // Fallback inteligent structurat pe subiecte dacă Gemini nu este disponibil
     if (!replyText) {
-      if (lang === 'ru') {
-        replyText = "Здравствуйте! 🧇 С удовольствием поможем вам выбрать что-то вкусное! Откройте меню по кнопке ниже! ✨";
+      const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|ciocana|botanica|durlesti|durlești|ialoveni|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете)\b)/i.test(messageText);
+      const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
+      const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
+      const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|оплата|как оплатить)\b)/i.test(messageText);
+
+      if (isDeliveryQ) {
+        if (lang === 'ru') {
+          replyText = "Мы доставляем по Кишиневу и в пригороды (в радиусе до 10 км) через службу такси-партнера (30 MDL посадка + 6.45 MDL/км, средняя цена 35-75 MDL). Рядом с нами (<1 км) действует пешая доставка (20-40 MDL), а самовывоз — бесплатно! Точная стоимость рассчитывается автоматически на сайте при выборе адреса на карте! 🛵";
+        } else {
+          replyText = "Livrăm cu drag în Chișinău și suburbii pe o rază de până la 10 km prin serviciu de taxi partener (tarif dinamic: 30 MDL pornire + 6.45 MDL/km, cost mediu aprox. 35-75 MDL în funcție de sector). Pentru zona apropiată (<1 km) avem livrare pietonală (20-40 MDL), iar preluarea din boutique este gratuită! Taxa exactă se calculează automat pe site la selectarea adresei pe hartă! 🛵";
+        }
+      } else if (isHoursQ) {
+        if (lang === 'ru') {
+          replyText = "Мы открыты ежедневно с 16:00 до 01:00 ночи! Ждем вас с радостью за свежими и теплыми десертами! ✨";
+        } else {
+          replyText = "Suntem deschiși zilnic de la 16:00 până la 01:00 noaptea! Vă așteptăm cu cel mai mare drag la bunătăți calde! ✨";
+        }
+      } else if (isAddressQ) {
+        if (lang === 'ru') {
+          replyText = "Наш бутик находится в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1 (Munchotella Boutique). Будем рады вас видеть! 🧇";
+        } else {
+          replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1 (Boutique Munchotella). Vă așteptăm cu drag! 🧇";
+        }
+      } else if (isPaymentQ) {
+        if (lang === 'ru') {
+          replyText = "Вы можете оплатить заказ онлайн картой на сайте при оформлении, либо наличными или картой курьеру при доставке! 💳";
+        } else {
+          replyText = "Puteți achita online securizat cu cardul direct pe site la plasarea comenzii, ori numerar/card la curier la livrare! 💳";
+        }
       } else {
-        replyText = "Bună! 🧇 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți vedea meniul complet pe butonul de mai jos! ✨";
+        if (lang === 'ru') {
+          replyText = "Здравствуйте! 🧇 С удовольствием поможем вам выбрать что-то вкусное! Откройте меню по кнопке ниже! ✨";
+        } else {
+          replyText = "Bună! 🧇 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți vedea meniul complet pe butonul de mai jos! ✨";
+        }
       }
     }
 
