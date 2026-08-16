@@ -556,9 +556,9 @@ function matchProductInText(text: string): {
 } {
   const lower = text.toLowerCase().trim();
   
-  // Detectare dacă mesajul este o întrebare generală FAQ (livrare, program, adresă etc.) fără intenție explicită de comandă
-  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|metode de plata|pana la|până la|до скольки|где находитесь|доставка|сколько стоит)\b)/i.test(text);
-  const isExplicitOrder = /(\b(vreau|sa comand|să comand|comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție)\b)/i.test(text);
+  // Detectare dacă mesajul este o întrebare generală FAQ (livrare, program, adresă, mese, timp preparare, plată, valută etc.) fără intenție explicită de comandă
+  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить)\b)/i.test(text);
+  const isExplicitOrder = /(\b(vreau|sa comand|să comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție)\b)/i.test(text);
 
   // Detectare cantitate
   let quantity = 1;
@@ -735,7 +735,16 @@ export async function processMessage(
 
     let replyText = "";
 
-    const isOrderIntent = lowerMsg.includes('vreau sa comand') || lowerMsg.includes('vreau să comand') || lowerMsg.includes('as dori sa comand') || lowerMsg.includes('aș dori să comand') || lowerMsg.includes('fac o comanda') || lowerMsg.includes('fac o comandă') || lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('хочу заказать') || lowerMsg.includes('сделать заказ') || lowerMsg.includes('i want to order');
+    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить)\b)/i.test(messageText);
+
+    const isOrderIntent = !isFaqQuestion && (
+      lowerMsg.includes('vreau sa comand') || lowerMsg.includes('vreau să comand') || 
+      lowerMsg.includes('as dori sa comand') || lowerMsg.includes('aș dori să comand') || 
+      lowerMsg.includes('fac o comanda') || lowerMsg.includes('fac o comandă') || 
+      lowerMsg.startsWith('comanda') || lowerMsg.startsWith('comandă') || 
+      lowerMsg.includes('хочу заказать') || lowerMsg.includes('сделать заказ') || 
+      lowerMsg.includes('i want to order')
+    );
 
     const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
       const currentCart = currentSession.cart || [];
