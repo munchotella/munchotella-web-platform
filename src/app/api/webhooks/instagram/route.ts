@@ -330,50 +330,88 @@ export async function POST(request: Request) {
     let senderId: string | null = null;
     let messageText: string | null = null;
     let isEcho = false;
+    let channel: 'instagram' | 'messenger' | 'whatsapp' = 'instagram';
+    let phoneNumberId: string = "";
 
     if (body && typeof body === 'object') {
-      if (Array.isArray(body?.entry)) {
-        for (const entry of body.entry) {
-          if (Array.isArray(entry?.messaging)) {
-            for (const item of entry.messaging) {
-              if (item?.message?.is_echo) {
-                isEcho = true;
-                continue;
-              }
-              const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
-              const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
-              
-              if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
-                isEcho = true;
-                continue;
-              }
-
-              if (sId && text) {
-                senderId = String(sId);
-                messageText = text;
-                break;
+      // 1. Detectare WhatsApp Business Cloud API
+      if (body.object === 'whatsapp_business_account') {
+        channel = 'whatsapp';
+        if (Array.isArray(body.entry)) {
+          for (const entry of body.entry) {
+            if (Array.isArray(entry.changes)) {
+              for (const change of entry.changes) {
+                if (change.field === 'messages') {
+                  const val = change.value;
+                  phoneNumberId = val?.metadata?.phone_number_id || "";
+                  if (Array.isArray(val?.messages)) {
+                    for (const msg of val.messages) {
+                      const sId = msg?.from;
+                      const text = msg?.text?.body || msg?.interactive?.button_reply?.title || msg?.interactive?.list_reply?.title || msg?.button?.text;
+                      if (sId && text) {
+                        senderId = String(sId);
+                        messageText = text;
+                        break;
+                      }
+                    }
+                  }
+                }
               }
             }
-          } else if (Array.isArray(entry?.changes)) {
-            for (const change of entry.changes) {
-              const val = change?.value;
-              if (val) {
-                if (val?.message?.is_echo || val?.is_echo) {
+          }
+        }
+      } 
+      // 2. Detectare Facebook Messenger sau Instagram Direct
+      else {
+        if (body.object === 'page') {
+          channel = 'messenger';
+        } else {
+          channel = 'instagram';
+        }
+
+        if (Array.isArray(body?.entry)) {
+          for (const entry of body.entry) {
+            if (Array.isArray(entry?.messaging)) {
+              for (const item of entry.messaging) {
+                if (item?.message?.is_echo) {
                   isEcho = true;
                   continue;
                 }
-                const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
-                const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
+                const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
+                const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
                 
                 if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
                   isEcho = true;
                   continue;
                 }
 
-                if (sId && typeof text === 'string') {
+                if (sId && text) {
                   senderId = String(sId);
                   messageText = text;
                   break;
+                }
+              }
+            } else if (Array.isArray(entry?.changes)) {
+              for (const change of entry.changes) {
+                const val = change?.value;
+                if (val) {
+                  if (val?.message?.is_echo || val?.is_echo) {
+                    isEcho = true;
+                    continue;
+                  }
+                  const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
+                  const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
+                  
+                  if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
+                    isEcho = true;
+                    continue;
+                  }
+
+                  if (sId && typeof text === 'string') {
+                    senderId = String(sId);
+                    messageText = text;
+                    break;
+                  }
                 }
               }
             }
@@ -388,14 +426,14 @@ export async function POST(request: Request) {
     }
 
     if (senderId && messageText) {
-      console.log(`Mesaj detectat de la ${senderId}: "${messageText}"`);
-      const debugResult = await processMessage(senderId, messageText);
-      return NextResponse.json({ success: true, status: 'procesat', senderId, messageText, debug: debugResult });
+      console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
+      const debugResult = await processMessage(senderId, messageText, channel, phoneNumberId);
+      return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
     } else {
       return NextResponse.json({ 
         success: true, 
         warning: 'lipsesc_date', 
-        extracted: { senderId, messageText }, 
+        extracted: { senderId, messageText, channel }, 
         bodyType: typeof body, 
         rawText,
         body 
@@ -653,7 +691,12 @@ async function saveSession(senderId: string, sessionData: any) {
   }
 }
 
-async function processMessage(senderId: string, messageText: string) {
+export async function processMessage(
+  senderId: string, 
+  messageText: string, 
+  channel: 'instagram' | 'messenger' | 'whatsapp' = 'instagram',
+  phoneNumberId: string = ''
+) {
   try {
     const lang = detectLanguage(messageText);
     const lowerMsg = messageText.toLowerCase().trim();
@@ -661,7 +704,7 @@ async function processMessage(senderId: string, messageText: string) {
     let session = await getSession(senderId);
 
     if (session.isHumanAssistedUntil && session.isHumanAssistedUntil > Date.now()) {
-      console.log(`Conversația cu ${senderId} este preluată de un operator uman. Botul rămâne în pauză.`);
+      console.log(`Conversația cu ${senderId} [${channel}] este preluată de un operator uman. Botul rămâne în pauză.`);
       return { success: true, status: 'human_assisted_pause_active' };
     }
 
@@ -673,7 +716,7 @@ async function processMessage(senderId: string, messageText: string) {
         ? "Конечно! 🤝 Я передал диалог нашему сотруднику. Оператор ответит вам здесь в ближайшее время!"
         : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!";
 
-      await sendMetaResponse(senderId, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, phoneNumberId, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
@@ -686,7 +729,7 @@ async function processMessage(senderId: string, messageText: string) {
         ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
         : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
 
-      await sendMetaResponse(senderId, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
+      await sendDispatchResponse(senderId, channel, phoneNumberId, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
 
@@ -733,7 +776,7 @@ async function processMessage(senderId: string, messageText: string) {
       session.state = 'IDLE';
       await saveSession(senderId, session);
 
-      await sendMetaResponse(senderId, replyText, finalCartUrl, finalButtonTitle);
+      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, finalCartUrl, finalButtonTitle);
       return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText };
     };
 
@@ -750,7 +793,7 @@ async function processMessage(senderId: string, messageText: string) {
         : "Cu mare drag! 🧇 Ce bunătăți ați dori să comandați astăzi din meniul Munchotella?";
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendMetaResponse(senderId, replyText, cartUrl, cartButtonTitle);
+      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, cartUrl, cartButtonTitle);
       return { success: true, status: 'awaiting_product', replyText };
     }
 
@@ -792,7 +835,7 @@ async function processMessage(senderId: string, messageText: string) {
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendMetaGenericCard(senderId, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
+      await sendDispatchGenericCard(senderId, channel, phoneNumberId, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
       return { success: true, status: 'product_added', cart: session.cart, replyText, cartUrl, cartButtonTitle, score: matched.score };
     }
 
@@ -807,7 +850,7 @@ async function processMessage(senderId: string, messageText: string) {
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendMetaGenericCard(senderId, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
+      await sendDispatchGenericCard(senderId, channel, phoneNumberId, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
       return { success: true, status: 'product_clarification_sent', suggestedProduct: suggested.name, replyText: clarifyReply, score: matched.score };
     }
 
@@ -822,7 +865,7 @@ async function processMessage(senderId: string, messageText: string) {
         : "Doriți să adăugăm și o băutură răcoritoare? Avem Ice Lemonade naturală (90 MDL) sau Milkshake cremos (Oreo, Kinder, Nutella, Căpșuni — 135 MDL)? 🥤";
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendMetaResponse(senderId, replyText, cartUrl, cartButtonTitle);
+      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, cartUrl, cartButtonTitle);
       return { success: true, status: 'awaiting_drinks', replyText, cartUrl, cartButtonTitle };
     }
 
@@ -839,8 +882,8 @@ REGULI STRICTE DE AUR:
 4. Răspunde SCURT, CALD și DIRECT (maxim 1-3 propoziții).
 5. Dacă clientul cere un preparat fără fistic sau fără arahide (ex: Delux mini waffle fără fistic): confirmă că bucătarul va pregăti desertul fără fistic și enumeră exact ingredientele reale care rămân pe produs (Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, arahide).
 
-CATALOG MENIU OFICIAL:
-- Waffles: Waffle sticks (145 MDL), Delux mini waffle (160 MDL), Nutella Mini waffles (145 MDL), Lotus Mini waffles (200 MDL), Fruits waffle (155 MDL), Classic waffle (145 MDL), Belgian panda waffle (160 MDL), Biscoff waffle (195 MDL).
+LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
+- Waffles: Waffle sticks (145 MDL), Delux mini waffle (160 MDL), Nutella Mini waffles (145 MDL), Lotus Mini waffles (200 MDL), Fruits waffle (150 MDL), Nutella waffle (145 MDL), Lotus waffle (200 MDL), Delux waffle (160 MDL), Biscoff waffle (200 MDL).
 - Crepes & Specialități: Delux crepe (165 MDL), Biscoff crepe (205 MDL), Fruits crepe (145 MDL), Oreo crepe (145 MDL), Kinder crepe (145 MDL), Crepe Dubai (265 MDL), Chocolate bites (165 MDL), Royal sushi (155 MDL), Sushi banana (140 MDL).
 - Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
@@ -961,12 +1004,188 @@ CATALOG MENIU OFICIAL:
     const menuUrl = `https://www.munchotella.md/${lang}/menu`;
     const buttonTitle = lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul";
 
-    const sendResult = await sendMetaResponse(senderId, replyText, menuUrl, buttonTitle);
+    const sendResult = await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, menuUrl, buttonTitle);
     return { success: true, sendResult, replyText, menuUrl, buttonTitle };
 
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
     return { error: err?.message || String(err), stack: err?.stack };
+  }
+}
+
+async function sendDispatchResponse(
+  senderId: string,
+  channel: 'instagram' | 'messenger' | 'whatsapp',
+  phoneNumberId: string,
+  text: string,
+  url: string,
+  buttonTitle: string
+) {
+  if (channel === 'whatsapp') {
+    return await sendWhatsAppResponse(senderId, phoneNumberId, text, url, buttonTitle);
+  } else {
+    return await sendMetaResponse(senderId, text, url, buttonTitle);
+  }
+}
+
+async function sendDispatchGenericCard(
+  senderId: string,
+  channel: 'instagram' | 'messenger' | 'whatsapp',
+  phoneNumberId: string,
+  product: typeof MENU_CATALOG[0],
+  text: string,
+  cartUrl: string,
+  cartButtonTitle: string,
+  menuUrl: string
+) {
+  if (channel === 'whatsapp') {
+    return await sendWhatsAppGenericCard(senderId, phoneNumberId, product, text, cartUrl, cartButtonTitle, menuUrl);
+  } else {
+    return await sendMetaGenericCard(senderId, product, text, cartUrl, cartButtonTitle, menuUrl);
+  }
+}
+
+async function sendWhatsAppResponse(
+  toPhoneNumber: string,
+  phoneNumberId: string,
+  text: string,
+  url: string,
+  buttonTitle: string
+) {
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
+  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1292226057301284";
+
+  try {
+    const ctaPayload = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: toPhoneNumber,
+      type: "interactive",
+      interactive: {
+        type: "cta_url",
+        header: {
+          type: "text",
+          text: "🧇 Munchotella Boutique"
+        },
+        body: {
+          text: cleanText || text
+        },
+        footer: {
+          text: "www.munchotella.md"
+        },
+        action: {
+          name: "cta_url",
+          parameters: {
+            display_text: buttonTitle || "🧇 Vezi Meniul & Coșul",
+            url: url
+          }
+        }
+      }
+    };
+
+    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${metaAccessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(ctaPayload)
+    });
+
+    const data = await res.json();
+    if (data?.error) {
+      console.warn("WhatsApp interactive CTA failed, fallback to plain text:", data.error);
+      const textPayload = {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: toPhoneNumber,
+        type: "text",
+        text: {
+          body: `${cleanText || text}\n\n👉 *Comandă online:* ${url}`,
+          preview_url: true
+        }
+      };
+
+      const fallbackRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${metaAccessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(textPayload)
+      });
+      return await fallbackRes.json();
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Eroare trimitere WhatsApp:", err);
+    return { error: String(err) };
+  }
+}
+
+async function sendWhatsAppGenericCard(
+  toPhoneNumber: string,
+  phoneNumberId: string,
+  product: typeof MENU_CATALOG[0],
+  text: string,
+  cartUrl: string,
+  cartButtonTitle: string,
+  menuUrl: string
+) {
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
+  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1292226057301284";
+
+  try {
+    const ctaPayload = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: toPhoneNumber,
+      type: "interactive",
+      interactive: {
+        type: "cta_url",
+        header: {
+          type: "image",
+          image: {
+            link: product.image
+          }
+        },
+        body: {
+          text: `*${product.name}* (${product.price} MDL)\n${product.ingredients ? `_${product.ingredients}_\n\n` : ''}${cleanText || 'Desert proaspăt preparat la Munchotella!'}`
+        },
+        footer: {
+          text: "Munchotella Waffle Boutique"
+        },
+        action: {
+          name: "cta_url",
+          parameters: {
+            display_text: cartButtonTitle || "🛍️ Deschide Coșul",
+            url: cartUrl
+          }
+        }
+      }
+    };
+
+    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${metaAccessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(ctaPayload)
+    });
+
+    const data = await res.json();
+    if (data?.error) {
+      console.warn("WhatsApp card CTA warning, fallback to text:", data.error);
+      return await sendWhatsAppResponse(toPhoneNumber, phoneId, `*${product.name}* (${product.price} MDL)\n${cleanText}`, cartUrl, cartButtonTitle);
+    }
+    return data;
+  } catch (err) {
+    console.error("Eroare trimitere WhatsApp generic card:", err);
+    return await sendWhatsAppResponse(toPhoneNumber, phoneId, text, cartUrl, cartButtonTitle);
   }
 }
 
