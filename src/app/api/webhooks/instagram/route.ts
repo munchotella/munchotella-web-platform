@@ -898,6 +898,8 @@ CATALOG MENIU OFICIAL:
       const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
       const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|оплата|как оплатить)\b)/i.test(messageText);
 
+      const isCostQ = /(\b(cat costa|cât costă|ce pret|ce preț|cat e livrarea|cât e livrarea|tarife|tarif|сколько стоит)\b)/i.test(messageText);
+
       if (isDeliveryQ) {
         const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
         if (isSuburbMention) {
@@ -905,6 +907,12 @@ CATALOG MENIU OFICIAL:
             replyText = "Здравствуйте! 🥰 К сожалению, доставляем только по Кишиневу, в пригороды доставки нет.";
           } else {
             replyText = "Bună! 🥰 Nu, din păcate facem livrare doar în Chișinău.";
+          }
+        } else if (isCostQ) {
+          if (lang === 'ru') {
+            replyText = "Доставка по Кишиневу в среднем 50-70 лей (рассчитывается на сайте при вводе адреса)! 🛵";
+          } else {
+            replyText = "Livrarea în Chișinău este în medie 50-70 lei (se calculează exact pe site la introducerea adresei)! 🛵";
           }
         } else {
           if (lang === 'ru') {
