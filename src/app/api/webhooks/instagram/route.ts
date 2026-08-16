@@ -898,7 +898,7 @@ CATALOG MENIU OFICIAL:
       const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
       const isPaymentQ = /(\b(plata|plată|achitare|card|pos|cash|numerar|transfer|cum platesc|cum plătesc|оплата|как оплатить)\b)/i.test(messageText);
 
-      const isCostQ = /(\b(cat costa|cât costă|ce pret|ce preț|cat e livrarea|cât e livrarea|tarife|tarif|сколько стоит)\b)/i.test(messageText);
+      const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
 
       if (isDeliveryQ) {
         const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
