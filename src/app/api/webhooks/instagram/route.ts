@@ -820,7 +820,14 @@ CATALOG MENIU OFICIAL:
 - Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
 - Program: Zilnic 16:00 - 01:00 noaptea.
-- Livrare: În Chișinău (60-70 MDL curier), suburbii (taxi partener).`;
+- Locație: Chișinău, Str. Nicolae Testemițeanu 21/1 (Boutique Munchotella).
+- Reguli de Livrare & Tarife:
+  * Livrăm în Chișinău și suburbii pe o rază de până la 10 km prin serviciu de taxi partener (formula dinamică: 30 MDL tarif de pornire + 6.45 MDL/km, costul mediu fiind de 35-75 MDL în funcție de sector).
+  * În zona imediată a cafenelei (< 1 km pe jos): tarif pietonal de 20-40 MDL.
+  * Preluare gratuită din boutique (Takeaway): 0 MDL.
+  * Peste 10 km (localități îndepărtate): este în afara ariei standard de livrare pe site.
+  * Taxa exactă se calculează automat la checkout pe www.munchotella.md când clientul selectează adresa pe hartă.
+- Metode de plată: Online cu cardul securizat pe site, Cash la livrare sau Card/POS la curier.`;
 
     let tone = "elegant";
     let adminCustomPrompt = "";
