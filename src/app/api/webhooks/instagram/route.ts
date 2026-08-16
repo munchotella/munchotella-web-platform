@@ -844,15 +844,13 @@ CATALOG MENIU OFICIAL:
 - Crepes & Specialități: Delux crepe (165 MDL), Biscoff crepe (205 MDL), Fruits crepe (145 MDL), Oreo crepe (145 MDL), Kinder crepe (145 MDL), Crepe Dubai (265 MDL), Chocolate bites (165 MDL), Royal sushi (155 MDL), Sushi banana (140 MDL).
 - Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
 - Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
-- Program: Zilnic 16:00 - 01:00 noaptea.
-- Locație: Chișinău, Str. Nicolae Testemițeanu 21/1 (Boutique Munchotella).
-- Reguli Stricte de Livrare & Tarife:
-  * Livrăm EXCLUSIV în raza orașului Chișinău (toate sectoarele: Centru, Botanica, Rîșcani, Ciocana, Buiucani, Telecentru, Poșta Veche).
-  * NU livrăm în suburbii (Trușeni, Colonița, Cricova, Ialoveni, Stăuceni, Bubuieci etc.).
-  * În zona imediată a cafenelei (< 1 km pe jos): tarif pietonal de 20-40 MDL.
-  * Preluare gratuită direct din boutique (Takeaway): 0 MDL.
-  * Taxa exactă de livrare în Chișinău se calculează automat pe www.munchotella.md la checkout când clientul introduce adresa.
-- Metode de plată: Online cu cardul securizat pe site, Cash la livrare sau Card/POS la curier.`;
+- Program oficial: Zilnic 16:00 - 00:00 (miezul nopții).
+- Locație: Chișinău, Str. Nicolae Testemițeanu 21/1.
+- Livrare & Reguli:
+  * Livrăm în tot orașul Chișinău (toate sectoarele). Prețul livrării se calculează pe site la checkout (în medie 50-70 lei).
+  * NU facem livrare în suburbii (Trușeni, Colonița, Cricova, Ialoveni, Durlești, Stăuceni etc.).
+  * Preluare gratuită din boutique (Takeaway).
+- Tonul răspunsurilor: SCURT, CALD, NATURAL și PRIETENOS (maxim 1-2 propoziții, exact ca un om pe chat). Fără detalii tehnice inutile sau formule matematice.`;
 
     let tone = "elegant";
     let adminCustomPrompt = "";
@@ -868,7 +866,7 @@ CATALOG MENIU OFICIAL:
       console.warn("Nu s-au putut încărca setările AI din Admin:", dbErr);
     }
 
-    const finalPrompt = `${baseMenuPrompt}\n\n${adminCustomPrompt ? `[Instrucțiuni Admin: ${adminCustomPrompt}]\n` : ""}\n[Limbă: ${lang.toUpperCase()}]\n[Mesaj client: "${messageText}"]\n[Răspuns scurt și la obiect]:`;
+    const finalPrompt = `${baseMenuPrompt}\n\n${adminCustomPrompt ? `[Instrucțiuni Admin: ${adminCustomPrompt}]\n` : ""}\n[Limbă: ${lang.toUpperCase()}]\n[Mesaj client: "${messageText}"]\n[Răspuns scurt, cald, uman (1-2 propoziții)]:`;
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (apiKey) {
@@ -893,7 +891,7 @@ CATALOG MENIU OFICIAL:
       }
     }
 
-    // Fallback inteligent structurat pe subiecte dacă Gemini nu este disponibil
+    // Fallback inteligent, scurt și uman dacă Gemini nu este disponibil
     if (!replyText) {
       const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
       const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
@@ -904,40 +902,40 @@ CATALOG MENIU OFICIAL:
         const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
         if (isSuburbMention) {
           if (lang === 'ru') {
-            replyText = "К сожалению, мы не осуществляем доставку в пригороды (Трушены, Колоница, Крикова, Яловены и т.д.). Доставка работает исключительно по городу Кишинев! 🛵";
+            replyText = "Здравствуйте! 🥰 К сожалению, доставляем только по Кишиневу, в пригороды доставки нет.";
           } else {
-            replyText = "Din păcate nu facem livrare în suburbii (Trușeni, Colonița, Cricova, Ialoveni etc.). Livrăm exclusiv în raza orașului Chișinău! 🛵";
+            replyText = "Bună! 🥰 Nu, din păcate facem livrare doar în Chișinău.";
           }
         } else {
           if (lang === 'ru') {
-            replyText = "Мы доставляем по всему городу Кишинев (все секторы: Центр, Ботаника, Рышкановка, Чеканы, Буюканы, Телецентр). Вблизи нас действует пешая доставка (20-40 MDL), а самовывоз — бесплатно! Точная стоимость рассчитывается на сайте при вводе адреса! 🛵";
+            replyText = "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Меню и заказ доступны по кнопке ниже! 🧇";
           } else {
-            replyText = "Livrăm cu drag în tot orașul Chișinău (toate sectoarele: Centru, Botanica, Rîșcani, Ciocana, Buiucani, Telecentru, Poșta Veche). Pentru zona apropiată avem livrare pietonală (20-40 MDL), iar preluarea din boutique este gratuită! Taxa exactă se calculează automat pe site la introducerea adresei! 🛵";
+            replyText = "Bună! 🥰 Da, facem livrare în tot Chișinăul! Puteți vedea meniul și comanda pe butonul de mai jos! 🧇";
           }
         }
       } else if (isHoursQ) {
         if (lang === 'ru') {
-          replyText = "Мы открыты ежедневно с 16:00 до 01:00 ночи! Ждем вас с радостью за свежими и теплыми десертами! ✨";
+          replyText = "Мы открыты ежедневно с 16:00 до 00:00! Ждем вас с радостью! ✨";
         } else {
-          replyText = "Suntem deschiși zilnic de la 16:00 până la 01:00 noaptea! Vă așteptăm cu cel mai mare drag la bunătăți calde! ✨";
+          replyText = "Suntem deschiși zilnic de la 16:00 până la 00:00! Vă așteptăm cu drag! ✨";
         }
       } else if (isAddressQ) {
         if (lang === 'ru') {
-          replyText = "Наш бутик находится в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1 (Munchotella Boutique). Будем рады вас видеть! 🧇";
+          replyText = "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇";
         } else {
-          replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1 (Boutique Munchotella). Vă așteptăm cu drag! 🧇";
+          replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
         }
       } else if (isPaymentQ) {
         if (lang === 'ru') {
-          replyText = "Вы можете оплатить заказ онлайн картой на сайте при оформлении, либо наличными или картой курьеру при доставке! 💳";
+          replyText = "Можно оплатить онлайн картой на сайте, либо наличными или картой курьеру при доставке! 💳";
         } else {
-          replyText = "Puteți achita online securizat cu cardul direct pe site la plasarea comenzii, ori numerar/card la curier la livrare! 💳";
+          replyText = "Puteți achita online cu cardul pe site, ori numerar/card la curier la livrare! 💳";
         }
       } else {
         if (lang === 'ru') {
-          replyText = "Здравствуйте! 🧇 С удовольствием поможем вам выбрать что-то вкусное! Откройте меню по кнопке ниже! ✨";
+          replyText = "Здравствуйте! 🥰 С удовольствием поможем вам выбрать десерт! Откройте меню по кнопке ниже! 🧇";
         } else {
-          replyText = "Bună! 🧇 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți vedea meniul complet pe butonul de mai jos! ✨";
+          replyText = "Bună! 🥰 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți deschide meniul mai jos! 🧇";
         }
       }
     }
