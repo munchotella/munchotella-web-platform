@@ -61,14 +61,16 @@ export default function AuthModal() {
   
   const [modalStep, setModalStep] = useState<OnboardingStep>("AUTH");
   const [isLogin, setIsLogin] = useState(true);
+  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotMethod, setForgotMethod] = useState<"phone" | "email">("phone");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   // Auth Form states
-  const [loginId, setLoginId] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -86,7 +88,6 @@ export default function AuthModal() {
   const checkAndTriggerOnboarding = (userData: any, authToken: string) => {
     const isComplete = userData.isTermsAccepted && userData.name && userData.name.trim().length > 0;
     if (!isComplete) {
-      // Setează numele inițial dacă există
       if (userData.name) {
         const parts = userData.name.split(" ");
         setFirstName(parts[0] || "");
@@ -138,26 +139,43 @@ export default function AuthModal() {
     }
   };
 
+  const normalizePhoneNumber = (raw: string, country: Country) => {
+    const cleaned = raw.trim();
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+    if (cleaned.startsWith('0')) {
+      return country.dialCode + cleaned.substring(1);
+    }
+    return country.dialCode + cleaned;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg("");
     setSuccessMsg("");
     
-    let normalizedLoginId = loginId.trim();
-    if (normalizedLoginId.startsWith('0') && normalizedLoginId.length === 9) {
-      normalizedLoginId = '+373' + normalizedLoginId.substring(1);
-    } else if (!normalizedLoginId.includes('@') && !normalizedLoginId.startsWith('+') && /^\d+$/.test(normalizedLoginId)) {
-      normalizedLoginId = selectedCountry.dialCode + normalizedLoginId;
-    }
-    
     try {
       if (isLogin) {
+        let identifier = "";
+        if (loginMethod === "phone") {
+          if (!phone.trim()) {
+            throw new Error("Te rugăm să introduci numărul de telefon.");
+          }
+          identifier = normalizePhoneNumber(phone, selectedCountry);
+        } else {
+          if (!loginEmail.trim()) {
+            throw new Error("Te rugăm să introduci adresa de email.");
+          }
+          identifier = loginEmail.trim().toLowerCase();
+        }
+
         const res = await fetch(`${API_URL}/auth/login`, {
           credentials: "include",
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: normalizedLoginId, password })
+          body: JSON.stringify({ phone: identifier, password })
         });
         const data = await res.json();
         
@@ -168,21 +186,29 @@ export default function AuthModal() {
         login(data.data, data.token);
         checkAndTriggerOnboarding(data.data, data.token);
       } else {
-        let rawPhone = phone.trim();
-        let normalizedRegisterPhone = rawPhone;
-        if (rawPhone.startsWith('+')) {
-          normalizedRegisterPhone = rawPhone;
-        } else if (rawPhone.startsWith('0')) {
-          normalizedRegisterPhone = selectedCountry.dialCode + rawPhone.substring(1);
-        } else {
-          normalizedRegisterPhone = selectedCountry.dialCode + rawPhone;
+        // REGISTER
+        if (!name.trim()) {
+          throw new Error("Te rugăm să introduci numele complet.");
         }
+        if (!phone.trim()) {
+          throw new Error("Te rugăm să introduci numărul de telefon.");
+        }
+        if (!loginEmail.trim()) {
+          throw new Error("Te rugăm să introduci adresa de email.");
+        }
+
+        const normalizedRegisterPhone = normalizePhoneNumber(phone, selectedCountry);
         
         const res = await fetch(`${API_URL}/auth/register`, {
           credentials: "include",
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone: normalizedRegisterPhone, email: loginId, password })
+          body: JSON.stringify({ 
+            name: name.trim(), 
+            phone: normalizedRegisterPhone, 
+            email: loginEmail.trim().toLowerCase(), 
+            password 
+          })
         });
         const data = await res.json();
         
@@ -194,7 +220,7 @@ export default function AuthModal() {
         checkAndTriggerOnboarding(data.data, data.token);
       }
       
-      setLoginId("");
+      setLoginEmail("");
       setPassword("");
       setName("");
       setPhone("");
@@ -212,11 +238,21 @@ export default function AuthModal() {
     setErrorMsg("");
     setSuccessMsg("");
     
-    let normalizedLoginId = loginId.trim();
-    if (normalizedLoginId.startsWith('0') && normalizedLoginId.length === 9) {
-      normalizedLoginId = '+373' + normalizedLoginId.substring(1);
-    } else if (!normalizedLoginId.includes('@') && !normalizedLoginId.startsWith('+') && /^\d+$/.test(normalizedLoginId)) {
-      normalizedLoginId = selectedCountry.dialCode + normalizedLoginId;
+    let identifier = "";
+    if (forgotMethod === "phone") {
+      if (!phone.trim()) {
+        setErrorMsg("Te rugăm să introduci numărul de telefon.");
+        setLoading(false);
+        return;
+      }
+      identifier = normalizePhoneNumber(phone, selectedCountry);
+    } else {
+      if (!loginEmail.trim()) {
+        setErrorMsg("Te rugăm să introduci adresa de email.");
+        setLoading(false);
+        return;
+      }
+      identifier = loginEmail.trim().toLowerCase();
     }
     
     try {
@@ -224,7 +260,7 @@ export default function AuthModal() {
         credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: normalizedLoginId, method: "email" })
+        body: JSON.stringify({ phone: identifier, method: forgotMethod })
       });
       const data = await res.json();
       
@@ -232,7 +268,7 @@ export default function AuthModal() {
         throw new Error(data.message || "Eroare la recuperarea parolei");
       }
       
-      setSuccessMsg(data.message || "Parola temporară a fost trimisă pe email!");
+      setSuccessMsg(data.message || "Parola temporară a fost trimisă cu succes!");
       setTimeout(() => {
         setIsForgotPassword(false);
         setSuccessMsg("");
@@ -323,17 +359,17 @@ export default function AuthModal() {
           onClick={() => setIsAuthModalOpen(false)}
         >
           <motion.div
-            className="relative w-full max-w-md bg-[#FAF8F5] rounded-3xl shadow-2xl overflow-hidden border border-[#E8E2D9]"
+            className="relative w-full max-w-md bg-[#FAF8F5] rounded-3xl shadow-2xl border border-[#E8E2D9] overflow-visible"
             variants={modalVariants}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Banner */}
-            <div className="relative bg-[#1A120B] p-8 text-center overflow-hidden">
+            <div className="relative bg-[#1A120B] p-8 text-center rounded-t-3xl overflow-hidden">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4A853_1px,transparent_1px)] [background-size:16px_16px]"></div>
               
               <button 
                 onClick={() => setIsAuthModalOpen(false)}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 hover:text-[#D4A853] transition-colors z-20"
+                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 hover:text-[#D4A853] transition-colors z-20 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -353,18 +389,18 @@ export default function AuthModal() {
                   : modalStep === "ONBOARDING_TERMS"
                   ? "Revizuiește și acceptă politica Munchotella"
                   : isForgotPassword 
-                  ? "Introdu telefonul pentru a primi parola pe email" 
+                  ? (forgotMethod === "phone" ? "Introdu telefonul pentru a primi parola temporară" : "Introdu adresa de email pentru recuperare")
                   : (isLogin ? "Accesează-ți contul Munchotella" : "Alătură-te comunității noastre dulci")}
               </p>
             </div>
 
             {/* Form Area */}
-            <div className="p-8 pb-10">
+            <div className="p-7 sm:p-8 pb-10">
               {errorMsg && (
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }} 
                   animate={{ opacity: 1, y: 0 }} 
-                  className="mb-6 p-3 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100 text-center"
+                  className="mb-5 p-3 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100 text-center"
                 >
                   {errorMsg}
                 </motion.div>
@@ -373,7 +409,7 @@ export default function AuthModal() {
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }} 
                   animate={{ opacity: 1, y: 0 }} 
-                  className="mb-6 p-3 bg-[#E6F4EA] text-[#137333] rounded-xl text-sm font-medium border border-[#CEEAD6] text-center"
+                  className="mb-5 p-3 bg-[#E6F4EA] text-[#137333] rounded-xl text-sm font-medium border border-[#CEEAD6] text-center"
                 >
                   {successMsg}
                 </motion.div>
@@ -456,7 +492,7 @@ export default function AuthModal() {
               {/* STEP 0: AUTHENTICATION FORM */}
               {modalStep === "AUTH" && (
                 <>
-                  {/* Social Login Buttons (Google, Facebook, Apple) */}
+                  {/* Social Login Buttons */}
                   {!isForgotPassword && (
                     <div className="mb-6 space-y-3">
                       <button
@@ -498,23 +534,63 @@ export default function AuthModal() {
 
                   {isForgotPassword ? (
                     <form onSubmit={handleForgotPassword} className="flex flex-col space-y-4">
-                      <div className="flex gap-2">
-                        <CountrySelector
-                          selectedCountry={selectedCountry}
-                          onSelect={setSelectedCountry}
-                        />
-                        <div className="relative group focus-within:text-[#D4A853] flex-1">
-                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                      {/* Toggle Phone / Email for Reset */}
+                      <div className="flex bg-[#F0EBE1] p-1 rounded-xl gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setForgotMethod("phone")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            forgotMethod === "phone"
+                              ? "bg-white text-[#1A120B] shadow-sm"
+                              : "text-[#1A120B]/60 hover:text-[#1A120B]"
+                          }`}
+                        >
+                          <Phone size={14} />
+                          <span>Telefon</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setForgotMethod("email")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            forgotMethod === "email"
+                              ? "bg-white text-[#1A120B] shadow-sm"
+                              : "text-[#1A120B]/60 hover:text-[#1A120B]"
+                          }`}
+                        >
+                          <Mail size={14} />
+                          <span>Email</span>
+                        </button>
+                      </div>
+
+                      {forgotMethod === "phone" ? (
+                        <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
+                          <CountrySelector
+                            selectedCountry={selectedCountry}
+                            onSelect={setSelectedCountry}
+                          />
                           <input 
-                            type="text" 
-                            placeholder="Număr de telefon" 
+                            type="tel" 
+                            placeholder="60 000 000" 
                             required
-                            value={loginId}
-                            onChange={(e) => setLoginId(e.target.value)}
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
+                          />
+                        </div>
+                      ) : (
+                        <div className="relative group focus-within:text-[#D4A853]">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                          <input 
+                            type="email" 
+                            placeholder="Adresa de email" 
+                            required
+                            value={loginEmail}
+                            onChange={(e) => setLoginEmail(e.target.value)}
                             className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
                           />
                         </div>
-                      </div>
+                      )}
+
                       <button 
                         type="submit" 
                         disabled={loading}
@@ -546,138 +622,186 @@ export default function AuthModal() {
                   ) : (
                     <>
                       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                      
-                      <AnimatePresence mode="popLayout">
-                        {!isLogin && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-col space-y-4 overflow-hidden"
-                          >
-                            <div className="relative">
-                              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40" size={18} />
-                              <input 
-                                type="text" 
-                                placeholder="Nume complet" 
-                                required={!isLogin}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300 group"
-                              />
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <CountrySelector
-                                selectedCountry={selectedCountry}
-                                onSelect={setSelectedCountry}
-                              />
-                              <div className="relative group focus-within:text-[#D4A853] flex-1">
-                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                        
+                        {/* If in Login mode: Toggle Phone / Email */}
+                        {isLogin && (
+                          <div className="flex bg-[#F0EBE1] p-1 rounded-xl gap-1 mb-1">
+                            <button
+                              type="button"
+                              onClick={() => setLoginMethod("phone")}
+                              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                loginMethod === "phone"
+                                  ? "bg-white text-[#1A120B] shadow-sm"
+                                  : "text-[#1A120B]/60 hover:text-[#1A120B]"
+                              }`}
+                            >
+                              <Phone size={14} />
+                              <span>Număr de Telefon</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setLoginMethod("email")}
+                              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                loginMethod === "email"
+                                  ? "bg-white text-[#1A120B] shadow-sm"
+                                  : "text-[#1A120B]/60 hover:text-[#1A120B]"
+                              }`}
+                            >
+                              <Mail size={14} />
+                              <span>Email</span>
+                            </button>
+                          </div>
+                        )}
+
+                        {/* REGISTER SPECIFIC FIELDS */}
+                        <AnimatePresence mode="popLayout">
+                          {!isLogin && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-col space-y-4 overflow-visible"
+                            >
+                              {/* 1. Full Name */}
+                              <div className="relative group focus-within:text-[#D4A853]">
+                                <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
                                 <input 
-                                  type="tel" 
-                                  placeholder="Număr de telefon" 
+                                  type="text" 
+                                  placeholder="Nume complet (ex: Maria Popescu)" 
                                   required={!isLogin}
-                                  value={phone}
-                                  onChange={(e) => setPhone(e.target.value)}
+                                  value={name}
+                                  onChange={(e) => setName(e.target.value)}
                                   className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
                                 />
                               </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      <div className="relative group focus-within:text-[#D4A853]">
-                        {isLogin ? (
-                          <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
-                        ) : (
-                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
-                        )}
-                        <input 
-                          type={isLogin ? "text" : "email"} 
-                          placeholder={isLogin ? "Email sau Număr de telefon" : "Adresa de email"} 
-                          required
-                          value={loginId}
-                          onChange={(e) => setLoginId(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
-                        />
-                      </div>
-
-                      <div className="relative group focus-within:text-[#D4A853]">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
-                        <input 
-                          type="password" 
-                          placeholder="Parola" 
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
-                        />
-                      </div>
-
-                      {isLogin && (
-                        <div className="text-right">
-                          <button 
-                            type="button" 
-                            onClick={() => { setIsForgotPassword(true); setErrorMsg(""); setSuccessMsg(""); }}
-                            className="text-[13px] text-[#1A120B]/60 hover:text-[#D4A853] font-medium transition-colors cursor-pointer"
-                          >
-                            Ai uitat parola?
-                          </button>
-                        </div>
-                      )}
-
-                      <button 
-                        type="submit" 
-                        disabled={loading || socialLoading}
-                        className="w-full mt-4 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer"
-                      >
-                        <motion.div 
-                          className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-                          animate={{
-                            translateX: ["-100%", "200%"],
-                          }}
-                          transition={{
-                            repeat: Infinity,
-                            duration: 2.5,
-                            ease: "linear",
-                            repeatDelay: 1
-                          }}
-                        />
-                        <div className="relative z-10 flex items-center justify-center space-x-2 group-hover:text-[#D4A853] transition-colors">
-                          {loading ? (
-                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-                              <Loader2 size={20} />
+                              
+                              {/* 2. Phone Number with Country Selector */}
+                              <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
+                                <CountrySelector
+                                  selectedCountry={selectedCountry}
+                                  onSelect={setSelectedCountry}
+                                />
+                                <input 
+                                  type="tel" 
+                                  placeholder="60 000 000" 
+                                  required={!isLogin}
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
+                                  className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
+                                />
+                              </div>
                             </motion.div>
-                          ) : (
-                            <>
-                              <span>{isLogin ? "Autentificare" : "Creează cont cu Email"}</span>
-                              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                            </>
                           )}
-                        </div>
-                      </button>
-                    </form>
+                        </AnimatePresence>
 
-                    <div className="mt-6 text-center text-sm text-[#1A120B]/60">
-                      {isLogin ? "Nu ai un cont încă?" : "Ai deja un cont?"}{" "}
-                      <button 
-                        type="button"
-                        onClick={() => { setIsLogin(!isLogin); setErrorMsg(""); setSuccessMsg(""); setIsForgotPassword(false); }}
-                        className="text-[#D4A853] font-bold hover:underline transition-all cursor-pointer"
-                      >
-                        {isLogin ? "Creează unul" : "Autentifică-te"}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
+                        {/* LOGIN: PHONE INPUT (when loginMethod === "phone") */}
+                        {isLogin && loginMethod === "phone" && (
+                          <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
+                            <CountrySelector
+                              selectedCountry={selectedCountry}
+                              onSelect={setSelectedCountry}
+                            />
+                            <input 
+                              type="tel" 
+                              placeholder="60 000 000" 
+                              required
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
+                            />
+                          </div>
+                        )}
+
+                        {/* LOGIN WITH EMAIL OR REGISTER EMAIL INPUT */}
+                        {(!isLogin || (isLogin && loginMethod === "email")) && (
+                          <div className="relative group focus-within:text-[#D4A853]">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                            <input 
+                              type="email" 
+                              placeholder="Adresa de email" 
+                              required
+                              value={loginEmail}
+                              onChange={(e) => setLoginEmail(e.target.value)}
+                              className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
+                            />
+                          </div>
+                        )}
+
+                        {/* PASSWORD INPUT */}
+                        <div className="relative group focus-within:text-[#D4A853]">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                          <input 
+                            type="password" 
+                            placeholder="Parola" 
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
+                          />
+                        </div>
+
+                        {isLogin && (
+                          <div className="text-right">
+                            <button 
+                              type="button" 
+                              onClick={() => { setIsForgotPassword(true); setErrorMsg(""); setSuccessMsg(""); }}
+                              className="text-[13px] text-[#1A120B]/60 hover:text-[#D4A853] font-medium transition-colors cursor-pointer"
+                            >
+                              Ai uitat parola?
+                            </button>
+                          </div>
+                        )}
+
+                        <button 
+                          type="submit" 
+                          disabled={loading || socialLoading}
+                          className="w-full mt-4 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer"
+                        >
+                          <motion.div 
+                            className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
+                            animate={{
+                              translateX: ["-100%", "200%"],
+                            }}
+                            transition={{
+                              repeat: Infinity,
+                              duration: 2.5,
+                              ease: "linear",
+                              repeatDelay: 1
+                            }}
+                          />
+                          <div className="relative z-10 flex items-center justify-center space-x-2 group-hover:text-[#D4A853] transition-colors">
+                            {loading ? (
+                              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                                <Loader2 size={20} />
+                              </motion.div>
+                            ) : (
+                              <>
+                                <span>{isLogin ? "Autentificare" : "Creează Cont"}</span>
+                                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      </form>
+
+                      <div className="mt-6 text-center text-sm text-[#1A120B]/60">
+                        {isLogin ? "Nu ai un cont încă?" : "Ai deja un cont?"}{" "}
+                        <button 
+                          type="button"
+                          onClick={() => { setIsLogin(!isLogin); setErrorMsg(""); setSuccessMsg(""); setIsForgotPassword(false); }}
+                          className="text-[#D4A853] font-bold hover:underline transition-all cursor-pointer"
+                        >
+                          {isLogin ? "Creează unul" : "Autentifică-te"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
+      )}
+    </AnimatePresence>
   );
 }

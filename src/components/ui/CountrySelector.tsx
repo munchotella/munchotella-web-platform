@@ -9,6 +9,8 @@ import { useLocale } from "next-intl";
 interface CountrySelectorProps {
   selectedCountry: Country;
   onSelect: (country: Country) => void;
+  className?: string;
+  buttonClassName?: string;
 }
 
 const SEARCH_PLACEHOLDERS: Record<string, string> = {
@@ -23,7 +25,12 @@ const NO_RESULTS: Record<string, string> = {
   ru: "Страна не найдена"
 };
 
-export default function CountrySelector({ selectedCountry, onSelect }: CountrySelectorProps) {
+export default function CountrySelector({ 
+  selectedCountry, 
+  onSelect,
+  className = "",
+  buttonClassName = ""
+}: CountrySelectorProps) {
   const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,15 +72,15 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
   const noResultsText = NO_RESULTS[locale] || NO_RESULTS.ro;
 
   return (
-    <div ref={containerRef} className="relative z-30">
+    <div ref={containerRef} className={`relative z-40 shrink-0 ${className}`}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-full flex items-center gap-1.5 px-3 py-3 bg-[#FCF9F4] hover:bg-[#F5EFDF] border-r border-[#E8E2D9] rounded-l-2xl transition-colors text-sm font-bold text-[#1A120B] shrink-0 outline-none"
+        className={`h-full flex items-center gap-1.5 px-3 py-3.5 bg-[#FAF7F2] hover:bg-[#F3EDE2] border-r border-[#E8E2D9] rounded-l-xl transition-all text-sm font-bold text-[#1A120B] shrink-0 outline-none select-none cursor-pointer ${buttonClassName}`}
       >
-        <span className="text-base">{selectedCountry.flag}</span>
-        <span>{selectedCountry.dialCode}</span>
+        <span className="text-base leading-none">{selectedCountry.flag}</span>
+        <span className="font-semibold text-xs tracking-tight">{selectedCountry.dialCode}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-[#D4A853] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -81,14 +88,14 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+            initial={{ opacity: 0, y: 6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#E8E2D9] overflow-hidden z-50 flex flex-col max-h-80"
+            className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-[#E8E2D9] overflow-hidden z-[100] flex flex-col max-h-72"
           >
             {/* Search Header */}
-            <div className="p-3 border-b border-[#E8E2D9] bg-[#FCF9F4] sticky top-0 z-10">
+            <div className="p-2.5 border-b border-[#E8E2D9] bg-[#FAF8F5] sticky top-0 z-10">
               <div className="relative flex items-center">
                 <Search className="w-4 h-4 text-[#736A60] absolute left-3 pointer-events-none" />
                 <input
@@ -97,7 +104,7 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
                   placeholder={searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2 text-xs text-[#1A120B] outline-none focus:border-[#D4A853] transition-all"
+                  className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2 text-xs text-[#1A120B] outline-none focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 transition-all placeholder:text-[#8C8075]"
                 />
               </div>
             </div>
@@ -120,12 +127,12 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
                         onSelect(country);
                         setIsOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-colors hover:bg-[#FCF9F4] text-left ${
-                        isSelected ? 'bg-[#FCF9F4] font-bold text-[#1A120B]' : 'text-[#4E4540]'
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-colors hover:bg-[#FAF8F5] text-left cursor-pointer ${
+                        isSelected ? 'bg-[#FAF8F5] font-bold text-[#1A120B]' : 'text-[#4E4540]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate pr-2">
-                        <span className="text-base leading-none">{country.flag}</span>
+                        <span className="text-base leading-none shrink-0">{country.flag}</span>
                         <span className="truncate">{displayName}</span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
