@@ -96,7 +96,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`h-full ${outfitFont.variable} ${playfairFont.variable} ${greatVibesFont.variable}`}>
       <head>
-        <meta name="facebook-domain-verification" content="c0wy1grogfjlxwqyorc6ekk49r1k0n" />
+        <meta name="facebook-domain-verification" content="c0wy1grogfjtxwqyorc6ekk49r1k0n" />
         {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
