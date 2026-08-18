@@ -3,17 +3,16 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const getAuthDomain = () => {
-    if (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) {
-        return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
-    }
     if (typeof window !== "undefined") {
-        const host = window.location.host;
-        if (host.includes("munchotella.md")) {
-            return host;
-        }
         if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
             return "munchotella-d67f1.firebaseapp.com";
         }
+        if (window.location.hostname.includes("munchotella.md") || window.location.hostname.includes("vercel.app")) {
+            return "www.munchotella.md";
+        }
+    }
+    if (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN && !process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN.includes("firebaseapp.com")) {
+        return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
     }
     return "www.munchotella.md";
 };
