@@ -239,28 +239,19 @@ export default function AuthModal() {
     setSuccessMsg("");
     
     let identifier = "";
-    if (forgotMethod === "phone") {
-      if (!phone.trim()) {
-        setErrorMsg("Te rugăm să introduci numărul de telefon.");
-        setLoading(false);
-        return;
-      }
-      identifier = normalizePhoneNumber(phone, selectedCountry);
-    } else {
-      if (!loginEmail.trim()) {
-        setErrorMsg("Te rugăm să introduci adresa de email.");
-        setLoading(false);
-        return;
-      }
-      identifier = loginEmail.trim().toLowerCase();
+    if (!phone.trim()) {
+      setErrorMsg("Te rugăm să introduci numărul de telefon.");
+      setLoading(false);
+      return;
     }
+    identifier = normalizePhoneNumber(phone, selectedCountry);
     
     try {
       const res = await fetch(`${API_URL}/auth/forgot-password`, {
         credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: identifier, method: forgotMethod })
+        body: JSON.stringify({ phone: identifier, method: "email" })
       });
       const data = await res.json();
       
@@ -536,62 +527,21 @@ export default function AuthModal() {
 
                   {isForgotPassword ? (
                     <form onSubmit={handleForgotPassword} className="flex flex-col space-y-4">
-                      {/* Toggle Phone / Email for Reset */}
-                      <div className="flex bg-[#F0EBE1] p-1 rounded-xl gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setForgotMethod("phone")}
-                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            forgotMethod === "phone"
-                              ? "bg-white text-[#1A120B] shadow-sm"
-                              : "text-[#1A120B]/60 hover:text-[#1A120B]"
-                          }`}
-                        >
-                          <Phone size={14} />
-                          <span>Telefon</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setForgotMethod("email")}
-                          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            forgotMethod === "email"
-                              ? "bg-white text-[#1A120B] shadow-sm"
-                              : "text-[#1A120B]/60 hover:text-[#1A120B]"
-                          }`}
-                        >
-                          <Mail size={14} />
-                          <span>Email</span>
-                        </button>
+                      <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
+                        <CountrySelector
+                          selectedCountry={selectedCountry}
+                          onSelect={setSelectedCountry}
+                        />
+                        <input 
+                          type="tel" 
+                          placeholder="60 000 000" 
+                          required
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
+                        />
                       </div>
 
-                      {forgotMethod === "phone" ? (
-                        <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
-                          <CountrySelector
-                            selectedCountry={selectedCountry}
-                            onSelect={setSelectedCountry}
-                          />
-                          <input 
-                            type="tel" 
-                            placeholder="60 000 000" 
-                            required
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
-                          />
-                        </div>
-                      ) : (
-                        <div className="relative group focus-within:text-[#D4A853]">
-                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
-                          <input 
-                            type="email" 
-                            placeholder="Adresa de email" 
-                            required
-                            value={loginEmail}
-                            onChange={(e) => setLoginEmail(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
-                          />
-                        </div>
-                      )}
 
                       <button 
                         type="submit" 
