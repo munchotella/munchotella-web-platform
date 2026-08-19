@@ -585,9 +585,14 @@ function calculateSimilarity(str1: string, str2: string): number {
   const maxLen = Math.max(s1.length, s2.length);
   const lenRatio = minLen / maxLen;
 
-  // Substring matching dacă unul conține pe celălalt
+  // Substring matching doar dacă lungimea este foarte apropiată sau dacă e cuvânt distinct
   if (minLen >= 3 && (s1.includes(s2) || s2.includes(s1))) {
-    return Math.max(0.85, lenRatio);
+    // Excludere fals-pozitiv: 'cola' în 'ciocolata' / 'ciocolată'
+    if ((s1.includes('ciocolat') || s2.includes('ciocolat')) && (s1 === 'cola' || s2 === 'cola' || s1 === 'coca-cola' || s2 === 'coca-cola')) {
+      // nu e cola
+    } else if (lenRatio >= 0.70 || new RegExp(`\\b${s2.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(s1) || new RegExp(`\\b${s1.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(s2)) {
+      return Math.max(0.85, lenRatio);
+    }
   }
 
   const levDist = levenshtein(s1, s2);
