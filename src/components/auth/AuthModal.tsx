@@ -101,10 +101,16 @@ export default function AuthModal() {
 
 
   const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
+    try {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
       window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
         size: "invisible",
       });
+    } catch (e) {
+      console.error("Recaptcha setup error:", e);
     }
   };
 
