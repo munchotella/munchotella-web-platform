@@ -11,7 +11,10 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   FacebookAuthProvider, 
-  OAuthProvider 
+  OAuthProvider,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult
 } from "firebase/auth";
 
 // SVG Icons for Social Providers
@@ -56,6 +59,12 @@ function AppleIcon() {
 
 type OnboardingStep = "AUTH" | "ONBOARDING_NAME" | "ONBOARDING_TERMS";
 
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+  }
+}
+
 export default function AuthModal() {
   const { isAuthModalOpen, setIsAuthModalOpen, login, user, token } = useAuth();
   
@@ -63,6 +72,11 @@ export default function AuthModal() {
   const [isLogin, setIsLogin] = useState(true);
   const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"phone" | "method" | "otp" | "success">("phone");
+  const [resetMethod, setResetMethod] = useState<"email" | "sms">("email");
+  const [otpCode, setOtpCode] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [tempPasswordDisplay, setTempPasswordDisplay] = useState("");
   const [forgotMethod, setForgotMethod] = useState<"phone" | "email">("phone");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState(false);
@@ -84,6 +98,15 @@ export default function AuthModal() {
   if (!isAuthModalOpen) return null;
 
   const API_URL = "https://munchotella-api.onrender.com/api";
+
+
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+      });
+    }
+  };
 
   const checkAndTriggerOnboarding = (userData: any, authToken: string) => {
     const isComplete = userData.isTermsAccepted && userData.name && userData.name.trim().length > 0;
@@ -232,41 +255,97 @@ export default function AuthModal() {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleForgotPhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!phone.trim()) {
+      setErrorMsg("Te rugăm să introduci numărul de telefon.");
+      return;
+    }
+    setForgotStep("method");
+  };
+
+  const handleForgotMethodSubmit = async () => {
     setLoading(true);
     setErrorMsg("");
     setSuccessMsg("");
-    
-    let identifier = "";
-    if (!phone.trim()) {
-      setErrorMsg("Te rugăm să introduci numărul de telefon.");
-      setLoading(false);
+    const identifier = normalizePhoneNumber(phone, selectedCountry);
+
+    if (resetMethod === "email") {
+      try {
+        const res = await fetch(`${API_URL}/auth/forgot-password`, {
+          credentials: "include",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: identifier, method: "email" })
+        });
+        const data = await res.json();
+        
+        if (!data.success) {
+          throw new Error(data.message || "Eroare la recuperarea parolei");
+        }
+        
+        setSuccessMsg(data.message || "Parola temporară a fost trimisă pe email!");
+        setForgotStep("success");
+      } catch (err: any) {
+        setErrorMsg(err.message || "Nu am putut iniția recuperarea parolei.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // SMS flow
+      try {
+        setupRecaptcha();
+        const confirmation = await signInWithPhoneNumber(auth, identifier, window.recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setForgotStep("otp");
+      } catch (error: any) {
+        console.error("SMS Error", error);
+        setErrorMsg(error.message || "Eroare la trimiterea SMS-ului. Verifică numărul și încearcă din nou.");
+        // reset recaptcha
+        if (window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length !== 6 || !confirmationResult) {
+      setErrorMsg("Introdu codul din 6 cifre.");
       return;
     }
-    identifier = normalizePhoneNumber(phone, selectedCountry);
-    
+    setLoading(true);
+    setErrorMsg("");
+
     try {
-      const res = await fetch(`${API_URL}/auth/forgot-password`, {
-        credentials: "include",
+      const userCredential = await confirmationResult.confirm(otpCode);
+      const idToken = await userCredential.user.getIdToken();
+
+      const res = await fetch(`${API_URL}/auth/reset-password-firebase`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: identifier, method: "email" })
+        body: JSON.stringify({ token: idToken })
       });
       const data = await res.json();
-      
+
       if (!data.success) {
-        throw new Error(data.message || "Eroare la recuperarea parolei");
+        throw new Error(data.message || "Eroare la resetarea parolei.");
       }
-      
-      setSuccessMsg(data.message || "Parola temporară a fost trimisă cu succes!");
-      setTimeout(() => {
-        setIsForgotPassword(false);
-        setSuccessMsg("");
-      }, 5000);
-      
+
+      if (data.data && data.data.tempPassword) {
+        setTempPasswordDisplay(data.data.tempPassword);
+        setForgotStep("success");
+      } else {
+        setSuccessMsg("Parola a fost resetată cu succes!");
+        setForgotStep("success");
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || "Nu am putut iniția recuperarea parolei.");
+      console.error(err);
+      setErrorMsg(err.message || "Cod incorect sau expirat.");
     } finally {
       setLoading(false);
     }
@@ -526,51 +605,99 @@ export default function AuthModal() {
                   )}
 
                   {isForgotPassword ? (
-                    <form onSubmit={handleForgotPassword} className="flex flex-col space-y-4">
-                      <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
-                        <CountrySelector
-                          selectedCountry={selectedCountry}
-                          onSelect={setSelectedCountry}
-                        />
-                        <input 
-                          type="tel" 
-                          placeholder="60 000 000" 
-                          required
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
-                        />
-                      </div>
+                    <div className="flex flex-col space-y-4">
+                      <div id="recaptcha-container" className="flex justify-center mt-2"></div>
+                      {forgotStep === "phone" && (
+                        <form onSubmit={handleForgotPhoneSubmit} className="flex flex-col space-y-4">
+                          <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-xl focus-within:border-[#D4A853] focus-within:ring-4 focus-within:ring-[#D4A853]/20 transition-all duration-300">
+                            <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+                            <input 
+                              type="tel" 
+                              placeholder="60 000 000" 
+                              required
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              className="w-full pl-3 pr-4 py-3.5 bg-transparent border-none text-[15px] text-[#1A120B] outline-none placeholder:text-[#1A120B]/40"
+                            />
+                          </div>
+                          <button type="submit" className="w-full relative bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors group cursor-pointer">
+                            <span>Următorul pas</span>
+                            <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                          </button>
+                        </form>
+                      )}
 
+                      {forgotStep === "method" && (
+                        <div className="flex flex-col space-y-4">
+                          <p className="text-center text-[#1A120B] font-medium text-sm">Cum dorești să recuperezi parola?</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <button onClick={() => setResetMethod("sms")} className={`py-3 rounded-xl font-bold text-sm transition-all ${resetMethod === 'sms' ? 'bg-[#1A120B] text-white shadow-md' : 'bg-white border border-[#E8E2D9] text-[#1A120B]/60 hover:border-[#1A120B] hover:text-[#1A120B]'}`}>
+                              Prin SMS
+                            </button>
+                            <button onClick={() => setResetMethod("email")} className={`py-3 rounded-xl font-bold text-sm transition-all ${resetMethod === 'email' ? 'bg-[#1A120B] text-white shadow-md' : 'bg-white border border-[#E8E2D9] text-[#1A120B]/60 hover:border-[#1A120B] hover:text-[#1A120B]'}`}>
+                              Prin Email
+                            </button>
+                          </div>
+                          <button onClick={handleForgotMethodSubmit} disabled={loading} className="w-full mt-2 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer">
+                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>Confirmă</span>}
+                          </button>
+                          <button onClick={() => setForgotStep("phone")} className="text-[13px] text-[#1A120B]/60 hover:text-[#1A120B] transition-colors mt-2">Înapoi la telefon</button>
+                        </div>
+                      )}
 
-                      <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="w-full mt-4 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer"
-                      >
-                        <div className="relative z-10 flex items-center justify-center space-x-2 group-hover:text-[#D4A853] transition-colors">
-                          {loading ? (
-                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-                              <Loader2 size={20} />
-                            </motion.div>
+                      {forgotStep === "otp" && (
+                        <form onSubmit={handleVerifyOtp} className="flex flex-col space-y-4">
+                          <p className="text-center text-[#1A120B] font-medium text-sm">Am trimis un cod de 6 cifre pe telefonul tău.</p>
+                          <div className="relative group focus-within:text-[#D4A853]">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
+                            <input 
+                              type="text" 
+                              placeholder="Cod OTP din 6 cifre" 
+                              required
+                              value={otpCode}
+                              onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0,6))}
+                              className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300 tracking-widest text-center"
+                            />
+                          </div>
+                          <button type="submit" disabled={loading} className="w-full mt-2 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer">
+                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>Verifică Codul</span>}
+                          </button>
+                        </form>
+                      )}
+
+                      {forgotStep === "success" && (
+                        <div className="flex flex-col space-y-4 text-center">
+                          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 text-green-600">
+                            <Check size={32} />
+                          </div>
+                          {tempPasswordDisplay ? (
+                            <>
+                              <h3 className="text-xl font-bold text-[#1A120B]">Recuperare reușită!</h3>
+                              <p className="text-[#1A120B]/70 text-sm">Parola ta temporară este:</p>
+                              <div className="bg-gray-100 p-4 rounded-xl border border-gray-200 mt-2">
+                                <p className="font-mono text-2xl tracking-wider font-bold text-[#1A120B]">{tempPasswordDisplay}</p>
+                              </div>
+                              <p className="text-[#1A120B]/60 text-xs mt-2">Folosește această parolă pentru a te autentifica, apoi schimb-o din contul tău.</p>
+                            </>
                           ) : (
                             <>
-                              <span>Trimite Parola</span>
-                              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                              <h3 className="text-xl font-bold text-[#1A120B]">Verifică-ți Emailul</h3>
+                              <p className="text-[#1A120B]/70 text-sm">{successMsg || "Parola temporară a fost trimisă cu succes!"}</p>
                             </>
                           )}
                         </div>
-                      </button>
+                      )}
+
                       <div className="text-center mt-4">
                         <button 
                           type="button" 
-                          onClick={() => { setIsForgotPassword(false); setErrorMsg(""); setSuccessMsg(""); }}
+                          onClick={() => { setIsForgotPassword(false); setForgotStep("phone"); setErrorMsg(""); setSuccessMsg(""); }}
                           className="text-[13px] text-[#1A120B]/60 hover:text-[#D4A853] font-medium transition-colors cursor-pointer"
                         >
-                          Înapoi la Autentificare
+                          {forgotStep === "success" ? "Mergi la Autentificare" : "Înapoi la Autentificare"}
                         </button>
                       </div>
-                    </form>
+                    </div>
                   ) : (
                     <>
                       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
