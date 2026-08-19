@@ -37,16 +37,20 @@ const nextConfig: any = {
     ignoreBuildErrors: true,
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://munchotella-api.onrender.com/api/:path*',
-      },
-      {
-        source: '/__/:path*',
-        destination: 'https://munchotella-d67f1.firebaseapp.com/__/:path*',
-      },
-    ];
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        {
+          source: '/api/:path*',
+          destination: 'https://munchotella-api.onrender.com/api/:path*',
+        },
+        {
+          source: '/__/:path*',
+          destination: 'https://munchotella-d67f1.firebaseapp.com/__/:path*',
+        },
+      ],
+    };
   },
   async headers() {
     return [
