@@ -515,6 +515,7 @@ export default function AuthModal() {
                         <span>Continuă cu Facebook</span>
                       </button>
 
+                      {/*
                       <button
                         type="button"
                         disabled={socialLoading || loading}
@@ -524,6 +525,7 @@ export default function AuthModal() {
                         <AppleIcon />
                         <span>Continuă cu Apple</span>
                       </button>
+                      */}
 
                       <div className="relative flex items-center justify-center my-4">
                         <div className="border-t border-[#E8E2D9] w-full"></div>
