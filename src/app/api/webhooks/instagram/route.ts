@@ -834,13 +834,28 @@ export async function processMessage(
       return { success: true, status: 'human_assisted_pause_active' };
     }
 
-    if (lowerMsg.includes('operator') || lowerMsg.includes('om real') || lowerMsg.includes('persoana') || lowerMsg.includes('persoană') || lowerMsg.includes('человек') || lowerMsg.includes('оператор') || lowerMsg.includes('human')) {
+    const isOperatorRequested = lowerMsg.includes('operator') || lowerMsg.includes('om real') || lowerMsg.includes('persoana') || lowerMsg.includes('persoană') || lowerMsg.includes('человек') || lowerMsg.includes('оператор') || lowerMsg.includes('human') || lowerMsg.includes('angajat');
+    const isComplaintOrIssue = /(\b(reclamatie|reclamație|nemultumit|nemulțumit|lipseste|lipsește|gresit|greșit|comanda mea|unde e comanda|intarzie|întârzie|problema|problemă|bani|retur|banii inapoi|banii înapoi|curierul|jaloba|жалоба|претензия|где заказ|ошибка|опоздал)\b)/i.test(messageText);
+
+    if (isOperatorRequested || isComplaintOrIssue) {
       session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
       await saveSession(senderId, session);
 
+      // Trimitere alertă instantă în grupul de Telegram al angajaților
+      await notifyStaffViaTelegram({
+        channel,
+        senderId,
+        messageText,
+        reason: isComplaintOrIssue ? 'complaint_or_issue' : 'operator_requested'
+      });
+
       const handoffReply = lang === 'ru'
-        ? "Конечно! 🤝 Я передал диалог нашему сотруднику. Оператор ответит вам здесь в ближайшее время!"
-        : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!";
+        ? (isComplaintOrIssue 
+            ? "Приносим извинения за неудобства! 🤝 Я передал ваш запрос администратору, сотрудник свяжется с вами здесь в самое ближайшее время!"
+            : "Конечно! 🤝 Я передал диалог нашему сотруднику. Оператор ответит вам здесь в ближайшее время!")
+        : (isComplaintOrIssue
+            ? "Ne cerem scuze pentru neplăceri! 🤝 Am trimis imediat o alertă echipei noastre și un coleg verifică situația pentru a vă răspunde aici în câteva momente!"
+            : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!");
 
       await sendDispatchResponse(senderId, channel, phoneNumberId, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
@@ -1476,3 +1491,52 @@ async function sendMetaResponse(senderId: string, text: string, url: string, but
     return { error: String(err) };
   }
 }
+
+async function notifyStaffViaTelegram(options: {
+  channel: 'instagram' | 'messenger' | 'whatsapp';
+  senderId: string;
+  messageText: string;
+  reason: 'operator_requested' | 'complaint_or_issue' | 'uncertain_query' | 'order_placed';
+  additionalInfo?: string;
+}) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "8450338336:AAGxHCnV7B-k9ufC2O3MSgwrlymiTdHMPUc";
+  const chatId = process.env.TELEGRAM_STAFF_CHAT_ID || "-4164368978";
+  
+  if (!token || !chatId) return;
+
+  const channelName = options.channel === 'instagram' 
+    ? '📸 Instagram Direct (@munchotella.md)' 
+    : options.channel === 'whatsapp' 
+    ? '💬 WhatsApp Business' 
+    : '🔵 Facebook Messenger';
+  
+  let title = '🚨 ASISTENȚĂ UMANĂ SOLICITATĂ';
+  if (options.reason === 'complaint_or_issue') title = '⚠️ RECLAMAȚIE / PROBLEMĂ CLIENT';
+  else if (options.reason === 'uncertain_query') title = '❓ ÎNTREBARE SPECIALĂ CLIENT';
+  else if (options.reason === 'order_placed') title = '🎉 COMANDĂ NOUĂ';
+
+  const cleanMsg = options.messageText.substring(0, 300);
+
+  const telegramMsg = `*${title}*\n\n` +
+    `📍 *Canal:* ${channelName}\n` +
+    `👤 *ID Client:* \`${options.senderId}\`\n` +
+    `💬 *Mesaj Client:* "${cleanMsg}"\n` +
+    (options.additionalInfo ? `ℹ️ *Detalii:* ${options.additionalInfo}\n` : '') +
+    `⏰ *Ora:* ${new Date().toLocaleTimeString('ro-RO', { timeZone: 'Europe/Chisinau' })}\n\n` +
+    `👉 *Acțiune:* Robotul AI a intrat în pauză 30 min pentru acest client. Vă rugăm să preluați conversația direct din aplicația ${channelName}! 🧇🍫`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: telegramMsg,
+        parse_mode: 'Markdown'
+      })
+    });
+  } catch (err) {
+    console.error("Eroare trimitere alertă Telegram staff:", err);
+  }
+}
+
