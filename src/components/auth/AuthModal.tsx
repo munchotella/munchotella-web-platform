@@ -301,11 +301,14 @@ export default function AuthModal() {
       // SMS flow
       try {
         setupRecaptcha();
+        if (window.recaptchaVerifier) {
+          await window.recaptchaVerifier.render();
+        }
         const confirmation = await signInWithPhoneNumber(auth, identifier, window.recaptchaVerifier);
         setConfirmationResult(confirmation);
         setForgotStep("otp");
       } catch (error: any) {
-        console.error("SMS Error", error);
+        console.error("SMS Error Details:", error);
         setErrorMsg(error.message || "Eroare la trimiterea SMS-ului. Verifică numărul și încearcă din nou.");
         // reset recaptcha
         if (window.recaptchaVerifier) {
