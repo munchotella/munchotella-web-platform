@@ -1134,36 +1134,35 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
       }
     }
 
-    // 2. Procesare conversațională inteligentă cu Gemini dacă nu este o întrebare FAQ de bază
+    // 2. Procesare conversațională inteligentă cu Gemini (Gemini 3.7-flash principal)
     if (!replyText) {
       const apiKey = process.env.GEMINI_API_KEY || Buffer.from("QVEuQWI4Uk42TER6U1BCOWRacFRfVXppRXNEeXlGb1FxRUZKXzV6VEh6cGNWcHZFcXdzcmc=", "base64").toString("utf-8");
       if (apiKey) {
-        try {
-          const ai = new GoogleGenAI({ apiKey });
-          const response = await ai.models.generateContent({
-            model: 'gemini-3.6-flash',
-            contents: finalPrompt,
-          });
-          replyText = response.text || "";
-        } catch (genAiErr: any) {
-          console.warn("GoogleGenAI SDK fallback to REST/3.5-flash:", genAiErr?.message);
+        const candidateModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
+        for (const modelName of candidateModels) {
           try {
-            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+            const ai = new GoogleGenAI({ apiKey });
+            const response = await ai.models.generateContent({
+              model: modelName,
+              contents: finalPrompt,
             });
-            const restData = await restRes.json();
-            replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          } catch (_) {
+            if (response.text) {
+              replyText = response.text;
+              break;
+            }
+          } catch (genAiErr: any) {
+            console.warn(`SDK warning pe ${modelName}, încercăm REST...`);
             try {
-              const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
+              const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
               });
-              const fallbackData = await fallbackRes.json();
-              replyText = fallbackData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              const restData = await restRes.json();
+              if (restData?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                replyText = restData.candidates[0].content.parts[0].text;
+                break;
+              }
             } catch (_) {}
           }
         }
