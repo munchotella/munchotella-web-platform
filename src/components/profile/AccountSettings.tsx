@@ -29,11 +29,11 @@ export default function AccountSettings() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const API_URL = "https://munchotella-api.onrender.com/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !token) return;
+    if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
       alert(t('imageTooLarge'));
@@ -45,12 +45,13 @@ export default function AccountSettings() {
       const formData = new FormData();
       formData.append("avatar", file);
 
+      const headers: any = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/users/avatar`, {
         credentials: "include",
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: formData
       });
       const data = await res.json();
@@ -71,9 +72,6 @@ export default function AccountSettings() {
 
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return;
-// ... (code omitted for brevity but we use multi_replace for accuracy)
-// Let me cancel this and use multi_replace to be more precise so I don't break the component.
 
     try {
       setSavingProfile(true);
@@ -88,13 +86,13 @@ export default function AccountSettings() {
         payload.dateOfBirth = new Date(form.dateOfBirth).toISOString();
       }
 
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/users/profile`, {
         credentials: "include",
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -114,7 +112,6 @@ export default function AccountSettings() {
 
   const handlePasswordSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return;
 
     if (passwordForm.newPass.length < 8) {
       return alert(t('passwordLength'));
@@ -125,13 +122,13 @@ export default function AccountSettings() {
 
     try {
       setSavingPassword(true);
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/users/change-password`, {
         credentials: "include",
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({
           currentPassword: passwordForm.current,
           newPassword: passwordForm.newPass
@@ -158,10 +155,13 @@ export default function AccountSettings() {
 
     try {
       setDeleting(true);
+      const headers: any = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/users/account`, {
         credentials: "include",
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers
       });
       const data = await res.json();
       

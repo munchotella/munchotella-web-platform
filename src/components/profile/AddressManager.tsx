@@ -23,15 +23,17 @@ export default function AddressManager() {
   const [formLabel, setFormLabel] = useState(t('home'));
   const [saving, setSaving] = useState(false);
 
-  const API_URL = "https://munchotella-api.onrender.com/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
 
   const fetchAddresses = async () => {
-    if (!token) return;
     try {
       setLoading(true);
+      const headers: any = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      
       const res = await fetch(`${API_URL}/auth/me`, {
         credentials: "include",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -46,8 +48,10 @@ export default function AddressManager() {
   };
 
   useEffect(() => {
-    fetchAddresses();
-  }, [token]);
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user]);
 
   const openAddModal = () => {
     setEditingId(null);
@@ -81,13 +85,13 @@ export default function AddressManager() {
       
       const method = editingId ? "PUT" : "POST";
 
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(endpoint, {
         credentials: "include",
         method,
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({
           street: formStreet,
           label: formLabel,
@@ -114,10 +118,13 @@ export default function AddressManager() {
     if (!confirm(t('confirmDelete'))) return;
 
     try {
+      const headers: any = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/users/addresses/${id}`, {
         credentials: "include",
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers
       });
       const data = await res.json();
       if (data.success) {

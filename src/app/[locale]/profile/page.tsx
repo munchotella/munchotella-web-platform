@@ -37,14 +37,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!token) return;
       try {
-        const API_URL = "https://munchotella-api.onrender.com/api";
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+        const headers: any = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        
         const res = await fetch(`${API_URL}/orders/myorders`, {
-        credentials: "include",
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
+          credentials: "include",
+          headers
         });
         const data = await res.json();
         if (data.success) {
@@ -57,12 +57,12 @@ export default function ProfilePage() {
       }
     };
     
-    if (user && token) {
+    if (user) {
       fetchOrders();
     } else if (!isLoading && !user) {
       setLoadingOrders(false);
     }
-  }, [user, token, isLoading]);
+  }, [user, isLoading]);
 
   if (isLoading || !user) {
     return (
@@ -127,18 +127,18 @@ export default function ProfilePage() {
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reviewOrder || !token) return;
+    if (!reviewOrder) return;
 
     try {
       setSubmittingReview(true);
-      const API_URL = "https://munchotella-api.onrender.com/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${API_URL}/orders/${reviewOrder._id}/review`, {
         credentials: "include",
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({
           rating: selectedRating,
           reviewText: reviewComment
