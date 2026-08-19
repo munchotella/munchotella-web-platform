@@ -1126,21 +1126,31 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
         try {
           const ai = new GoogleGenAI({ apiKey });
           const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-3.6-flash',
             contents: finalPrompt,
           });
           replyText = response.text || "";
         } catch (genAiErr: any) {
-          console.warn("GoogleGenAI SDK fallback to REST:", genAiErr?.message);
+          console.warn("GoogleGenAI SDK fallback to REST/3.5-flash:", genAiErr?.message);
           try {
-            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
             });
             const restData = await restRes.json();
             replyText = restData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          } catch (_) {}
+          } catch (_) {
+            try {
+              const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+              });
+              const fallbackData = await fallbackRes.json();
+              replyText = fallbackData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            } catch (_) {}
+          }
         }
       }
     }
