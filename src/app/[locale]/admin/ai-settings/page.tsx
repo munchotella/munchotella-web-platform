@@ -193,7 +193,8 @@ export default function AiSettingsPage() {
     setTelegramTestStatus(null);
     try {
       const res = await fetch("/api/admin/telegram-test", {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       });
       const data = await res.json();
       if (data.success) {
