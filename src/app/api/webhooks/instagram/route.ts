@@ -248,7 +248,7 @@ const MENU_CATALOG = [
     ingredients: "Lapte, înghețată, biscuiți Oreo, frișcă", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["milkshake oreo", "milsheic oreo", "shake oreo", "milsheik oreo", "milcsec oreo", "milsheic orio", "коктейль орео"]
+    aliases: ["milkshake oreo", "milk shake oreo", "milsheic oreo", "shake oreo", "milsheik oreo", "milcsec oreo", "milsheic orio", "коктейль орео", "милкшейк орео", "шейк орео"]
   },
   { 
     id: "drink_milkshake_kinder", 
@@ -259,7 +259,7 @@ const MENU_CATALOG = [
     ingredients: "Lapte, înghețată, Kinder Bueno, frișcă", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["milkshake kinder", "milsheic kinder", "shake kinder", "milsheik kinder", "milcsec kinder", "коктейль киндер"]
+    aliases: ["milkshake kinder", "milk shake kinder", "milsheic kinder", "shake kinder", "milsheik kinder", "milcsec kinder", "коктейль киндер", "милкшейк киндер", "шейк киндer"]
   },
   { 
     id: "drink_milkshake_nutella", 
@@ -270,7 +270,7 @@ const MENU_CATALOG = [
     ingredients: "Lapte, înghețată, Nutella®, frișcă", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["milkshake nutella", "milsheic nutella", "shake nutella", "milsheik nutella", "milcsec nutella", "коктейль нутелла"]
+    aliases: ["milkshake nutella", "milk shake nutella", "milsheic nutella", "shake nutella", "milsheik nutella", "milcsec nutella", "коктейль нутелла", "милкшейк нутелла", "шейк нутелла"]
   },
   { 
     id: "drink_milkshake_strawberry", 
@@ -281,7 +281,7 @@ const MENU_CATALOG = [
     ingredients: "Lapte, înghețată, piure căpșuni proaspete, frișcă", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["milkshake strawberry", "milkshake capsuni", "milsheic capsuni", "shake capsuni", "milsheik capsuni", "клубничный коктейль"]
+    aliases: ["milkshake strawberry", "milk shake strawberry", "milkshake capsuni", "milkshake căpșuni", "milsheic capsuni", "shake capsuni", "milsheik capsuni", "клубничный коктейль", "милкшейк клубника", "клубничный милкшейк"]
   },
   { 
     id: "drink_ice_lemonade", 
@@ -292,7 +292,73 @@ const MENU_CATALOG = [
     ingredients: "Lămâie proaspătă, mentă, gheață, apă minerală", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["ice lemonade", "lemonade", "limonada", "limonada naturala", "garuz", "garose", "garuzh", "limonada rece", "лимонад"]
+    aliases: ["ice lemonade", "lemonade", "limonada", "limonadă", "limonada naturala", "garuz", "garose", "garuzh", "limonada rece", "лимонад", "лимонада", "лемонад"]
+  },
+  { 
+    id: "drink_cola", 
+    name: "Coca-Cola", 
+    price: 20, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Coca-Cola (doză 330ml / sticlă)", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["coca-cola", "coca cola", "coca", "cola", "coke", "cola zero", "coca cola zero", "cola rece", "кока кола", "кола", "кока-кола", "колу", "колы", "pepsi"]
+  },
+  { 
+    id: "drink_fanta", 
+    name: "Fanta", 
+    price: 20, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Fanta Orange (doză 330ml)", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["fanta", "fantă", "fanta orange", "fanta portocale", "fanta rece", "фанта", "фанту", "фанты"]
+  },
+  { 
+    id: "drink_sprite", 
+    name: "Sprite", 
+    price: 20, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Sprite (doză 330ml)", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["sprite", "sprait", "sprajt", "sprite rece", "спрайт", "спрайта"]
+  },
+  { 
+    id: "drink_apa_dorna", 
+    name: "Apă Dorna", 
+    price: 15, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Apă plată / minerală carbogazoasă Dorna 500ml", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["apa dorna", "apă dorna", "dorna", "apa plata", "apă plată", "apa minerala", "apă minerală", "apa", "apă", "o apa", "o apă", "apica", "вода", "минералка", "минеральная вода", "водичка", "дорна"]
+  },
+  { 
+    id: "drink_tea", 
+    name: "Black/Green Tea", 
+    price: 50, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Infuzie de ceai premium (Negru sau Verde)", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["black/green tea", "black green tea", "ceai", "ceai negru", "ceai verde", "ceai cald", "tea", "black tea", "green tea", "ceai aromat", "чай", "черный чай", "зеленый чай", "чая", "чаёк"]
+  },
+  { 
+    id: "drink_coffee", 
+    name: "Cafea / Espresso", 
+    price: 40, 
+    category: "drinks", 
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png", 
+    ingredients: "Cafea proaspăt măcinată (Espresso, Americano, Cappuccino, Latte)", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["cafea", "espresso", "espreso", "cappuccino", "capucino", "latte", "americano", "cafea neagra", "cafea cu lapte", "кофе", "капучино", "латте", "эспрессо", "американо"]
   }
 ];
 
@@ -519,8 +585,8 @@ function calculateSimilarity(str1: string, str2: string): number {
   const maxLen = Math.max(s1.length, s2.length);
   const lenRatio = minLen / maxLen;
 
-  // Substring matching doar dacă lungimea este relevantă (minim 4 caractere) și raportul e rezonabil (minim 60%)
-  if (minLen >= 4 && (s1.includes(s2) || s2.includes(s1)) && lenRatio >= 0.6) {
+  // Substring matching dacă unul conține pe celălalt
+  if (minLen >= 3 && (s1.includes(s2) || s2.includes(s1))) {
     return Math.max(0.85, lenRatio);
   }
 
@@ -529,7 +595,7 @@ function calculateSimilarity(str1: string, str2: string): number {
   const diceScore = diceCoefficient(s1, s2);
   
   if (minLen < 4) {
-    return levScore >= 0.8 ? levScore : 0;
+    return levScore >= 0.5 ? levScore : 0;
   }
 
   return Math.max(levScore, diceScore);
@@ -556,13 +622,13 @@ function matchProductInText(text: string): {
 } {
   const lower = text.toLowerCase().trim();
   
-  // Detectare dacă mesajul este o întrebare generală FAQ (livrare, program, adresă, mese, timp preparare, plată, valută etc.) fără intenție explicită de comandă
+  // Detectare dacă mesajul este o întrebare generală FAQ fără intenție explicită de comandă
   const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить)\b)/i.test(text);
-  const isExplicitOrder = /(\b(vreau|sa comand|să comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție)\b)/i.test(text);
+  const isExplicitOrder = /(\b(vreau|sa comand|să comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție|cola|fanta|sprite|bautura|băutură|ceai|cafea|dorna|limonada)\b)/i.test(text);
 
   // Detectare cantitate
   let quantity = 1;
-  const qtyMatch = lower.match(/\b(\d+)\s*(porți[ie]?|buc[aă]ți?|x)?\b/);
+  const qtyMatch = lower.match(/\b(\d+)\s*(porți[ie]?|buc[aă]ți?|doze?|sticle?|pahare?|x)?\b/);
   if (qtyMatch && parseInt(qtyMatch[1]) > 0 && parseInt(qtyMatch[1]) <= 20) {
     quantity = parseInt(qtyMatch[1]);
   } else if (lower.includes('doua') || lower.includes('două') || lower.includes('два') || lower.includes('две')) {
@@ -582,34 +648,50 @@ function matchProductInText(text: string): {
   }
 
   const cleaned = cleanTextForMatching(text);
-  let bestMatch: typeof MENU_CATALOG[0] | null = null;
-  let bestScore = 0;
+  let bestFoodMatch: typeof MENU_CATALOG[0] | null = null;
+  let bestFoodScore = 0;
+  let bestDrinkMatch: typeof MENU_CATALOG[0] | null = null;
+  let bestDrinkScore = 0;
 
   for (const item of MENU_CATALOG) {
+    const isDrink = item.category === 'drinks';
     const allAliases = [item.name.toLowerCase(), ...(item.aliases || [])];
+    
     for (const alias of allAliases) {
       if (cleaned === alias) {
-        bestScore = 1.0;
-        bestMatch = item;
+        if (isDrink) {
+          bestDrinkScore = 1.0;
+          bestDrinkMatch = item;
+        } else {
+          bestFoodScore = 1.0;
+          bestFoodMatch = item;
+        }
         break;
       }
 
       const fullScore = calculateSimilarity(cleaned, alias);
-      if (fullScore > bestScore) {
-        bestScore = fullScore;
-        bestMatch = item;
+      if (isDrink && fullScore > bestDrinkScore) {
+        bestDrinkScore = fullScore;
+        bestDrinkMatch = item;
+      } else if (!isDrink && fullScore > bestFoodScore) {
+        bestFoodScore = fullScore;
+        bestFoodMatch = item;
       }
 
-      const words = cleaned.split(' ').filter(w => w.length >= 3);
-      if (words.length > 1) {
+      // Verificare pe cuvinte individuale și fraze
+      const words = cleaned.split(' ').filter(w => w.length >= 2);
+      if (words.length > 0) {
         for (let i = 0; i < words.length; i++) {
           for (let j = i + 1; j <= words.length; j++) {
             const phrase = words.slice(i, j).join(' ');
-            if (phrase.length >= 4) {
+            if (phrase.length >= 2) {
               const phraseScore = calculateSimilarity(phrase, alias);
-              if (phraseScore > bestScore) {
-                bestScore = phraseScore;
-                bestMatch = item;
+              if (isDrink && phraseScore > bestDrinkScore) {
+                bestDrinkScore = phraseScore;
+                bestDrinkMatch = item;
+              } else if (!isDrink && phraseScore > bestFoodScore) {
+                bestFoodScore = phraseScore;
+                bestFoodMatch = item;
               }
             }
           }
@@ -619,7 +701,7 @@ function matchProductInText(text: string): {
   }
 
   // Dacă e întrebare generală FAQ și nu e comandă explicită, nu declanșăm potrivire forțată sub 0.85
-  if (isGeneralQuestion && !isExplicitOrder && bestScore < 0.85) {
+  if (isGeneralQuestion && !isExplicitOrder && Math.max(bestFoodScore, bestDrinkScore) < 0.85) {
     return {
       product: null,
       suggestedProduct: null,
@@ -629,10 +711,54 @@ function matchProductInText(text: string): {
     };
   }
 
+  // Regula de toleranță cerută:
+  // Pentru băuturi: acceptare directă de la un scor de 40% (0.40) - adică robotul este sigur chiar și de la 40%, adăugând băutura direct!
+  // Pentru mâncare (deserturi): acceptare directă de la un scor de 70% (0.70).
+  if (bestDrinkScore >= 0.40 && (bestDrinkScore >= bestFoodScore || bestFoodScore < 0.70)) {
+    return {
+      product: bestDrinkMatch,
+      suggestedProduct: null,
+      score: bestDrinkScore,
+      quantity,
+      customization
+    };
+  }
+
+  if (bestFoodScore >= 0.70) {
+    return {
+      product: bestFoodMatch,
+      suggestedProduct: null,
+      score: bestFoodScore,
+      quantity,
+      customization
+    };
+  }
+
+  // Sugestii când scorul este parțial
+  if (bestDrinkScore >= 0.25 && bestDrinkMatch) {
+    return {
+      product: null,
+      suggestedProduct: bestDrinkMatch,
+      score: bestDrinkScore,
+      quantity,
+      customization
+    };
+  }
+
+  if (bestFoodScore >= 0.50 && bestFoodMatch) {
+    return {
+      product: null,
+      suggestedProduct: bestFoodMatch,
+      score: bestFoodScore,
+      quantity,
+      customization
+    };
+  }
+
   return {
-    product: bestScore >= 0.70 ? bestMatch : null,
-    suggestedProduct: bestScore >= 0.50 && bestScore < 0.70 ? bestMatch : null,
-    score: bestScore,
+    product: null,
+    suggestedProduct: null,
+    score: Math.max(bestFoodScore, bestDrinkScore),
     quantity,
     customization
   };
@@ -895,7 +1021,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 - Waffles: Waffle sticks (145 MDL), Delux mini waffle (160 MDL), Nutella Mini waffles (145 MDL), Lotus Mini waffles (200 MDL), Fruits waffle (150 MDL), Nutella waffle (145 MDL), Lotus waffle (200 MDL), Delux waffle (160 MDL), Biscoff waffle (200 MDL).
 - Crepes & Specialități: Delux crepe (165 MDL), Biscoff crepe (205 MDL), Fruits crepe (145 MDL), Oreo crepe (145 MDL), Kinder crepe (145 MDL), Crepe Dubai (265 MDL), Chocolate bites (165 MDL), Royal sushi (155 MDL), Sushi banana (140 MDL).
 - Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
-- Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL).
+- Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL), Black/Green Tea (50 MDL), Coca-Cola (20 MDL), Fanta (20 MDL), Sprite (20 MDL), Apă Dorna (15 MDL), Cafea / Espresso (40 MDL).
 - Program oficial: 16:00 - 00:00 (Miercuri: Închis).
 - Locație: Chișinău, Str. Nicolae Testemițeanu 21/1.
 - Mese / Cafenea / Terasă: Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului.
@@ -1091,7 +1217,7 @@ async function sendWhatsAppResponse(
 ) {
   const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
   const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
-  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1292226057301284";
+  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1241267882405772";
 
   try {
     const ctaPayload = {
@@ -1173,7 +1299,7 @@ async function sendWhatsAppGenericCard(
 ) {
   const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
   const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
-  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1292226057301284";
+  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1241267882405772";
 
   try {
     const ctaPayload = {
