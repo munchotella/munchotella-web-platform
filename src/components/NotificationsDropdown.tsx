@@ -197,7 +197,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
                         <div className="flex-1">
                           <h4 className="font-bold text-[#1A120B] text-sm">{notif.title === 'notifOrderPlacedTitle' ? t('orderPlaced') : notif.title === 'orderUpdates' ? t('orderUpdate') : notif.title}</h4>
                           <p className="text-xs text-[#736A60] mt-1 leading-relaxed">
-                            {notif.body === 'notifOrderConfirmedBody' ? t('notifOrderConfirmedBody') : notif.body === 'notifOrderDeliveringBody' ? t('notifOrderDeliveringBody') : notif.body.split('|')[0] === 'notifOrderPlacedBody' ? t('notifOrderPlacedBody') : notif.body}
+                            {notif.body?.startsWith('notifOrder') ? t(notif.body.split('|')[0] as any) : notif.body}
                           </p>
                           <div className="flex justify-between items-center mt-2">
                             <span className="text-[10px] font-bold text-[#736A60] flex items-center gap-1 uppercase tracking-wide">

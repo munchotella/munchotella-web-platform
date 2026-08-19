@@ -132,15 +132,14 @@
     "sendingOrder": "Se trimite comanda...",
     "completeSteps": "Completează Pașii Pentru Plată",
     "placeOrderBtn": "Plasează Comanda",
-    "missingInfo": "Mai ai de completat informații în pașii anteriori",
-    "courier": "Curier"
+    "missingInfo": "Mai ai de completat informații în pașii anteriori"
   },
   "LiveStore": {
-    "openNow": "Deschis Acum • Preluăm comenzi",
-    "closedWednesday": "Închis Miercuri • Deschidem Joi la 16:00",
-    "openToday": "Deschidem azi la 16:00",
-    "openTomorrow": "Deschidem mâine la 16:00",
-    "closedCurrently": "Închis Momentan •"
+    "openNow": "Deschis Acum",
+    "closedWednesday": "Închis Azi",
+    "closedCurrently": "Închis Acum",
+    "openToday": "Deschide la 16:00",
+    "openTomorrow": "Deschide mâine la 16:00"
   },
   "Header": {
     "home": "Acasă",
@@ -150,72 +149,6 @@
     "myProfile": "Profilul Meu",
     "myAccount": "Contul Meu",
     "logout": "Deconectare"
-  },
-  "Profile": {
-    "hello": "Salut",
-    "welcomeBack": "Bine ai revenit în contul tău Munchotella.",
-    "logout": "Deconectare",
-    "orderHistory": "Istoric Comenzi",
-    "deliveryAddresses": "Adrese Livrare",
-    "accountSettings": "Setări Cont",
-    "contactSchedule": "Contact & Program",
-    "scheduleTitle": "Program",
-    "scheduleMonSun": "Luni – Duminică: 16:00 – 00:00",
-    "scheduleWed": "Miercuri - Închis",
-    "phone": "Telefon",
-    "instagram": "Instagram",
-    "activeOrder": "Comandă în curs",
-    "orderPreparing": "Comanda ta se prepară!",
-    "orderReadyIn": "va fi gata în aproximativ 15 minute.",
-    "trackLive": "Urmărește Live",
-    "recentOrders": "Ultimele comenzi",
-    "noOrders": "Nu ai plasat nicio comandă încă.",
-    "others": "altele",
-    "total": "Total",
-    "reviewSaved": "Îți mulțumim! Recenzia ta a fost salvată.",
-    "reviewError": "Eroare la trimiterea recenziei."
-  },
-  "Global": {
-    "continue": "Continuă",
-    "back": "Înapoi",
-    "cancel": "Renunță",
-    "save": "Salvează",
-    "addBtn": "Adaugă",
-    "currency": "MDL"
-  },
-  "Categories": {
-    "Toate": "Toate",
-    "Băuturi": "Băuturi",
-    "Specialități": "Specialități",
-    "Waffles": "Waffles",
-    "Crepes": "Clătite",
-    "Pancakes": "Pancakes"
-  },
-  "Contact": {
-    "weAreHere": "Suntem Aici",
-    "letsTalk": "Hai să vorbim.",
-    "subtitle": "Vino pentru deserturi premium preparate pe loc sau scrie-ne pentru evenimente și comenzi speciale.",
-    "addressTitle": "Adresa Localului",
-    "openMap": "Deschide Harta",
-    "phoneEmailTitle": "Telefon & Email",
-    "scheduleTitle": "Program",
-    "scheduleTime": "Luni - Duminică: 16:00 - 00:00",
-    "scheduleClosed": "Miercuri: Închis",
-    "formSubtitle": "Fie că vrei o comandă mai mare pentru o petrecere sau doar ai o întrebare, scrie-ne și îți răspundem cât mai repede!",
-    "messageSent": "Mesaj Trimis!",
-    "messageSentDesc": "Echipa Munchotella va reveni în cel mai scurt timp posibil.",
-    "fullName": "Nume Complet",
-    "yourName": "Numele tău",
-    "phoneNumber": "Număr Telefon",
-    "phonePlaceholder": "ex: 079 xxx xxx",
-    "message": "Mesaj",
-    "messagePlaceholder": "Scrie mesajul tău...",
-    "sendMessage": "Trimite Mesajul",
-    "community": "Comunitatea Noastră",
-    "socialMedia": "Munchotella pe Social Media",
-    "follow": "Urmărește",
-    "dessertRestaurant": "Restaurant de deserturi",
-    "tiktokDesc": "Procesul nostru de preparare ✨ Cel mai bun desert din Chișinău! #waffles"
   },
   "Profile": {
     "hello": "Salut",
@@ -253,6 +186,52 @@
     "youGaveStars": "Ai oferit {rating}/5 stele",
     "leaveReview": "Lasă o Recenzie",
     "viewTracking": "Vezi Tracking Live"
+  },
+  "Global": {
+    "continue": "Continuă",
+    "back": "Înapoi",
+    "cancel": "Renunță",
+    "save": "Salvează",
+    "addBtn": "Adaugă",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "Toate",
+    "Băuturi": "Băuturi",
+    "Specialități": "Specialități",
+    "Waffles": "Waffles",
+    "Crepes": "Clătite",
+    "Pancakes": "Pancakes"
+  },
+  "Contact": {
+    "weAreHere": "Suntem aici",
+    "letsTalk": "Hai să discutăm",
+    "subtitle": "Ai o întrebare sau vrei să afli mai multe? Lasă-ne un mesaj și îți răspundem rapid.",
+    "addressTitle": "Adresa noastră",
+    "openMap": "Deschide pe hartă",
+    "phoneEmailTitle": "Telefon & Email",
+    "scheduleTitle": "Program",
+    "scheduleTime": "Zilnic: 16:00 - 00:00",
+    "scheduleClosed": "Miercuri: Închis",
+    "formSubtitle": "Completează datele de mai jos",
+    "fullName": "Numele complet *",
+    "yourName": "Numele tău",
+    "phoneNumber": "Număr de telefon *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Mesajul tău *",
+    "messagePlaceholder": "Scrie-ne cum te putem ajuta...",
+    "submittingReview": "Se trimite...",
+    "sendMessage": "Trimite mesajul",
+    "validateNumber": "Verificare Număr",
+    "smsNote": "Am trimis un cod de 6 cifre prin SMS la",
+    "verifyCode": "Confirmă și Trimite",
+    "messageSent": "Mesaj trimis cu succes!",
+    "messageSentDesc": "Îți mulțumim că ne-ai contactat. Vom reveni cu un răspuns în cel mai scurt timp.",
+    "community": "Comunitate",
+    "socialMedia": "Urmărește-ne",
+    "follow": "Urmărește",
+    "tiktokDesc": "Vezi cele mai noi deserturi și din spatele culiselor.",
+    "dessertRestaurant": "Restaurant de Deserturi"
   },
   "AddressManager": {
     "confirmDelete": "Sigur vrei să ștergi această adresă?",
@@ -365,13 +344,6 @@
     "taxiDelivery": "Livrare prin Taxi",
     "taxiDeliveryDesc": "Se folosește un serviciu extern de taxi. Tariful se calculează automat la finalizarea comenzii conform formulei: 30 MDL pornire + 6.45 MDL / km."
   },
-  "LiveStore": {
-    "openNow": "Deschis Acum",
-    "closedWednesday": "Închis Azi",
-    "closedCurrently": "Închis Acum",
-    "openToday": "Deschide la 16:00",
-    "openTomorrow": "Deschide mâine la 16:00"
-  },
   "Map": {
     "subtitle": "Locația Noastră",
     "title": "Te așteptăm la Boutique",
@@ -438,7 +410,10 @@
     "notifOrderConfirmedBody": "Comanda a fost confirmată și va fi pregătită.",
     "notifOrderDeliveringBody": "Comanda este pe drum spre tine.",
     "notifOrderPlacedBody": "Comanda a fost înregistrată cu succes.",
-    "viewOrder": "Vezi Comanda"
+    "viewOrder": "Vezi Comanda",
+    "notifOrderPreparingBody": "Comanda ta este in curs de preparare.",
+    "notifOrderDeliveredBody": "Comanda ta a fost livrata! Pofta buna.",
+    "notifOrderCancelledBody": "Comanda ta a fost anulata."
   },
   "Redirect": {
     "redirectingReviews": "Se redirecționează la recenzii..."
@@ -458,35 +433,5 @@
     "scheduleTime": "Luni - Duminică: 16:00 - 00:00",
     "scheduleClosed": "Miercuri: Închis",
     "rights": "Toate drepturile rezervate."
-  },
-  "Contact": {
-    "weAreHere": "Suntem aici",
-    "letsTalk": "Hai să discutăm",
-    "subtitle": "Ai o întrebare sau vrei să afli mai multe? Lasă-ne un mesaj și îți răspundem rapid.",
-    "addressTitle": "Adresa noastră",
-    "openMap": "Deschide pe hartă",
-    "phoneEmailTitle": "Telefon & Email",
-    "scheduleTitle": "Program",
-    "scheduleTime": "Zilnic: 16:00 - 00:00",
-    "scheduleClosed": "Miercuri: Închis",
-    "formSubtitle": "Completează datele de mai jos",
-    "fullName": "Numele complet *",
-    "yourName": "Numele tău",
-    "phoneNumber": "Număr de telefon *",
-    "phonePlaceholder": "079 000 000",
-    "message": "Mesajul tău *",
-    "messagePlaceholder": "Scrie-ne cum te putem ajuta...",
-    "submittingReview": "Se trimite...",
-    "sendMessage": "Trimite mesajul",
-    "validateNumber": "Verificare Număr",
-    "smsNote": "Am trimis un cod de 6 cifre prin SMS la",
-    "verifyCode": "Confirmă și Trimite",
-    "messageSent": "Mesaj trimis cu succes!",
-    "messageSentDesc": "Îți mulțumim că ne-ai contactat. Vom reveni cu un răspuns în cel mai scurt timp.",
-    "community": "Comunitate",
-    "socialMedia": "Urmărește-ne",
-    "follow": "Urmărește",
-    "tiktokDesc": "Vezi cele mai noi deserturi și din spatele culiselor.",
-    "dessertRestaurant": "Restaurant de Deserturi"
   }
 }

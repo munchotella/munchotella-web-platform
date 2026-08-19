@@ -132,15 +132,14 @@
     "sendingOrder": "Sending order...",
     "completeSteps": "Complete Payment Steps",
     "placeOrderBtn": "Place Order",
-    "missingInfo": "You still need to complete information in previous steps",
-    "courier": "Courier"
+    "missingInfo": "You still need to complete information in previous steps"
   },
   "LiveStore": {
-    "openNow": "Open Now • Taking orders",
-    "closedWednesday": "Closed Wednesday • Opening Thursday at 16:00",
-    "openToday": "Opening today at 16:00",
-    "openTomorrow": "Opening tomorrow at 16:00",
-    "closedCurrently": "Currently Closed •"
+    "openNow": "Open Now",
+    "closedWednesday": "Closed Today",
+    "closedCurrently": "Closed Now",
+    "openToday": "Opens at 16:00",
+    "openTomorrow": "Opens tomorrow at 16:00"
   },
   "Header": {
     "home": "Home",
@@ -150,71 +149,6 @@
     "myProfile": "My Profile",
     "myAccount": "My Account",
     "logout": "Logout"
-  },
-  "Profile": {
-    "hello": "Hello",
-    "welcomeBack": "Welcome back to your Munchotella account.",
-    "logout": "Logout",
-    "orderHistory": "Order History",
-    "deliveryAddresses": "Delivery Addresses",
-    "accountSettings": "Account Settings",
-    "contactSchedule": "Contact & Schedule",
-    "scheduleTitle": "Schedule",
-    "scheduleMonSun": "Monday – Sunday: 16:00 – 00:00",
-    "scheduleWed": "Wednesday - Closed",
-    "phone": "Phone",
-    "instagram": "Instagram",
-    "activeOrder": "Active order",
-    "orderPreparing": "Your order is being prepared!",
-    "orderReadyIn": "will be ready in about 15 minutes.",
-    "trackLive": "Track Live",
-    "recentOrders": "Recent orders",
-    "noOrders": "You haven't placed any orders yet.",
-    "others": "others",
-    "total": "Total",
-    "reviewSaved": "Thank you! Your review has been saved.",
-    "reviewError": "Error submitting review."
-  },
-  "Global": {
-    "continue": "Continue",
-    "back": "Back",
-    "cancel": "Cancel",
-    "save": "Save",
-    "addBtn": "Add",
-    "currency": "MDL"
-  },
-  "Categories": {
-    "Toate": "All",
-    "Băuturi": "Drinks",
-    "Specialități": "Specialties",
-    "Waffles": "Waffles",
-    "Crepes": "Crepes"
-  },
-  "Contact": {
-    "weAreHere": "We Are Here",
-    "letsTalk": "Let's talk.",
-    "subtitle": "Come for premium desserts made on the spot or write to us for events and special orders.",
-    "addressTitle": "Location Address",
-    "openMap": "Open Map",
-    "phoneEmailTitle": "Phone & Email",
-    "scheduleTitle": "Schedule",
-    "scheduleTime": "Monday - Sunday: 16:00 - 00:00",
-    "scheduleClosed": "Wednesday: Closed",
-    "formSubtitle": "Whether you want a large order for a party or just have a question, write to us and we'll reply as soon as possible!",
-    "messageSent": "Message Sent!",
-    "messageSentDesc": "The Munchotella team will get back to you as soon as possible.",
-    "fullName": "Full Name",
-    "yourName": "Your name",
-    "phoneNumber": "Phone Number",
-    "phonePlaceholder": "e.g. 079 xxx xxx",
-    "message": "Message",
-    "messagePlaceholder": "Write your message...",
-    "sendMessage": "Send Message",
-    "community": "Our Community",
-    "socialMedia": "Munchotella on Social Media",
-    "follow": "Follow",
-    "dessertRestaurant": "Dessert Restaurant",
-    "tiktokDesc": "Our preparation process ✨ The best dessert in Chisinau! #waffles"
   },
   "Profile": {
     "hello": "Hello",
@@ -252,6 +186,51 @@
     "youGaveStars": "You gave {rating}/5 stars",
     "leaveReview": "Leave a Review",
     "viewTracking": "View Live Tracking"
+  },
+  "Global": {
+    "continue": "Continue",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "addBtn": "Add",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "All",
+    "Băuturi": "Drinks",
+    "Specialități": "Specialties",
+    "Waffles": "Waffles",
+    "Crepes": "Crepes"
+  },
+  "Contact": {
+    "weAreHere": "We are here",
+    "letsTalk": "Let's Talk",
+    "subtitle": "Have a question or want to know more? Leave us a message and we'll reply fast.",
+    "addressTitle": "Our Address",
+    "openMap": "Open in Maps",
+    "phoneEmailTitle": "Phone & Email",
+    "scheduleTitle": "Schedule",
+    "scheduleTime": "Daily: 16:00 - 00:00",
+    "scheduleClosed": "Wednesday: Closed",
+    "formSubtitle": "Fill out the details below",
+    "fullName": "Full Name *",
+    "yourName": "Your name",
+    "phoneNumber": "Phone Number *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Your Message *",
+    "messagePlaceholder": "How can we help you?",
+    "submittingReview": "Sending...",
+    "sendMessage": "Send Message",
+    "validateNumber": "Verify Number",
+    "smsNote": "We sent a 6-digit SMS verification code to",
+    "verifyCode": "Confirm & Send",
+    "messageSent": "Message Sent!",
+    "messageSentDesc": "Thank you for reaching out. We will get back to you shortly.",
+    "community": "Community",
+    "socialMedia": "Follow Us",
+    "follow": "Follow",
+    "tiktokDesc": "See the latest desserts and behind the scenes.",
+    "dessertRestaurant": "Dessert Restaurant"
   },
   "AddressManager": {
     "confirmDelete": "Are you sure you want to delete this address?",
@@ -364,13 +343,6 @@
     "taxiDelivery": "Taxi Delivery",
     "taxiDeliveryDesc": "An external taxi service is used. The rate is calculated automatically upon order completion according to the formula: 30 MDL starting + 6.45 MDL / km."
   },
-  "LiveStore": {
-    "openNow": "Open Now",
-    "closedWednesday": "Closed Today",
-    "closedCurrently": "Closed Now",
-    "openToday": "Opens at 16:00",
-    "openTomorrow": "Opens tomorrow at 16:00"
-  },
   "Map": {
     "subtitle": "Our Location",
     "title": "We are waiting for you at the Boutique",
@@ -437,7 +409,10 @@
     "notifOrderConfirmedBody": "The order has been confirmed and will be prepared.",
     "notifOrderDeliveringBody": "The order is on its way to you.",
     "notifOrderPlacedBody": "The order has been successfully registered.",
-    "viewOrder": "View Order"
+    "viewOrder": "View Order",
+    "notifOrderPreparingBody": "Your order is now being prepared.",
+    "notifOrderDeliveredBody": "Your order has been delivered! Enjoy your meal.",
+    "notifOrderCancelledBody": "Your order has been cancelled."
   },
   "Redirect": {
     "redirectingReviews": "Redirecting to reviews..."
@@ -457,35 +432,5 @@
     "scheduleTime": "Monday - Sunday: 16:00 - 00:00",
     "scheduleClosed": "Wednesday: Closed",
     "rights": "All rights reserved."
-  },
-  "Contact": {
-    "weAreHere": "We are here",
-    "letsTalk": "Let's Talk",
-    "subtitle": "Have a question or want to know more? Leave us a message and we'll reply fast.",
-    "addressTitle": "Our Address",
-    "openMap": "Open in Maps",
-    "phoneEmailTitle": "Phone & Email",
-    "scheduleTitle": "Schedule",
-    "scheduleTime": "Daily: 16:00 - 00:00",
-    "scheduleClosed": "Wednesday: Closed",
-    "formSubtitle": "Fill out the details below",
-    "fullName": "Full Name *",
-    "yourName": "Your name",
-    "phoneNumber": "Phone Number *",
-    "phonePlaceholder": "079 000 000",
-    "message": "Your Message *",
-    "messagePlaceholder": "How can we help you?",
-    "submittingReview": "Sending...",
-    "sendMessage": "Send Message",
-    "validateNumber": "Verify Number",
-    "smsNote": "We sent a 6-digit SMS verification code to",
-    "verifyCode": "Confirm & Send",
-    "messageSent": "Message Sent!",
-    "messageSentDesc": "Thank you for reaching out. We will get back to you shortly.",
-    "community": "Community",
-    "socialMedia": "Follow Us",
-    "follow": "Follow",
-    "tiktokDesc": "See the latest desserts and behind the scenes.",
-    "dessertRestaurant": "Dessert Restaurant"
   }
 }

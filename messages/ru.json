@@ -132,15 +132,14 @@
     "sendingOrder": "Отправка заказа...",
     "completeSteps": "Завершите шаги оплаты",
     "placeOrderBtn": "Оформить заказ",
-    "missingInfo": "Вам необходимо заполнить информацию на предыдущих шагах",
-    "courier": "Курьер"
+    "missingInfo": "Вам необходимо заполнить информацию на предыдущих шагах"
   },
   "LiveStore": {
-    "openNow": "Открыто • Принимаем заказы",
-    "closedWednesday": "Закрыто в среду • Откроемся в четверг в 16:00",
-    "openToday": "Откроемся сегодня в 16:00",
-    "openTomorrow": "Откроемся завтра в 16:00",
-    "closedCurrently": "Сейчас закрыто •"
+    "openNow": "Открыто сейчас",
+    "closedWednesday": "Закрыто сегодня",
+    "closedCurrently": "Закрыто",
+    "openToday": "Откроется в 16:00",
+    "openTomorrow": "Откроется завтра в 16:00"
   },
   "Header": {
     "home": "Главная",
@@ -150,71 +149,6 @@
     "myProfile": "Мой Профиль",
     "myAccount": "Мой Аккаунт",
     "logout": "Выйти"
-  },
-  "Profile": {
-    "hello": "Привет",
-    "welcomeBack": "С возвращением в ваш аккаунт Munchotella.",
-    "logout": "Выйти",
-    "orderHistory": "История заказов",
-    "deliveryAddresses": "Адреса доставки",
-    "accountSettings": "Настройки аккаунта",
-    "contactSchedule": "Контакты и график",
-    "scheduleTitle": "График работы",
-    "scheduleMonSun": "Понедельник – Воскресенье: 16:00 – 00:00",
-    "scheduleWed": "Среда - Выходной",
-    "phone": "Телефон",
-    "instagram": "Instagram",
-    "activeOrder": "Активный заказ",
-    "orderPreparing": "Ваш заказ готовится!",
-    "orderReadyIn": "будет готов примерно через 15 минут.",
-    "trackLive": "Следить Live",
-    "recentOrders": "Последние заказы",
-    "noOrders": "Вы еще не размещали заказов.",
-    "others": "другие",
-    "total": "Итого",
-    "reviewSaved": "Спасибо! Ваш отзыв сохранен.",
-    "reviewError": "Ошибка при отправке отзыва."
-  },
-  "Global": {
-    "continue": "Продолжить",
-    "back": "Назад",
-    "cancel": "Отмена",
-    "save": "Сохранить",
-    "addBtn": "Добавить",
-    "currency": "MDL"
-  },
-  "Categories": {
-    "Toate": "Все",
-    "Băuturi": "Напитки",
-    "Specialități": "Спецпредложения",
-    "Waffles": "Вафли",
-    "Crepes": "Блины"
-  },
-  "Contact": {
-    "weAreHere": "Мы здесь",
-    "letsTalk": "Давайте поговорим.",
-    "subtitle": "Приходите за премиальными десертами, приготовленными на месте, или пишите нам для мероприятий и спецзаказов.",
-    "addressTitle": "Адрес заведения",
-    "openMap": "Открыть карту",
-    "phoneEmailTitle": "Телефон и Email",
-    "scheduleTitle": "График работы",
-    "scheduleTime": "Понедельник - Воскресенье: 16:00 - 00:00",
-    "scheduleClosed": "Среда: Закрыто",
-    "formSubtitle": "Хотите сделать большой заказ на праздник или просто задать вопрос? Пишите, и мы ответим как можно скорее!",
-    "messageSent": "Сообщение отправлено!",
-    "messageSentDesc": "Команда Munchotella свяжется с вами в ближайшее время.",
-    "fullName": "Полное имя",
-    "yourName": "Ваше имя",
-    "phoneNumber": "Номер телефона",
-    "phonePlaceholder": "напр: 079 xxx xxx",
-    "message": "Сообщение",
-    "messagePlaceholder": "Напишите ваше сообщение...",
-    "sendMessage": "Отправить сообщение",
-    "community": "Наше сообщество",
-    "socialMedia": "Munchotella в соцсетях",
-    "follow": "Подписаться",
-    "dessertRestaurant": "Ресторан десертов",
-    "tiktokDesc": "Наш процесс приготовления ✨ Лучший десерт в Кишиневе! #waffles"
   },
   "Profile": {
     "hello": "Привет",
@@ -252,6 +186,51 @@
     "youGaveStars": "Вы поставили {rating}/5 звезд",
     "leaveReview": "Оставить отзыв",
     "viewTracking": "Следить за заказом"
+  },
+  "Global": {
+    "continue": "Продолжить",
+    "back": "Назад",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "addBtn": "Добавить",
+    "currency": "MDL"
+  },
+  "Categories": {
+    "Toate": "Все",
+    "Băuturi": "Напитки",
+    "Specialități": "Спецпредложения",
+    "Waffles": "Вафли",
+    "Crepes": "Блины"
+  },
+  "Contact": {
+    "weAreHere": "Мы здесь",
+    "letsTalk": "Давайте поговорим",
+    "subtitle": "У вас есть вопрос? Оставьте сообщение, и мы быстро ответим.",
+    "addressTitle": "Наш адрес",
+    "openMap": "Открыть карту",
+    "phoneEmailTitle": "Телефон и Email",
+    "scheduleTitle": "График",
+    "scheduleTime": "Ежедневно: 16:00 - 00:00",
+    "scheduleClosed": "Среда: Выходной",
+    "formSubtitle": "Заполните данные ниже",
+    "fullName": "Полное имя *",
+    "yourName": "Ваше имя",
+    "phoneNumber": "Номер телефона *",
+    "phonePlaceholder": "079 000 000",
+    "message": "Ваше сообщение *",
+    "messagePlaceholder": "Как мы можем помочь?",
+    "submittingReview": "Отправка...",
+    "sendMessage": "Отправить сообщение",
+    "validateNumber": "Проверка номера",
+    "smsNote": "Мы отправили 6-значный SMS-код на номер",
+    "verifyCode": "Подтвердить и отправить",
+    "messageSent": "Сообщение успешно отправлено!",
+    "messageSentDesc": "Спасибо за сообщение. Мы скоро вам ответим.",
+    "community": "Сообщество",
+    "socialMedia": "Следите за нами",
+    "follow": "Подписаться",
+    "tiktokDesc": "Смотрите наши десерты и закулисье.",
+    "dessertRestaurant": "Десертный ресторан"
   },
   "AddressManager": {
     "confirmDelete": "Вы уверены, что хотите удалить этот адрес?",
@@ -364,13 +343,6 @@
     "taxiDelivery": "Доставка на такси",
     "taxiDeliveryDesc": "Используется внешняя служба такси. Тариф рассчитывается автоматически при оформлении заказа по формуле: 30 леев старт + 6,45 лея / км."
   },
-  "LiveStore": {
-    "openNow": "Открыто сейчас",
-    "closedWednesday": "Закрыто сегодня",
-    "closedCurrently": "Закрыто",
-    "openToday": "Откроется в 16:00",
-    "openTomorrow": "Откроется завтра в 16:00"
-  },
   "Map": {
     "subtitle": "Наше местоположение",
     "title": "Ждем вас в Бутике",
@@ -437,7 +409,10 @@
     "notifOrderConfirmedBody": "Заказ подтвержден и будет приготовлен.",
     "notifOrderDeliveringBody": "Заказ в пути к вам.",
     "notifOrderPlacedBody": "Заказ успешно зарегистрирован.",
-    "viewOrder": "Посмотреть заказ"
+    "viewOrder": "Посмотреть заказ",
+    "notifOrderPreparingBody": "Ваш заказ сейчас готовится.",
+    "notifOrderDeliveredBody": "Ваш заказ доставлен! Приятного аппетита.",
+    "notifOrderCancelledBody": "Ваш заказ был отменен."
   },
   "Redirect": {
     "redirectingReviews": "Перенаправление на отзывы..."
@@ -457,35 +432,5 @@
     "scheduleTime": "Понедельник - Воскресенье: 16:00 - 00:00",
     "scheduleClosed": "Среда: Закрыто",
     "rights": "Все права защищены."
-  },
-  "Contact": {
-    "weAreHere": "Мы здесь",
-    "letsTalk": "Давайте поговорим",
-    "subtitle": "У вас есть вопрос? Оставьте сообщение, и мы быстро ответим.",
-    "addressTitle": "Наш адрес",
-    "openMap": "Открыть карту",
-    "phoneEmailTitle": "Телефон и Email",
-    "scheduleTitle": "График",
-    "scheduleTime": "Ежедневно: 16:00 - 00:00",
-    "scheduleClosed": "Среда: Выходной",
-    "formSubtitle": "Заполните данные ниже",
-    "fullName": "Полное имя *",
-    "yourName": "Ваше имя",
-    "phoneNumber": "Номер телефона *",
-    "phonePlaceholder": "079 000 000",
-    "message": "Ваше сообщение *",
-    "messagePlaceholder": "Как мы можем помочь?",
-    "submittingReview": "Отправка...",
-    "sendMessage": "Отправить сообщение",
-    "validateNumber": "Проверка номера",
-    "smsNote": "Мы отправили 6-значный SMS-код на номер",
-    "verifyCode": "Подтвердить и отправить",
-    "messageSent": "Сообщение успешно отправлено!",
-    "messageSentDesc": "Спасибо за сообщение. Мы скоро вам ответим.",
-    "community": "Сообщество",
-    "socialMedia": "Следите за нами",
-    "follow": "Подписаться",
-    "tiktokDesc": "Смотрите наши десерты и закулисье.",
-    "dessertRestaurant": "Десертный ресторан"
   }
 }
