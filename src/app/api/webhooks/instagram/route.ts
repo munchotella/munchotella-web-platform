@@ -378,6 +378,39 @@ export async function GET(request: Request) {
   }
 }
 
+async function logAIActivity(senderId: string, channel: string, messageText: string, status: string) {
+  if (channel === 'whatsapp') return;
+
+  const actionMap: Record<string, string> = {
+    'human_assisted_pause_active': 'Pauză (Asistență Umană)',
+    'human_handoff_triggered': 'Escalat la Om',
+    'order_cancelled': 'Comandă Anulată / Coș Golit',
+    'order_completed_link_generated': 'Link Finalizare Trimis',
+    'awaiting_product': 'Întrebare Generală / Start',
+    'product_added': 'Comandă Preluată Automat de AI',
+    'product_clarification_sent': 'Clarificare Produs',
+    'awaiting_drinks': 'Așteaptă Băuturi',
+    'gemini_response': 'Răspuns AI Generat'
+  };
+
+  const aiAction = actionMap[status] || 'Interacțiune Procesată';
+  const telegramAlertSent = ['human_handoff_triggered'].includes(status);
+
+  try {
+    const { db: mongoDb } = await connectToDatabase();
+    await mongoDb.collection('ai_activity_logs').insertOne({
+      senderId,
+      channel,
+      messageText,
+      aiAction,
+      telegramAlertSent,
+      timestamp: new Date()
+    });
+  } catch (err) {
+    console.error("Eroare la salvarea log-ului AI:", err);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     let body: any = null;
@@ -494,6 +527,7 @@ export async function POST(request: Request) {
     if (senderId && messageText) {
       console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
       const debugResult = await processMessage(senderId, messageText, channel, phoneNumberId);
+      await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
       return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
     } else {
       return NextResponse.json({ 
@@ -1197,7 +1231,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
     const buttonTitle = lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul";
 
     const sendResult = await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, menuUrl, buttonTitle);
-    return { success: true, sendResult, replyText, menuUrl, buttonTitle };
+    return { success: true, sendResult, replyText, menuUrl, buttonTitle, status: 'gemini_response' };
 
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
