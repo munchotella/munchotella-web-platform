@@ -169,7 +169,7 @@ export default function AuthModal() {
   };
 
   const normalizePhoneNumber = (raw: string, country: Country) => {
-    const cleaned = raw.trim();
+    let cleaned = raw.replace(/\s+/g, '');
     if (cleaned.startsWith('+')) {
       return cleaned;
     }
