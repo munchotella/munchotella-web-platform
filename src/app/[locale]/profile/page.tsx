@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCart, CartItem } from "@/context/CartContext";
@@ -303,28 +304,48 @@ export default function ProfilePage() {
           <div className="lg:col-span-8 space-y-8">
             
             {/* Active Order Banner (If any) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-[#1A120B] p-8 rounded-[32px] text-white flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
-            >
-              <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
-              <div className="relative z-10 flex-1">
-                <div className="flex items-center gap-2 text-[#D4A853] text-sm font-bold uppercase tracking-widest mb-2">
-                  <Clock size={16} />
-                  <span>{t('activeOrder')}</span>
-                </div>
-                <h3 className="text-2xl font-serif text-[#FDF9F1] mb-2">{t('orderPreparing')}</h3>
-                <p className="text-white/70 text-sm">Crepe Dubai {t('orderReadyIn')}</p>
-              </div>
-              <button 
-                onClick={() => router.push('/order-tracking/live-123')}
-                className="relative z-10 px-6 py-3 bg-[#D4A853] text-white rounded-full font-bold hover:bg-[#C29641] transition-colors w-full md:w-auto text-center"
-              >
-                {t('trackLive')}
-              </button>
-            </motion.div>
+            {(() => {
+              const activeOrder = orders.find(o => {
+                const isActiveStatus = ['pending', 'preparing', 'ready', 'on_the_way'].includes(o.status);
+                const orderDate = new Date(o.createdAt).getTime();
+                const now = new Date().getTime();
+                const isRecent = (now - orderDate) < 12 * 60 * 60 * 1000; // within 12 hours
+                return isActiveStatus && isRecent;
+              });
+              if (!activeOrder) return null;
+
+              const activeItemNames = activeOrder.items.slice(0, 2).map((i: any) => i.name || i.menuItem?.name).join(", ");
+
+              return (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-[#1A120B] p-8 rounded-[32px] text-white flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+                  <div className="relative z-10 flex-1">
+                    <div className="flex items-center gap-2 text-[#D4A853] text-sm font-bold uppercase tracking-widest mb-2">
+                      <Clock size={16} />
+                      <span>{t('activeOrder')}</span>
+                    </div>
+                    <h3 className="text-2xl font-serif text-[#FDF9F1] mb-2">
+                      {activeOrder.status === 'pending' ? t('orderReceived') || 'Comanda a fost primită' :
+                       activeOrder.status === 'preparing' ? t('orderPreparing') || 'Comanda se prepară' :
+                       activeOrder.status === 'ready' ? t('orderReady') || 'Comanda este gata' :
+                       t('orderOnTheWay') || 'Comanda este pe drum'}
+                    </h3>
+                    <p className="text-white/70 text-sm">{activeItemNames} {t('orderReadyIn')}</p>
+                  </div>
+                  <button 
+                    onClick={() => router.push(`/order-tracking/${activeOrder._id}`)}
+                    className="relative z-10 px-6 py-3 bg-[#D4A853] text-white rounded-full font-bold hover:bg-[#C29641] transition-colors w-full md:w-auto text-center"
+                  >
+                    {t('trackLive')}
+                  </button>
+                </motion.div>
+              );
+            })()}
 
             {/* Conținut Tab-uri */}
             <AnimatePresence mode="wait">
@@ -529,76 +550,79 @@ export default function ProfilePage() {
       </div>
       
       {/* Modal Evaluare Comandă */}
-      <AnimatePresence>
-        {reviewOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setReviewOrder(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-[32px] p-8 w-full max-w-md relative z-10 shadow-2xl border border-[#E8E2D9]"
-            >
-              <h3 className="text-2xl font-serif text-[#1A120B] mb-2 text-center">Cum a fost comanda ta?</h3>
-              <p className="text-xs text-[#1A120B]/60 text-center mb-6">
-                Comanda #{reviewOrder._id.slice(-6).toUpperCase()}
-              </p>
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {reviewOrder && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ position: 'fixed' }}>
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setReviewOrder(null)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="bg-white rounded-[32px] p-8 w-full max-w-md relative z-10 shadow-2xl border border-[#E8E2D9]"
+              >
+                <h3 className="text-2xl font-serif text-[#1A120B] mb-2 text-center">Cum a fost comanda ta?</h3>
+                <p className="text-xs text-[#1A120B]/60 text-center mb-6">
+                  Comanda #{reviewOrder._id.slice(-6).toUpperCase()}
+                </p>
 
-              <form onSubmit={handleReviewSubmit} className="space-y-6">
-                {/* Stele */}
-                <div className="flex justify-center items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
+                <form onSubmit={handleReviewSubmit} className="space-y-6">
+                  {/* Stele */}
+                  <div className="flex justify-center items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setSelectedRating(star)}
+                        className="p-1 hover:scale-125 transition-transform"
+                      >
+                        <Star 
+                          size={32} 
+                          className={star <= selectedRating ? "text-[#D4A853] fill-[#D4A853]" : "text-[#E8E2D9]"} 
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#1A120B]/70 mb-2">Comentariul tău (opțional)</label>
+                    <textarea
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Spune-ne cum a fost gustul, livrarea etc..."
+                      className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-4 text-sm text-[#1A120B] focus:outline-none focus:border-[#D4A853] min-h-[90px] resize-none"
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
                     <button
-                      key={star}
                       type="button"
-                      onClick={() => setSelectedRating(star)}
-                      className="p-1 hover:scale-125 transition-transform"
+                      onClick={() => setReviewOrder(null)}
+                      className="flex-1 py-3.5 bg-gray-100 text-[#1A120B]/70 rounded-xl font-bold hover:bg-gray-200 transition-colors"
                     >
-                      <Star 
-                        size={32} 
-                        className={star <= selectedRating ? "text-[#D4A853] fill-[#D4A853]" : "text-[#E8E2D9]"} 
-                      />
+                      Anulează
                     </button>
-                  ))}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#1A120B]/70 mb-2">Comentariul tău (opțional)</label>
-                  <textarea
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
-                    placeholder="Spune-ne cum a fost gustul, livrarea etc..."
-                    className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-4 text-sm text-[#1A120B] focus:outline-none focus:border-[#D4A853] min-h-[90px] resize-none"
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setReviewOrder(null)}
-                    className="flex-1 py-3.5 bg-gray-100 text-[#1A120B]/70 rounded-xl font-bold hover:bg-gray-200 transition-colors"
-                  >
-                    Anulează
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submittingReview}
-                    className="flex-1 py-3.5 bg-[#1A120B] text-white rounded-xl font-bold hover:bg-[#D4A853] transition-colors disabled:opacity-50"
-                  >
-                    {submittingReview ? "Se trimite..." : "Trimite Recenzia"}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    <button
+                      type="submit"
+                      disabled={submittingReview}
+                      className="flex-1 py-3.5 bg-[#1A120B] text-white rounded-xl font-bold hover:bg-[#D4A853] transition-colors disabled:opacity-50"
+                    >
+                      {submittingReview ? "Se trimite..." : "Trimite Recenzia"}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       <Footer />
     </main>

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
-import { LayoutDashboard, ShoppingBag, Utensils, Users, Ticket, Bot, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, Users, Ticket, Bot, LogOut, X, Star } from 'lucide-react';
 import { adminFetch } from '@/lib/adminApi';
 
 interface AdminSidebarProps {
@@ -36,6 +36,7 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
     { name: 'Meniu și Oferte', href: '/admin/menu', icon: Utensils },
     { name: 'Oaspeți și Recunoștință', href: '/admin/crm', icon: Users },
     { name: 'Promoții și Cuponuri', href: '/admin/marketing', icon: Ticket },
+    { name: 'Recenzii Clienți', href: '/admin/reviews', icon: Star },
     { name: 'Asistent AI Instagram', href: '/admin/ai-settings', icon: Bot },
   ];
 

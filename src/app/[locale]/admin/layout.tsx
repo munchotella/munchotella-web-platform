@@ -70,6 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname.includes("/crm")) title = "Oaspeți și Recunoștință";
   if (pathname.includes("/marketing")) title = "Promoții și Oferte";
   if (pathname.includes("/menu")) title = "Gestionare Meniu";
+  if (pathname.includes("/reviews")) title = "Recenzii Clienți";
 
   // 1. Loading state — așteptăm răspunsul server-side înainte de a afișa orice
   if (isAuthenticated === null) {
