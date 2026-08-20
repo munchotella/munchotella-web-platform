@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+export const API_URL = "https://munchotella-api.onrender.com/api";
 
 export async function adminFetch(endpoint: string, options: RequestInit = {}) {
   const url = `${API_URL}${endpoint}`;

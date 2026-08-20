@@ -225,7 +225,7 @@ export default function CheckoutPage() {
         promoCode: discountPercent > 0 ? couponCode : undefined
       };
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+      const API_URL = "https://munchotella-api.onrender.com/api";
       
       const res = await fetch(`${API_URL}/orders`, {
         credentials: "include",

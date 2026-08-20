@@ -38,7 +38,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+        const API_URL = "https://munchotella-api.onrender.com/api";
         const headers: any = {};
         
         let currentToken = token;
@@ -137,7 +137,7 @@ export default function ProfilePage() {
 
     try {
       setSubmittingReview(true);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+      const API_URL = "https://munchotella-api.onrender.com/api";
       const headers: any = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
