@@ -40,7 +40,13 @@ export default function ProfilePage() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
         const headers: any = {};
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+        
+        let currentToken = token;
+        if (!currentToken && typeof window !== "undefined") {
+          currentToken = localStorage.getItem("munchotella_token");
+        }
+        
+        if (currentToken) headers["Authorization"] = `Bearer ${currentToken}`;
         
         const res = await fetch(`${API_URL}/orders/myorders`, {
           credentials: "include",
@@ -62,7 +68,7 @@ export default function ProfilePage() {
     } else if (!isLoading && !user) {
       setLoadingOrders(false);
     }
-  }, [user, isLoading]);
+  }, [user, token, isLoading]);
 
   if (isLoading || !user) {
     return (

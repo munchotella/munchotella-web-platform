@@ -29,7 +29,13 @@ export default function AddressManager() {
     try {
       setLoading(true);
       const headers: any = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      
+      let currentToken = token;
+      if (!currentToken && typeof window !== "undefined") {
+        currentToken = localStorage.getItem("munchotella_token");
+      }
+      
+      if (currentToken) headers["Authorization"] = `Bearer ${currentToken}`;
       
       const res = await fetch(`${API_URL}/auth/me`, {
         credentials: "include",
@@ -51,7 +57,7 @@ export default function AddressManager() {
     if (user) {
       fetchAddresses();
     }
-  }, [user]);
+  }, [user, token]);
 
   const openAddModal = () => {
     setEditingId(null);
