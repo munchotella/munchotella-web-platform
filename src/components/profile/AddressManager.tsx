@@ -44,7 +44,7 @@ export default function AddressManager() {
       const data = await res.json();
       if (data.success && data.data) {
         setAddresses(data.data.addresses || []);
-        updateUser({ addresses: data.data.addresses });
+        updateUser(data.data);
       }
     } catch (err) {
       console.error("Error fetching profile:", err);
