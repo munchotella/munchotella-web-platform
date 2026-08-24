@@ -502,13 +502,7 @@ export default function ProfilePage() {
                                     </button>
                                   )}
 
-                                  <button 
-                                    onClick={() => router.push(`/order-tracking/${order._id}`)}
-                                    className="w-full px-6 py-3 bg-white border border-[#E8E2D9] text-[#1A120B] rounded-full font-bold hover:bg-[#1A120B]/5 transition-colors flex items-center justify-center gap-2"
-                                  >
-                                    <span>{t('viewTracking')}</span>
-                                    <ChevronRight size={16} />
-                                  </button>
+
                                 </div>
                               </div>
                             </motion.div>
