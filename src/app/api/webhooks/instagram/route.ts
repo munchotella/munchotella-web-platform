@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -6,7 +7,6 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const PERMANENT_META_PAGE_ACCESS_TOKEN = "EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXSPZCE9TfaJKTHu7fTv542LYbiOFC2ZB16SZAAprVec1Dvx8db6ydyU4shHOb8ZAI6wxLsF9mep5cKYjQivMxLbRp21qoOsdwZBZCe2yc5vZBTwA4noZArn3edbYSs8b9ZA8IDHP4H5l73BuM7xQvhYfXe1TF3Gj8zWVi8kL";
 const INSTAGRAM_ACCOUNT_ID = "17841407196466279";
 const FACEBOOK_PAGE_ID = "2033309050260259";
 
@@ -379,8 +379,6 @@ export async function GET(request: Request) {
 }
 
 async function logAIActivity(senderId: string, channel: string, messageText: string, status: string) {
-  if (channel === 'whatsapp') return;
-
   const actionMap: Record<string, string> = {
     'human_assisted_pause_active': 'Pauză (Asistență Umană)',
     'human_handoff_triggered': 'Escalat la Om',
@@ -413,8 +411,31 @@ async function logAIActivity(senderId: string, channel: string, messageText: str
 
 export async function POST(request: Request) {
   try {
-    let body: any = null;
     const rawText = await request.text();
+
+    // ═══ SECURITATE: Verificare Semnătură Criptografică Meta (X-Hub-Signature-256) ═══
+    const appSecret = process.env.META_APP_SECRET;
+    const signatureHeader = request.headers.get('x-hub-signature-256') || '';
+
+    if (appSecret) {
+      if (!signatureHeader || !signatureHeader.startsWith('sha256=')) {
+        console.warn("⚠️ Webhook Meta respins: Header X-Hub-Signature-256 lipsă sau format invalid.");
+        return new NextResponse("Unauthorized: Missing signature", { status: 401 });
+      }
+
+      const expectedSignature = 'sha256=' + crypto.createHmac('sha256', appSecret).update(rawText, 'utf8').digest('hex');
+      const sigBuffer = Buffer.from(signatureHeader, 'utf8');
+      const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+
+      if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+        console.warn("⚠️ Webhook Meta respins: Semnătură X-Hub-Signature-256 invalidă.");
+        return new NextResponse("Unauthorized: Invalid signature", { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      console.warn("⚠️ META_APP_SECRET nu este configurat în mediul de producție.");
+    }
+
+    let body: any = null;
     try {
       body = JSON.parse(rawText);
       if (typeof body === 'string') {
@@ -424,93 +445,64 @@ export async function POST(request: Request) {
       body = rawText;
     }
 
-    console.log("Webhook primit de la Meta:", JSON.stringify(body, null, 2));
-
     let senderId: string | null = null;
     let messageText: string | null = null;
     let isEcho = false;
-    let channel: 'instagram' | 'messenger' | 'whatsapp' = 'instagram';
-    let phoneNumberId: string = "";
+    let channel: 'instagram' | 'messenger' = 'instagram';
 
     if (body && typeof body === 'object') {
-      // 1. Detectare WhatsApp Business Cloud API
-      if (body.object === 'whatsapp_business_account') {
-        channel = 'whatsapp';
-        if (Array.isArray(body.entry)) {
-          for (const entry of body.entry) {
-            if (Array.isArray(entry.changes)) {
-              for (const change of entry.changes) {
-                if (change.field === 'messages') {
-                  const val = change.value;
-                  phoneNumberId = val?.metadata?.phone_number_id || "";
-                  if (Array.isArray(val?.messages)) {
-                    for (const msg of val.messages) {
-                      const sId = msg?.from;
-                      const text = msg?.text?.body || msg?.interactive?.button_reply?.title || msg?.interactive?.list_reply?.title || msg?.button?.text;
-                      if (sId && text) {
-                        senderId = String(sId);
-                        messageText = text;
-                        break;
-                      }
-                    }
-                  }
-                }
+      // 1. Detectare Facebook Messenger sau Instagram Direct
+      if (body.object === 'page') {
+        channel = 'messenger';
+      } else if (body.object === 'instagram') {
+        channel = 'instagram';
+      } else {
+        // Ignorare alte obiecte Meta nesuportate
+        return NextResponse.json({ status: 'ignored_unsupported_object' }, { status: 200 });
+      }
+
+      if (Array.isArray(body?.entry)) {
+        for (const entry of body.entry) {
+          if (Array.isArray(entry?.messaging)) {
+            for (const item of entry.messaging) {
+              if (item?.message?.is_echo) {
+                isEcho = true;
+                continue;
+              }
+              const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
+              const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
+              
+              if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
+                isEcho = true;
+                continue;
+              }
+
+              if (sId && text) {
+                senderId = String(sId);
+                messageText = text;
+                break;
               }
             }
-          }
-        }
-      } 
-      // 2. Detectare Facebook Messenger sau Instagram Direct
-      else {
-        if (body.object === 'page') {
-          channel = 'messenger';
-        } else {
-          channel = 'instagram';
-        }
-
-        if (Array.isArray(body?.entry)) {
-          for (const entry of body.entry) {
-            if (Array.isArray(entry?.messaging)) {
-              for (const item of entry.messaging) {
-                if (item?.message?.is_echo) {
+          } else if (Array.isArray(entry?.changes)) {
+            for (const change of entry.changes) {
+              const val = change?.value;
+              if (val) {
+                if (val?.message?.is_echo || val?.is_echo) {
                   isEcho = true;
                   continue;
                 }
-                const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
-                const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
+                const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
+                const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
                 
                 if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
                   isEcho = true;
                   continue;
                 }
 
-                if (sId && text) {
+                if (sId && typeof text === 'string') {
                   senderId = String(sId);
                   messageText = text;
                   break;
-                }
-              }
-            } else if (Array.isArray(entry?.changes)) {
-              for (const change of entry.changes) {
-                const val = change?.value;
-                if (val) {
-                  if (val?.message?.is_echo || val?.is_echo) {
-                    isEcho = true;
-                    continue;
-                  }
-                  const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
-                  const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
-                  
-                  if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
-                    isEcho = true;
-                    continue;
-                  }
-
-                  if (sId && typeof text === 'string') {
-                    senderId = String(sId);
-                    messageText = text;
-                    break;
-                  }
                 }
               }
             }
@@ -526,7 +518,7 @@ export async function POST(request: Request) {
 
     if (senderId && messageText) {
       console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
-      const debugResult = await processMessage(senderId, messageText, channel, phoneNumberId);
+      const debugResult = await processMessage(senderId, messageText, channel);
       await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
       return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
     } else {
@@ -859,8 +851,7 @@ async function saveSession(senderId: string, sessionData: any) {
 export async function processMessage(
   senderId: string, 
   messageText: string, 
-  channel: 'instagram' | 'messenger' | 'whatsapp' = 'instagram',
-  phoneNumberId: string = ''
+  channel: 'instagram' | 'messenger' = 'instagram'
 ) {
   try {
     const lang = detectLanguage(messageText);
@@ -1230,7 +1221,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
     const menuUrl = `https://www.munchotella.md/${lang}/menu`;
     const buttonTitle = lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul";
 
-    const sendResult = await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, menuUrl, buttonTitle);
+    const sendResult = await sendDispatchResponse(senderId, channel, replyText, menuUrl, buttonTitle);
     return { success: true, sendResult, replyText, menuUrl, buttonTitle, status: 'gemini_response' };
 
   } catch (err: any) {
@@ -1241,178 +1232,24 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 
 async function sendDispatchResponse(
   senderId: string,
-  channel: 'instagram' | 'messenger' | 'whatsapp',
-  phoneNumberId: string,
+  channel: 'instagram' | 'messenger',
   text: string,
   url: string,
   buttonTitle: string
 ) {
-  if (channel === 'whatsapp') {
-    return await sendWhatsAppResponse(senderId, phoneNumberId, text, url, buttonTitle);
-  } else {
-    return await sendMetaResponse(senderId, text, url, buttonTitle);
-  }
+  return await sendMetaResponse(senderId, text, url, buttonTitle);
 }
 
 async function sendDispatchGenericCard(
   senderId: string,
-  channel: 'instagram' | 'messenger' | 'whatsapp',
-  phoneNumberId: string,
+  channel: 'instagram' | 'messenger',
   product: typeof MENU_CATALOG[0],
   text: string,
   cartUrl: string,
   cartButtonTitle: string,
   menuUrl: string
 ) {
-  if (channel === 'whatsapp') {
-    return await sendWhatsAppGenericCard(senderId, phoneNumberId, product, text, cartUrl, cartButtonTitle, menuUrl);
-  } else {
-    return await sendMetaGenericCard(senderId, product, text, cartUrl, cartButtonTitle, menuUrl);
-  }
-}
-
-async function sendWhatsAppResponse(
-  toPhoneNumber: string,
-  phoneNumberId: string,
-  text: string,
-  url: string,
-  buttonTitle: string
-) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
-  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
-  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1241267882405772";
-
-  try {
-    const ctaPayload = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: toPhoneNumber,
-      type: "interactive",
-      interactive: {
-        type: "cta_url",
-        header: {
-          type: "text",
-          text: "🧇 Munchotella Boutique"
-        },
-        body: {
-          text: cleanText || text
-        },
-        footer: {
-          text: "www.munchotella.md"
-        },
-        action: {
-          name: "cta_url",
-          parameters: {
-            display_text: buttonTitle || "🧇 Vezi Meniul & Coșul",
-            url: url
-          }
-        }
-      }
-    };
-
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${metaAccessToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(ctaPayload)
-    });
-
-    const data = await res.json();
-    if (data?.error) {
-      console.warn("WhatsApp interactive CTA failed, fallback to plain text:", data.error);
-      const textPayload = {
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: toPhoneNumber,
-        type: "text",
-        text: {
-          body: `${cleanText || text}\n\n👉 *Comandă online:* ${url}`,
-          preview_url: true
-        }
-      };
-
-      const fallbackRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${metaAccessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(textPayload)
-      });
-      return await fallbackRes.json();
-    }
-
-    return data;
-  } catch (err) {
-    console.error("Eroare trimitere WhatsApp:", err);
-    return { error: String(err) };
-  }
-}
-
-async function sendWhatsAppGenericCard(
-  toPhoneNumber: string,
-  phoneNumberId: string,
-  product: typeof MENU_CATALOG[0],
-  text: string,
-  cartUrl: string,
-  cartButtonTitle: string,
-  menuUrl: string
-) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
-  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
-  const phoneId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "1241267882405772";
-
-  try {
-    const ctaPayload = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: toPhoneNumber,
-      type: "interactive",
-      interactive: {
-        type: "cta_url",
-        header: {
-          type: "image",
-          image: {
-            link: product.image
-          }
-        },
-        body: {
-          text: `*${product.name}* (${product.price} MDL)\n${product.ingredients ? `_${product.ingredients}_\n\n` : ''}${cleanText || 'Desert proaspăt preparat la Munchotella!'}`
-        },
-        footer: {
-          text: "Munchotella Waffle Boutique"
-        },
-        action: {
-          name: "cta_url",
-          parameters: {
-            display_text: cartButtonTitle || "🛍️ Deschide Coșul",
-            url: cartUrl
-          }
-        }
-      }
-    };
-
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${metaAccessToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(ctaPayload)
-    });
-
-    const data = await res.json();
-    if (data?.error) {
-      console.warn("WhatsApp card CTA warning, fallback to text:", data.error);
-      return await sendWhatsAppResponse(toPhoneNumber, phoneId, `*${product.name}* (${product.price} MDL)\n${cleanText}`, cartUrl, cartButtonTitle);
-    }
-    return data;
-  } catch (err) {
-    console.error("Eroare trimitere WhatsApp generic card:", err);
-    return await sendWhatsAppResponse(toPhoneNumber, phoneId, text, cartUrl, cartButtonTitle);
-  }
+  return await sendMetaGenericCard(senderId, product, text, cartUrl, cartButtonTitle, menuUrl);
 }
 
 async function sendMetaGenericCard(
@@ -1423,7 +1260,11 @@ async function sendMetaGenericCard(
   cartButtonTitle: string,
   menuUrl: string
 ) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
+  if (!metaAccessToken) {
+    console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
+    return { error: "Missing META_PAGE_ACCESS_TOKEN" };
+  }
   const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
 
   try {
@@ -1478,7 +1319,11 @@ async function sendMetaGenericCard(
 }
 
 async function sendMetaResponse(senderId: string, text: string, url: string, buttonTitle: string) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
+  if (!metaAccessToken) {
+    console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
+    return { error: "Missing META_PAGE_ACCESS_TOKEN" };
+  }
   const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
 
   try {
@@ -1531,21 +1376,19 @@ async function sendMetaResponse(senderId: string, text: string, url: string, but
 }
 
 async function notifyStaffViaTelegram(options: {
-  channel: 'instagram' | 'messenger' | 'whatsapp';
+  channel: 'instagram' | 'messenger';
   senderId: string;
   messageText: string;
   reason: 'operator_requested' | 'complaint_or_issue' | 'uncertain_query' | 'order_placed';
   additionalInfo?: string;
 }) {
-  const token = process.env.TELEGRAM_BOT_TOKEN || "8450338336:AAGxHCnV7B-k9ufC2O3MSgwrlymiTdHMPUc";
-  const chatId = process.env.TELEGRAM_STAFF_CHAT_ID || "-4164368978";
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_STAFF_CHAT_ID;
   
   if (!token || !chatId) return;
 
   const channelName = options.channel === 'instagram' 
     ? '📸 Instagram Direct (@munchotella.md)' 
-    : options.channel === 'whatsapp' 
-    ? '💬 WhatsApp Business' 
     : '🔵 Facebook Messenger';
   
   let title = '🚨 ASISTENȚĂ UMANĂ SOLICITATĂ';

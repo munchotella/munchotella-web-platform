@@ -6,6 +6,8 @@ import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 import { useTranslations } from 'next-intl';
 
+import PaymentBadges from "./PaymentBadges";
+
 export default function Footer() {
   const t = useTranslations('Footer');
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -87,10 +89,22 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between">
-          <p className="text-white/50 text-[14px] text-center md:text-left mb-4 md:mb-0">
+        {/* Payment Partners & Security Row */}
+        <div className="pt-8 pb-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <span className="text-white/60 text-[12px] font-semibold tracking-wider uppercase">Metode de Plată Securizate:</span>
+            <PaymentBadges variant="footer" />
+          </div>
+          <div className="flex items-center gap-2 text-white/50 text-[12px]">
+            <span className="material-symbols-outlined text-[16px] text-[#00B497]">lock</span>
+            <span>Securizat 256-bit SSL • Partener maib</span>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between">
+          <p className="text-white/50 text-[13px] text-center md:text-left mb-4 md:mb-0">
             © {new Date().getFullYear()} Munchotella. {t('rights')}<br/>
-            <span className="text-[12px] mt-1 block">IDNO: 1017600046702, "Munchotella" S.R.L.</span>
+            <span className="text-[12px] mt-1 block text-white/40">IDNO: 1017600046702 • "MUNCHOTELLA" S.R.L. • Chișinău, Moldova</span>
           </p>
         </div>
       </div>

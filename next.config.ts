@@ -8,20 +8,19 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 // O CSP strictă este prima linie de apărare împotriva XSS.
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  // script-src: 'unsafe-inline' necesar momentan pentru Next.js inline hydration
-  // Migrare viitoare: nonce-based CSP pentru eliminarea 'unsafe-inline'
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://apis.google.com",
-  // style-src: 'unsafe-inline' necesar pentru CSS-in-JS și styled-components
+  // script-src: 'unsafe-inline' necesar pentru Next.js inline hydration
+  "script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://apis.google.com https://identitytoolkit.googleapis.com",
+  // style-src: 'unsafe-inline' necesar pentru Tailwind/styled components
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   // font-src: Google Fonts
   "font-src 'self' https://fonts.gstatic.com data:",
-  // img-src: Cloudinary pentru imagini produse, Google pentru avatare sociale, Webflow CDN pentru imagini statice
+  // img-src: Cloudinary, Google avatars, Facebook, Maps
   "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://cdn.prod.website-files.com",
   // connect-src: API Munchotella (Render) + Firebase + Sentry
   "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com",
-  // frame-src: Firebase auth popup (Google, Facebook login) and Google Maps iframe
+  // frame-src: Firebase auth popup and Google Maps iframe
   "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md",
-  // media-src: video/audio propriu
+  // media-src: audio/video propriu
   "media-src 'self'",
   // object-src: blochează complet plugin-urile (Flash etc.)
   "object-src 'none'",
@@ -29,6 +28,8 @@ const ContentSecurityPolicy = [
   "base-uri 'self'",
   // form-action: restricționează unde pot fi trimise formularele
   "form-action 'self'",
+  // upgrade-insecure-requests: forțează toate resursele pe HTTPS
+  "upgrade-insecure-requests",
 ].join('; ');
 
 const nextConfig: any = {

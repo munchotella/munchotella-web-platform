@@ -1,12 +1,12 @@
-import { GET as handleGet, POST as handlePost } from '../instagram/route';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-  return handleGet(request);
+export async function GET() {
+  return new NextResponse("WhatsApp webhook is disabled", { status: 404 });
 }
 
-export async function POST(request: Request) {
-  return handlePost(request);
+export async function POST() {
+  return NextResponse.json({ status: "whatsapp_disabled", message: "Canalul WhatsApp este dezactivat." }, { status: 200 });
 }

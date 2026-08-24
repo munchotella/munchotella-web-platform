@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LuxuryButton from "@/components/admin/LuxuryButton";
 import StatusBadge from "@/components/admin/StatusBadge";
 import BentoKpiCard from "@/components/admin/BentoKpiCard";
@@ -34,7 +34,7 @@ import {
 interface EscalationLog {
   id: string;
   time: string;
-  channel: "Instagram" | "WhatsApp" | "Messenger";
+  channel: "Instagram" | "Messenger";
   user: string;
   userMessage: string;
   action: "escalated" | "ai_resolved" | "order_placed" | "complaint";
@@ -45,24 +45,11 @@ interface EscalationLog {
 
 export default function AiSettingsPage() {
   // 1. Settings State
-  const [tone, setTone] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("munchotella_ai_tone") || "elegant";
-    }
-    return "elegant";
-  });
-
-  const [prompt, setPrompt] = useState(() => {
-    if (typeof window !== "undefined") {
-      return (
-        localStorage.getItem("munchotella_ai_prompt") ||
-        "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram, WhatsApp și Messenger. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic 100% pură, kataif crocant și ciocolată belgiană caldă."
-      );
-    }
-    return "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram, WhatsApp și Messenger. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic 100% pură, kataif crocant și ciocolată belgiană caldă.";
-  });
-
-  const [selectedModel, setSelectedModel] = useState("gemini-3.7-flash");
+  const [tone, setTone] = useState("elegant");
+  const [prompt, setPrompt] = useState(
+    "Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram și Messenger. Dacă clientul dorește să comande o clătită Dubai, subliniază că este produsul nostru premium cu pastă de fistic 100% pură, kataif crocant și ciocolată belgiană caldă."
+  );
+  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
   const [temperature, setTemperature] = useState<number>(0.3);
   const [autoOrders, setAutoOrders] = useState<boolean>(true);
   const [autoPauseHandoff, setAutoPauseHandoff] = useState<boolean>(true);
@@ -87,6 +74,32 @@ export default function AiSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [syncingKnowledge, setSyncingKnowledge] = useState(false);
 
+  // Load settings from MongoDB on mount
+  useEffect(() => {
+    const loadAiSettings = async () => {
+      try {
+        const res = await fetch("/api/admin/ai-settings", {
+          credentials: "include",
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          if (data.data.tone) setTone(data.data.tone);
+          if (data.data.systemPrompt) setPrompt(data.data.systemPrompt);
+          if (data.data.model) setSelectedModel(data.data.model);
+          if (typeof data.data.temperature === 'number') setTemperature(data.data.temperature);
+          if (data.data.autoOrders !== undefined) setAutoOrders(Boolean(data.data.autoOrders));
+          if (data.data.autoPauseHandoff !== undefined) setAutoPauseHandoff(Boolean(data.data.autoPauseHandoff));
+          if (data.data.telegramAlertsEnabled !== undefined) setTelegramAlertsEnabled(Boolean(data.data.telegramAlertsEnabled));
+          if (Array.isArray(data.data.keywords) && data.data.keywords.length > 0) setKeywords(data.data.keywords);
+        }
+      } catch (err) {
+        console.error("Eroare la încărcarea setărilor AI din backend:", err);
+      }
+    };
+    loadAiSettings();
+  }, []);
+
   // Telegram Testing State
   const [testingTelegram, setTestingTelegram] = useState(false);
   const [telegramTestStatus, setTelegramTestStatus] = useState<{
@@ -103,9 +116,9 @@ export default function AiSettingsPage() {
   >([
     {
       sender: "ai",
-      text: "Bună ziua! Sunt Munchotella AI (alimentat de Google Gemini 3.7-Flash). Cu ce desert vă pot încânta astăzi? 🧇🍫",
+      text: "Bună ziua! Sunt Munchotella AI (alimentat de Google Gemini). Cu ce desert vă pot încânta astăzi? 🧇🍫",
       time: "Acum",
-      model: "gemini-3.7-flash"
+      model: "gemini-2.0-flash"
     }
   ]);
 
@@ -119,7 +132,7 @@ export default function AiSettingsPage() {
       userMessage: "Vreau să comand 2 Waffles Dubai la Testemițeanu 21.",
       action: "order_placed",
       actionText: "Comandă Preluată Automat de AI",
-      model: "Gemini 3.7 Flash",
+      model: "Gemini 2.0 Flash",
       staffAlerted: true
     },
     {
@@ -130,18 +143,18 @@ export default function AiSettingsPage() {
       userMessage: "Aș vrea să vorbesc cu cineva din staff despre un catering pentru 30 de persoane.",
       action: "escalated",
       actionText: "Escalat la Om (Handoff Operator)",
-      model: "Gemini 3.7 Flash",
+      model: "Gemini 2.0 Flash",
       staffAlerted: true
     },
     {
       id: "log-3",
       time: "22:38",
-      channel: "WhatsApp",
-      user: "+373 69 412***",
+      channel: "Instagram",
+      user: "@daria_foodie",
       userMessage: "Care sunt ingredientele la sosul de ciocolată albă?",
       action: "ai_resolved",
       actionText: "Răspuns AI Meniu Livrat (1.1s)",
-      model: "Gemini 3.7 Flash",
+      model: "Gemini 2.0 Flash",
       staffAlerted: false
     },
     {
@@ -152,7 +165,7 @@ export default function AiSettingsPage() {
       userMessage: "Până la ce oră aveți deschis în această seară la boutique?",
       action: "ai_resolved",
       actionText: "Răspuns AI Program Livrat (0.8s)",
-      model: "Gemini 3.7 Flash",
+      model: "Gemini 2.0 Flash",
       staffAlerted: false
     },
     {
@@ -163,27 +176,40 @@ export default function AiSettingsPage() {
       userMessage: "Comanda mea întârzie cu 20 de minute, vă rog să verificați!",
       action: "complaint",
       actionText: "Reclamație Livrare ➔ Alertă Telegram Staff",
-      model: "Gemini 3.7 Flash",
+      model: "Gemini 2.0 Flash",
       staffAlerted: true
     }
   ]);
 
-  // Handle Save
-  const handleSave = () => {
+  // Handle Save to MongoDB
+  const handleSave = async () => {
     setSaving(true);
     try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("munchotella_ai_tone", tone);
-        localStorage.setItem("munchotella_ai_prompt", prompt);
-        localStorage.setItem("munchotella_ai_model", selectedModel);
+      const res = await fetch("/api/admin/ai-settings", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tone,
+          prompt,
+          model: selectedModel,
+          temperature,
+          autoOrders,
+          autoPauseHandoff,
+          telegramAlertsEnabled,
+          keywords
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ Toate configurările asistentului AI au fost salvate și sincronizate cu succes în baza de date MongoDB!");
+      } else {
+        alert(data.message || "Eroare la salvarea setărilor în baza de date.");
       }
-      setTimeout(() => {
-        setSaving(false);
-        alert("✅ Toate configurările asistentului AI și regulile de escaladare au fost salvate cu succes!");
-      }, 400);
     } catch (e) {
+      alert("Eroare de conexiune la salvarea setărilor.");
+    } finally {
       setSaving(false);
-      alert("Eroare la salvarea setărilor.");
     }
   };
 
@@ -194,6 +220,7 @@ export default function AiSettingsPage() {
     try {
       const res = await fetch("/api/admin/telegram-test", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" }
       });
       const data = await res.json();
@@ -206,7 +233,7 @@ export default function AiSettingsPage() {
       } else {
         setTelegramTestStatus({
           success: false,
-          message: data.error || "Eroare la apelul Telegram API"
+          message: data.message || data.error || "Eroare la apelul Telegram API"
         });
       }
     } catch (err: any) {
@@ -256,6 +283,7 @@ export default function AiSettingsPage() {
     try {
       const res = await fetch("/api/admin/ai-simulator", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userText,
@@ -331,10 +359,7 @@ export default function AiSettingsPage() {
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Instagram (@munchotella.md)
               </span>
               <span className="text-xs text-cacao-dark/60 font-body-md flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> WhatsApp (+373)
-              </span>
-              <span className="text-xs text-cacao-dark/60 font-body-md flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Messenger
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Facebook Messenger
               </span>
             </div>
           </div>
@@ -973,7 +998,7 @@ export default function AiSettingsPage() {
           <div className="flex items-center gap-3">
             <input
               type="text"
-              placeholder="Scrie un mesaj de test ca și cum ai fi un client pe Instagram sau WhatsApp..."
+              placeholder="Scrie un mesaj de test ca și cum ai fi un client pe Instagram sau Messenger..."
               value={simMessage}
               onChange={e => setSimMessage(e.target.value)}
               onKeyDown={e => {
@@ -1032,7 +1057,6 @@ export default function AiSettingsPage() {
                   <td className="py-3.5 px-4">
                     <span className="font-semibold text-cacao-dark">
                       {log.channel === "Instagram" && "📸 Instagram"}
-                      {log.channel === "WhatsApp" && "💬 WhatsApp"}
                       {log.channel === "Messenger" && "🔵 Messenger"}
                     </span>
                   </td>

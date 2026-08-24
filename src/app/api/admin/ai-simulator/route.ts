@@ -1,14 +1,31 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { verifyAdminRequest } from '@/lib/serverAuth';
 
 export async function POST(req: Request) {
   try {
+    // 1. Verificare securizată a sesiunii de admin
+    const adminUser = await verifyAdminRequest(req);
+    if (!adminUser) {
+      return NextResponse.json(
+        { success: false, message: 'Acces refuzat: Sesiune de administrator invalidă sau inexistentă.' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const userMessage = body.message || 'Bună ziua, ce produse recomandați?';
     const customPrompt = body.prompt || 'Ești asistentul Munchotella Waffle Boutique. Trebuie să răspunzi elegant, politicos și cald clienților pe Instagram.';
-    const model = body.model || 'gemini-3.7-flash';
+    const model = body.model || 'gemini-2.0-flash';
 
-    const apiKey = process.env.GEMINI_API_KEY || Buffer.from("QVEuQWI4Uk42TER6U1BCOWRacFRfVXppRXNEeXlGb1FxRUZKXzV6VEh6cGNWcHZFcXdzcmc=", "base64").toString("utf-8");
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { success: false, message: 'Configurare incompletă: GEMINI_API_KEY nu este setată în variabilele de mediu.' },
+        { status: 500 }
+      );
+    }
 
     // Check for escalation triggers
     const lower = userMessage.toLowerCase();
@@ -21,8 +38,8 @@ export async function POST(req: Request) {
 
     if (isEscalation) {
       replyText = "Desigur! Vă fac imediat legătura cu un coleg din echipa Munchotella pentru a vă asista personal. Un moment, vă rog! 🧇🍫";
-    } else if (apiKey) {
-      const candidateModels = [model, 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
+    } else {
+      const candidateModels = [model, 'gemini-2.0-flash', 'gemini-1.5-flash'];
       for (const m of candidateModels) {
         try {
           const ai = new GoogleGenAI({ apiKey });

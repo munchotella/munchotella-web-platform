@@ -9,8 +9,10 @@ import { adminFetch } from "@/lib/adminApi";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { 
   Users, Star, Gift, ChevronRight, Award, AlertCircle, 
-  ShieldCheck, Send, CheckSquare, Square, Tag, BellRing 
+  ShieldCheck, Send, CheckSquare, Square, Tag, BellRing,
+  ShieldAlert, X
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function CrmPage() {
   const [guests, setGuests] = useState<any[]>([]);
@@ -26,6 +28,11 @@ export default function CrmPage() {
   const [notificationBody, setNotificationBody] = useState("");
   const [sendingNotification, setSendingNotification] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Role Change Security Modal State (SEC-MED-05)
+  const [roleModalUser, setRoleModalUser] = useState<any | null>(null);
+  const [roleModalLoading, setRoleModalLoading] = useState(false);
+  const [roleModalError, setRoleModalError] = useState<string | null>(null);
 
   const loadGuests = async () => {
     try {
@@ -64,23 +71,33 @@ export default function CrmPage() {
     loadGuests();
   }, []);
 
-  const handleToggleRole = async (guest: any, e: React.MouseEvent) => {
+  const handleOpenRoleModal = (guest: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    const newRole = guest.role === "admin" ? "customer" : "admin";
-    const roleText = newRole === "admin" ? "Administrator" : "Client Normal";
-    if (!confirm(`Ești sigur că vrei să schimbi rolul utilizatorului ${guest.name || guest.email} în ${roleText}?`)) return;
+    setRoleModalError(null);
+    setRoleModalUser(guest);
+  };
+
+  const handleConfirmRoleChange = async () => {
+    if (!roleModalUser) return;
+    const targetRole = roleModalUser.role === "admin" ? "customer" : "admin";
+    setRoleModalLoading(true);
+    setRoleModalError(null);
 
     try {
-      const res = await adminFetch(`/admin/users/${guest._id}/role`, {
+      const res = await adminFetch(`/admin/users/${roleModalUser._id}/role`, {
         method: "PUT",
-        body: JSON.stringify({ role: newRole }),
+        body: JSON.stringify({ role: targetRole }),
       });
       if (res?.success) {
-        alert(res.message || "Rol actualizat cu succes!");
+        setRoleModalUser(null);
         await loadGuests();
+      } else {
+        setRoleModalError(res?.message || "Nu s-a putut actualiza rolul.");
       }
     } catch (err: any) {
-      alert("Eroare la schimbarea rolului: " + (err.message || "Apel eșuat"));
+      setRoleModalError(err.message || "Eroare la apelul către server.");
+    } finally {
+      setRoleModalLoading(false);
     }
   };
 
@@ -309,7 +326,7 @@ export default function CrmPage() {
 
                     <div className="col-span-2 flex items-center justify-end gap-2">
                       <button
-                        onClick={(e) => handleToggleRole(guest, e)}
+                        onClick={(e) => handleOpenRoleModal(guest, e)}
                         className="px-3 py-1.5 bg-gold-saffron/10 hover:bg-gold-saffron/20 border border-gold-saffron/40 rounded-lg text-gold-saffron font-label-caps text-xs transition-colors cursor-pointer flex items-center gap-1.5"
                         title={guest.role === 'admin' ? 'Revocă Acces Administrator' : 'Acordă Acces Administrator'}
                       >
@@ -405,6 +422,93 @@ export default function CrmPage() {
 
         </form>
       </SlideOver>
+
+      {/* Role Change Confirmation Modal (SEC-MED-05) */}
+      <AnimatePresence>
+        {roleModalUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-vanilla-porcelain border border-warm-border rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+            >
+              <button
+                onClick={() => setRoleModalUser(null)}
+                className="absolute top-6 right-6 text-cacao-dark/40 hover:text-cacao-dark transition-colors cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  roleModalUser.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-600'
+                }`}>
+                  <ShieldAlert size={24} />
+                </div>
+                <div>
+                  <h3 className="font-headline-md text-cacao-dark text-xl">
+                    {roleModalUser.role === 'admin' ? 'Revocare Rol Admin' : 'Acordare Rol Administrator'}
+                  </h3>
+                  <p className="text-xs text-cacao-dark/60 font-body-md">
+                    Acțiune de securitate critică (RBAC)
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-warm-border mb-5 text-sm space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-cacao-dark/60 font-label-caps text-xs">Utilizator:</span>
+                  <span className="font-semibold text-cacao-dark">{roleModalUser.name || 'Anonim'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cacao-dark/60 font-label-caps text-xs">Email / Contact:</span>
+                  <span className="font-mono text-xs text-cacao-dark">{roleModalUser.email || roleModalUser.phone || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cacao-dark/60 font-label-caps text-xs">Rol Curent:</span>
+                  <span className="font-bold text-xs uppercase text-gold-saffron">{roleModalUser.role || 'customer'}</span>
+                </div>
+              </div>
+
+              {roleModalUser.role !== 'admin' ? (
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3.5 text-xs mb-6 leading-relaxed">
+                  ⚠️ <strong>Atenție:</strong> Prin acordarea rolului de Administrator, acest utilizator va avea acces la întreg Panoul de Administrare, Setările AI, Comenzile clienților și Gestiunea Promoțiilor.
+                </div>
+              ) : (
+                <div className="bg-rose-50 border border-rose-200 text-rose-900 rounded-xl p-3.5 text-xs mb-6 leading-relaxed">
+                  ℹ️ Acest utilizator va pierde drepturile de administrare și va deveni un client standard.
+                </div>
+              )}
+
+              {roleModalError && (
+                <div className="bg-red-100 text-red-700 text-xs p-3 rounded-xl mb-4 font-semibold">
+                  {roleModalError}
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <LuxuryButton
+                  variant="secondary"
+                  onClick={() => setRoleModalUser(null)}
+                  disabled={roleModalLoading}
+                  className="flex-1"
+                >
+                  Anulează
+                </LuxuryButton>
+                <LuxuryButton
+                  variant="primary"
+                  onClick={handleConfirmRoleChange}
+                  disabled={roleModalLoading}
+                  className="flex-1"
+                >
+                  {roleModalLoading ? "Se procesează..." : "Confirmă Schimbarea"}
+                </LuxuryButton>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

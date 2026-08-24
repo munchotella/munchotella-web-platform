@@ -1,16 +1,34 @@
 import { NextResponse } from 'next/server';
+import { verifyAdminRequest } from '@/lib/serverAuth';
 
 export async function POST(req: Request) {
   try {
-    const token = process.env.TELEGRAM_BOT_TOKEN || "8450338336:AAGxHCnV7B-k9ufC2O3MSgwrlymiTdHMPUc";
-    const chatId = process.env.TELEGRAM_STAFF_CHAT_ID || "-4164368978";
+    // 1. Verificare securizată a sesiunii de admin
+    const adminUser = await verifyAdminRequest(req);
+    if (!adminUser) {
+      return NextResponse.json(
+        { success: false, message: 'Acces refuzat: Sesiune de administrator invalidă sau inexistentă.' },
+        { status: 401 }
+      );
+    }
+
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_STAFF_CHAT_ID;
+
+    if (!token || !chatId) {
+      return NextResponse.json(
+        { success: false, message: 'Configurare incompletă: TELEGRAM_BOT_TOKEN sau TELEGRAM_STAFF_CHAT_ID nu sunt setate în variabilele de mediu.' },
+        { status: 500 }
+      );
+    }
 
     const now = new Date().toLocaleTimeString('ro-RO', { timeZone: 'Europe/Chisinau' });
 
     const telegramMsg = `🟢 *TEST CONEXIUNE ADMIN DASHBOARD*\n\n` +
       `✅ *Status:* Conexiune 100% Activă și Operațională\n` +
+      `👤 *Admin Inițiator:* ${adminUser.name || adminUser.email || 'Administrator'}\n` +
       `🤖 *Bot:* Munchotella Staff Alert Bot\n` +
-      `🧠 *Model AI:* Google Gemini 3.7-Flash (Cascade Failover Active)\n` +
+      `🧠 *Model AI:* Google Gemini (Cascade Failover Active)\n` +
       `📍 *Origine:* Panou Administrator (Asistent AI Settings)\n` +
       `⏰ *Ora Chișinău:* ${now}\n\n` +
       `🧇🍫 _Toate alertele de comenzi noi și asistență umană sunt perfect sincronizate cu acest grup!_`;

@@ -28,6 +28,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useTranslations } from "next-intl";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
+import PaymentBadges from "@/components/PaymentBadges";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -755,20 +756,42 @@ export default function CheckoutPage() {
                       </div>
                     </button>
                     
-                    {/* Placeholder for future Online Payment Stripe */}
+                    {/* Online Payment — maib Checkout (Card, Apple Pay, Google Pay, MIA) */}
                     <button
                       type="button"
-                      disabled
-                      className="w-full p-5 rounded-2xl border text-left bg-[#FAF7F2] border-[#E8E2D9] opacity-60 cursor-not-allowed flex items-center justify-between"
+                      onClick={() => setPaymentMethod("online")}
+                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col gap-3 ${
+                        paymentMethod === "online"
+                          ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
+                          : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
+                      }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-[#E8E2D9]/50 flex items-center justify-center">
-                          <CreditCard className="w-6 h-6 text-[#736A60]" />
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'online' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
+                            <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#008F79]/15 text-[#008F79]">
+                                maib
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#736A60] mt-0.5">{t('onlineDesc')}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Stripe / Apple Pay / Google Pay</p>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'online' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
+                          {paymentMethod === 'online' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
                         </div>
+                      </div>
+
+                      {/* Payment Badges & MIA Notice */}
+                      <div className="pt-2 border-t border-[#E8E2D9]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <PaymentBadges variant="checkout" />
+                        <span className="text-[11px] font-bold text-[#008F79] bg-[#008F79]/10 px-2.5 py-1 rounded-md">
+                          ✨ MIA: 0% comision
+                        </span>
                       </div>
                     </button>
 
