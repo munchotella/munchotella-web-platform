@@ -445,7 +445,7 @@ export default function ProfilePage() {
                               className="border-t border-[#E8E2D9]/50 px-6 overflow-hidden"
                             >
                               <div className="py-6 flex flex-col md:flex-row gap-6 justify-between items-start">
-                                <div className="space-y-4 w-full md:w-2/3">
+                                <div className="space-y-4 w-full md:w-2/3 md:pr-12">
                                   <p className="text-sm font-bold text-[#1A120B] uppercase tracking-wider">{t('orderDetails')}</p>
                                   <ul className="text-sm text-[#1A120B]/80 space-y-3">
                                     {order.items.map((item: any, idx: number) => (
@@ -464,11 +464,11 @@ export default function ProfilePage() {
                                       </li>
                                     ))}
                                   </ul>
-                                  <div className="pt-2 mt-2 flex justify-between md:max-w-[300px]">
+                                  <div className="pt-2 mt-2 flex justify-between">
                                     <span className="font-bold text-[#1A120B]">{t('delivery')}</span>
                                     <span className="font-bold text-[#1A120B]/70">{order.deliveryFee > 0 ? `${order.deliveryFee} MDL` : t('free')}</span>
                                   </div>
-                                  <div className="pt-2 border-t border-[#E8E2D9]/50 flex justify-between md:max-w-[300px]">
+                                  <div className="pt-2 border-t border-[#E8E2D9]/50 flex justify-between">
                                     <span className="font-bold text-[#1A120B]">{t('totalCost')}</span>
                                     <span className="font-bold text-[#D4A853] text-lg">{order.totalPrice} MDL</span>
                                   </div>
