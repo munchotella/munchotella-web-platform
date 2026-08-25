@@ -68,7 +68,7 @@ export default function MapSection() {
         </div>
         
         <div className="h-[400px] md:h-[500px] w-full rounded-2xl overflow-hidden shadow-2xl border border-[#E8E2D9] relative">
-          <iframe 
+          <iframe title="Harta locatiei Munchotella" 
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2721.2307317529003!2d28.83227137672343!3d46.9964423299121!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40c97fb3bb17dd4f%3A0x5854017f25b025e6!2sMunchotella!5e0!3m2!1sen!2s!4v1785244588653!5m2!1sen!2s" 
             width="100%" 
             height="100%" 

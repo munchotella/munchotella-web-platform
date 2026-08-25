@@ -156,7 +156,7 @@ export default function Navbar() {
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ml-1 ${
+            aria-label="Deschide meniul mobil" className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ml-1 ${
               effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B]" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
