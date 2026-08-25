@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -68,6 +68,7 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: "",
     street: "",
     house: "",
@@ -87,12 +88,15 @@ export default function CheckoutPage() {
       setFormData(prev => ({
         ...prev,
         name: user.name || prev.name,
+        email: user.email || prev.email,
         phone: user.phone || prev.phone,
       }));
     }
   }, [user]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
 
   // Exact Munchotella Backend Delivery Calculation Engine
@@ -172,7 +176,13 @@ export default function CheckoutPage() {
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (items.length === 0 || !deliveryCalc.isDeliverable) return;
+    if (activeStep < 4) return;
+    if (!deliveryCalc.isDeliverable) return;
+    if (!acceptedTerms) {
+      setTermsError(true);
+      return;
+    }
+    setTermsError(false);
 
     setIsSubmitting(true);
 
@@ -198,6 +208,7 @@ export default function CheckoutPage() {
       const orderPayload = {
         customer: {
           name: formData.name,
+          email: formData.email,
           phone: formData.phone,
           address: fullAddress,
           notes: aggregatedNotes,
@@ -474,6 +485,20 @@ export default function CheckoutPage() {
                           />
                         </div>
                       </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Email {paymentMethod === 'online' && <span className="text-red-500">*</span>}</label>
+                        <input
+                          type="email"
+                          required={paymentMethod === 'online'}
+                          placeholder="client@email.com"
+                          className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        />
+                        {paymentMethod === 'online' && (
+                          <p className="text-[10px] text-[#D4A853] mt-1 font-medium">* Obligatoriu pentru trimiterea chitanței digitale (Cerință bancară)</p>
+                        )}
+                      </div>
                     </div>
 
                     {deliveryType === "delivery" && (
@@ -733,29 +758,7 @@ export default function CheckoutPage() {
                       </div>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("pos")}
-                      className={`w-full p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                        paymentMethod === "pos"
-                          ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
-                          : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'pos' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
-                          <CreditCard className={`w-6 h-6 ${paymentMethod === 'pos' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">{t('posTitle')}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('posDesc')}</p>
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'pos' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
-                        {paymentMethod === 'pos' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
-                      </div>
-                    </button>
-                    
+
                     {/* Online Payment — maib Checkout (Card, Apple Pay, Google Pay, MIA) */}
                     <button
                       type="button"
@@ -790,7 +793,7 @@ export default function CheckoutPage() {
                       <div className="pt-2 border-t border-[#E8E2D9]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <PaymentBadges variant="checkout" />
                         <span className="text-[11px] font-bold text-[#008F79] bg-[#008F79]/10 px-2.5 py-1 rounded-md">
-                          ✨ MIA: 0% comision
+                          MIA: 0% comision
                         </span>
                       </div>
                     </button>
@@ -911,6 +914,41 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-end mb-6">
                   <span className="font-bold text-[#1A120B] uppercase tracking-wider text-xs">{t('totalToPay')}</span>
                   <span className="font-serif text-3xl md:text-4xl font-bold text-[#D4A853] leading-none">{grandTotal} MDL</span>
+                </div>
+
+                {/* Terms and Conditions Acceptance Checkbox (MAIB Requirement) */}
+                <div className="mb-5">
+                  <label className="flex items-start gap-3 cursor-pointer select-none group">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => {
+                        setAcceptedTerms(e.target.checked);
+                        if (e.target.checked) setTermsError(false);
+                      }}
+                      className="mt-1 w-4 h-4 rounded border-[#E8E2D9] text-[#D4A853] focus:ring-[#D4A853] cursor-pointer accent-[#D4A853]"
+                    />
+                    <span className="text-[12px] text-[#4A4238] leading-relaxed">
+                      {t.rich('termsCheckbox', {
+                        terms: (chunks) => (
+                          <Link href="/legal#terms" target="_blank" className="font-bold text-[#1A120B] underline hover:text-[#D4A853] transition-colors">
+                            {chunks}
+                          </Link>
+                        ),
+                        privacy: (chunks) => (
+                          <Link href="/legal#privacy" target="_blank" className="font-bold text-[#1A120B] underline hover:text-[#D4A853] transition-colors">
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
+                    </span>
+                  </label>
+                  {termsError && (
+                    <p className="text-[11px] text-red-600 font-semibold mt-1.5 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {t('termsRequired')}
+                    </p>
+                  )}
                 </div>
 
                 <button

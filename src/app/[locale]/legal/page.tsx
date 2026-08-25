@@ -132,6 +132,39 @@ export default function LegalPage() {
             </AnimateIn>
           </section>
 
+          {/* Date Identificare Comerciant (Cerințe maib) */}
+          <section id="merchant" className="scroll-mt-32">
+            <AnimateIn direction="up" delay={0.4}>
+              <div className="bg-white p-8 rounded-3xl border border-[#E8E2D9] shadow-sm space-y-4 text-sm text-[#4A4238]">
+                <h3 className="font-serif text-xl font-bold text-[#1A120B]">Date Identificare Comerciant & Plăți</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#E8E2D9]">
+                  <div>
+                    <p className="text-[#736A60]">Denumire Juridică:</p>
+                    <p className="font-bold text-[#1A120B]">MUNCHOTELLA S.R.L.</p>
+                  </div>
+                  <div>
+                    <p className="text-[#736A60]">IDNO / Cod Fiscal:</p>
+                    <p className="font-bold text-[#1A120B]">1017600046702</p>
+                  </div>
+                  <div>
+                    <p className="text-[#736A60]">Adresă:</p>
+                    <p className="font-bold text-[#1A120B]">Str. Nicolae Testemițeanu 21/1, Chișinău, Moldova</p>
+                  </div>
+                  <div>
+                    <p className="text-[#736A60]">Contact:</p>
+                    <p className="font-bold text-[#1A120B]">079 006 499 • munchotella@gmail.com</p>
+                  </div>
+                </div>
+                <div className="pt-3 border-t border-[#E8E2D9]">
+                  <p className="text-[#736A60] mb-1">Metode de Plată Acceptate:</p>
+                  <p className="font-medium text-[#1A120B]">
+                    Plată online securizată prin <strong>maib</strong> (Card Visa / Mastercard, Apple Pay, Google Pay, MIA Plăți Instant), POS Mobil la livrare sau Numerar la preluare/livrare.
+                  </p>
+                </div>
+              </div>
+            </AnimateIn>
+          </section>
+
         </div>
       </div>
     </main>

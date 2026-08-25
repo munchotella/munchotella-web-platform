@@ -131,10 +131,14 @@
     "free": "Free",
     "outOfRange": "Sorry, the address entered exceeds our maximum delivery radius (10 km).",
     "totalToPay": "Total to Pay",
+    "termsCheckbox": "I agree with the {terms} and {privacy}",
+    "termsLink": "Terms and Conditions",
+    "privacyLink": "Privacy Policy",
+    "termsRequired": "You must accept the Terms and Conditions to place the order.",
     "sendingOrder": "Sending order...",
-    "completeSteps": "Complete Payment Steps",
+    "completeSteps": "Complete Steps for Payment",
     "placeOrderBtn": "Place Order",
-    "missingInfo": "You still need to complete information in previous steps"
+    "missingInfo": "Please complete the required information in previous steps"
   },
   "LiveStore": {
     "openNow": "Open Now",

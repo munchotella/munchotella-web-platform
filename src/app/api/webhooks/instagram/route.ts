@@ -368,7 +368,7 @@ export async function GET(request: Request) {
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
 
-  const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "munchotella_secret_token";
+  const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN;
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
     console.log("WEBHOOK_VERIFIED");
@@ -1166,7 +1166,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 
     // 2. Procesare conversațională inteligentă cu Gemini (Gemini 3.7-flash principal)
     if (!replyText) {
-      const apiKey = process.env.GEMINI_API_KEY || Buffer.from("QVEuQWI4Uk42TER6U1BCOWRacFRfVXppRXNEeXlGb1FxRUZKXzV6VEh6cGNWcHZFcXdzcmc=", "base64").toString("utf-8");
+      const apiKey = process.env.GEMINI_API_KEY;
       if (apiKey) {
         const candidateModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
         for (const modelName of candidateModels) {
