@@ -114,6 +114,15 @@ export default function MapPickerModal({
       } else {
         reverseGeocode(newLat, newLng);
       }
+
+      const timer = setTimeout(() => {
+        if (mapRef.current && window.google?.maps?.event) {
+          window.google.maps.event.trigger(mapRef.current, "resize");
+          mapRef.current.setCenter({ lat: newLat, lng: newLng });
+        }
+      }, 350);
+
+      return () => clearTimeout(timer);
     }
   }, [isOpen, initialLat, initialLng, initialAddress, reverseGeocode]);
 
@@ -248,6 +257,12 @@ export default function MapPickerModal({
                   }}
                   onLoad={(map) => {
                     mapRef.current = map;
+                    setTimeout(() => {
+                      if (window.google?.maps?.event) {
+                        window.google.maps.event.trigger(map, "resize");
+                        map.setCenter(position);
+                      }
+                    }, 200);
                   }}
                   onDragEnd={handleDragEnd}
                   onClick={(e) => {

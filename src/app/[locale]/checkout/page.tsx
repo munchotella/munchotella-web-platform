@@ -80,7 +80,7 @@ export default function CheckoutPage() {
     apartment: "",
     intercom: "",
     notes: "",
-    estimatedKm: 3.5, // Standard estimated distance in Chisinau (~3.5km rutieri)
+    estimatedKm: 0,
     lat: 46.996452,
     lng: 28.834809,
   });
@@ -124,6 +124,8 @@ export default function CheckoutPage() {
 
 
   // Exact Munchotella Backend Delivery Calculation Engine
+  const hasAddress = !!formData.street.trim();
+
   const deliveryCalc = useMemo(() => {
     if (deliveryType === "pickup") {
       return {
@@ -131,7 +133,19 @@ export default function CheckoutPage() {
         isDeliverable: true,
         isPedestrian: false,
         distanceKm: 0,
+        hasAddress: true,
         typeLabel: "Preluare Gratuită din Boutique",
+      };
+    }
+
+    if (!formData.street.trim()) {
+      return {
+        fee: 0,
+        isDeliverable: true,
+        isPedestrian: false,
+        distanceKm: 0,
+        hasAddress: false,
+        typeLabel: "Introduceți adresa de livrare",
       };
     }
 
@@ -143,6 +157,7 @@ export default function CheckoutPage() {
         isDeliverable: false,
         isPedestrian: false,
         distanceKm: roadDistance,
+        hasAddress: true,
         typeLabel: "În Afara Ariei de Livrare (max 10 km)",
       };
     }
@@ -157,6 +172,7 @@ export default function CheckoutPage() {
         isDeliverable: true,
         isPedestrian: true,
         distanceKm: Math.round(roadDistance * 10) / 10,
+        hasAddress: true,
         typeLabel: doorDelivery ? "Livrare Pietonală la Ușă" : "Livrare Pietonală la Scară",
       };
     }
@@ -171,11 +187,12 @@ export default function CheckoutPage() {
       isDeliverable: true,
       isPedestrian: false,
       distanceKm: Math.round(roadDistance * 10) / 10,
-      typeLabel: "Livrare prin Taxi (Letz Taxi)",
+      hasAddress: true,
+      typeLabel: "Livrare prin Taxi",
     };
-  }, [deliveryType, doorDelivery, formData.estimatedKm]);
+  }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm]);
 
-  const deliveryFee = deliveryCalc.fee;
+  const deliveryFee = (deliveryType === 'delivery' && !hasAddress) ? 0 : deliveryCalc.fee;
   const discountAmount = Math.round((totalPrice * discountPercent) / 100);
   const grandTotal = Math.max(0, totalPrice - discountAmount + deliveryFee);
 
@@ -252,12 +269,10 @@ export default function CheckoutPage() {
       const menuItems = items.filter(i => !String(i.cartItemId).startsWith('drink_'));
       const drinkItems = items.filter(i => String(i.cartItemId).startsWith('drink_'));
 
-      // Pregătește adresa completă (adăugând detalii bloc/apartament/interfon)
+      // Pregătește adresa completă (adăugând detalii bloc/scară)
       let fullAddress = formData.street;
       const extras = [];
-      if (formData.house) extras.push(`Bloc ${formData.house}`);
-      if (formData.apartment) extras.push(`Ap. ${formData.apartment}`);
-      if (formData.intercom) extras.push(`Interfon ${formData.intercom}`);
+      if (formData.house) extras.push(`Bloc/Scară: ${formData.house}`);
       if (extras.length > 0) {
         fullAddress += ` (${extras.join(', ')})`;
       }
@@ -669,36 +684,26 @@ export default function CheckoutPage() {
                           />
                         </div>
 
-                        {/* Additional Address Info (Grid) */}
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
+                        {/* Additional Address Info & Order Notes */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="sm:col-span-1">
                             <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('buildingDetails')}</label>
                             <input
                               type="text"
                               placeholder={t('placeholderBuilding')}
-                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
+                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                               value={formData.house}
                               onChange={(e) => setFormData({ ...formData, house: e.target.value })}
                             />
                           </div>
-                          <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('apartment')}</label>
+                          <div className="sm:col-span-2">
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
                             <input
                               type="text"
-                              placeholder={t('placeholderApartment')}
-                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
-                              value={formData.apartment}
-                              onChange={(e) => setFormData({ ...formData, apartment: e.target.value })}
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('intercom')}</label>
-                            <input
-                              type="text"
-                              placeholder={t('placeholderIntercom')}
-                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853]"
-                              value={formData.intercom}
-                              onChange={(e) => setFormData({ ...formData, intercom: e.target.value })}
+                              placeholder={t('placeholderNotes')}
+                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                              value={formData.notes}
+                              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             />
                           </div>
                         </div>
@@ -992,13 +997,30 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between text-[#736A60] font-medium items-end">
                   <div className="flex flex-col">
-                    <span>{t('delivery')} {deliveryType === 'delivery' ? (doorDelivery ? t('door') : t('entrance')) : t('pickupMethod')}</span>
-                    {deliveryType === 'delivery' && deliveryCalc.distanceKm > 0 && (
-                      <span className="text-[10px] mt-0.5">~{deliveryCalc.distanceKm} km (Taxi/Pietonal)</span>
+                    <span>
+                      {t('delivery')}{' '}
+                      {deliveryType === 'delivery'
+                        ? !hasAddress
+                          ? ''
+                          : doorDelivery
+                          ? t('door')
+                          : t('entrance')
+                        : t('pickupMethod')}
+                    </span>
+                    {deliveryType === 'delivery' && (
+                      <span className="text-[10px] mt-0.5 text-[#736A60]">
+                        {!hasAddress ? (
+                          <span className="text-[#D4A853] font-medium">{t('calculatedAtStep2')}</span>
+                        ) : (
+                          `~${deliveryCalc.distanceKm} km (${deliveryCalc.isPedestrian ? t('pedestrianDelivery') : t('taxiDelivery')})`
+                        )}
+                      </span>
                     )}
                   </div>
                   <span className="text-[#1A120B]">
-                    {deliveryFee === 0 ? (
+                    {deliveryType === 'delivery' && !hasAddress ? (
+                      <span className="text-[#736A60] text-xs font-normal italic">{t('calculatedAtStep2')}</span>
+                    ) : deliveryFee === 0 ? (
                       <span className="text-[#D4A853] font-bold">{t('free')}</span>
                     ) : (
                       `${deliveryFee} MDL`
