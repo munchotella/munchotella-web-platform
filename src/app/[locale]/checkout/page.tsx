@@ -17,8 +17,13 @@ import {
   AlertCircle,
   User,
   FileText,
-  ChevronDown
+  ChevronDown,
+  Smartphone,
+  X,
+  Loader2
 } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
@@ -98,6 +103,25 @@ export default function CheckoutPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
 
+  // OTP states for guest cash orders
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [otpError, setOtpError] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  React.useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (resendCooldown > 0) {
+      timer = setTimeout(() => setResendCooldown(prev => prev - 1), 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [resendCooldown]);
+
 
   // Exact Munchotella Backend Delivery Calculation Engine
   const deliveryCalc = useMemo(() => {
@@ -174,16 +198,54 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeStep < 4) return;
-    if (!deliveryCalc.isDeliverable) return;
-    if (!acceptedTerms) {
-      setTermsError(true);
-      return;
+  const setupRecaptcha = () => {
+    try {
+      if ((window as any).recaptchaVerifierCheckout) {
+        (window as any).recaptchaVerifierCheckout.clear();
+        (window as any).recaptchaVerifierCheckout = null;
+      }
+      (window as any).recaptchaVerifierCheckout = new RecaptchaVerifier(auth, "recaptcha-container-checkout", {
+        size: "invisible",
+      });
+    } catch (e) {
+      console.error("Recaptcha setup error:", e);
     }
-    setTermsError(false);
+  };
 
+  const triggerOtpSms = async () => {
+    const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
+    if (!rawPhone || rawPhone.length < 6) {
+      alert(t('otpPhoneMissing'));
+      return false;
+    }
+
+    setIsSendingOtp(true);
+    setOtpError("");
+    
+    try {
+      if (typeof window !== "undefined" && auth) {
+        setupRecaptcha();
+        const appVerifier = (window as any).recaptchaVerifierCheckout;
+        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
+        const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
+        setConfirmationResult(confirmation);
+        setOtpCode("");
+        setIsOtpModalOpen(true);
+        setResendCooldown(60);
+        return true;
+      } else {
+        throw new Error("Firebase Auth not initialized");
+      }
+    } catch (err: any) {
+      console.error("SMS Trigger Error:", err);
+      setOtpError(err.message || "Eroare la trimiterea SMS-ului. Te rugăm să verifici numărul și să încerci din nou.");
+      return false;
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const executePlaceOrder = async () => {
     setIsSubmitting(true);
 
     try {
@@ -258,7 +320,7 @@ export default function CheckoutPage() {
       if (user) {
          try {
            const profileRes = await fetch(`${API_URL}/auth/me`, {
-        credentials: "include",
+             credentials: "include",
              headers: { "Authorization": `Bearer ${token}` }
            });
            const profileData = await profileRes.json();
@@ -276,6 +338,45 @@ export default function CheckoutPage() {
       alert(err.message || "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (activeStep < 4) return;
+    if (!deliveryCalc.isDeliverable) return;
+    if (!acceptedTerms) {
+      setTermsError(true);
+      return;
+    }
+    setTermsError(false);
+
+    // Cerință: La comanda CASH a unui client GUEST (nelogat), validăm numărul prin SMS OTP
+    const isGuestCashOrder = !user && paymentMethod === "cash";
+    if (isGuestCashOrder) {
+      const sent = await triggerOtpSms();
+      if (!sent) return;
+      return;
+    }
+
+    await executePlaceOrder();
+  };
+
+  const handleVerifyOtpAndPlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmationResult || !otpCode || otpCode.length < 6) return;
+    setIsVerifyingOtp(true);
+    setOtpError("");
+
+    try {
+      await confirmationResult.confirm(otpCode);
+      setIsOtpModalOpen(false);
+      await executePlaceOrder();
+    } catch (error: any) {
+      console.error("OTP verification error:", error);
+      setOtpError(t("otpInvalid"));
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -995,6 +1096,110 @@ export default function CheckoutPage() {
           setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
         }}
       />
+
+      {/* OTP Verification Modal for Guest Cash Orders */}
+      <AnimatePresence>
+        {isOtpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            {/* Modal Dialog */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#FCF9F4] rounded-[28px] border border-[#E8E2D9] p-7 md:p-9 shadow-2xl overflow-hidden z-10"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
+                className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Icon & Title */}
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center mb-4 text-[#D4A853]">
+                  <Smartphone className="w-8 h-8" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold text-[#1A120B]">
+                  {t('otpTitle')}
+                </h3>
+                <p className="text-xs text-[#736A60] mt-2 leading-relaxed max-w-xs">
+                  {t('otpSubtitle')}{" "}
+                  <span className="font-bold text-[#1A120B]">
+                    {selectedCountry.dialCode} {formData.phone}
+                  </span>
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {otpError && (
+                <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200/80 text-red-600 text-xs text-center flex items-center justify-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{otpError}</span>
+                </div>
+              )}
+
+              {/* OTP Form */}
+              <form onSubmit={handleVerifyOtpAndPlaceOrder} className="space-y-5">
+                <div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    autoFocus
+                    maxLength={6}
+                    placeholder={t('otpPlaceholder') || "000000"}
+                    value={otpCode}
+                    onChange={(e) => {
+                      setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                      if (otpError) setOtpError("");
+                    }}
+                    className="w-full bg-white border-2 border-[#E8E2D9] focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 rounded-2xl py-4 text-center text-2xl font-mono font-bold tracking-[0.5em] text-[#1A120B] outline-none transition-all placeholder:tracking-widest placeholder:text-[#C5BCB1]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingOtp || otpCode.length < 6}
+                  className="w-full py-4 rounded-full bg-[#1A120B] text-white font-bold text-sm hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {isVerifyingOtp ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{t('otpVerifying')}</span>
+                    </>
+                  ) : (
+                    <span>{t('otpVerifyBtn')}</span>
+                  )}
+                </button>
+
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    disabled={resendCooldown > 0 || isSendingOtp}
+                    onClick={triggerOtpSms}
+                    className="text-xs text-[#736A60] hover:text-[#D4A853] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
+                  >
+                    {isSendingOtp ? t('otpSending') : resendCooldown > 0 ? t('otpResendIn', { seconds: resendCooldown }) : t('otpResend')}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      <div id="recaptcha-container-checkout"></div>
     </div>
   );
 }

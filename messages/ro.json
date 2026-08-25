@@ -140,7 +140,17 @@
     "sendingOrder": "Se trimite comanda...",
     "completeSteps": "Completează Pașii Pentru Plată",
     "placeOrderBtn": "Plasează Comanda",
-    "missingInfo": "Mai ai de completat informații în pașii anteriori"
+    "missingInfo": "Mai ai de completat informații în pașii anteriori",
+    "otpTitle": "Confirmare Număr de Telefon",
+    "otpSubtitle": "Pentru a plasa comanda cu plată în numerar, introdu codul din 6 cifre primit prin SMS la:",
+    "otpPlaceholder": "000000",
+    "otpVerifyBtn": "Confirmă și Plasează Comanda",
+    "otpVerifying": "Se verifică codul...",
+    "otpSending": "Se trimite SMS...",
+    "otpResend": "Retrimite SMS",
+    "otpResendIn": "Retrimite în {seconds}s",
+    "otpInvalid": "Codul SMS este incorect sau a expirat. Te rugăm să încerci din nou.",
+    "otpPhoneMissing": "Te rugăm să introduci un număr de telefon valid."
   },
   "LiveStore": {
     "openNow": "Deschis Acum",

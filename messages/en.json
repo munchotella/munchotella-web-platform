@@ -140,7 +140,17 @@
     "sendingOrder": "Sending order...",
     "completeSteps": "Complete Steps for Payment",
     "placeOrderBtn": "Place Order",
-    "missingInfo": "Please complete the required information in previous steps"
+    "missingInfo": "Please complete the required information in previous steps",
+    "otpTitle": "Phone Number Verification",
+    "otpSubtitle": "To place your cash-on-delivery order, enter the 6-digit code sent via SMS to:",
+    "otpPlaceholder": "000000",
+    "otpVerifyBtn": "Verify & Place Order",
+    "otpVerifying": "Verifying code...",
+    "otpSending": "Sending SMS...",
+    "otpResend": "Resend SMS",
+    "otpResendIn": "Resend in {seconds}s",
+    "otpInvalid": "The SMS code is incorrect or has expired. Please try again.",
+    "otpPhoneMissing": "Please enter a valid phone number."
   },
   "LiveStore": {
     "openNow": "Open Now",
