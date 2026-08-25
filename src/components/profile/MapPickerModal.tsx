@@ -2,10 +2,10 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { GoogleMap } from "@react-google-maps/api";
+import { GoogleMap, MarkerF } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers } from "lucide-react";
+import { X, Check, ArrowLeft, Locate, Plus, Minus, Layers, Hand } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 interface MapPickerModalProps {
@@ -28,6 +28,19 @@ const defaultCenter = {
   lng: 28.8638,
 };
 
+const customPinSvg = `data:image/svg+xml;utf-8,${encodeURIComponent(`
+<svg width="48" height="60" viewBox="0 0 48 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <filter id="shadow" x="0" y="0" width="48" height="60" filterUnits="userSpaceOnUse">
+    <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
+  </filter>
+  <g filter="url(#shadow)">
+    <path d="M24 2C13.5 2 5 10.5 5 21C5 34.5 24 50 24 50C24 50 43 34.5 43 21C43 10.5 34.5 2 24 2Z" fill="#1A120B" stroke="#D4A853" stroke-width="2.5"/>
+    <circle cx="24" cy="21" r="9" fill="#D4A853"/>
+    <circle cx="24" cy="21" r="4.5" fill="#1A120B"/>
+  </g>
+</svg>
+`)}`;
+
 export default function MapPickerModal({
   isOpen,
   onClose,
@@ -38,22 +51,12 @@ export default function MapPickerModal({
 }: MapPickerModalProps) {
   const { isLoaded, loadError } = useGoogleMaps();
 
-  // Initial center reference so GoogleMap does not re-center on every re-render
-  const initialCenterRef = useRef({
-    lat: initialLat || defaultCenter.lat,
-    lng: initialLng || defaultCenter.lng,
-  });
-
   const [position, setPosition] = useState({
     lat: initialLat || defaultCenter.lat,
     lng: initialLng || defaultCenter.lng,
   });
-  const positionRef = useRef(position);
-  positionRef.current = position;
-
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [mapTypeId, setMapTypeId] = useState<google.maps.MapTypeId | "roadmap" | "hybrid">("roadmap");
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -91,9 +94,7 @@ export default function MapPickerModal({
     if (isOpen) {
       const newLat = initialLat || defaultCenter.lat;
       const newLng = initialLng || defaultCenter.lng;
-      initialCenterRef.current = { lat: newLat, lng: newLng };
       setPosition({ lat: newLat, lng: newLng });
-      positionRef.current = { lat: newLat, lng: newLng };
       
       if (initialAddress) {
         setAddressText(initialAddress);
@@ -104,8 +105,8 @@ export default function MapPickerModal({
       const timer = setTimeout(() => {
         if (mapRef.current && window.google?.maps?.event) {
           window.google.maps.event.trigger(mapRef.current, "resize");
-          mapRef.current.setCenter({ lat: newLat, lng: newLng });
-          mapRef.current.setZoom(18);
+          mapRef.current.panTo({ lat: newLat, lng: newLng });
+          mapRef.current.setZoom(18.5);
         }
       }, 300);
 
@@ -121,10 +122,9 @@ export default function MapPickerModal({
           const newLat = pos.coords.latitude;
           const newLng = pos.coords.longitude;
           setPosition({ lat: newLat, lng: newLng });
-          positionRef.current = { lat: newLat, lng: newLng };
           if (mapRef.current) {
             mapRef.current.panTo({ lat: newLat, lng: newLng });
-            mapRef.current.setZoom(18.5);
+            mapRef.current.setZoom(19);
           }
           reverseGeocode(newLat, newLng);
         },
@@ -153,23 +153,24 @@ export default function MapPickerModal({
     setMapTypeId(prev => (prev === "roadmap" ? "hybrid" : "roadmap"));
   };
 
-  // Called when camera stops moving after pan/drag
-  const handleCameraIdle = () => {
-    if (mapRef.current) {
-      const center = mapRef.current.getCenter();
-      if (center) {
-        const newLat = center.lat();
-        const newLng = center.lng();
-        const prevLat = positionRef.current.lat;
-        const prevLng = positionRef.current.lng;
-        
-        // If center shifted significantly (> ~2 meters)
-        if (Math.abs(newLat - prevLat) > 0.000015 || Math.abs(newLng - prevLng) > 0.000015) {
-          positionRef.current = { lat: newLat, lng: newLng };
-          setPosition({ lat: newLat, lng: newLng });
-          reverseGeocode(newLat, newLng);
-        }
+  const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newLat = e.latLng.lat();
+      const newLng = e.latLng.lng();
+      setPosition({ lat: newLat, lng: newLng });
+      reverseGeocode(newLat, newLng);
+    }
+  };
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const newLat = e.latLng.lat();
+      const newLng = e.latLng.lng();
+      setPosition({ lat: newLat, lng: newLng });
+      if (mapRef.current) {
+        mapRef.current.panTo({ lat: newLat, lng: newLng });
       }
+      reverseGeocode(newLat, newLng);
     }
   };
 
@@ -198,8 +199,8 @@ export default function MapPickerModal({
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={initialCenterRef.current}
-              zoom={18}
+              center={position}
+              zoom={18.5}
               mapTypeId={mapTypeId}
               options={{
                 disableDefaultUI: true,
@@ -226,66 +227,28 @@ export default function MapPickerModal({
               onLoad={(map) => {
                 mapRef.current = map;
                 map.setTilt(45);
-                setTimeout(() => {
-                  if (window.google?.maps?.event) {
-                    window.google.maps.event.trigger(map, "resize");
-                    map.setCenter(positionRef.current);
-                    map.setZoom(18);
-                  }
-                }, 200);
               }}
-              onDragStart={() => setIsDragging(true)}
-              onDragEnd={() => setIsDragging(false)}
-              onIdle={handleCameraIdle}
-              onClick={(e) => {
-                if (e.latLng) {
-                  const newLat = e.latLng.lat();
-                  const newLng = e.latLng.lng();
-                  setPosition({ lat: newLat, lng: newLng });
-                  positionRef.current = { lat: newLat, lng: newLng };
-                  if (mapRef.current) {
-                    mapRef.current.panTo({ lat: newLat, lng: newLng });
-                  }
-                  reverseGeocode(newLat, newLng);
+              onClick={handleMapClick}
+            >
+              {/* Fully interactive, touch-draggable native Google Maps Marker */}
+              <MarkerF
+                position={position}
+                draggable={true}
+                onDragEnd={handleMarkerDragEnd}
+                icon={
+                  typeof window !== "undefined" && window.google?.maps ? {
+                    url: customPinSvg,
+                    scaledSize: new window.google.maps.Size(42, 52),
+                    anchor: new window.google.maps.Point(21, 50),
+                  } : undefined
                 }
-              }}
-            />
+              />
+            </GoogleMap>
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-[#FAF7F2] text-[#1A120B] font-medium text-sm p-4 text-center">
               Se încarcă Google Maps...
             </div>
           )}
-        </div>
-
-        {/* Center Target Luxury Pin with Pulse */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8 select-none">
-          <div className="flex flex-col items-center pointer-events-none">
-            {/* Entrance Guide Floating Tag */}
-            <motion.div
-              animate={{ opacity: isDragging ? 0 : 1, y: isDragging ? 5 : 0 }}
-              className="bg-[#1A120B] text-[#D4A853] text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-[#D4A853]/40 mb-1 pointer-events-none uppercase tracking-wider select-none"
-            >
-              Intrarea / Scara
-            </motion.div>
-
-            <motion.div 
-              animate={{ y: isDragging ? -14 : 0, scale: isDragging ? 1.12 : 1 }}
-              transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-2 border-[#D4A853] pointer-events-none"
-            >
-              <MapPin size={26} className="fill-[#1A120B]" />
-            </motion.div>
-            <motion.div 
-              animate={{ y: isDragging ? -14 : 0 }}
-              transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853] pointer-events-none" 
-            />
-            <motion.div 
-              animate={{ scale: isDragging ? 0.5 : 1, opacity: isDragging ? 0.25 : 0.6 }}
-              transition={{ duration: 0.2 }}
-              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1 pointer-events-none" 
-            />
-          </div>
         </div>
 
         {/* Top Floating Glassmorphic Search Bar */}
@@ -306,11 +269,10 @@ export default function MapPickerModal({
                 onChange={(val) => setAddressText(val)}
                 onPlaceSelected={(lat, lng, address) => {
                   setPosition({ lat, lng });
-                  positionRef.current = { lat, lng };
                   setAddressText(address);
                   if (mapRef.current) {
                     mapRef.current.panTo({ lat, lng });
-                    mapRef.current.setZoom(18.5);
+                    mapRef.current.setZoom(19);
                   }
                 }}
                 placeholder="Caută bloc, stradă sau reper..."
@@ -329,7 +291,7 @@ export default function MapPickerModal({
           </div>
         </div>
 
-        {/* Top Right Floating Layer / 3D Mode Toggle */}
+        {/* Top Right Floating Layer / 3D Mode Toggle (Desktop) */}
         <div className="absolute top-3 md:top-6 right-3 md:right-6 z-30 hidden sm:flex items-center gap-2">
           <button
             type="button"
@@ -411,9 +373,10 @@ export default function MapPickerModal({
                 <h4 className="text-xs md:text-sm font-serif font-bold text-[#1A120B] line-clamp-2 leading-snug">
                   {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
                 </h4>
-                <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
-                  Trage harta pentru a poziționa pinul exact la intrarea / scara blocului
-                </p>
+                <div className="flex items-center gap-1 mt-1 text-[11px] text-[#736A60] font-medium">
+                  <Hand size={12} className="text-[#D4A853] shrink-0" />
+                  <span>Apasă pe clădire sau trage pinul direct pe intrare/scară</span>
+                </div>
               </div>
             </div>
 
