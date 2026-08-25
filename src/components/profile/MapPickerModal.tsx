@@ -185,7 +185,7 @@ export default function MapPickerModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[500] w-screen h-screen overflow-hidden bg-[#1A120B]">
+      <div className="fixed inset-0 z-[99999] w-screen h-screen overflow-hidden bg-[#1A120B]">
         {/* Fullscreen Interactive Map Canvas */}
         <div className="absolute inset-0 w-full h-full">
           {isLoaded && !loadError ? (
