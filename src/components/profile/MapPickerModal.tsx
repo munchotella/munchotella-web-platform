@@ -192,7 +192,7 @@ export default function MapPickerModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl h-[88vh] max-h-[720px] bg-[#FFFCF6] rounded-[28px] md:rounded-[32px] overflow-hidden flex flex-col shadow-2xl border border-[#E8E2D9] z-10"
+          className="relative w-full max-w-2xl h-[80vh] max-h-[640px] min-h-[460px] bg-[#FFFCF6] rounded-[28px] md:rounded-[32px] overflow-hidden flex flex-col shadow-2xl border border-[#E8E2D9] z-10 my-auto"
         >
           {/* Header */}
           <div className="bg-[#FFFCF6] px-5 py-4 flex justify-between items-center shrink-0 border-b border-[#E8E2D9]">
@@ -232,8 +232,8 @@ export default function MapPickerModal({
 
           {/* Map Area */}
           <div className="flex-1 relative w-full bg-[#E8E2D9]/30 min-h-0">
-            {/* Map Canvas */}
-            <div className="w-full h-full relative">
+            {/* Map Canvas Inside Absolute Inset */}
+            <div className="absolute inset-0">
               {isLoaded && !loadError ? (
                 <GoogleMap
                   mapContainerStyle={mapContainerStyle}
@@ -294,7 +294,7 @@ export default function MapPickerModal({
           </div>
 
           {/* Footer Address Confirmation */}
-          <div className="px-5 py-4 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-10 relative">
+          <div className="px-5 py-3.5 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-10 relative">
             <div className="flex-1 min-w-0 w-full">
               <p className="text-xs font-bold text-[#1A120B] truncate leading-tight">
                 {geocoding ? "Se determină adresa..." : addressText || "Selectează o locație pe hartă"}
@@ -308,7 +308,7 @@ export default function MapPickerModal({
               type="button"
               onClick={handleConfirm}
               disabled={geocoding || !position.lat}
-              className="w-full sm:w-auto px-7 py-3.5 bg-[#1A120B] text-white rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 cursor-pointer shadow-md shrink-0"
+              className="w-full sm:w-auto px-7 py-3 bg-[#1A120B] text-white rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 cursor-pointer shadow-md shrink-0"
             >
               <Check size={16} />
               <span>Confirmă Adresa</span>
