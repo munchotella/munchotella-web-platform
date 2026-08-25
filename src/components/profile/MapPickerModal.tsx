@@ -174,75 +174,65 @@ export default function MapPickerModal({
 
   if (!isOpen) return null;
 
-  // Varianta slide-over din dreapta pentru desktop, slide-up pentru mobil
-  const slideVariants: Variants = {
-    hidden: { x: "100%", opacity: 0 },
-    visible: { x: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
-    exit: { x: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }
-  };
-
-  const slideUpVariants: Variants = {
-    hidden: { y: "100%", opacity: 0 },
-    visible: { y: "0%", opacity: 1, transition: { type: "spring", bounce: 0, duration: 0.4 } },
-    exit: { y: "100%", opacity: 0, transition: { type: "spring", bounce: 0, duration: 0.4 } }
-  };
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] flex justify-end h-screen w-screen overflow-hidden">
+      <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         />
 
-        {/* Panel Container (Responsive & Screen-Fitting) */}
+        {/* Centered Modal Dialog */}
         <motion.div
-          variants={typeof window !== 'undefined' && window.innerWidth >= 768 ? slideVariants : slideUpVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className="relative w-full md:w-[480px] lg:w-[520px] h-[90dvh] md:h-screen max-h-screen mt-auto md:mt-0 bg-[#FFFCF6] md:rounded-l-[32px] rounded-t-[32px] md:rounded-tr-none overflow-hidden flex flex-col shadow-2xl border-l border-t md:border-t-0 border-[#E8E2D9] z-10"
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-2xl h-[88vh] max-h-[720px] bg-[#FFFCF6] rounded-[28px] md:rounded-[32px] overflow-hidden flex flex-col shadow-2xl border border-[#E8E2D9] z-10"
         >
           {/* Header */}
-          <div className="bg-[#FFFCF6] p-4 md:p-5 flex justify-between items-center shrink-0 border-b border-[#E8E2D9]">
+          <div className="bg-[#FFFCF6] px-5 py-4 flex justify-between items-center shrink-0 border-b border-[#E8E2D9]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#D4A853]/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-[#D4A853]/15 flex items-center justify-center">
                 <MapPin size={20} className="text-[#D4A853]" />
               </div>
               <div>
-                <h3 className="font-serif text-lg md:text-xl font-bold text-[#1A120B]">Locația ta</h3>
-                <p className="text-xs font-medium text-[#736A60]">Caută sau fixează pinul</p>
+                <h3 className="font-serif text-lg font-bold text-[#1A120B]">Selectează Locația de Livrare</h3>
+                <p className="text-[11px] font-medium text-[#736A60]">Caută adresa sau mută harta pentru a fixa pinul</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-9 h-9 rounded-full bg-[#FAF7F2] border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:border-[#D4A853] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:border-[#D4A853] transition-colors cursor-pointer shadow-sm"
             >
               <X size={18} />
             </button>
           </div>
 
-          {/* Search Bar - Fixed at top of map */}
-          <div className="p-3.5 md:p-4 bg-[#FFFCF6] shrink-0 z-10 relative shadow-sm border-b border-[#E8E2D9]">
+          {/* Search Bar */}
+          <div className="px-5 py-3 bg-white/70 backdrop-blur-md shrink-0 z-10 relative border-b border-[#E8E2D9]">
             <MapAutocomplete
               value={addressText}
               onChange={(val) => setAddressText(val)}
               onPlaceSelected={(lat, lng, address) => {
                 setPosition({ lat, lng });
                 setAddressText(address);
+                if (mapRef.current) {
+                  mapRef.current.panTo({ lat, lng });
+                }
               }}
-              placeholder="Caută adresa..."
-              className="w-full bg-white border border-[#E8E2D9] rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+              placeholder="Caută adresa (stradă, număr, reper)..."
+              className="w-full bg-white border border-[#E8E2D9] rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all shadow-sm"
             />
           </div>
 
           {/* Map Area */}
           <div className="flex-1 relative w-full bg-[#E8E2D9]/30 min-h-0">
-            {/* Map Canvas / Embed */}
+            {/* Map Canvas */}
             <div className="w-full h-full relative">
               {isLoaded && !loadError ? (
                 <GoogleMap
@@ -283,7 +273,7 @@ export default function MapPickerModal({
               {/* Center Target Pin Icon Overlay */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
                 <div className="flex flex-col items-center">
-                  <div className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-xl border-2 border-[#D4A853]">
+                  <div className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-2xl border-2 border-[#D4A853]">
                     <MapPin size={24} className="fill-[#1A120B]" />
                   </div>
                   <div className="w-3 h-3 bg-[#1A120B] rotate-45 -mt-1.5 border-r-2 border-b-2 border-[#D4A853]" />
@@ -304,13 +294,13 @@ export default function MapPickerModal({
           </div>
 
           {/* Footer Address Confirmation */}
-          <div className="p-4 md:p-5 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-10 relative">
-            <div className="flex-1">
-              <p className="text-sm font-bold text-[#1A120B] truncate leading-tight">
+          <div className="px-5 py-4 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-10 relative">
+            <div className="flex-1 min-w-0 w-full">
+              <p className="text-xs font-bold text-[#1A120B] truncate leading-tight">
                 {geocoding ? "Se determină adresa..." : addressText || "Selectează o locație pe hartă"}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853] mt-1">
-                📍 Pin fixat pe hartă
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853] mt-0.5">
+                📍 Pin fixat exact pe hartă
               </p>
             </div>
 
@@ -318,9 +308,9 @@ export default function MapPickerModal({
               type="button"
               onClick={handleConfirm}
               disabled={geocoding || !position.lat}
-              className="w-full py-3.5 md:py-4 bg-[#1A120B] text-white rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 cursor-pointer shadow-md"
+              className="w-full sm:w-auto px-7 py-3.5 bg-[#1A120B] text-white rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 cursor-pointer shadow-md shrink-0"
             >
-              <Check size={18} />
+              <Check size={16} />
               <span>Confirmă Adresa</span>
             </button>
           </div>
