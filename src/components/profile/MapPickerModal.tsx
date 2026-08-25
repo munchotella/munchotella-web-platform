@@ -2,10 +2,10 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { GoogleMap, MarkerF } from "@react-google-maps/api";
+import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, ArrowLeft, Locate, Plus, Minus, Layers, Hand } from "lucide-react";
+import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 interface MapPickerModalProps {
@@ -28,19 +28,6 @@ const defaultCenter = {
   lng: 28.8638,
 };
 
-const customPinSvg = `data:image/svg+xml;utf-8,${encodeURIComponent(`
-<svg width="48" height="60" viewBox="0 0 48 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <filter id="shadow" x="0" y="0" width="48" height="60" filterUnits="userSpaceOnUse">
-    <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
-  </filter>
-  <g filter="url(#shadow)">
-    <path d="M24 2C13.5 2 5 10.5 5 21C5 34.5 24 50 24 50C24 50 43 34.5 43 21C43 10.5 34.5 2 24 2Z" fill="#1A120B" stroke="#D4A853" stroke-width="2.5"/>
-    <circle cx="24" cy="21" r="9" fill="#D4A853"/>
-    <circle cx="24" cy="21" r="4.5" fill="#1A120B"/>
-  </g>
-</svg>
-`)}`;
-
 export default function MapPickerModal({
   isOpen,
   onClose,
@@ -51,12 +38,15 @@ export default function MapPickerModal({
 }: MapPickerModalProps) {
   const { isLoaded, loadError } = useGoogleMaps();
 
-  const [position, setPosition] = useState({
+  // Keep coords in ref for real-time tracking without re-rendering the GoogleMap component
+  const currentCoordsRef = useRef({
     lat: initialLat || defaultCenter.lat,
     lng: initialLng || defaultCenter.lng,
   });
+
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [mapTypeId, setMapTypeId] = useState<google.maps.MapTypeId | "roadmap" | "hybrid">("roadmap");
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -92,21 +82,22 @@ export default function MapPickerModal({
 
   useEffect(() => {
     if (isOpen) {
-      const newLat = initialLat || defaultCenter.lat;
-      const newLng = initialLng || defaultCenter.lng;
-      setPosition({ lat: newLat, lng: newLng });
+      const targetLat = initialLat || defaultCenter.lat;
+      const targetLng = initialLng || defaultCenter.lng;
+      currentCoordsRef.current = { lat: targetLat, lng: targetLng };
       
       if (initialAddress) {
         setAddressText(initialAddress);
       } else {
-        reverseGeocode(newLat, newLng);
+        reverseGeocode(targetLat, targetLng);
       }
 
       const timer = setTimeout(() => {
         if (mapRef.current && window.google?.maps?.event) {
           window.google.maps.event.trigger(mapRef.current, "resize");
-          mapRef.current.panTo({ lat: newLat, lng: newLng });
+          mapRef.current.setCenter({ lat: targetLat, lng: targetLng });
           mapRef.current.setZoom(18.5);
+          mapRef.current.setTilt(45);
         }
       }, 300);
 
@@ -121,7 +112,7 @@ export default function MapPickerModal({
         (pos) => {
           const newLat = pos.coords.latitude;
           const newLng = pos.coords.longitude;
-          setPosition({ lat: newLat, lng: newLng });
+          currentCoordsRef.current = { lat: newLat, lng: newLng };
           if (mapRef.current) {
             mapRef.current.panTo({ lat: newLat, lng: newLng });
             mapRef.current.setZoom(19);
@@ -153,32 +144,31 @@ export default function MapPickerModal({
     setMapTypeId(prev => (prev === "roadmap" ? "hybrid" : "roadmap"));
   };
 
-  const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      const newLat = e.latLng.lat();
-      const newLng = e.latLng.lng();
-      setPosition({ lat: newLat, lng: newLng });
-      reverseGeocode(newLat, newLng);
-    }
-  };
-
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      const newLat = e.latLng.lat();
-      const newLng = e.latLng.lng();
-      setPosition({ lat: newLat, lng: newLng });
-      if (mapRef.current) {
-        mapRef.current.panTo({ lat: newLat, lng: newLng });
+  // Called automatically as the user finishes panning/dragging the map
+  const handleMapIdle = () => {
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      if (center) {
+        const lat = center.lat();
+        const lng = center.lng();
+        const prev = currentCoordsRef.current;
+        
+        // If center moved by more than ~1 meter
+        if (Math.abs(lat - prev.lat) > 0.00001 || Math.abs(lng - prev.lng) > 0.00001) {
+          currentCoordsRef.current = { lat, lng };
+          reverseGeocode(lat, lng);
+        }
       }
-      reverseGeocode(newLat, newLng);
     }
+    setIsDragging(false);
   };
 
   const handleConfirm = () => {
+    const coords = currentCoordsRef.current;
     onSelectLocation({
-      address: addressText || `Lat: ${position.lat.toFixed(4)}, Lng: ${position.lng.toFixed(4)}`,
-      lat: position.lat,
-      lng: position.lng,
+      address: addressText || `Lat: ${coords.lat.toFixed(4)}, Lng: ${coords.lng.toFixed(4)}`,
+      lat: coords.lat,
+      lng: coords.lng,
     });
     onClose();
   };
@@ -194,13 +184,13 @@ export default function MapPickerModal({
   return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B]">
-        {/* Fullscreen Interactive Map Canvas with 3D Buildings & Detail View */}
+        {/* Fullscreen Interactive Map Canvas */}
         <div className="absolute inset-0 w-full h-full">
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={position}
-              zoom={18.5}
+              defaultCenter={currentCoordsRef.current}
+              defaultZoom={18.5}
               mapTypeId={mapTypeId}
               options={{
                 disableDefaultUI: true,
@@ -228,27 +218,43 @@ export default function MapPickerModal({
                 mapRef.current = map;
                 map.setTilt(45);
               }}
-              onClick={handleMapClick}
-            >
-              {/* Fully interactive, touch-draggable native Google Maps Marker */}
-              <MarkerF
-                position={position}
-                draggable={true}
-                onDragEnd={handleMarkerDragEnd}
-                icon={
-                  typeof window !== "undefined" && window.google?.maps ? {
-                    url: customPinSvg,
-                    scaledSize: new window.google.maps.Size(42, 52),
-                    anchor: new window.google.maps.Point(21, 50),
-                  } : undefined
-                }
-              />
-            </GoogleMap>
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => setIsDragging(false)}
+              onIdle={handleMapIdle}
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-[#FAF7F2] text-[#1A120B] font-medium text-sm p-4 text-center">
               Se încarcă Google Maps...
             </div>
           )}
+        </div>
+
+        {/* Center Screen Fixed Pin that tracks exactly whatever building is underneath */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8 select-none">
+          <div className="flex flex-col items-center pointer-events-none">
+            {/* Animated Pin Head */}
+            <motion.div 
+              animate={{ y: isDragging ? -16 : 0, scale: isDragging ? 1.15 : 1 }}
+              transition={{ type: "spring", stiffness: 450, damping: 22 }}
+              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.5)] border-2 border-[#D4A853] pointer-events-none"
+            >
+              <MapPin size={26} className="fill-[#1A120B]" />
+            </motion.div>
+            
+            {/* Pin Tip Pointer */}
+            <motion.div 
+              animate={{ y: isDragging ? -16 : 0 }}
+              transition={{ type: "spring", stiffness: 450, damping: 22 }}
+              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853] pointer-events-none" 
+            />
+            
+            {/* Dynamic Ground Shadow */}
+            <motion.div 
+              animate={{ scale: isDragging ? 0.45 : 1, opacity: isDragging ? 0.2 : 0.6 }}
+              transition={{ duration: 0.2 }}
+              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1 pointer-events-none" 
+            />
+          </div>
         </div>
 
         {/* Top Floating Glassmorphic Search Bar */}
@@ -268,7 +274,7 @@ export default function MapPickerModal({
                 value={addressText}
                 onChange={(val) => setAddressText(val)}
                 onPlaceSelected={(lat, lng, address) => {
-                  setPosition({ lat, lng });
+                  currentCoordsRef.current = { lat, lng };
                   setAddressText(address);
                   if (mapRef.current) {
                     mapRef.current.panTo({ lat, lng });
@@ -373,17 +379,16 @@ export default function MapPickerModal({
                 <h4 className="text-xs md:text-sm font-serif font-bold text-[#1A120B] line-clamp-2 leading-snug">
                   {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
                 </h4>
-                <div className="flex items-center gap-1 mt-1 text-[11px] text-[#736A60] font-medium">
-                  <Hand size={12} className="text-[#D4A853] shrink-0" />
-                  <span>Apasă pe clădire sau trage pinul direct pe intrare/scară</span>
-                </div>
+                <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
+                  Trage harta pe ecran pentru a poziționa pinul pe intrarea / scara ta
+                </p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={geocoding || !position.lat}
+              disabled={geocoding || !currentCoordsRef.current.lat}
               className="w-full h-12 md:h-13 bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg active:scale-[0.98]"
             >
               <Check size={18} />
