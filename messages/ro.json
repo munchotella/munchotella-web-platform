@@ -87,6 +87,8 @@
     "step2Title": "Unde te găsim?",
     "nameLabel": "Numele tău complet *",
     "phoneLabel": "Număr de contact *",
+    "emailLabel": "Email",
+    "emailNote": "Trimitem confirmarea și nota de plată pe această adresă de email",
     "savedAddresses": "Adrese Salvate",
     "deliveryAddressLabel": "Adresa de livrare *",
     "selectOnMap": "Selectează pe Hartă",

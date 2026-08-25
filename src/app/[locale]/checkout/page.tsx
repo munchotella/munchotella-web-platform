@@ -486,7 +486,11 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">Email {paymentMethod === 'online' && <span className="text-red-500">*</span>}</label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">
+                            {t('emailLabel')} {paymentMethod === 'online' && <span className="text-red-500">*</span>}
+                          </label>
+                        </div>
                         <input
                           type="email"
                           required={paymentMethod === 'online'}
@@ -495,9 +499,9 @@ export default function CheckoutPage() {
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
-                        {paymentMethod === 'online' && (
-                          <p className="text-[10px] text-[#D4A853] mt-1 font-medium">* Obligatoriu pentru trimiterea chitanței digitale (Cerință bancară)</p>
-                        )}
+                        <p className="text-[11px] text-[#736A60] mt-1.5 flex items-center gap-1 font-normal">
+                          <span className="text-[#D4A853]">ℹ️</span> {t('emailNote')}
+                        </p>
                       </div>
                     </div>
 

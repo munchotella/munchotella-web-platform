@@ -87,6 +87,8 @@
     "step2Title": "Где вас найти?",
     "nameLabel": "Ваше полное имя *",
     "phoneLabel": "Контактный номер *",
+    "emailLabel": "Email",
+    "emailNote": "Мы отправим подтверждение и чек на этот адрес электронной почты",
     "savedAddresses": "Сохраненные адреса",
     "deliveryAddressLabel": "Адрес доставки *",
     "selectOnMap": "Выбрать на карте",

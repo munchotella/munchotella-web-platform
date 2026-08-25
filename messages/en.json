@@ -87,6 +87,8 @@
     "step2Title": "Where can we find you?",
     "nameLabel": "Your full name *",
     "phoneLabel": "Contact number *",
+    "emailLabel": "Email",
+    "emailNote": "We will send the order confirmation and receipt to this email address",
     "savedAddresses": "Saved Addresses",
     "deliveryAddressLabel": "Delivery Address *",
     "selectOnMap": "Select on Map",
