@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -181,11 +182,17 @@ export default function MapPickerModal({
     onClose();
   };
 
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[99999] w-screen h-screen overflow-hidden bg-[#1A120B]">
+      <div className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B]">
         {/* Fullscreen Interactive Map Canvas */}
         <div className="absolute inset-0 w-full h-full">
           {isLoaded && !loadError ? (
@@ -358,6 +365,7 @@ export default function MapPickerModal({
           </motion.div>
         </div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
