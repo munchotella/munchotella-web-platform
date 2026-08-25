@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers, Compass } from "lucide-react";
+import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 interface MapPickerModalProps {
@@ -38,15 +38,23 @@ export default function MapPickerModal({
 }: MapPickerModalProps) {
   const { isLoaded, loadError } = useGoogleMaps();
 
+  // Initial center reference so GoogleMap does not re-center on every re-render
+  const initialCenterRef = useRef({
+    lat: initialLat || defaultCenter.lat,
+    lng: initialLng || defaultCenter.lng,
+  });
+
   const [position, setPosition] = useState({
     lat: initialLat || defaultCenter.lat,
     lng: initialLng || defaultCenter.lng,
   });
+  const positionRef = useRef(position);
+  positionRef.current = position;
+
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [mapTypeId, setMapTypeId] = useState<google.maps.MapTypeId | "roadmap" | "hybrid">("roadmap");
-  const [tilt, setTilt] = useState(45);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -83,7 +91,9 @@ export default function MapPickerModal({
     if (isOpen) {
       const newLat = initialLat || defaultCenter.lat;
       const newLng = initialLng || defaultCenter.lng;
+      initialCenterRef.current = { lat: newLat, lng: newLng };
       setPosition({ lat: newLat, lng: newLng });
+      positionRef.current = { lat: newLat, lng: newLng };
       
       if (initialAddress) {
         setAddressText(initialAddress);
@@ -111,6 +121,7 @@ export default function MapPickerModal({
           const newLat = pos.coords.latitude;
           const newLng = pos.coords.longitude;
           setPosition({ lat: newLat, lng: newLng });
+          positionRef.current = { lat: newLat, lng: newLng };
           if (mapRef.current) {
             mapRef.current.panTo({ lat: newLat, lng: newLng });
             mapRef.current.setZoom(18.5);
@@ -142,23 +153,22 @@ export default function MapPickerModal({
     setMapTypeId(prev => (prev === "roadmap" ? "hybrid" : "roadmap"));
   };
 
-  const toggleTilt = () => {
-    const nextTilt = tilt === 45 ? 0 : 45;
-    setTilt(nextTilt);
-    if (mapRef.current) {
-      mapRef.current.setTilt(nextTilt);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
+  // Called when camera stops moving after pan/drag
+  const handleCameraIdle = () => {
     if (mapRef.current) {
       const center = mapRef.current.getCenter();
       if (center) {
         const newLat = center.lat();
         const newLng = center.lng();
-        setPosition({ lat: newLat, lng: newLng });
-        reverseGeocode(newLat, newLng);
+        const prevLat = positionRef.current.lat;
+        const prevLng = positionRef.current.lng;
+        
+        // If center shifted significantly (> ~2 meters)
+        if (Math.abs(newLat - prevLat) > 0.000015 || Math.abs(newLng - prevLng) > 0.000015) {
+          positionRef.current = { lat: newLat, lng: newLng };
+          setPosition({ lat: newLat, lng: newLng });
+          reverseGeocode(newLat, newLng);
+        }
       }
     }
   };
@@ -188,16 +198,18 @@ export default function MapPickerModal({
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={position}
+              center={initialCenterRef.current}
               zoom={18}
               mapTypeId={mapTypeId}
               options={{
                 disableDefaultUI: true,
                 zoomControl: false,
                 gestureHandling: "greedy",
-                tilt: 45, // 3D Building Extrusion View
+                tilt: 45,
+                draggable: true,
+                clickableIcons: false,
+                keyboardShortcuts: false,
                 mapTypeId: mapTypeId,
-                // Default high-detail styling that shows exact building shapes, entrance pathways, and block numbers
                 styles: mapTypeId === "roadmap" ? [
                   {
                     featureType: "poi.business",
@@ -217,18 +229,20 @@ export default function MapPickerModal({
                 setTimeout(() => {
                   if (window.google?.maps?.event) {
                     window.google.maps.event.trigger(map, "resize");
-                    map.setCenter(position);
+                    map.setCenter(positionRef.current);
                     map.setZoom(18);
                   }
                 }, 200);
               }}
               onDragStart={() => setIsDragging(true)}
-              onDragEnd={handleDragEnd}
+              onDragEnd={() => setIsDragging(false)}
+              onIdle={handleCameraIdle}
               onClick={(e) => {
                 if (e.latLng) {
                   const newLat = e.latLng.lat();
                   const newLng = e.latLng.lng();
                   setPosition({ lat: newLat, lng: newLng });
+                  positionRef.current = { lat: newLat, lng: newLng };
                   if (mapRef.current) {
                     mapRef.current.panTo({ lat: newLat, lng: newLng });
                   }
@@ -244,12 +258,12 @@ export default function MapPickerModal({
         </div>
 
         {/* Center Target Luxury Pin with Pulse */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8">
-          <div className="flex flex-col items-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8 select-none">
+          <div className="flex flex-col items-center pointer-events-none">
             {/* Entrance Guide Floating Tag */}
             <motion.div
               animate={{ opacity: isDragging ? 0 : 1, y: isDragging ? 5 : 0 }}
-              className="bg-[#1A120B] text-[#D4A853] text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-[#D4A853]/40 mb-1 pointer-events-none uppercase tracking-wider"
+              className="bg-[#1A120B] text-[#D4A853] text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-[#D4A853]/40 mb-1 pointer-events-none uppercase tracking-wider select-none"
             >
               Intrarea / Scara
             </motion.div>
@@ -257,19 +271,19 @@ export default function MapPickerModal({
             <motion.div 
               animate={{ y: isDragging ? -14 : 0, scale: isDragging ? 1.12 : 1 }}
               transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-2 border-[#D4A853]"
+              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-2 border-[#D4A853] pointer-events-none"
             >
               <MapPin size={26} className="fill-[#1A120B]" />
             </motion.div>
             <motion.div 
               animate={{ y: isDragging ? -14 : 0 }}
               transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853]" 
+              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853] pointer-events-none" 
             />
             <motion.div 
               animate={{ scale: isDragging ? 0.5 : 1, opacity: isDragging ? 0.25 : 0.6 }}
               transition={{ duration: 0.2 }}
-              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1" 
+              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1 pointer-events-none" 
             />
           </div>
         </div>
@@ -292,6 +306,7 @@ export default function MapPickerModal({
                 onChange={(val) => setAddressText(val)}
                 onPlaceSelected={(lat, lng, address) => {
                   setPosition({ lat, lng });
+                  positionRef.current = { lat, lng };
                   setAddressText(address);
                   if (mapRef.current) {
                     mapRef.current.panTo({ lat, lng });
