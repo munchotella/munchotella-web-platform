@@ -131,7 +131,7 @@
     "free": "Gratuit",
     "outOfRange": "Ne pare rău, dar adresa introdusă depășește raza maximă de livrare (10 km).",
     "totalToPay": "Total de Plată",
-    "termsCheckbox": "Sunt de acord cu {terms} și {privacy}",
+    "termsCheckbox": "Sunt de acord cu <terms>Termenii și Condițiile</terms> și <privacy>Politica de Confidențialitate</privacy>",
     "termsLink": "Termenii și Condițiile",
     "privacyLink": "Politica de Confidențialitate",
     "termsRequired": "Trebuie să accepți Termenii și Condițiile pentru a plasa comanda.",

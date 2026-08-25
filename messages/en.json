@@ -131,7 +131,7 @@
     "free": "Free",
     "outOfRange": "Sorry, the address entered exceeds our maximum delivery radius (10 km).",
     "totalToPay": "Total to Pay",
-    "termsCheckbox": "I agree with the {terms} and {privacy}",
+    "termsCheckbox": "I agree to the <terms>Terms and Conditions</terms> and <privacy>Privacy Policy</privacy>",
     "termsLink": "Terms and Conditions",
     "privacyLink": "Privacy Policy",
     "termsRequired": "You must accept the Terms and Conditions to place the order.",
