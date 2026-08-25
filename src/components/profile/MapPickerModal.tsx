@@ -3,9 +3,8 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { MapPin, X, Check, Navigation, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Locate } from "lucide-react";
-
+import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 interface MapPickerModalProps {
@@ -71,6 +70,7 @@ export default function MapPickerModal({
   });
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -120,18 +120,11 @@ export default function MapPickerModal({
           window.google.maps.event.trigger(mapRef.current, "resize");
           mapRef.current.setCenter({ lat: newLat, lng: newLng });
         }
-      }, 350);
+      }, 300);
 
       return () => clearTimeout(timer);
     }
   }, [isOpen, initialLat, initialLng, initialAddress, reverseGeocode]);
-
-  const handlePan = (dLat: number, dLng: number) => {
-    const newLat = position.lat + dLat;
-    const newLng = position.lng + dLng;
-    setPosition({ lat: newLat, lng: newLng });
-    reverseGeocode(newLat, newLng);
-  };
 
   const handleLocateMe = () => {
     if (typeof window !== "undefined" && "geolocation" in navigator) {
@@ -141,6 +134,9 @@ export default function MapPickerModal({
           const newLat = pos.coords.latitude;
           const newLng = pos.coords.longitude;
           setPosition({ lat: newLat, lng: newLng });
+          if (mapRef.current) {
+            mapRef.current.panTo({ lat: newLat, lng: newLng });
+          }
           reverseGeocode(newLat, newLng);
         },
         (err) => {
@@ -151,7 +147,20 @@ export default function MapPickerModal({
     }
   };
 
+  const handleZoomIn = () => {
+    if (mapRef.current) {
+      mapRef.current.setZoom((mapRef.current.getZoom() || 16) + 1);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapRef.current) {
+      mapRef.current.setZoom((mapRef.current.getZoom() || 16) - 1);
+    }
+  };
+
   const handleDragEnd = () => {
+    setIsDragging(false);
     if (mapRef.current) {
       const center = mapRef.current.getCenter();
       if (center) {
@@ -176,149 +185,179 @@ export default function MapPickerModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        />
-
-        {/* Centered Modal Dialog */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl h-[80vh] max-h-[640px] min-h-[460px] bg-[#FFFCF6] rounded-[28px] md:rounded-[32px] overflow-hidden flex flex-col shadow-2xl border border-[#E8E2D9] z-10 my-auto"
-        >
-          {/* Header */}
-          <div className="bg-[#FFFCF6] px-5 py-4 flex justify-between items-center shrink-0 border-b border-[#E8E2D9]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#D4A853]/15 flex items-center justify-center">
-                <MapPin size={20} className="text-[#D4A853]" />
-              </div>
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#1A120B]">Selectează Locația de Livrare</h3>
-                <p className="text-[11px] font-medium text-[#736A60]">Caută adresa sau mută harta pentru a fixa pinul</p>
-              </div>
+      <div className="fixed inset-0 z-[500] w-screen h-screen overflow-hidden bg-[#1A120B]">
+        {/* Fullscreen Interactive Map Canvas */}
+        <div className="absolute inset-0 w-full h-full">
+          {isLoaded && !loadError ? (
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={position}
+              zoom={16}
+              options={{
+                disableDefaultUI: true,
+                zoomControl: false,
+                gestureHandling: "greedy",
+                styles: retroMapStyles
+              }}
+              onLoad={(map) => {
+                mapRef.current = map;
+                setTimeout(() => {
+                  if (window.google?.maps?.event) {
+                    window.google.maps.event.trigger(map, "resize");
+                    map.setCenter(position);
+                  }
+                }, 200);
+              }}
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={handleDragEnd}
+              onClick={(e) => {
+                if (e.latLng) {
+                  const newLat = e.latLng.lat();
+                  const newLng = e.latLng.lng();
+                  setPosition({ lat: newLat, lng: newLng });
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat: newLat, lng: newLng });
+                  }
+                  reverseGeocode(newLat, newLng);
+                }
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-[#FAF7F2] text-[#1A120B] font-medium text-sm p-4 text-center">
+              Se încarcă Google Maps...
             </div>
+          )}
+        </div>
+
+        {/* Center Target Luxury Pin */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8">
+          <div className="flex flex-col items-center">
+            <motion.div 
+              animate={{ y: isDragging ? -14 : 0, scale: isDragging ? 1.1 : 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.35)] border-2 border-[#D4A853]"
+            >
+              <MapPin size={28} className="fill-[#1A120B]" />
+            </motion.div>
+            <motion.div 
+              animate={{ y: isDragging ? -14 : 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853]" 
+            />
+            <motion.div 
+              animate={{ scale: isDragging ? 0.6 : 1, opacity: isDragging ? 0.3 : 0.6 }}
+              transition={{ duration: 0.2 }}
+              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1" 
+            />
+          </div>
+        </div>
+
+        {/* Top Floating Glassmorphic Search & Navigation Bar */}
+        <div className="absolute top-4 md:top-6 left-4 right-4 md:left-8 md:right-auto md:w-[500px] z-30">
+          <div className="bg-[#FFFCF6]/95 backdrop-blur-xl border border-[#E8E2D9] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-2 flex items-center gap-2">
             <button
+              type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:border-[#D4A853] transition-colors cursor-pointer shadow-sm"
+              className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] transition-all cursor-pointer shrink-0"
+              title="Înapoi la Comandă"
+            >
+              <ArrowLeft size={18} />
+            </button>
+
+            <div className="flex-1 min-w-0">
+              <MapAutocomplete
+                value={addressText}
+                onChange={(val) => setAddressText(val)}
+                onPlaceSelected={(lat, lng, address) => {
+                  setPosition({ lat, lng });
+                  setAddressText(address);
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat, lng });
+                  }
+                }}
+                placeholder="Caută adresa sau reperul în Chișinău..."
+                className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2.5 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-9 h-9 rounded-xl bg-transparent flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-black/5 transition-colors cursor-pointer shrink-0"
+              title="Închide"
             >
               <X size={18} />
             </button>
           </div>
+        </div>
 
-          {/* Search Bar */}
-          <div className="px-5 py-3 bg-white/70 backdrop-blur-md shrink-0 z-10 relative border-b border-[#E8E2D9]">
-            <MapAutocomplete
-              value={addressText}
-              onChange={(val) => setAddressText(val)}
-              onPlaceSelected={(lat, lng, address) => {
-                setPosition({ lat, lng });
-                setAddressText(address);
-                if (mapRef.current) {
-                  mapRef.current.panTo({ lat, lng });
-                }
-              }}
-              placeholder="Caută adresa (stradă, număr, reper)..."
-              className="w-full bg-white border border-[#E8E2D9] rounded-2xl pl-10 pr-4 py-3 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all shadow-sm"
-            />
+        {/* Floating Controls: GPS & Zoom */}
+        <div className="absolute right-4 md:right-8 bottom-36 md:bottom-32 z-30 flex flex-col gap-2.5">
+          <button
+            type="button"
+            title="Locația mea curentă"
+            onClick={handleLocateMe}
+            className="w-12 h-12 bg-white/95 backdrop-blur-md hover:bg-[#D4A853] text-[#1A120B] rounded-2xl shadow-xl border border-[#E8E2D9] flex items-center justify-center transition-all cursor-pointer group active:scale-95"
+          >
+            <Locate size={20} className="group-hover:scale-110 transition-transform text-[#1A120B]" />
+          </button>
+          
+          <div className="hidden sm:flex flex-col bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#E8E2D9] overflow-hidden">
+            <button
+              type="button"
+              title="Mărește"
+              onClick={handleZoomIn}
+              className="w-12 h-10 flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853]/20 border-b border-[#E8E2D9] transition-colors cursor-pointer"
+            >
+              <Plus size={18} />
+            </button>
+            <button
+              type="button"
+              title="Micșorează"
+              onClick={handleZoomOut}
+              className="w-12 h-10 flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853]/20 transition-colors cursor-pointer"
+            >
+              <Minus size={18} />
+            </button>
           </div>
+        </div>
 
-          {/* Map Area */}
-          <div className="flex-1 relative w-full bg-[#E8E2D9]/30 min-h-0">
-            {/* Map Canvas Inside Absolute Inset */}
-            <div className="absolute inset-0">
-              {isLoaded && !loadError ? (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={position}
-                  zoom={16}
-                  options={{
-                    disableDefaultUI: true,
-                    zoomControl: false,
-                    gestureHandling: "greedy",
-                    styles: retroMapStyles
-                  }}
-                  onLoad={(map) => {
-                    mapRef.current = map;
-                    setTimeout(() => {
-                      if (window.google?.maps?.event) {
-                        window.google.maps.event.trigger(map, "resize");
-                        map.setCenter(position);
-                      }
-                    }, 200);
-                  }}
-                  onDragEnd={handleDragEnd}
-                  onClick={(e) => {
-                    if (e.latLng) {
-                      const newLat = e.latLng.lat();
-                      const newLng = e.latLng.lng();
-                      setPosition({ lat: newLat, lng: newLng });
-                      reverseGeocode(newLat, newLng);
-                    }
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[#E8E2D9]/50 text-[#1A120B] font-medium text-sm p-4 text-center">
-                  Se încarcă Google Maps...
+        {/* Bottom Floating Luxury Action Card */}
+        <div className="absolute bottom-4 md:bottom-8 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[540px] z-30">
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-[#FFFCF6]/95 backdrop-blur-xl rounded-[24px] md:rounded-[28px] border border-[#E8E2D9] p-4 md:p-5 shadow-[0_16px_48px_rgba(0,0,0,0.25)] flex flex-col gap-3.5"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-pulse"></span>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#D4A853]">
+                    {geocoding ? "IDENTIFICARE ADRESĂ..." : "ADRESĂ LIVRARE SELECTATĂ"}
+                  </p>
                 </div>
-              )}
-              
-              {/* Center Target Pin Icon Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 pb-8">
-                <div className="flex flex-col items-center">
-                  <div className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-2xl border-2 border-[#D4A853]">
-                    <MapPin size={24} className="fill-[#1A120B]" />
-                  </div>
-                  <div className="w-3 h-3 bg-[#1A120B] rotate-45 -mt-1.5 border-r-2 border-b-2 border-[#D4A853]" />
-                  <div className="w-6 h-2 bg-black/30 rounded-[100%] blur-[3px] mt-1" />
-                </div>
+                <h4 className="text-sm md:text-base font-serif font-bold text-[#1A120B] truncate leading-tight">
+                  {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
+                </h4>
+                <p className="text-[11px] text-[#736A60] mt-0.5">
+                  Trage harta sau mută pinul pe intrarea / scara ta
+                </p>
               </div>
-
-              {/* Floating Clean GPS Button */}
-              <button
-                type="button"
-                title="Locația mea GPS"
-                onClick={handleLocateMe}
-                className="absolute right-4 bottom-4 z-20 w-11 h-11 bg-white hover:bg-[#D4A853] text-[#1A120B] rounded-full shadow-lg border border-[#E8E2D9] flex items-center justify-center transition-all cursor-pointer group"
-              >
-                <Locate size={18} className="group-hover:scale-110 transition-transform text-[#1A120B]" />
-              </button>
-            </div>
-          </div>
-
-          {/* Footer Address Confirmation */}
-          <div className="px-5 py-3.5 bg-[#FFFCF6] border-t border-[#E8E2D9] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-10 relative">
-            <div className="flex-1 min-w-0 w-full">
-              <p className="text-xs font-bold text-[#1A120B] truncate leading-tight">
-                {geocoding ? "Se determină adresa..." : addressText || "Selectează o locație pe hartă"}
-              </p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853] mt-0.5">
-                📍 Pin fixat exact pe hartă
-              </p>
             </div>
 
             <button
               type="button"
               onClick={handleConfirm}
               disabled={geocoding || !position.lat}
-              className="w-full sm:w-auto px-7 py-3 bg-[#1A120B] text-white rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 cursor-pointer shadow-md shrink-0"
+              className="w-full h-12 md:h-13 bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg active:scale-[0.98]"
             >
-              <Check size={16} />
-              <span>Confirmă Adresa</span>
+              <Check size={18} />
+              <span>Confirmă Această Adresă</span>
             </button>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );
 }
-
-
-
