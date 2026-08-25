@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus } from "lucide-react";
+import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers, Compass } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 
 interface MapPickerModalProps {
@@ -28,33 +28,6 @@ const defaultCenter = {
   lng: 28.8638,
 };
 
-const retroMapStyles = [
-  { elementType: "geometry", stylers: [{ color: "#ebe3cd" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#523735" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#f5f1e6" }] },
-  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9b2a6" }] },
-  { featureType: "administrative.land_parcel", elementType: "geometry.stroke", stylers: [{ color: "#dcd2be" }] },
-  { featureType: "administrative.land_parcel", elementType: "labels.text.fill", stylers: [{ color: "#ae9e90" }] },
-  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#93817c" }] },
-  { featureType: "poi.park", elementType: "geometry.fill", stylers: [{ color: "#a5b076" }] },
-  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#447530" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#f5f1e6" }] },
-  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#fdfcf8" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f8c967" }] },
-  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e9bc62" }] },
-  { featureType: "road.highway.controlled_access", elementType: "geometry", stylers: [{ color: "#e98d58" }] },
-  { featureType: "road.highway.controlled_access", elementType: "geometry.stroke", stylers: [{ color: "#db8555" }] },
-  { featureType: "road.local", elementType: "labels.text.fill", stylers: [{ color: "#806b63" }] },
-  { featureType: "transit.line", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "transit.line", elementType: "labels.text.fill", stylers: [{ color: "#8f7d77" }] },
-  { featureType: "transit.line", elementType: "labels.text.stroke", stylers: [{ color: "#ebe3cd" }] },
-  { featureType: "transit.station", elementType: "geometry", stylers: [{ color: "#dfd2ae" }] },
-  { featureType: "water", elementType: "geometry.fill", stylers: [{ color: "#b9d3c2" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#92998d" }] }
-];
-
 export default function MapPickerModal({
   isOpen,
   onClose,
@@ -72,6 +45,8 @@ export default function MapPickerModal({
   const [addressText, setAddressText] = useState("");
   const [geocoding, setGeocoding] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [mapTypeId, setMapTypeId] = useState<google.maps.MapTypeId | "roadmap" | "hybrid">("roadmap");
+  const [tilt, setTilt] = useState(45);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -120,6 +95,7 @@ export default function MapPickerModal({
         if (mapRef.current && window.google?.maps?.event) {
           window.google.maps.event.trigger(mapRef.current, "resize");
           mapRef.current.setCenter({ lat: newLat, lng: newLng });
+          mapRef.current.setZoom(18);
         }
       }, 300);
 
@@ -137,26 +113,40 @@ export default function MapPickerModal({
           setPosition({ lat: newLat, lng: newLng });
           if (mapRef.current) {
             mapRef.current.panTo({ lat: newLat, lng: newLng });
+            mapRef.current.setZoom(18.5);
           }
           reverseGeocode(newLat, newLng);
         },
         (err) => {
           console.warn("Geolocation denied or unavailable", err);
           setGeocoding(false);
-        }
+        },
+        { enableHighAccuracy: true }
       );
     }
   };
 
   const handleZoomIn = () => {
     if (mapRef.current) {
-      mapRef.current.setZoom((mapRef.current.getZoom() || 16) + 1);
+      mapRef.current.setZoom((mapRef.current.getZoom() || 18) + 1);
     }
   };
 
   const handleZoomOut = () => {
     if (mapRef.current) {
-      mapRef.current.setZoom((mapRef.current.getZoom() || 16) - 1);
+      mapRef.current.setZoom((mapRef.current.getZoom() || 18) - 1);
+    }
+  };
+
+  const toggleMapType = () => {
+    setMapTypeId(prev => (prev === "roadmap" ? "hybrid" : "roadmap"));
+  };
+
+  const toggleTilt = () => {
+    const nextTilt = tilt === 45 ? 0 : 45;
+    setTilt(nextTilt);
+    if (mapRef.current) {
+      mapRef.current.setTilt(nextTilt);
     }
   };
 
@@ -193,25 +183,42 @@ export default function MapPickerModal({
   return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B]">
-        {/* Fullscreen Interactive Map Canvas */}
+        {/* Fullscreen Interactive Map Canvas with 3D Buildings & Detail View */}
         <div className="absolute inset-0 w-full h-full">
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               center={position}
-              zoom={16}
+              zoom={18}
+              mapTypeId={mapTypeId}
               options={{
                 disableDefaultUI: true,
                 zoomControl: false,
                 gestureHandling: "greedy",
-                styles: retroMapStyles
+                tilt: 45, // 3D Building Extrusion View
+                mapTypeId: mapTypeId,
+                // Default high-detail styling that shows exact building shapes, entrance pathways, and block numbers
+                styles: mapTypeId === "roadmap" ? [
+                  {
+                    featureType: "poi.business",
+                    elementType: "labels",
+                    stylers: [{ visibility: "on" }]
+                  },
+                  {
+                    featureType: "landscape.man_made",
+                    elementType: "geometry",
+                    stylers: [{ color: "#f0ede6" }]
+                  }
+                ] : undefined
               }}
               onLoad={(map) => {
                 mapRef.current = map;
+                map.setTilt(45);
                 setTimeout(() => {
                   if (window.google?.maps?.event) {
                     window.google.maps.event.trigger(map, "resize");
                     map.setCenter(position);
+                    map.setZoom(18);
                   }
                 }, 200);
               }}
@@ -236,32 +243,40 @@ export default function MapPickerModal({
           )}
         </div>
 
-        {/* Center Target Luxury Pin */}
+        {/* Center Target Luxury Pin with Pulse */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8">
           <div className="flex flex-col items-center">
-            <motion.div 
-              animate={{ y: isDragging ? -14 : 0, scale: isDragging ? 1.1 : 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.35)] border-2 border-[#D4A853]"
+            {/* Entrance Guide Floating Tag */}
+            <motion.div
+              animate={{ opacity: isDragging ? 0 : 1, y: isDragging ? 5 : 0 }}
+              className="bg-[#1A120B] text-[#D4A853] text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-[#D4A853]/40 mb-1 pointer-events-none uppercase tracking-wider"
             >
-              <MapPin size={28} className="fill-[#1A120B]" />
+              Intrarea / Scara
+            </motion.div>
+
+            <motion.div 
+              animate={{ y: isDragging ? -14 : 0, scale: isDragging ? 1.12 : 1 }}
+              transition={{ type: "spring", stiffness: 450, damping: 22 }}
+              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-2 border-[#D4A853]"
+            >
+              <MapPin size={26} className="fill-[#1A120B]" />
             </motion.div>
             <motion.div 
               animate={{ y: isDragging ? -14 : 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              transition={{ type: "spring", stiffness: 450, damping: 22 }}
               className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853]" 
             />
             <motion.div 
-              animate={{ scale: isDragging ? 0.6 : 1, opacity: isDragging ? 0.3 : 0.6 }}
+              animate={{ scale: isDragging ? 0.5 : 1, opacity: isDragging ? 0.25 : 0.6 }}
               transition={{ duration: 0.2 }}
               className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1" 
             />
           </div>
         </div>
 
-        {/* Top Floating Glassmorphic Search & Navigation Bar */}
-        <div className="absolute top-4 md:top-6 left-4 right-4 md:left-8 md:right-auto md:w-[500px] z-30">
-          <div className="bg-[#FFFCF6]/95 backdrop-blur-xl border border-[#E8E2D9] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-2 flex items-center gap-2">
+        {/* Top Floating Glassmorphic Search Bar */}
+        <div className="absolute top-3 md:top-6 left-3 right-3 md:left-6 md:right-auto md:w-[480px] z-30">
+          <div className="bg-[#FFFCF6]/95 backdrop-blur-xl border border-[#E8E2D9] rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] p-1.5 md:p-2 flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
@@ -280,10 +295,11 @@ export default function MapPickerModal({
                   setAddressText(address);
                   if (mapRef.current) {
                     mapRef.current.panTo({ lat, lng });
+                    mapRef.current.setZoom(18.5);
                   }
                 }}
-                placeholder="Caută adresa sau reperul în Chișinău..."
-                className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2.5 text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                placeholder="Caută bloc, stradă sau reper..."
+                className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2 text-xs md:text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all truncate"
               />
             </div>
 
@@ -298,8 +314,40 @@ export default function MapPickerModal({
           </div>
         </div>
 
-        {/* Floating Controls: GPS & Zoom */}
-        <div className="absolute right-4 md:right-8 bottom-36 md:bottom-32 z-30 flex flex-col gap-2.5">
+        {/* Top Right Floating Layer / 3D Mode Toggle */}
+        <div className="absolute top-3 md:top-6 right-3 md:right-6 z-30 hidden sm:flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleMapType}
+            className={`px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-xl border backdrop-blur-md flex items-center gap-2 transition-all cursor-pointer ${
+              mapTypeId === "hybrid"
+                ? "bg-[#1A120B] text-[#D4A853] border-[#D4A853]"
+                : "bg-white/95 text-[#1A120B] border-[#E8E2D9] hover:bg-[#FAF7F2]"
+            }`}
+            title="Schimbă între Satelit și Hartă 3D"
+          >
+            <Layers size={16} />
+            <span>{mapTypeId === "hybrid" ? "🛰️ Satelit Activ" : "🗺️ Vedere 3D"}</span>
+          </button>
+        </div>
+
+        {/* Floating Controls: GPS, Layer Toggle & Zoom (Positioned safely above bottom card) */}
+        <div className="absolute right-3 md:right-6 bottom-56 md:bottom-36 z-30 flex flex-col gap-2.5">
+          {/* Mobile Map Type Switcher Button */}
+          <button
+            type="button"
+            title="Comută Satelit / Hartă 3D"
+            onClick={toggleMapType}
+            className={`sm:hidden w-12 h-12 rounded-2xl shadow-xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+              mapTypeId === "hybrid"
+                ? "bg-[#1A120B] text-[#D4A853] border-[#D4A853]"
+                : "bg-white/95 text-[#1A120B] border-[#E8E2D9]"
+            }`}
+          >
+            <Layers size={20} />
+          </button>
+
+          {/* GPS Locate Me Button */}
           <button
             type="button"
             title="Locația mea curentă"
@@ -309,6 +357,7 @@ export default function MapPickerModal({
             <Locate size={20} className="group-hover:scale-110 transition-transform text-[#1A120B]" />
           </button>
           
+          {/* Zoom Buttons */}
           <div className="hidden sm:flex flex-col bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#E8E2D9] overflow-hidden">
             <button
               type="button"
@@ -330,11 +379,11 @@ export default function MapPickerModal({
         </div>
 
         {/* Bottom Floating Luxury Action Card */}
-        <div className="absolute bottom-4 md:bottom-8 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[540px] z-30">
+        <div className="absolute bottom-3 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:w-[540px] z-30">
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-[#FFFCF6]/95 backdrop-blur-xl rounded-[24px] md:rounded-[28px] border border-[#E8E2D9] p-4 md:p-5 shadow-[0_16px_48px_rgba(0,0,0,0.25)] flex flex-col gap-3.5"
+            className="bg-[#FFFCF6]/95 backdrop-blur-xl rounded-[24px] md:rounded-[28px] border border-[#E8E2D9] p-4 md:p-5 shadow-[0_16px_48px_rgba(0,0,0,0.3)] flex flex-col gap-3"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
@@ -344,11 +393,11 @@ export default function MapPickerModal({
                     {geocoding ? "IDENTIFICARE ADRESĂ..." : "ADRESĂ LIVRARE SELECTATĂ"}
                   </p>
                 </div>
-                <h4 className="text-sm md:text-base font-serif font-bold text-[#1A120B] truncate leading-tight">
+                <h4 className="text-xs md:text-sm font-serif font-bold text-[#1A120B] line-clamp-2 leading-snug">
                   {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
                 </h4>
-                <p className="text-[11px] text-[#736A60] mt-0.5">
-                  Trage harta sau mută pinul pe intrarea / scara ta
+                <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
+                  Trage harta pentru a poziționa pinul exact la intrarea / scara blocului
                 </p>
               </div>
             </div>
