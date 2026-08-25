@@ -189,3 +189,15 @@ body {
   margin-top: 2px !important;
 }
 
+/* Google Maps Mobile 1-Finger Touch & Panning Enablers */
+.gm-style, 
+.gm-style canvas, 
+.gm-style > div, 
+.gm-style > div:first-child,
+.gm-style iframe + div {
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+

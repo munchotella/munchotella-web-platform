@@ -17,9 +17,10 @@ interface MapPickerModalProps {
   onSelectLocation: (location: { address: string; lat: number; lng: number }) => void;
 }
 
-const mapContainerStyle = {
+const mapContainerStyle: React.CSSProperties = {
   width: "100%",
   height: "100%",
+  touchAction: "none",
 };
 
 // Chișinău coordinates as default center
@@ -49,6 +50,20 @@ export default function MapPickerModal({
   const [isDragging, setIsDragging] = useState(false);
   const [mapTypeId, setMapTypeId] = useState<google.maps.MapTypeId | "roadmap" | "hybrid">("roadmap");
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  // Lock body scroll and touch action while modal is open to ensure 1-finger drag goes 100% to Google Maps
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
+    }
+  }, [isOpen]);
 
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     setGeocoding(true);
@@ -98,6 +113,10 @@ export default function MapPickerModal({
           mapRef.current.setCenter({ lat: targetLat, lng: targetLng });
           mapRef.current.setZoom(18.5);
           mapRef.current.setTilt(45);
+          mapRef.current.setOptions({
+            gestureHandling: "greedy",
+            draggable: true,
+          });
         }
       }, 300);
 
@@ -144,7 +163,7 @@ export default function MapPickerModal({
     setMapTypeId(prev => (prev === "roadmap" ? "hybrid" : "roadmap"));
   };
 
-  // Called automatically as the user finishes panning/dragging the map
+  // Called automatically as the user finishes panning/dragging the map with one finger
   const handleMapIdle = () => {
     if (mapRef.current) {
       const center = mapRef.current.getCenter();
@@ -183,9 +202,15 @@ export default function MapPickerModal({
 
   return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B]">
+      <div 
+        className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B] touch-none select-none overscroll-none"
+        style={{ touchAction: "none" }}
+      >
         {/* Fullscreen Interactive Map Canvas */}
-        <div className="absolute inset-0 w-full h-full">
+        <div 
+          className="absolute inset-0 w-full h-full touch-none select-none overflow-hidden" 
+          style={{ touchAction: "none" }}
+        >
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
@@ -195,7 +220,7 @@ export default function MapPickerModal({
               options={{
                 disableDefaultUI: true,
                 zoomControl: false,
-                gestureHandling: "greedy",
+                gestureHandling: "greedy", // Force 1-finger touch dragging on mobile
                 tilt: 45,
                 draggable: true,
                 clickableIcons: false,
@@ -217,6 +242,15 @@ export default function MapPickerModal({
               onLoad={(map) => {
                 mapRef.current = map;
                 map.setTilt(45);
+                map.setOptions({
+                  gestureHandling: "greedy",
+                  draggable: true,
+                });
+              }}
+              onClick={(e) => {
+                if (e.latLng && mapRef.current) {
+                  mapRef.current.panTo(e.latLng);
+                }
               }}
               onDragStart={() => setIsDragging(true)}
               onDragEnd={() => setIsDragging(false)}
@@ -380,7 +414,7 @@ export default function MapPickerModal({
                   {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
                 </h4>
                 <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
-                  Trage harta pe ecran pentru a poziționa pinul pe intrarea / scara ta
+                  Trage harta cu degetul pentru a poziționa pinul pe intrarea / scara ta
                 </p>
               </div>
             </div>
