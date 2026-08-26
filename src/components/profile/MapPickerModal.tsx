@@ -213,11 +213,6 @@ export default function MapPickerModal({
         featureType: "poi.business",
         elementType: "labels",
         stylers: [{ visibility: "on" }]
-      },
-      {
-        featureType: "landscape.man_made",
-        elementType: "geometry",
-        stylers: [{ color: "#f0ede6" }]
       }
     ] : undefined
   }), [mapTypeId]);
