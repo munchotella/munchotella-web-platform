@@ -272,31 +272,29 @@ export default function MapPickerModal({
         </div>
 
         {/* Center Screen Fixed Pin that tracks exactly whatever building is underneath */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 pb-8 select-none">
-          <div className="flex flex-col items-center pointer-events-none">
-            {/* Animated Pin Head */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 select-none">
+          {/* Fixed Ground Anchor (Stays exactly at the center) */}
+          <div className="absolute flex items-center justify-center z-0">
+            <div className="w-2.5 h-2.5 bg-[#1A120B] rounded-full border border-white shadow-sm z-10" />
             <motion.div 
-              animate={{ y: isDragging ? -16 : 0, scale: isDragging ? 1.15 : 1 }}
-              transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="bg-[#1A120B] text-[#D4A853] p-3 rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.5)] border-2 border-[#D4A853] pointer-events-none"
-            >
-              <MapPin size={26} className="fill-[#1A120B]" />
-            </motion.div>
-            
-            {/* Pin Tip Pointer */}
-            <motion.div 
-              animate={{ y: isDragging ? -16 : 0 }}
-              transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className="w-3.5 h-3.5 bg-[#1A120B] rotate-45 -mt-2 border-r-2 border-b-2 border-[#D4A853] pointer-events-none" 
-            />
-            
-            {/* Dynamic Ground Shadow */}
-            <motion.div 
-              animate={{ scale: isDragging ? 0.45 : 1, opacity: isDragging ? 0.2 : 0.6 }}
+              animate={{ scale: isDragging ? 0.7 : 1, opacity: isDragging ? 0.2 : 0.5 }}
               transition={{ duration: 0.2 }}
-              className="w-8 h-2.5 bg-black rounded-[100%] blur-[2px] mt-1 pointer-events-none" 
+              className="w-8 h-2 bg-black rounded-[100%] blur-[2px] absolute top-1" 
             />
           </div>
+
+          {/* Animated Pin (Lifts up when dragging) */}
+          <motion.div 
+            animate={{ y: isDragging ? -34 : -24, scale: isDragging ? 1.05 : 1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="absolute flex flex-col items-center pointer-events-none z-10"
+          >
+            <div className="w-11 h-11 bg-[#1A120B] rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.3)] flex items-center justify-center border-[3px] border-white">
+              <div className="w-3.5 h-3.5 bg-[#D4A853] rounded-sm shadow-sm" />
+            </div>
+            {/* The Stick */}
+            <div className="w-1 h-3.5 bg-[#1A120B] shadow-sm -mt-[2px]" />
+          </motion.div>
         </div>
 
         {/* Top Floating Glassmorphic Search Bar */}
