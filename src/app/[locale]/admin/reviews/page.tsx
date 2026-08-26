@@ -160,7 +160,6 @@ export default function ReviewsPage() {
           <div>
             <LuxuryButton
               variant="outline"
-              size="sm"
               onClick={() => loadReviews(false)}
               disabled={refreshing}
               className="w-full flex items-center justify-center gap-2"

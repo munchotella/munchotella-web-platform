@@ -54,10 +54,10 @@ export default function AddressManager() {
   };
 
   useEffect(() => {
-    if (user?.id || user?._id) {
+    if (user?.id || (user as any)?._id) {
       fetchAddresses();
     }
-  }, [user?.id, user?._id, token]);
+  }, [user?.id, (user as any)?._id, token]);
 
   const openAddModal = () => {
     setEditingId(null);

@@ -233,8 +233,8 @@ export default function MapPickerModal({
           {isLoaded && !loadError ? (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              defaultCenter={currentCoordsRef.current}
-              defaultZoom={18.5}
+              center={currentCoordsRef.current}
+              zoom={18.5}
               mapTypeId={mapTypeId}
               options={mapOptions}
               onLoad={(map) => {
