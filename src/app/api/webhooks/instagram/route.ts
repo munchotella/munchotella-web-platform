@@ -445,6 +445,16 @@ export async function POST(request: Request) {
       body = rawText;
     }
 
+    try {
+      const { db: mongoDb } = await connectToDatabase();
+      await mongoDb.collection('debug_webhooks').insertOne({
+        timestamp: new Date(),
+        rawText,
+        body,
+        signatureHeader
+      });
+    } catch (e) {}
+
     let senderId: string | null = null;
     let messageText: string | null = null;
     let isEcho = false;
