@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { GoogleMap } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
@@ -198,6 +198,30 @@ export default function MapPickerModal({
     setMounted(true);
   }, []);
 
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: true,
+    zoomControl: false,
+    gestureHandling: "greedy", // Force 1-finger touch dragging on mobile & mouse dragging on desktop
+    tilt: 45,
+    draggable: true,
+    scrollwheel: true,
+    clickableIcons: false,
+    keyboardShortcuts: true,
+    mapTypeId: mapTypeId,
+    styles: mapTypeId === "roadmap" ? [
+      {
+        featureType: "poi.business",
+        elementType: "labels",
+        stylers: [{ visibility: "on" }]
+      },
+      {
+        featureType: "landscape.man_made",
+        elementType: "geometry",
+        stylers: [{ color: "#f0ede6" }]
+      }
+    ] : undefined
+  }), [mapTypeId]);
+
   if (!isOpen || !mounted) return null;
 
   return createPortal(
@@ -217,29 +241,7 @@ export default function MapPickerModal({
               defaultCenter={currentCoordsRef.current}
               defaultZoom={18.5}
               mapTypeId={mapTypeId}
-              options={{
-                disableDefaultUI: true,
-                zoomControl: false,
-                gestureHandling: "greedy", // Force 1-finger touch dragging on mobile & mouse dragging on desktop
-                tilt: 45,
-                draggable: true,
-                scrollwheel: true,
-                clickableIcons: false,
-                keyboardShortcuts: true,
-                mapTypeId: mapTypeId,
-                styles: mapTypeId === "roadmap" ? [
-                  {
-                    featureType: "poi.business",
-                    elementType: "labels",
-                    stylers: [{ visibility: "on" }]
-                  },
-                  {
-                    featureType: "landscape.man_made",
-                    elementType: "geometry",
-                    stylers: [{ color: "#f0ede6" }]
-                  }
-                ] : undefined
-              }}
+              options={mapOptions}
               onLoad={(map) => {
                 mapRef.current = map;
                 map.setTilt(45);
