@@ -887,7 +887,7 @@ export async function processMessage(
             ? "Ne cerem scuze pentru neplăceri! 🤝 Am trimis imediat o alertă echipei noastre și un coleg verifică situația pentru a vă răspunde aici în câteva momente!"
             : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!");
 
-      await sendDispatchResponse(senderId, channel, phoneNumberId, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
@@ -900,7 +900,7 @@ export async function processMessage(
         ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
         : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
 
-      await sendDispatchResponse(senderId, channel, phoneNumberId, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
+      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
 
@@ -956,7 +956,7 @@ export async function processMessage(
       session.state = 'IDLE';
       await saveSession(senderId, session);
 
-      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, finalCartUrl, finalButtonTitle);
+      await sendDispatchResponse(senderId, channel, replyText, finalCartUrl, finalButtonTitle);
       return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText };
     };
 
@@ -973,7 +973,7 @@ export async function processMessage(
         : "Cu mare drag! 🧇 Ce bunătăți ați dori să comandați astăzi din meniul Munchotella?";
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, cartUrl, cartButtonTitle);
+      await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
       return { success: true, status: 'awaiting_product', replyText };
     }
 
@@ -1015,7 +1015,7 @@ export async function processMessage(
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendDispatchGenericCard(senderId, channel, phoneNumberId, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
+      await sendDispatchGenericCard(senderId, channel, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
       return { success: true, status: 'product_added', cart: session.cart, replyText, cartUrl, cartButtonTitle, score: matched.score };
     }
 
@@ -1030,7 +1030,7 @@ export async function processMessage(
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendDispatchGenericCard(senderId, channel, phoneNumberId, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
+      await sendDispatchGenericCard(senderId, channel, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
       return { success: true, status: 'product_clarification_sent', suggestedProduct: suggested.name, replyText: clarifyReply, score: matched.score };
     }
 
@@ -1045,7 +1045,7 @@ export async function processMessage(
         : "Doriți să adăugăm și o băutură răcoritoare? Avem Ice Lemonade naturală (90 MDL) sau Milkshake cremos (Oreo, Kinder, Nutella, Căpșuni — 135 MDL)? 🥤";
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, phoneNumberId, replyText, cartUrl, cartButtonTitle);
+      await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
       return { success: true, status: 'awaiting_drinks', replyText, cartUrl, cartButtonTitle };
     }
 
