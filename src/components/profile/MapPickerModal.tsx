@@ -208,7 +208,7 @@ export default function MapPickerModal({
       >
         {/* Fullscreen Interactive Map Canvas */}
         <div 
-          className="absolute inset-0 w-full h-full touch-none select-none overflow-hidden" 
+          className="absolute inset-0 w-full h-full touch-none select-none overflow-hidden cursor-grab active:cursor-grabbing" 
           style={{ touchAction: "none" }}
         >
           {isLoaded && !loadError ? (
@@ -220,11 +220,12 @@ export default function MapPickerModal({
               options={{
                 disableDefaultUI: true,
                 zoomControl: false,
-                gestureHandling: "greedy", // Force 1-finger touch dragging on mobile
+                gestureHandling: "greedy", // Force 1-finger touch dragging on mobile & mouse dragging on desktop
                 tilt: 45,
                 draggable: true,
+                scrollwheel: true,
                 clickableIcons: false,
-                keyboardShortcuts: false,
+                keyboardShortcuts: true,
                 mapTypeId: mapTypeId,
                 styles: mapTypeId === "roadmap" ? [
                   {
@@ -245,11 +246,16 @@ export default function MapPickerModal({
                 map.setOptions({
                   gestureHandling: "greedy",
                   draggable: true,
+                  scrollwheel: true,
                 });
               }}
               onClick={(e) => {
                 if (e.latLng && mapRef.current) {
                   mapRef.current.panTo(e.latLng);
+                  const lat = e.latLng.lat();
+                  const lng = e.latLng.lng();
+                  currentCoordsRef.current = { lat, lng };
+                  reverseGeocode(lat, lng);
                 }
               }}
               onDragStart={() => setIsDragging(true)}
@@ -414,7 +420,7 @@ export default function MapPickerModal({
                   {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
                 </h4>
                 <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
-                  Trage harta cu degetul pentru a poziționa pinul pe intrarea / scara ta
+                  Trage harta sau fă click pe locație pentru a poziționa pinul pe intrarea ta
                 </p>
               </div>
             </div>
