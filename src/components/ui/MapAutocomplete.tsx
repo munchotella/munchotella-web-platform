@@ -62,7 +62,7 @@ export default function MapAutocomplete({
 
   return (
     <div className="relative w-full">
-      <MapPin className="absolute left-4 top-3.5 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
+      <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
       
       {isLoaded ? (
         <Autocomplete
@@ -92,7 +92,7 @@ export default function MapAutocomplete({
             className={className}
             disabled
           />
-          <div className="absolute right-4 top-3.5">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
             <div className="w-4 h-4 border-2 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
