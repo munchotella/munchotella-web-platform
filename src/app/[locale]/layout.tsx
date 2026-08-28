@@ -82,6 +82,7 @@ export const metadata: Metadata = {
 
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 
 export default async function RootLayout({
   children,
@@ -165,6 +166,19 @@ export default async function RootLayout({
             </LayoutWrapper>
           </ClientProviders>
         </NextIntlClientProvider>
+        {/* Google Analytics (gtag.js) */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-PG9HXCGDR6"}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-PG9HXCGDR6"}');
+          `}
+        </Script>
         <Analytics />
         <SpeedInsights />
       </body>
