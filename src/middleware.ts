@@ -8,8 +8,15 @@ export default function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const { pathname } = req.nextUrl;
 
-  // Bypass middleware for all API routes
-  if (pathname.startsWith('/api')) {
+  // Bypass middleware for API routes, robots.txt, sitemap.xml, llms.txt, and static files
+  if (
+    pathname.startsWith('/api') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt' ||
+    pathname.includes('.')
+  ) {
     return NextResponse.next();
   }
 
