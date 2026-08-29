@@ -24,6 +24,7 @@ const greatVibesFont = Great_Vibes({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.munchotella.md"),
   title: "Munchotella | Ceva Dulce în Chișinău — Waffles & Crepes Premium",
   description: "Vrei ceva dulce în Chișinău? Munchotella îți aduce cele mai delicioase waffles americane, mini waffles, clătite franțuzești cu Nutella®, fructe proaspete și livrare rapidă la ușa ta!",
   keywords: [
@@ -49,6 +50,26 @@ export const metadata: Metadata = {
     "доставка десертов кишинев",
     "вафли кишинев"
   ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: "https://www.munchotella.md",
+    languages: {
+      ro: "https://www.munchotella.md",
+      ru: "https://www.munchotella.md/ru",
+      en: "https://www.munchotella.md/en",
+      "x-default": "https://www.munchotella.md",
+    },
+  },
   openGraph: {
     title: "Munchotella | Ceva Dulce în Chișinău",
     description: "Waffles & Crepes proaspete cu Nutella® originală și livrare rapidă în Chișinău.",
@@ -126,23 +147,54 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
+              "@type": "Restaurant",
+              "@id": "https://www.munchotella.md/#restaurant",
               "name": "Munchotella",
-              "alternateName": "Munchotella Waffle Boutique",
+              "alternateName": "Munchotella Waffle Boutique Chișinău",
               "url": "https://www.munchotella.md",
               "logo": "https://www.munchotella.md/icon-512.png",
+              "image": "https://www.munchotella.md/Mini_Waffle_platter_with_toppings_202607181714.jpeg",
+              "description": "Boutique artizanal de deserturi premium în Chișinău: Waffles americane, mini waffles, clătite franțuzești (crepes) cu Nutella® originală și fistic sicilian 100%.",
+              "servesCuisine": ["Dessert", "Waffles", "Crepes", "Artisan Bakery"],
+              "priceRange": "$$",
+              "currenciesAccepted": "MDL",
+              "paymentAccepted": "Cash, Credit Card",
+              "hasMenu": "https://www.munchotella.md/menu",
+              "telephone": "+37379006499",
+              "email": "munchotella@gmail.com",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Str. Nicolae Testemițanu 21/1",
+                "addressLocality": "Chișinău",
+                "addressRegion": "Chișinău",
+                "postalCode": "MD-2025",
+                "addressCountry": "MD"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 46.9986,
+                "longitude": 28.8354
+              },
+              "openingHoursSpecification": [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": [
+                    "Monday",
+                    "Tuesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday"
+                  ],
+                  "opens": "16:00",
+                  "closes": "00:00"
+                }
+              ],
               "sameAs": [
                 "https://www.instagram.com/munchotella.md/",
                 "https://www.tiktok.com/@munchotella",
                 "https://www.facebook.com/munchotella"
-              ],
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": "+37379006499",
-                "contactType": "customer service",
-                "areaServed": "MD",
-                "availableLanguage": ["Romanian", "English", "Russian"]
-              }
+              ]
             })
           }}
         />

@@ -8,16 +8,16 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 // O CSP strictă este prima linie de apărare împotriva XSS.
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  // script-src: 'unsafe-inline' și 'unsafe-eval' necesare pentru Next.js și Google Maps API
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.googleapis.com https://apis.google.com https://identitytoolkit.googleapis.com https://*.gstatic.com",
+  // script-src: 'unsafe-inline' și 'unsafe-eval' necesare pentru Next.js, Google Maps API, GTM și Google Analytics
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.googleapis.com https://apis.google.com https://identitytoolkit.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://va.vercel-scripts.com",
   // style-src: 'unsafe-inline' necesar pentru Tailwind/styled components și Google Maps styles
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com",
   // font-src: Google Fonts
   "font-src 'self' https://fonts.gstatic.com data:",
-  // img-src: Cloudinary, Google avatars, Facebook, Maps tiles
-  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com https://cdn.prod.website-files.com",
-  // connect-src: API Munchotella (Render) + Firebase + Sentry + Google Maps API/Tiles
-  "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com https://maps.googleapis.com https://*.googleapis.com https://*.google.com https://*.gstatic.com data: blob:",
+  // img-src: Cloudinary, Google avatars, Facebook, Maps tiles, Analytics, GTM
+  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com https://cdn.prod.website-files.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://googleads.g.doubleclick.net https://www.google.md",
+  // connect-src: API Munchotella (Render) + Firebase + Sentry + Google Maps API/Tiles + Google Analytics/GTM + Vercel Insights
+  "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com https://maps.googleapis.com https://*.googleapis.com https://*.google.com https://*.gstatic.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://*.googletagmanager.com https://vitals.vercel-insights.com data: blob:",
   // worker-src: necesar pentru web workers (vector tiles Google Maps)
   "worker-src 'self' blob:",
   // child-src: iframe / web workers
