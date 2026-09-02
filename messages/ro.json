@@ -106,7 +106,9 @@
     "scheduledDesc": "Voi fi acolo/aștept la",
     "btnAsap": "Cât Mai Repede",
     "btnSchedule": "Programează",
-    "desiredTime": "Ora dorită (Astăzi)",
+    "desiredTime": "Ora dorită",
+    "storeClosedBanner": "Laboratorul este închis acum. Comanda ta va fi preparată la redeschidere.",
+    "preOrderOnlyNotice": "Comenzile imediate (ASAP) nu sunt disponibile în afara programului. Alege o oră de livrare dorită:",
     "step4Title": "Cum preferi să plătești?",
     "cashTitle": "Numerar la {type}",
     "cashDelivery": "Livrare",
@@ -157,10 +159,13 @@
   },
   "LiveStore": {
     "openNow": "Deschis Acum",
-    "closedWednesday": "Închis Azi",
+    "closedWednesday": "Închis Miercuri",
     "closedCurrently": "Închis Acum",
     "openToday": "Deschide la 16:00",
-    "openTomorrow": "Deschide mâine la 16:00"
+    "openTomorrow": "Deschide mâine la 16:00",
+    "emergencyClosed": "Închis Temporar",
+    "closedHoliday": "Închis • Sărbătoare",
+    "preOrderAvailable": "Pre-comenzile sunt active"
   },
   "Header": {
     "home": "Acasă",

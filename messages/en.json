@@ -106,7 +106,9 @@
     "scheduledDesc": "I will be there/waiting at",
     "btnAsap": "As soon as possible",
     "btnSchedule": "Schedule",
-    "desiredTime": "Desired time (Today)",
+    "desiredTime": "Desired time",
+    "storeClosedBanner": "The kitchen is currently closed. Your order will be prepared upon reopening.",
+    "preOrderOnlyNotice": "Immediate delivery (ASAP) is unavailable outside working hours. Please select a scheduled time:",
     "step4Title": "How do you prefer to pay?",
     "cashTitle": "Cash on {type}",
     "cashDelivery": "Delivery",
@@ -157,10 +159,13 @@
   },
   "LiveStore": {
     "openNow": "Open Now",
-    "closedWednesday": "Closed Today",
+    "closedWednesday": "Closed Wednesday",
     "closedCurrently": "Closed Now",
-    "openToday": "Opens at 16:00",
-    "openTomorrow": "Opens tomorrow at 16:00"
+    "openToday": "Opens today at 16:00",
+    "openTomorrow": "Opens tomorrow at 16:00",
+    "emergencyClosed": "Temporarily Closed",
+    "closedHoliday": "Closed • Holiday",
+    "preOrderAvailable": "Pre-orders accepted"
   },
   "Header": {
     "home": "Home",

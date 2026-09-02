@@ -118,6 +118,91 @@ export default function CheckoutPage() {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Stare program magazin dinamic
+  const [storeStatus, setStoreStatus] = useState<{
+    isOpen: boolean;
+    isEmergencyClosed?: boolean;
+    reason?: string;
+    nextOpening?: { label: string; time: string; date: string } | null;
+  }>({ isOpen: true });
+
+  const [draftOrderId, setDraftOrderId] = useState<string | null>(null);
+
+  // Verificare status magazin la inițializare
+  React.useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch("https://munchotella-api.onrender.com/api/settings/store-status");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+            setStoreStatus(data.data);
+            // Dacă magazinul este închis, forțăm comanda pe 'scheduled' și setăm ora de deschidere
+            if (!data.data.isOpen) {
+              setTiming("scheduled");
+              if (data.data.nextOpening?.time) {
+                setScheduledTime(data.data.nextOpening.time);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Store status check failed:", err);
+      }
+    };
+    fetchStatus();
+  }, []);
+
+  // ═══ LEAD CAPTURE: Salvare automată a coșului abandonat (Draft Order) ═══
+  // Când clientul a introdus un număr de telefon valid (>=6 cifre) și are produse în coș,
+  // salvăm silențios în fundal datele pentru ca echipa să îl poată contacta dacă abandonează.
+  React.useEffect(() => {
+    const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
+    if (cleanPhone.length < 6 || items.length === 0) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("https://munchotella-api.onrender.com/api/orders/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            draftOrderId,
+            customer: {
+              name: formData.name || "Oaspete",
+              phone: `${selectedCountry.dialCode}${cleanPhone.startsWith('+') ? cleanPhone.slice(selectedCountry.dialCode.length) : cleanPhone}`,
+              address: formData.street,
+              notes: formData.notes,
+              coordinates: { lat: formData.lat, lng: formData.lng },
+            },
+            items: items.map(i => ({
+              menuItemId: i.id || i.cartItemId,
+              name: i.name,
+              price: i.price,
+              quantity: i.quantity,
+              variantName: (i as any).selectedVariant,
+              modifiers: i.selectedToppings?.map((t: any) => ({
+                title: t.groupName || 'Topping',
+                optionName: t.name,
+                price: t.price,
+              })),
+            })),
+            deliveryType,
+            doorDelivery,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success && data.draftOrderId) {
+          setDraftOrderId(data.draftOrderId);
+        }
+      } catch (err) {
+        // Ignorăm erorile de fundal pentru a nu deranja clientul
+      }
+    }, 1800); // 1.8 secunde debounce după tastare
+
+    return () => clearTimeout(timer);
+  }, [formData.phone, formData.name, formData.street, items, deliveryType, doorDelivery, selectedCountry.dialCode]);
+
   React.useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
     if (resendCooldown > 0) {
@@ -373,6 +458,9 @@ export default function CheckoutPage() {
         deliveryType,
         needsCutlery: false,
         promoCode: activePromo ? activePromo.code : undefined,
+        timing,
+        scheduledTime: timing === "scheduled" ? scheduledTime : null,
+        draftOrderId: draftOrderId || undefined,
       };
 
       const API_URL = "https://munchotella-api.onrender.com/api";
@@ -831,17 +919,35 @@ export default function CheckoutPage() {
                     variants={accordionVariants}
                     className="px-6 md:px-8 pb-8 space-y-6"
                   >
+                    {!storeStatus.isOpen && (
+                      <div className="p-4 rounded-2xl bg-[#D4A853]/10 border border-[#D4A853]/30 text-xs text-[#1A120B] flex flex-col gap-1.5 leading-relaxed">
+                        <div className="font-bold flex items-center gap-1.5 text-[#8C6B1B]">
+                          <span className="material-symbols-outlined text-base">schedule</span>
+                          <span>{t('storeClosedBanner')}</span>
+                        </div>
+                        <p className="text-[#736A60]">
+                          {storeStatus.nextOpening?.label ? `Se deschide ${storeStatus.nextOpening.label}.` : ''} {t('preOrderOnlyNotice')}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => setTiming("asap")}
-                        className={`p-4 rounded-2xl border text-sm font-bold uppercase tracking-wider transition-all cursor-pointer text-center ${
-                          timing === "asap"
-                            ? "bg-[#D4A853] border-[#D4A853] text-[#1A120B] shadow-md"
-                            : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50"
+                        disabled={!storeStatus.isOpen}
+                        onClick={() => {
+                          if (storeStatus.isOpen) setTiming("asap");
+                        }}
+                        className={`p-4 rounded-2xl border text-sm font-bold uppercase tracking-wider transition-all text-center ${
+                          !storeStatus.isOpen
+                            ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+                            : timing === "asap"
+                            ? "bg-[#D4A853] border-[#D4A853] text-[#1A120B] shadow-md cursor-pointer"
+                            : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50 cursor-pointer"
                         }`}
                       >
                         {t('btnAsap')}
+                        {!storeStatus.isOpen && <span className="block text-[10px] font-normal lowercase tracking-normal mt-0.5">(indisponibil acum)</span>}
                       </button>
                       <button
                         type="button"
@@ -858,7 +964,9 @@ export default function CheckoutPage() {
 
                     {timing === "scheduled" && (
                       <div className="flex flex-col items-start gap-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">{t('desiredTime')}</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">
+                          {t('desiredTime')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}
+                        </label>
                         <input
                           type="time"
                           value={scheduledTime}

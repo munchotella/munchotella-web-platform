@@ -106,7 +106,9 @@
     "scheduledDesc": "Я буду там/жду в",
     "btnAsap": "Как можно быстрее",
     "btnSchedule": "Запланировать",
-    "desiredTime": "Желаемое время (Сегодня)",
+    "desiredTime": "Желаемое время",
+    "storeClosedBanner": "Кухня сейчас закрыта. Ваш заказ будет приготовлен сразу после открытия.",
+    "preOrderOnlyNotice": "Срочная доставка (ASAP) недоступна в нерабочее время. Пожалуйста, выберите удобное время доставки:",
     "step4Title": "Как вы предпочитаете платить?",
     "cashTitle": "Наличными при {type}",
     "cashDelivery": "доставке",
@@ -157,10 +159,13 @@
   },
   "LiveStore": {
     "openNow": "Открыто сейчас",
-    "closedWednesday": "Закрыто сегодня",
-    "closedCurrently": "Закрыто",
-    "openToday": "Откроется в 16:00",
-    "openTomorrow": "Откроется завтра в 16:00"
+    "closedWednesday": "Закрыто по средам",
+    "closedCurrently": "Закрыто сейчас",
+    "openToday": "Откроется сегодня в 16:00",
+    "openTomorrow": "Откроется завтра в 16:00",
+    "emergencyClosed": "Временно закрыто",
+    "closedHoliday": "Закрыто • Праздник",
+    "preOrderAvailable": "Принимаем предзаказы"
   },
   "Header": {
     "home": "Главная",
