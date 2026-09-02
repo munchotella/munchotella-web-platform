@@ -31,6 +31,7 @@ export default function MenuPage() {
       img: item.img,
       category: item.category,
       rawCategory: item.rawCategory,
+      modifiers: item.modifiers,
     });
     setIsModalOpen(true);
   };
@@ -119,6 +120,7 @@ export default function MenuPage() {
               rawCategory: item.category?.toLowerCase() || "",
               desc,
               img: item.imageUrl || item.image,
+              modifiers: item.modifiers,
               badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
             };
           }).sort((a: any, b: any) => getCategoryIndex(a.rawCategory) - getCategoryIndex(b.rawCategory));

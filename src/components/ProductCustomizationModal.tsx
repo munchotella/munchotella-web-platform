@@ -2,18 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Minus, Check, Sparkles } from "lucide-react";
+import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
 import { useTranslations } from "next-intl";
 
 export type ProductItem = {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   desc?: string;
   img: string;
   category?: string;
   rawCategory?: string;
+  modifiers?: any[];
 };
 
 
@@ -33,6 +34,7 @@ export default function ProductCustomizationModal({
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
 
+  // Fallback Hardcoded Toppings (In case offline cache 'menu.json' without modifiers is active)
   const ALL_TOPPINGS: ToppingOption[] = [
     { name: t("extraNutella"), price: 55 },
     { name: t("extraWhiteChocolate"), price: 45 },
@@ -50,49 +52,54 @@ export default function ProductCustomizationModal({
     { name: t("iceCream"), price: 30 },
   ];
 
-  const AVAILABLE_TOPPINGS = ALL_TOPPINGS.filter((topping) => {
-    if (!product) return false;
+  let renderModifierGroups: { title: string; options: ToppingOption[] }[] = [];
 
-    // FĂRĂ ADAOSURI PENTRU BĂUTURI
-    if (
-      product.rawCategory === "drinks" || 
-      product.rawCategory === "băuturi" || 
-      product.rawCategory === "напитки" || 
-      product.category === "drinks"
-    ) {
-      return false; 
+  if (product) {
+    const isDrink = product.rawCategory === "drinks" || 
+                    product.rawCategory === "băuturi" || 
+                    product.rawCategory === "напитки" || 
+                    product.category === "drinks";
+    
+    if (!isDrink) {
+      if (Array.isArray(product.modifiers) && product.modifiers.length > 0) {
+        // DYNAMIC LOGIC: Fetched from Database API
+        renderModifierGroups = product.modifiers;
+      } else {
+        // FALLBACK LOGIC: Offline cache fallback
+        const descLower = (product.desc || "").toLowerCase();
+        const nameLower = (product.name || "").toLowerCase();
+
+        const AVAILABLE_TOPPINGS = ALL_TOPPINGS.filter((topping) => {
+          if (topping.name === t("freshFruit")) return true;
+          if (topping.name === t("iceCream")) return true;
+          if (topping.name === t("pistachioPaste")) {
+            return descLower.includes("pistachio cream") || descLower.includes("katayf") || nameLower.includes("dubai");
+          }
+          if (topping.name === t("kinderBueno")) return descLower.includes("kinder bueno");
+          if (topping.name === t("extraKiwi")) return descLower.includes("kiwi");
+          if (topping.name === t("extraNutella")) return descLower.includes("nutella");
+          if (topping.name === t("extraStrawberry")) return descLower.includes("strawberry");
+          if (topping.name === t("extraBanana")) return descLower.includes("banana");
+          if (topping.name === t("extraPistachio")) return descLower.includes("pistachio") && !topping.name.includes("Pastă"); 
+          if (topping.name === t("extraOreo")) return descLower.includes("oreo");
+          if (topping.name === t("extraKinder")) return (descLower.includes("kinder") && !descLower.includes("kinder bueno")) || descLower.includes("kinder");
+          if (topping.name === t("extraPeanuts")) return descLower.includes("peanuts");
+          if (topping.name === t("extraWhiteChocolate")) return descLower.includes("white chocolate");
+          if (topping.name === t("extraLotus")) return descLower.includes("lotus");
+          return true;
+        });
+
+        if (AVAILABLE_TOPPINGS.length > 0) {
+          renderModifierGroups = [
+            {
+              title: 'Personalizare', // Generic fallback title
+              options: AVAILABLE_TOPPINGS
+            }
+          ];
+        }
+      }
     }
-
-    const descLower = (product.desc || "").toLowerCase();
-    const nameLower = (product.name || "").toLowerCase();
-
-    // -- ADAOSURI UNIVERSALE (Apar la toate produsele, cu excepția băuturilor) --
-    if (topping.name === t("freshFruit")) return true; // Fructe mix
-    if (topping.name === t("iceCream")) return true; // Înghețată
-
-    // -- FILTRE PENTRU NOILE ADAOSURI --
-    if (topping.name === t("pistachioPaste")) {
-      return descLower.includes("pistachio cream") || descLower.includes("katayf") || nameLower.includes("dubai");
-    }
-    if (topping.name === t("kinderBueno")) return descLower.includes("kinder bueno");
-    if (topping.name === t("extraKiwi")) return descLower.includes("kiwi");
-
-    // -- FILTRE PENTRU ADAOSURILE ACTUALIZATE (Trebuie să existe în rețetă) --
-    if (topping.name === t("extraNutella")) return descLower.includes("nutella");
-    if (topping.name === t("extraStrawberry")) return descLower.includes("strawberry");
-    if (topping.name === t("extraBanana")) return descLower.includes("banana");
-    if (topping.name === t("extraPistachio")) return descLower.includes("pistachio") && !topping.name.includes("Pastă"); 
-    if (topping.name === t("extraOreo")) return descLower.includes("oreo");
-    if (topping.name === t("extraKinder")) return descLower.includes("kinder") && !descLower.includes("kinder bueno") || descLower.includes("kinder");
-    if (topping.name === t("extraPeanuts")) return descLower.includes("peanuts");
-
-    // -- ADAOSURI CARE NU AU FOST MENȚIONATE, dar le filtrăm logic --
-    if (topping.name === t("extraWhiteChocolate")) return descLower.includes("white chocolate");
-    if (topping.name === t("extraLotus")) return descLower.includes("lotus");
-
-    // Pentru orice alt topping nedefinit (fallback de siguranță)
-    return true;
-  });
+  }
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -206,44 +213,50 @@ export default function ProductCustomizationModal({
                 )}
               </div>
 
-              {/* Toppings Selection (Hidden for Drinks) */}
-              {product.rawCategory !== "drinks" && product.rawCategory !== "băuturi" && product.rawCategory !== "напитки" && (
+              {/* Toppings Selection */}
+              {renderModifierGroups.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <h4 className="text-[16px] font-bold text-[#1A1A1A]">
-                      {t('customize')}
-                    </h4>
-                    <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">{t('optional')}</span>
-                  </div>
+                  {renderModifierGroups.map((group, groupIndex) => (
+                    <div key={groupIndex} className="mb-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <h4 className="text-[16px] font-bold text-[#1A1A1A]">
+                          {group.title}
+                        </h4>
+                        <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">
+                          {t('optional')}
+                        </span>
+                      </div>
 
-                  <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white mb-6">
-                    {AVAILABLE_TOPPINGS.map((topping, index) => {
-                      const isSelected = selectedToppings.some((t) => t.name === topping.name);
-                      return (
-                        <div
-                          key={topping.name}
-                          onClick={(e) => toggleTopping(e, topping)}
-                          className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
-                            index !== AVAILABLE_TOPPINGS.length - 1 ? "border-b border-[#EAE1DB]" : ""
-                          } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
-                        >
-                          <div className="flex flex-row items-center gap-3">
-                            <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
-                              {topping.name}
-                            </span>
-                            <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
-                              (+{topping.price} MDL)
-                            </span>
-                          </div>
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
-                            isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
-                          }`}>
-                            {isSelected && <Check className="w-5 h-5 text-white stroke-[3]" />}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                      <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white">
+                        {group.options.map((topping: any, index: number) => {
+                          const isSelected = selectedToppings.some((t) => t.name === topping.name);
+                          return (
+                            <div
+                              key={topping.name}
+                              onClick={(e) => toggleTopping(e, { name: topping.name, price: topping.price })}
+                              className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
+                                index !== group.options.length - 1 ? "border-b border-[#EAE1DB]" : ""
+                              } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
+                            >
+                              <div className="flex flex-row items-center gap-3">
+                                <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
+                                  {topping.name}
+                                </span>
+                                <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
+                                  (+{topping.price} MDL)
+                                </span>
+                              </div>
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
+                                isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
+                              }`}>
+                                {isSelected && <Check className="w-5 h-5 text-white stroke-[3]" />}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
