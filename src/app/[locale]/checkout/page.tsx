@@ -923,10 +923,10 @@ export default function CheckoutPage() {
                       <div className="p-4 rounded-2xl bg-[#D4A853]/10 border border-[#D4A853]/30 text-xs text-[#1A120B] flex flex-col gap-1.5 leading-relaxed">
                         <div className="font-bold flex items-center gap-2 text-[#8C6B1B]">
                           <Clock className="w-4 h-4 text-[#8C6B1B] shrink-0" />
-                          <span>{t('storeClosedBanner')}</span>
+                          <span>{t('storeClosedBanner')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}</span>
                         </div>
                         <p className="text-[#736A60]">
-                          {storeStatus.nextOpening?.label ? `Se deschide ${storeStatus.nextOpening.label}.` : ''} {t('preOrderOnlyNotice')}
+                          {t('preOrderOnlyNotice')}
                         </p>
                       </div>
                     )}
