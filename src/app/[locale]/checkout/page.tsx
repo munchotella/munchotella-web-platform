@@ -67,7 +67,12 @@ export default function CheckoutPage() {
   const [scheduledTime, setScheduledTime] = useState("18:00");
 
   const [couponCode, setCouponCode] = useState("");
-  const [discountPercent, setDiscountPercent] = useState(0);
+  const [activePromo, setActivePromo] = useState<{
+    code: string;
+    type: string;
+    value: number;
+    display: string;
+  } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
@@ -192,8 +197,25 @@ export default function CheckoutPage() {
     };
   }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm]);
 
-  const deliveryFee = (deliveryType === 'delivery' && !hasAddress) ? 0 : deliveryCalc.fee;
-  const discountAmount = Math.round((totalPrice * discountPercent) / 100);
+  let discountAmount = 0;
+  if (activePromo) {
+    if (activePromo.type === 'percentage') {
+      discountAmount = Math.round((totalPrice * activePromo.value) / 100);
+    } else if (activePromo.type === 'fixed') {
+      discountAmount = activePromo.value;
+    }
+  }
+
+  let deliveryFee = (deliveryType === 'delivery' && !hasAddress) ? 0 : deliveryCalc.fee;
+  
+  if (activePromo) {
+    if (activePromo.type === 'free_shipping') {
+      deliveryFee = 0;
+    } else if (activePromo.type === 'delivery_percentage') {
+      deliveryFee = Math.max(0, deliveryFee - Math.round((deliveryFee * activePromo.value) / 100));
+    }
+  }
+
   const grandTotal = Math.max(0, totalPrice - discountAmount + deliveryFee);
 
   React.useEffect(() => {
@@ -202,16 +224,37 @@ export default function CheckoutPage() {
     }
   }, [deliveryCalc.isPedestrian, doorDelivery]);
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     setCouponError("");
     const code = couponCode.trim().toUpperCase();
-    if (code === "MUNCH10" || code === "DUBAI10") {
-      setDiscountPercent(10);
-    } else if (code === "MUNCH20") {
-      setDiscountPercent(20);
-    } else {
-      setCouponError("Cod promoțional invalid sau expirat.");
+    if (!code) return;
+
+    try {
+      const res = await fetch("https://munchotella-api.onrender.com/api/promo/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setActivePromo({
+          code: data.data.code,
+          type: data.data.discountType,
+          value: data.data.discountValue,
+          display: data.data.discountDisplay
+        });
+      } else {
+        setCouponError(data.message || t('promoInvalid'));
+        setActivePromo(null);
+      }
+    } catch (err) {
+      setCouponError(t('promoError'));
+      setActivePromo(null);
     }
   };
 
@@ -311,7 +354,7 @@ export default function CheckoutPage() {
         doorDelivery,
         deliveryType,
         needsCutlery: false,
-        promoCode: discountPercent > 0 ? couponCode : undefined
+        promoCode: activePromo ? activePromo.code : undefined,
       };
 
       const API_URL = "https://munchotella-api.onrender.com/api";
@@ -972,9 +1015,9 @@ export default function CheckoutPage() {
                       {t('applyBtn')}
                     </button>
                   </div>
-                  {discountPercent > 0 && (
+                  {activePromo && (
                     <div className="flex items-center gap-1.5 text-xs text-[#D4A853] font-bold bg-[#D4A853]/10 px-3 py-2 rounded-lg">
-                      <CheckCircle2 className="w-4 h-4" /> {t('couponActive', { percent: discountPercent })}
+                      <CheckCircle2 className="w-4 h-4" /> {t('couponActive', { discountDisplay: activePromo.display })}
                     </div>
                   )}
                   {couponError && <p className="text-[11px] text-red-500 font-medium ml-1">{couponError}</p>}
