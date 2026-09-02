@@ -71,6 +71,7 @@ export default function CheckoutPage() {
     code: string;
     type: string;
     value: number;
+    maxDiscountAmount: number;
     display: string;
   } | null>(null);
   const [couponError, setCouponError] = useState("");
@@ -204,6 +205,16 @@ export default function CheckoutPage() {
     } else if (activePromo.type === 'fixed') {
       discountAmount = activePromo.value;
     }
+    
+    if (activePromo.maxDiscountAmount && activePromo.maxDiscountAmount > 0) {
+      if (discountAmount > activePromo.maxDiscountAmount) {
+        discountAmount = activePromo.maxDiscountAmount;
+      }
+    }
+  }
+
+  if (discountAmount > totalPrice) {
+    discountAmount = totalPrice;
   }
 
   let deliveryFee = (deliveryType === 'delivery' && !hasAddress) ? 0 : deliveryCalc.fee;
@@ -212,7 +223,13 @@ export default function CheckoutPage() {
     if (activePromo.type === 'free_shipping') {
       deliveryFee = 0;
     } else if (activePromo.type === 'delivery_percentage') {
-      deliveryFee = Math.max(0, deliveryFee - Math.round((deliveryFee * activePromo.value) / 100));
+      let deliveryDiscount = Math.round((deliveryFee * activePromo.value) / 100);
+      if (activePromo.maxDiscountAmount && activePromo.maxDiscountAmount > 0) {
+        if (deliveryDiscount > activePromo.maxDiscountAmount) {
+          deliveryDiscount = activePromo.maxDiscountAmount;
+        }
+      }
+      deliveryFee = Math.max(0, deliveryFee - deliveryDiscount);
     }
   }
 
@@ -246,6 +263,7 @@ export default function CheckoutPage() {
           code: data.data.code,
           type: data.data.discountType,
           value: data.data.discountValue,
+          maxDiscountAmount: data.data.maxDiscountAmount,
           display: data.data.discountDisplay
         });
       } else {
