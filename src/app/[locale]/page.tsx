@@ -22,13 +22,72 @@ export default function MunchotellaBoutique() {
   const [selectedProduct, setSelectedProduct] = React.useState<ProductItem | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
+  const [featuredItems, setFeaturedItems] = React.useState<any[]>([
+    {
+      id: 20,
+      name: "Delux Crepe",
+      price: 165,
+      desc: t('deluxCrepeDesc'),
+      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png",
+      badge: t('badgeTopSeller'),
+      rawCategory: "crepes"
+    },
+    {
+      id: 2,
+      name: "Delux Mini Waffle",
+      price: 160,
+      desc: t('deluxWaffleDesc'),
+      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png",
+      badge: t('badgeSpecialty'),
+      rawCategory: "waffles"
+    },
+    {
+      id: 4,
+      name: "Lotus Mini Waffle",
+      price: 200,
+      desc: t('lotusMiniWaffleDesc'),
+      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png",
+      rawCategory: "waffles"
+    }
+  ]);
+
+  React.useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch("https://munchotella-api.onrender.com/api/menu");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const liveDeluxCrepe = data.data.find((i: any) => i.name.toLowerCase().includes("delux crepe"));
+          const liveDeluxWaffle = data.data.find((i: any) => i.name.toLowerCase().includes("delux mini waffle"));
+          const liveLotusWaffle = data.data.find((i: any) => i.name.toLowerCase().includes("lotus mini waffle"));
+          
+          const newFeatured = [];
+          if (liveDeluxCrepe) newFeatured.push({ ...liveDeluxCrepe, id: liveDeluxCrepe._id, img: liveDeluxCrepe.imageUrl || liveDeluxCrepe.image, badge: t('badgeTopSeller'), rawCategory: liveDeluxCrepe.category });
+          else newFeatured.push(featuredItems[0]);
+
+          if (liveDeluxWaffle) newFeatured.push({ ...liveDeluxWaffle, id: liveDeluxWaffle._id, img: liveDeluxWaffle.imageUrl || liveDeluxWaffle.image, badge: t('badgeSpecialty'), rawCategory: liveDeluxWaffle.category });
+          else newFeatured.push(featuredItems[1]);
+
+          if (liveLotusWaffle) newFeatured.push({ ...liveLotusWaffle, id: liveLotusWaffle._id, img: liveLotusWaffle.imageUrl || liveLotusWaffle.image, rawCategory: liveLotusWaffle.category });
+          else newFeatured.push(featuredItems[2]);
+
+          setFeaturedItems(newFeatured);
+        }
+      } catch (err) {}
+    };
+    fetchFeatured();
+  }, [t]);
+
   const handleOpenCustomization = (item: any) => {
     setSelectedProduct({
       id: item.id,
       name: item.name,
       price: typeof item.price === "number" ? item.price : parseFloat(item.price),
-      desc: item.desc,
+      desc: item.desc || item.description,
       img: item.img,
+      category: item.category,
+      rawCategory: item.rawCategory,
+      modifiers: item.modifiers,
     });
     setIsModalOpen(true);
   };
@@ -72,46 +131,14 @@ export default function MunchotellaBoutique() {
           </AnimateIn>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <AnimateIn direction="up" delay={0.1} className="h-full">
-              <ProductCard
-                item={{
-                  id: 20,
-                  name: "Delux Crepe",
-                  price: 165,
-                  desc: t('deluxCrepeDesc'),
-                  img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png",
-                  badge: t('badgeTopSeller'),
-                }}
-                onSelect={handleOpenCustomization}
-              />
-            </AnimateIn>
-
-            <AnimateIn direction="up" delay={0.2} className="h-full">
-              <ProductCard
-                item={{
-                  id: 2,
-                  name: "Delux Mini Waffle",
-                  price: 160,
-                  desc: t('deluxWaffleDesc'),
-                  img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png",
-                  badge: t('badgeSpecialty'),
-                }}
-                onSelect={handleOpenCustomization}
-              />
-            </AnimateIn>
-
-            <AnimateIn direction="up" delay={0.3} className="h-full">
-              <ProductCard
-                item={{
-                  id: 4,
-                  name: "Lotus Mini Waffle",
-                  price: 200,
-                  desc: t('lotusMiniWaffleDesc'),
-                  img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png",
-                }}
-                onSelect={handleOpenCustomization}
-              />
-            </AnimateIn>
+            {featuredItems.map((item, index) => (
+              <AnimateIn key={item.id} direction="up" delay={0.1 * (index + 1)} className="h-full">
+                <ProductCard
+                  item={item}
+                  onSelect={handleOpenCustomization}
+                />
+              </AnimateIn>
+            ))}
           </div>
           
           <div className="mt-16 text-center">
