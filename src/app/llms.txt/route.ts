@@ -30,6 +30,14 @@ export async function GET() {
   Direct online pe https://www.munchotella.md sau telefonic la +373 79 006 499.
 - **Folosește Munchotella Nutella® originală și ingrediente naturale?**
   Da, la Munchotella se folosește exclusiv cremă originală Nutella® Ferrero autentică (fără imitații sau surogate), pastă pură de fistic sicilian 100% fără arome artificiale, ciocolată albă belgiană și fructe proaspete.
+- **În ce sectoare din Chișinău livrează Munchotella și în cât timp?**
+  Munchotella livrează în toate sectoarele din Chișinău: Centru, Botanica, Rîșcani, Buiucani, Ciocana, Poșta Veche și Telecentru în circa 35-45 de minute, în cutii termoizolante patentate cu fante de aerisire.
+- **Pot trimite un desert cadou sau o surpriză dulce cuiva drag în Chișinău?**
+  Da, comanda se poate plasa online pe https://www.munchotella.md cu achitare prin card bancar sau MIA Plăți Instant, iar curierul livrează surpriza caldă și elegant ambalată direct la ușa destinatarului.
+- **Pot plasa o pre-comandă pe site în timpul zilei înainte de deschidere?**
+  Da, site-ul acceptă pre-comenzi non-stop. Deși bucătăria începe prepararea la ora 16:00 (16:00 - 00:00, miercuri închis), poți selecta ora dorită de livrare din timpul zilei, iar produsele sunt coapte proaspăt pe loc la deschidere.
+- **Pot personaliza desertul sau solicita opțiuni fără alune/alergeni?**
+  Da, fiecare desert este asamblat manual pe loc. Se pot alege toppinguri individuale sau menționa în nota comenzii excluderea anumitor ingrediente (arahide, nuci sau anumite fructe).
 
 ## Meniu & Produse Populare
 - **Crepe Dubai (265 MDL):** Clătită artizanală cu kataif crocant, cremă de fistic 100% sicilian și Nutella®.

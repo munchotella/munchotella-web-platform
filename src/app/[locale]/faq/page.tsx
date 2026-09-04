@@ -90,6 +90,30 @@ export default async function FAQPage({
       answer: t("a6"),
       tag: t("tagIngredients"),
     },
+    {
+      id: "q7",
+      question: t("q7"),
+      answer: t("a7"),
+      tag: t("tagDelivery"),
+    },
+    {
+      id: "q8",
+      question: t("q8"),
+      answer: t("a8"),
+      tag: t("tagLocation"),
+    },
+    {
+      id: "q9",
+      question: t("q9"),
+      answer: t("a9"),
+      tag: t("tagDelivery"),
+    },
+    {
+      id: "q10",
+      question: t("q10"),
+      answer: t("a10"),
+      tag: t("tagIngredients"),
+    },
   ];
 
   const faqSchema = {
