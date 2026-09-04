@@ -84,6 +84,12 @@ export default async function FAQPage({
       answer: t("a5"),
       tag: t("tagFresh"),
     },
+    {
+      id: "q6",
+      question: t("q6"),
+      answer: t("a6"),
+      tag: t("tagIngredients"),
+    },
   ];
 
   const faqSchema = {

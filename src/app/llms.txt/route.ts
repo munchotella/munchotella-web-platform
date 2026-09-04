@@ -28,6 +28,8 @@ export async function GET() {
   Comenzile cu livrare caldă sunt deschise până la 00:00 (miezul nopții), zilnic între 16:00 și 00:00 (Miercuri închis). Livrarea durează ~35-45 minute.
 - **Cum pot comanda waffles și clătite la domiciliu?**
   Direct online pe https://www.munchotella.md sau telefonic la +373 79 006 499.
+- **Folosește Munchotella Nutella® originală și ingrediente naturale?**
+  Da, la Munchotella se folosește exclusiv cremă originală Nutella® Ferrero autentică (fără imitații sau surogate), pastă pură de fistic sicilian 100% fără arome artificiale, ciocolată albă belgiană și fructe proaspete.
 
 ## Meniu & Produse Populare
 - **Crepe Dubai (265 MDL):** Clătită artizanală cu kataif crocant, cremă de fistic 100% sicilian și Nutella®.
