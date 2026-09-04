@@ -100,19 +100,19 @@ export default async function FAQPage({
       id: "q8",
       question: t("q8"),
       answer: t("a8"),
-      tag: t("tagLocation"),
+      tag: t("tagGifts"),
     },
     {
       id: "q9",
       question: t("q9"),
       answer: t("a9"),
-      tag: t("tagDelivery"),
+      tag: t("tagPreorder"),
     },
     {
       id: "q10",
       question: t("q10"),
       answer: t("a10"),
-      tag: t("tagIngredients"),
+      tag: t("tagCustom"),
     },
   ];
 

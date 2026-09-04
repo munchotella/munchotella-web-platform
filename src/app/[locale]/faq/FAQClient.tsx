@@ -103,7 +103,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-5 mb-14 md:mb-18">
             
             {/* Location Card */}
-            <div className="bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-5 shadow-[0_4px_20px_rgba(26,26,26,0.03)] hover:border-[#D4A853]/60 transition-all duration-300 flex flex-col justify-between group">
+            <div className="bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-5 shadow-[0_4px_20px_rgba(26,26,26,0.03)] hover:border-[#D4A853]/60 transition-all duration-300 flex flex-col justify-between group active:scale-[0.99]">
               <div className="flex items-center gap-3.5 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-[#D4A853]/15 text-[#8C6B1B] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <MapPin className="w-5 h-5 text-[#D4A853]" />
@@ -135,17 +135,17 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                   <p className="text-sm font-bold text-[#1A120B]">16:00 – 00:00</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-medium text-[#736A60] pt-2 border-t border-[#E8E2D9]/60">
-                <span className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-1.5 text-[11px] font-medium text-[#736A60] pt-2 border-t border-[#E8E2D9]/60">
+                <span className="flex items-center gap-1.5 shrink-0">
                   <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-pulse inline-block" />
                   {tContact("scheduleTime")}
                 </span>
-                <span className="text-amber-700 font-semibold">{tContact("scheduleClosed")}</span>
+                <span className="text-amber-700 font-semibold shrink-0">{tContact("scheduleClosed")}</span>
               </div>
             </div>
 
             {/* Phone & Fast Orders Card */}
-            <div className="bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-5 shadow-[0_4px_20px_rgba(26,26,26,0.03)] hover:border-[#D4A853]/60 transition-all duration-300 flex flex-col justify-between group">
+            <div className="bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-5 shadow-[0_4px_20px_rgba(26,26,26,0.03)] hover:border-[#D4A853]/60 transition-all duration-300 flex flex-col justify-between group active:scale-[0.99]">
               <div className="flex items-center gap-3.5 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-[#D4A853]/15 text-[#8C6B1B] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Phone className="w-5 h-5 text-[#D4A853]" />
@@ -169,7 +169,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
               <button
                 type="button"
                 onClick={handleCallClick}
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#D4A853] hover:text-[#1A120B] transition-colors pt-2 border-t border-[#E8E2D9]/60 cursor-pointer text-left"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#D4A853] hover:text-[#1A120B] transition-colors pt-2 border-t border-[#E8E2D9]/60 cursor-pointer text-left active:scale-95"
               >
                 <span>{isCalling ? t("callingState") : t("contactBtn")}</span>
                 <PhoneCall className={`w-3 h-3 ${isCalling ? "animate-bounce" : ""}`} />
@@ -181,25 +181,25 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
 
         {/* Quality Guarantees Ribbon */}
         <AnimateIn direction="up" delay={0.28}>
-          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 py-3 px-6 mb-12 rounded-full bg-[#FFFCF6]/80 border border-[#E8E2D9] text-xs font-semibold text-[#736A60] shadow-xs">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 py-3.5 px-6 mb-12 rounded-full bg-[#FFFCF6]/80 border border-[#E8E2D9] text-xs font-semibold text-[#736A60] shadow-xs">
             <span className="inline-flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-[#D4A853]" />
-              Nutella® Original
+              {t("ribbonNutella")}
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
             <span className="inline-flex items-center gap-1.5">
               <Award className="w-4 h-4 text-[#D4A853]" />
-              100% Pure Pistachio
+              {t("ribbonPistachio")}
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
             <span className="inline-flex items-center gap-1.5">
               <PackageCheck className="w-4 h-4 text-[#D4A853]" />
-              Ventilated Thermal Delivery Box
+              {t("ribbonBox")}
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-[#D4A853]" />
-              Fresh Batter Daily
+              {t("ribbonBatter")}
             </span>
           </div>
         </AnimateIn>
@@ -209,7 +209,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
           {faqItems.map((item, index) => {
             const isOpen = openId === item.id;
             return (
-              <AnimateIn key={item.id} direction="up" delay={0.05 * (index + 1)}>
+              <AnimateIn key={item.id} direction="up" delay={0.04 * (index + 1)}>
                 <div
                   className={`bg-[#FFFCF6] rounded-2xl md:rounded-[20px] border transition-all duration-300 overflow-hidden ${
                     isOpen
@@ -223,9 +223,9 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${item.id}`}
                     id={`faq-question-${item.id}`}
-                    className="w-full px-5 py-5 sm:px-7 sm:py-6 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A853] rounded-2xl group"
+                    className="w-full px-5 py-5 sm:px-7 sm:py-6 text-left flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A853] rounded-2xl group active:scale-[0.995]"
                   >
-                    <div className="flex items-start sm:items-center gap-4 min-w-0">
+                    <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 min-w-0">
                       {/* Number Stamp */}
                       <span
                         className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shrink-0 transition-colors duration-300 ${
@@ -234,13 +234,13 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                             : "bg-[#FAF7F2] text-[#8C6B1B] border border-[#E8E2D9] group-hover:border-[#D4A853]/50"
                         }`}
                       >
-                        0{index + 1}
+                        {index < 9 ? `0${index + 1}` : `${index + 1}`}
                       </span>
 
                       {/* Question Text & Category Tag */}
-                      <div className="space-y-1 min-w-0">
+                      <div className="space-y-1.5 min-w-0">
                         {item.tag && (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#D4A853] px-2 py-0.5 rounded-md bg-[#D4A853]/10">
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#8C6B1B] px-2.5 py-0.5 rounded-md bg-[#D4A853]/15 border border-[#D4A853]/25">
                             {item.tag}
                           </span>
                         )}
@@ -273,8 +273,8 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                       >
-                        <div className="px-5 pb-6 pt-1 sm:px-7 sm:pb-8 border-t border-[#E8E2D9]/60 bg-white/40">
-                          <p className="text-[#1A120B]/85 text-sm sm:text-[15px] font-sans font-light leading-relaxed pl-12 sm:pl-13">
+                        <div className="px-5 pb-6 pt-3 sm:px-7 sm:pb-8 sm:pt-4 border-t border-[#E8E2D9]/60 bg-white/40">
+                          <p className="text-[#1A120B]/85 text-sm sm:text-[15px] font-sans font-light leading-relaxed sm:pl-13">
                             {item.answer}
                           </p>
                         </div>
@@ -311,7 +311,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                 {/* Floating Artisan Badge */}
                 <div className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 px-3.5 py-1.5 rounded-full bg-[#1A120B]/85 backdrop-blur-md border border-[#D4A853]/40 text-white text-[11px] font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-lg">
                   <Award className="w-3.5 h-3.5 text-[#D4A853]" />
-                  <span>Handcrafted Daily</span>
+                  <span>{t("badgeHandcrafted")}</span>
                 </div>
               </div>
 
@@ -319,7 +319,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
               <div className="lg:w-7/12 p-7 sm:p-10 lg:p-12 flex flex-col justify-center text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4A853]/15 border border-[#D4A853]/30 text-[#D4A853] text-[10px] font-bold uppercase tracking-[0.2em] mb-4 w-fit">
                   <Flame className="w-3 h-3 text-[#D4A853]" />
-                  <span>MUNCHOTELLA KITCHEN</span>
+                  <span>{t("kitchenEyebrow")}</span>
                 </div>
 
                 <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal text-white mb-4 tracking-tight leading-snug">
