@@ -1,21 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { 
   ChevronDown, 
   Phone, 
+  PhoneCall,
   Utensils, 
-  HelpCircle, 
-  Sparkles, 
   MapPin, 
   Clock, 
   ExternalLink,
   Flame,
   CheckCircle2,
-  HeartHandshake,
-  ShieldCheck,
-  PackageCheck
+  PackageCheck,
+  Award,
+  Sparkles,
+  ArrowUpRight,
+  Copy,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimateIn } from "@/components/ui/AnimateIn";
@@ -32,9 +35,26 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
   const t = useTranslations("FAQ");
   const tContact = useTranslations("Contact");
   const [openId, setOpenId] = useState<string | null>("q1");
+  const [isCalling, setIsCalling] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const toggleItem = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
+  };
+
+  const handleCallClick = (e: React.MouseEvent) => {
+    setIsCalling(true);
+    // Also copy number to clipboard on desktop/all devices as convenient backup
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText("+37379006499").then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 3000);
+      }).catch(() => {});
+    }
+    setTimeout(() => {
+      window.location.href = "tel:+37379006499";
+      setTimeout(() => setIsCalling(false), 2000);
+    }, 250);
   };
 
   return (
@@ -60,7 +80,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
         <header className="text-center mb-14 md:mb-18 max-w-3xl mx-auto">
           <AnimateIn direction="up">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A853]/15 border border-[#D4A853]/35 text-[#8C6B1B] text-[11px] font-bold uppercase tracking-[0.2em] mb-5 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4A853]" />
+              <Award className="w-3.5 h-3.5 text-[#D4A853]" />
               <span>{t("badge")}</span>
             </div>
           </AnimateIn>
@@ -117,7 +137,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
               </div>
               <div className="flex items-center justify-between text-[11px] font-medium text-[#736A60] pt-2 border-t border-[#E8E2D9]/60">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
+                  <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-pulse inline-block" />
                   {tContact("scheduleTime")}
                 </span>
                 <span className="text-amber-700 font-semibold">{tContact("scheduleClosed")}</span>
@@ -132,18 +152,28 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-[#736A60] uppercase tracking-wider">{tContact("phoneEmailTitle")}</p>
-                  <a href="tel:+37379006499" className="text-sm font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors">
-                    079 006 499
-                  </a>
+                  <button
+                    type="button"
+                    onClick={handleCallClick}
+                    className="text-sm font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                  >
+                    <span>079 006 499</span>
+                    {isCopied ? (
+                      <Check className="w-3.5 h-3.5 text-[#D4A853]" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5 text-[#736A60] opacity-60 hover:opacity-100" />
+                    )}
+                  </button>
                 </div>
               </div>
-              <a
-                href="tel:+37379006499"
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#D4A853] hover:text-[#1A120B] transition-colors pt-2 border-t border-[#E8E2D9]/60"
+              <button
+                type="button"
+                onClick={handleCallClick}
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#D4A853] hover:text-[#1A120B] transition-colors pt-2 border-t border-[#E8E2D9]/60 cursor-pointer text-left"
               >
-                <span>{t("contactBtn")}</span>
-                <Phone className="w-3 h-3" />
-              </a>
+                <span>{isCalling ? t("callingState") : t("contactBtn")}</span>
+                <PhoneCall className={`w-3 h-3 ${isCalling ? "animate-bounce" : ""}`} />
+              </button>
             </div>
 
           </div>
@@ -158,7 +188,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
             <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <Award className="w-4 h-4 text-[#D4A853]" />
               100% Pure Pistachio
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
@@ -168,7 +198,7 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
             </span>
             <span className="hidden sm:inline text-[#D4A853]/40">•</span>
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-600" />
+              <CheckCircle2 className="w-4 h-4 text-[#D4A853]" />
               Fresh Batter Daily
             </span>
           </div>
@@ -257,43 +287,91 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
           })}
         </div>
 
-        {/* Signature Call to Action Banner (Dark Chocolate Warm Luxury) */}
+        {/* 21st.dev-Inspired Visual CTA Showcase Card (Warm Luxury Editorial) */}
         <AnimateIn direction="up" delay={0.35}>
-          <div className="mt-16 md:mt-24 bg-[#1A120B] rounded-3xl p-8 sm:p-12 md:p-14 text-center text-white border border-[#D4A853]/25 shadow-2xl relative overflow-hidden max-w-4xl mx-auto">
+          <div className="mt-16 md:mt-24 max-w-4xl mx-auto rounded-3xl bg-[#1A120B] border border-[#D4A853]/30 shadow-2xl overflow-hidden relative">
             {/* Ambient Background Glows */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A853]/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4A853]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4A853]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#D4A853]/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 max-w-xl mx-auto">
-              <div className="w-14 h-14 rounded-2xl bg-[#D4A853]/20 border border-[#D4A853]/30 text-[#D4A853] flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <HeartHandshake className="w-7 h-7 text-[#D4A853]" />
+            <div className="flex flex-col lg:flex-row items-stretch relative z-10">
+              
+              {/* Visual Appetizer Showcase (40% desktop) */}
+              <div className="lg:w-5/12 relative min-h-[260px] lg:min-h-[380px] overflow-hidden group">
+                <Image
+                  src="/dubai_pistachio_crepe_ref.png"
+                  alt="Munchotella Dubai Pistachio Crepe"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority={false}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-[#1A120B]/30 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-[#1A120B]/40 lg:to-[#1A120B]" />
+                
+                {/* Floating Artisan Badge */}
+                <div className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 px-3.5 py-1.5 rounded-full bg-[#1A120B]/85 backdrop-blur-md border border-[#D4A853]/40 text-white text-[11px] font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-lg">
+                  <Award className="w-3.5 h-3.5 text-[#D4A853]" />
+                  <span>Handcrafted Daily</span>
+                </div>
               </div>
 
-              <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal mb-3 text-white tracking-tight leading-tight">
-                {t("ctaTitle")}
-              </h3>
+              {/* Content & Action Block (60% desktop) */}
+              <div className="lg:w-7/12 p-7 sm:p-10 lg:p-12 flex flex-col justify-center text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4A853]/15 border border-[#D4A853]/30 text-[#D4A853] text-[10px] font-bold uppercase tracking-[0.2em] mb-4 w-fit">
+                  <Flame className="w-3 h-3 text-[#D4A853]" />
+                  <span>MUNCHOTELLA KITCHEN</span>
+                </div>
 
-              <p className="text-white/75 text-sm sm:text-base font-light leading-relaxed mb-9">
-                {t("ctaDesc")}
-              </p>
+                <h3 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal text-white mb-4 tracking-tight leading-snug">
+                  {t("ctaTitle")}
+                </h3>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a
-                  href="tel:+37379006499"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full border border-white/20 transition-all duration-300 min-h-[48px] shadow-sm"
-                >
-                  <Phone className="w-4 h-4 text-[#D4A853]" />
-                  <span>{t("contactBtn")}</span>
-                </a>
+                <p className="text-white/75 text-sm sm:text-base font-light leading-relaxed mb-8">
+                  {t("ctaDesc")}
+                </p>
 
-                <Link
-                  href="/menu"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-[#D4A853] hover:bg-[#C09640] active:scale-95 text-[#1A120B] font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-[0_8px_30px_rgba(212,168,83,0.35)] min-h-[48px]"
-                >
-                  <Utensils className="w-4 h-4 text-[#1A120B]" />
-                  <span>{t("menuBtn")}</span>
-                </Link>
+                {/* Interactive Action Row */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                  <button
+                    type="button"
+                    onClick={handleCallClick}
+                    className={`inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 min-h-[50px] cursor-pointer active:scale-95 shadow-lg ${
+                      isCalling
+                        ? "bg-[#D4A853] text-[#1A120B] animate-pulse"
+                        : "bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-[#D4A853]/50"
+                    }`}
+                  >
+                    <PhoneCall className={`w-4 h-4 text-[#D4A853] ${isCalling ? "animate-spin" : ""}`} />
+                    <span>{isCalling ? t("callingState") : t("contactBtn")}</span>
+                  </button>
+
+                  <Link
+                    href="/menu"
+                    className="inline-flex items-center justify-center gap-2.5 bg-[#D4A853] hover:bg-[#C09640] active:scale-95 text-[#1A120B] font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-[0_8px_30px_rgba(212,168,83,0.35)] hover:shadow-[0_12px_35px_rgba(212,168,83,0.45)] min-h-[50px]"
+                  >
+                    <Utensils className="w-4 h-4 text-[#1A120B]" />
+                    <span>{t("menuBtn")}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-[#1A120B]" />
+                  </Link>
+                </div>
+
+                {/* Call Feedback Notification */}
+                <AnimatePresence>
+                  {(isCalling || isCopied) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#D4A853] bg-[#D4A853]/10 border border-[#D4A853]/30 px-3.5 py-1.5 rounded-lg w-fit"
+                    >
+                      <Check className="w-3.5 h-3.5 text-[#D4A853]" />
+                      <span>{isCopied ? t("callCopied") : t("callingState")} (+373 79 006 499)</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
               </div>
+
             </div>
           </div>
         </AnimateIn>
