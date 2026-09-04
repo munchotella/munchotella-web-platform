@@ -451,6 +451,7 @@
     "ourStory": "Our Story",
     "fullMenu": "Full Menu",
     "reviews": "Reviews",
+    "faq": "Frequently Asked Questions (FAQ)",
     "support": "Support",
     "contact": "Contact",
     "privacy": "Privacy Policy",
@@ -461,5 +462,24 @@
     "scheduleTime": "Monday - Sunday: 16:00 - 00:00",
     "scheduleClosed": "Wednesday: Closed",
     "rights": "All rights reserved."
+  },
+  "FAQ": {
+    "badge": "QUICK ANSWERS",
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you want to know about our fresh artisan desserts, premium ingredients, and hot delivery in Chisinau.",
+    "ctaTitle": "Have more questions?",
+    "ctaDesc": "Our team is delighted to help you with any sweet curiosity or recommendation.",
+    "contactBtn": "Call the Boutique",
+    "menuBtn": "Explore the Menu",
+    "q1": "Where can I find the best waffles in Chisinau?",
+    "a1": "You can find the best artisan waffles in Chisinau at Munchotella, located on Strada Nicolae Testemițanu 21/1. We prepare fresh batter every morning from scratch using our own secret recipe. We serve 16 warm mini waffles and classic Belgian waffles topped with original Nutella®, Belgian white chocolate, crushed pistachios, Lotus Biscoff cookies, and fresh fruits. You can enjoy them at our boutique or order them hot directly to your door.",
+    "q2": "Where can I eat Dubai Crepe with 100% pure pistachio and kataifi in Chisinau?",
+    "a2": "At Munchotella you can enjoy the famous handcrafted Dubai Crepe right in Chisinau (Str. Nicolae Testemițanu 21/1). We use fresh butter-toasted crispy kataifi pastry, 100% pure Sicilian pistachio cream (no artificial colors or flavorings), and authentic Nutella®. It is a spectacular, rich dessert freshly made to order.",
+    "q3": "What 'something sweet' options does Munchotella offer in Chisinau?",
+    "a3": "Whenever you crave something sweet in Chisinau, Munchotella offers a full premium dessert menu: American waffles (Delux Mini Waffles, Lotus Biscoff, Fruits Waffle), French crepes (Delux Crepe, Dubai Crepe, Kinder Crepe), Sweet Sushi (Royal Sushi Crepe with fresh bananas and strawberries), Waffle Sticks on skewers, fluffy pancakes, and handcrafted milkshakes made with real ingredients.",
+    "q4": "Until what time can I order hot desserts with delivery in Chisinau?",
+    "a4": "At Munchotella you can order hot desserts with fast delivery across Chisinau until 00:00 (midnight). We are open Monday through Sunday from 16:00 to 00:00 (Closed on Wednesdays). All desserts are packed in insulated thermal boxes, ensuring your waffles and crepes arrive hot, fluffy, and fresh at your door within 35-45 minutes.",
+    "q5": "How can I order hot waffles and crepes for home delivery from Munchotella?",
+    "a5": "Ordering is very easy online on our official website www.munchotella.md (with secure card payment or cash on delivery), or by calling +373 79 006 499 (079 006 499). Takeaway pickup is also available directly from our boutique at Str. Nicolae Testemițanu 21/1."
   }
 }

@@ -49,6 +49,7 @@ export default function Footer() {
               <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('ourStory')}</Link></li>
               <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('fullMenu')}</Link></li>
               <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('reviews')}</Link></li>
+              <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('faq')}</Link></li>
             </ul>
           </div>
 
