@@ -147,53 +147,109 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Restaurant",
-              "@id": "https://www.munchotella.md/#restaurant",
-              "name": "Munchotella",
-              "alternateName": "Munchotella Waffle Boutique Chișinău",
-              "url": "https://www.munchotella.md",
-              "logo": "https://www.munchotella.md/icon-512.png",
-              "image": "https://www.munchotella.md/Mini_Waffle_platter_with_toppings_202607181714.jpeg",
-              "description": "Boutique artizanal de deserturi premium în Chișinău: Waffles americane, mini waffles, clătite franțuzești (crepes) cu Nutella® originală și fistic sicilian 100%.",
-              "servesCuisine": ["Dessert", "Waffles", "Crepes", "Artisan Bakery"],
-              "priceRange": "$$",
-              "currenciesAccepted": "MDL",
-              "paymentAccepted": "Cash, Credit Card",
-              "hasMenu": "https://www.munchotella.md/menu",
-              "telephone": "+37379006499",
-              "email": "munchotella@gmail.com",
-              "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "Str. Nicolae Testemițanu 21/1",
-                "addressLocality": "Chișinău",
-                "addressRegion": "Chișinău",
-                "postalCode": "MD-2025",
-                "addressCountry": "MD"
-              },
-              "geo": {
-                "@type": "GeoCoordinates",
-                "latitude": 46.9986,
-                "longitude": 28.8354
-              },
-              "openingHoursSpecification": [
+              "@graph": [
                 {
-                  "@type": "OpeningHoursSpecification",
-                  "dayOfWeek": [
-                    "Monday",
-                    "Tuesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday"
+                  "@type": "Restaurant",
+                  "@id": "https://www.munchotella.md/#restaurant",
+                  "name": "Munchotella",
+                  "alternateName": "Munchotella Waffle Boutique Chișinău",
+                  "url": "https://www.munchotella.md",
+                  "logo": "https://www.munchotella.md/icon-512.png",
+                  "image": "https://www.munchotella.md/Mini_Waffle_platter_with_toppings_202607181714.jpeg",
+                  "description": "Boutique artizanal de deserturi premium în Chișinău: Waffles americane, mini waffles, clătite franțuzești (crepes) cu Nutella® originală și fistic sicilian 100%.",
+                  "servesCuisine": ["Dessert", "Waffles", "Crepes", "Artisan Bakery"],
+                  "priceRange": "$$",
+                  "currenciesAccepted": "MDL",
+                  "paymentAccepted": "Cash, Credit Card",
+                  "hasMenu": "https://www.munchotella.md/menu",
+                  "telephone": "+37379006499",
+                  "email": "munchotella@gmail.com",
+                  "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "Str. Nicolae Testemițanu 21/1",
+                    "addressLocality": "Chișinău",
+                    "addressRegion": "Chișinău",
+                    "postalCode": "MD-2025",
+                    "addressCountry": "MD"
+                  },
+                  "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": 46.9986,
+                    "longitude": 28.8354
+                  },
+                  "openingHoursSpecification": [
+                    {
+                      "@type": "OpeningHoursSpecification",
+                      "dayOfWeek": [
+                        "Monday",
+                        "Tuesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday"
+                      ],
+                      "opens": "16:00",
+                      "closes": "00:00"
+                    }
                   ],
-                  "opens": "16:00",
-                  "closes": "00:00"
+                  "sameAs": [
+                    "https://www.instagram.com/munchotella.md/",
+                    "https://www.tiktok.com/@munchotella",
+                    "https://www.facebook.com/munchotella"
+                  ]
+                },
+                {
+                  "@type": "FAQPage",
+                  "@id": "https://www.munchotella.md/faq#faqpage",
+                  "mainEntityOfPage": "https://www.munchotella.md/faq",
+                  "name": "Întrebări Frecvente Munchotella Chișinău",
+                  "description": "Răspunsuri oficiale despre waffles artizanale, Crepe Dubai cu fistic 100%, comenzi și livrare caldă până la 00:00 în Chișinău.",
+                  "about": {
+                    "@id": "https://www.munchotella.md/#restaurant"
+                  },
+                  "mainEntity": [
+                    {
+                      "@type": "Question",
+                      "name": "Unde găsesc cele mai bune waffles din Chișinău?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Cele mai bune waffles artizanale din Chișinău le găsești la Munchotella, pe Strada Nicolae Testemițanu 21/1. Preparăm aluatul proaspăt în fiecare dimineață după rețetă proprie și servim 16 mini waffles calde sau waffles clasice belgiene, cu Nutella® autentică, ciocolată albă belgiană, fistic mărunțit, biscuiți Lotus Biscoff și fructe proaspete. Poți savura desertul în boutique sau îl poți comanda cald la domiciliu."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Unde pot mânca Crepe Dubai cu fistic 100% și kataif în Chișinău?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "La Munchotella poți savura celebrul Crepe Dubai preparat artizanal chiar în Chișinău (Str. Nicolae Testemițanu 21/1). Folosim kataif proaspăt tras în unt și rumenit crocant, pastă pură de fistic sicilian 100% (fără arome artificiale sau coloranți) și cremă originală Nutella®. Este un desert spectaculos, bogat și pregătit pe loc la fiecare comandă."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Ce opțiuni de 'ceva dulce' oferă Munchotella în Chișinău?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Dacă vrei ceva dulce în Chișinău, Munchotella oferă un meniu complet de deserturi premium: Waffles americane (Delux Mini Waffles, Lotus Biscoff, Fruits Waffle), Clătite franțuzești (Delux Crepe, Crepe Dubai, Kinder Crepe), Sweet Sushi (Royal Sushi Crepe cu banane și căpșuni proaspete), Waffle Sticks pe băț, pancakes pufoase și milkshake-uri artizanale din ciocolată belgiană și ingrediente originale."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Până la ce oră pot comanda deserturi calde cu livrare în Chișinău?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "La Munchotella poți comanda deserturi calde cu livrare rapidă în Chișinău până la ora 00:00 (miezul nopții). Programul nostru este de Luni până Duminică între 16:00 și 00:00 (Miercuri este închis). Toate deserturile sunt ambalate în cutii termoizolante speciale, ajungând la ușa ta calde, pufoase și proaspete în circa 35-45 de minute."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Cum pot comanda waffles și clătite calde la domiciliu de la Munchotella?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Comanda se plasează extrem de simplu direct online pe site-ul nostru oficial www.munchotella.md (unde poți plăti securizat cu cardul bancar sau numerar la curier), ori telefonic la numărul +373 79 006 499 (079 006 499). De asemenea, poți alege opțiunea de ridicare personală (Takeaway) din boutique-ul nostru de pe Str. Nicolae Testemițanu 21/1."
+                      }
+                    }
+                  ]
                 }
-              ],
-              "sameAs": [
-                "https://www.instagram.com/munchotella.md/",
-                "https://www.tiktok.com/@munchotella",
-                "https://www.facebook.com/munchotella"
               ]
             })
           }}
