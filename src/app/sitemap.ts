@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.munchotella.md';
   const locales = ['ro', 'en', 'ru'];
-  const routes = ['', '/menu', '/about', '/contact', '/checkout', '/faq'];
+  const routes = ['', '/menu', '/about', '/contact', '/checkout'];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
