@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Minus, Check, Sparkles } from "lucide-react";
+import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { translateTopping } from "@/utils/toppingTranslations";
@@ -217,18 +217,6 @@ export default function ProductCustomizationModal({
                         {product.desc}
                       </p>
                     )}
-                  </div>
-
-                  {/* Desktop Tip Badge */}
-                  <div className="hidden md:flex items-start gap-2.5 p-3 rounded-2xl bg-[#F5EFEB]/80 border border-[#EAE1DB] mt-6">
-                    <Sparkles className="w-4 h-4 text-[#D4A853] shrink-0 mt-0.5" />
-                    <p className="text-[12px] text-[#736A60] leading-snug">
-                      {locale === "ro"
-                        ? "Personalizează desertul cu toppingurile tale favorite din lista alăturată."
-                        : locale === "ru"
-                        ? "Настройте десерт с любимыми топпингами из списка справа."
-                        : "Customize your treat with your favorite toppings from the list."}
-                    </p>
                   </div>
                 </div>
               </div>
