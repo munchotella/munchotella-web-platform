@@ -30,41 +30,77 @@ const HERO_PLAYLIST = [
 
 export default function CinematicScrollHero() {
   const t = useTranslations("Hero");
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  const currentTrack = HERO_PLAYLIST[currentTrackIndex];
-
-  const handleVideoEnded = () => {
-    setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % HERO_PLAYLIST.length);
-  };
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch((err) => {
+  const switchToTrack = (nextIndex: number) => {
+    const nextVideo = videoRefs.current[nextIndex];
+    if (nextVideo) {
+      nextVideo.currentTime = 0;
+      nextVideo.play().catch((err) => {
         console.warn("Video playback autoplay blocked/ready:", err);
       });
     }
-  }, [currentTrackIndex]);
+    // Pause other videos to optimize GPU/CPU
+    videoRefs.current.forEach((vid, idx) => {
+      if (vid && idx !== nextIndex) {
+        vid.pause();
+      }
+    });
+    setCurrentTrackIndex(nextIndex);
+  };
+
+  const handleVideoEnded = (idx: number) => {
+    if (idx === currentTrackIndex) {
+      const nextIndex = (currentTrackIndex + 1) % HERO_PLAYLIST.length;
+      switchToTrack(nextIndex);
+    }
+  };
+
+  useEffect(() => {
+    // Initial start for first video
+    const firstVideo = videoRefs.current[0];
+    if (firstVideo) {
+      firstVideo.play().catch((err) => {
+        console.warn("Initial autoplay blocked/ready:", err);
+      });
+    }
+    // Pre-buffer subsequent videos in background
+    videoRefs.current.forEach((vid, idx) => {
+      if (vid && idx !== 0) {
+        vid.load();
+      }
+    });
+  }, []);
 
   return (
     <section className="relative bg-[#1A120B] h-screen w-full overflow-hidden flex flex-col items-center justify-center">
-      {/* Background Video Layer with Seamless Playlist */}
-      <div className="absolute inset-0 w-full h-full z-0">
-        <video
-          ref={videoRef}
-          key={currentTrack.src}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          poster={currentTrack.poster}
-          onEnded={handleVideoEnded}
-          className="w-full h-full object-cover object-center opacity-90 transition-opacity duration-700"
-        >
-          <source src={currentTrack.src} type="video/mp4" />
-        </video>
+      {/* Background Video Layer with Instant Multi-Buffer (Zero Black Millisecond) */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        {HERO_PLAYLIST.map((track, idx) => {
+          const isActive = idx === currentTrackIndex;
+          return (
+            <video
+              key={track.src}
+              ref={(el) => {
+                videoRefs.current[idx] = el;
+              }}
+              autoPlay={idx === 0}
+              muted
+              playsInline
+              preload="auto"
+              poster={track.poster}
+              onEnded={() => handleVideoEnded(idx)}
+              className={`absolute inset-0 w-full h-full object-cover object-center ${
+                isActive
+                  ? "opacity-90 z-10 block"
+                  : "opacity-0 z-0 pointer-events-none"
+              }`}
+            >
+              <source src={track.src} type="video/mp4" />
+            </video>
+          );
+        })}
 
         {/* UI Safe Zone Gradient Overlay (Dark Left Vignette for Text Legibility) */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#1A120B]/95 via-[#1A120B]/55 to-transparent w-full md:w-3/5 pointer-events-none z-10" />
@@ -139,7 +175,7 @@ export default function CinematicScrollHero() {
           {HERO_PLAYLIST.map((track, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrentTrackIndex(idx)}
+              onClick={() => switchToTrack(idx)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
               }`}
