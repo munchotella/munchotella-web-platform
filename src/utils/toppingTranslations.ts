@@ -3,12 +3,17 @@ export type SupportedLocale = 'ro' | 'ru' | 'en';
 export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string>> = {
   // ── Group Titles ──
   'Toppings': {
-    ro: 'Toppings',
+    ro: 'Toppinguri',
+    ru: 'Топпинги',
+    en: 'Toppings',
+  },
+  'Topping': {
+    ro: 'Toppinguri',
     ru: 'Топпинги',
     en: 'Toppings',
   },
   'Toppings Extra': {
-    ro: 'Toppings',
+    ro: 'Toppinguri',
     ru: 'Топпинги',
     en: 'Toppings',
   },

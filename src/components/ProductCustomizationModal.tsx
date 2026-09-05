@@ -223,17 +223,8 @@ export default function ProductCustomizationModal({
 
               {/* RIGHT COLUMN (Desktop) / BOTTOM SECTION (Mobile): Customization & Actions */}
               <div className="w-full md:w-[60%] lg:w-[62%] flex-1 flex flex-col min-h-0 bg-white">
-                {/* Desktop Header Bar with Close Button */}
-                <div className="hidden md:flex items-center justify-between px-5 py-3 border-b border-[#EAE1DB] bg-white shrink-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-[15px] text-[#1A1A1A]">
-                      {locale === 'ro' ? 'Toppinguri & Personalizare' : locale === 'ru' ? 'Топпинги и Настройка' : 'Toppings & Customization'}
-                    </h4>
-                    <span className="text-[11px] bg-[#F5EFEB] text-[#736A60] px-2 py-0.5 rounded-full font-medium">
-                      {t('optional')}
-                    </span>
-                  </div>
-
+                {/* Desktop Close Button Header */}
+                <div className="hidden md:flex items-center justify-end px-5 pt-3 pb-1 bg-white shrink-0">
                   <button
                     type="button"
                     onClick={onClose}
