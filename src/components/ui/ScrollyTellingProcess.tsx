@@ -67,7 +67,7 @@ export default function ScrollyTellingProcess() {
         >
           <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
             {/* Fallback to process video if step1.mp4 is missing */}
-            <source src="/videos/step1.mp4" type="video/mp4" onError={(e) => (e.currentTarget.src = "/videos/munchotella_philosophy_process.mp4")} />
+            <source src="/videos/proces/step1.mp4" type="video/mp4" />
           </video>
         </motion.div>
 
@@ -77,7 +77,7 @@ export default function ScrollyTellingProcess() {
           style={{ opacity: vid2Opacity, scale: videoScale, filter: videoBlur }}
         >
           <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
-            <source src="/videos/step2.mp4" type="video/mp4" onError={(e) => (e.currentTarget.src = "/videos/munchotella_philosophy_process.mp4")} />
+            <source src="/videos/proces/step2.mp4" type="video/mp4" />
           </video>
         </motion.div>
 
@@ -87,7 +87,7 @@ export default function ScrollyTellingProcess() {
           style={{ opacity: vid3Opacity, scale: videoScale, filter: videoBlur }}
         >
           <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
-            <source src="/videos/step3.mp4" type="video/mp4" onError={(e) => (e.currentTarget.src = "/videos/munchotella_philosophy_process.mp4")} />
+            <source src="/videos/proces/step3.mp4" type="video/mp4" />
           </video>
         </motion.div>
 

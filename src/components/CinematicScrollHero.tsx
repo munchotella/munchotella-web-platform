@@ -9,19 +9,19 @@ import { Link } from "@/i18n/routing";
 
 const HERO_PLAYLIST = [
   {
-    src: "/videos/mini_waffle_video_hero.mp4",
+    src: "/videos/hero_waffle_v2.mp4",
     poster: "/delux_mini_waffle_official.png",
     titleKey: "video1Title",
     subtitleKey: "video1Subtitle"
   },
   {
-    src: "/Munchotella_Commercial_1785537195299.mp4",
+    src: "/videos/hero_sushi_v2.mp4",
     poster: "/royal_sushi_official.png",
     titleKey: "video2Title",
     subtitleKey: "video2Subtitle"
   },
   {
-    src: "/videos/waffles_biscoff.mp4",
+    src: "/videos/hero_biscoff_v2.mp4",
     poster: "/lotus_biscoff_waffle_ref.png",
     titleKey: "video3Title",
     subtitleKey: "video3Subtitle"
