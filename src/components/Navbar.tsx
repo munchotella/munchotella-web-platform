@@ -7,8 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 import NotificationsDropdown from "./NotificationsDropdown";
-import { User, LogOut, Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { User, LogOut, Menu, X, ShoppingBag, Phone } from "lucide-react";
 import NumberTicker from "@/components/ui/NumberTicker";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { useTranslations } from "next-intl";
@@ -78,7 +77,7 @@ export default function Navbar() {
         {/* Trailing Icons */}
         <div className={`flex items-center space-x-2 md:space-x-4 ${effectiveIsScrolled ? "text-[#1A120B]" : "text-white"}`}>
           <a href="tel:+37379006499" className={`hidden md:flex items-center space-x-2 text-[14px] font-bold hover:text-[#D4A853] transition-colors`}>
-            <span className="material-symbols-outlined text-[18px]">call</span>
+            <Phone className="w-4 h-4 text-[#D4A853]" />
             <span>079 006 499</span>
           </a>
           
@@ -135,7 +134,7 @@ export default function Navbar() {
                 effectiveIsScrolled ? "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]" : "bg-white text-[#1A120B] hover:bg-white/90"
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+              <ShoppingBag className="w-4 h-4 shrink-0" />
               <span className="font-bold text-[14px] hidden sm:block">{totalPrice} MDL</span>
               <span className="flex items-center justify-center bg-[#D4A853] text-white text-[11px] font-bold w-5 h-5 rounded-full">
                 <NumberTicker value={totalItems} />
@@ -149,7 +148,7 @@ export default function Navbar() {
                 effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A120B]" : "hover:bg-white/10 text-white"
               }`}
             >
-              <span className="material-symbols-outlined">shopping_bag</span>
+              <ShoppingBag className="w-5 h-5 shrink-0" />
             </button>
           )}
 
@@ -237,7 +236,7 @@ export default function Navbar() {
             <div className="mt-auto pb-10 border-t border-[#E8E2D9] pt-6 shrink-0">
               <a href="tel:+37379006499" className="flex items-center gap-3 text-lg font-bold text-[#1A120B]">
                 <div className="w-10 h-10 rounded-full bg-[#D4A853]/10 flex items-center justify-center text-[#D4A853]">
-                  <span className="material-symbols-outlined text-xl">call</span>
+                  <Phone className="w-5 h-5" />
                 </div>
                 079 006 499
               </a>
