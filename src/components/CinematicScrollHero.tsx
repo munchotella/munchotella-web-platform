@@ -119,7 +119,7 @@ export default function CinematicScrollHero() {
           animate="visible"
           variants={{
             hidden: {},
-            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
+            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
           }}
           className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[68px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-6"
         >
@@ -127,7 +127,7 @@ export default function CinematicScrollHero() {
             <motion.div
               variants={{
                 hidden: { y: "100%", rotateZ: 3, opacity: 0 },
-                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
               }}
             >
               {t('title1')}
@@ -137,7 +137,7 @@ export default function CinematicScrollHero() {
             <motion.div
               variants={{
                 hidden: { y: "100%", rotateZ: 3, opacity: 0 },
-                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+                visible: { y: 0, rotateZ: 0, opacity: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
               }}
               className="italic font-normal text-[#D4A853]"
             >
@@ -147,9 +147,9 @@ export default function CinematicScrollHero() {
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0, filter: "blur(10px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={{ delay: 1, duration: 1, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="text-[#E8E2D9] text-base md:text-lg max-w-lg leading-relaxed mb-8 font-light"
         >
           {t('subtitle')}
@@ -157,9 +157,9 @@ export default function CinematicScrollHero() {
 
         {/* CTA Buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
+          transition={{ delay: 0.65, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-wrap items-center gap-4"
         >
           <MagneticButton>
