@@ -49,17 +49,16 @@ export default function Footer() {
               <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('ourStory')}</Link></li>
               <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('fullMenu')}</Link></li>
               <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('reviews')}</Link></li>
-              <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('faq')}</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('support')}</h4>
             <ul className="space-y-4">
+              <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('helpFaq')}</Link></li>
               <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
+              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('termsAndDelivery')}</Link></li>
               <li><Link href="/legal#privacy" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('privacy')}</Link></li>
-              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('terms')}</Link></li>
-              <li><Link href="/legal#delivery" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('delivery')}</Link></li>
             </ul>
           </div>
           
