@@ -36,6 +36,9 @@ export default function CinematicScrollHero() {
   const switchToTrack = (nextIndex: number) => {
     const nextVideo = videoRefs.current[nextIndex];
     if (nextVideo) {
+      if (nextVideo.preload !== "auto") {
+        nextVideo.preload = "auto";
+      }
       nextVideo.currentTime = 0;
       nextVideo.play().catch((err) => {
         console.warn("Video playback autoplay blocked/ready:", err);
@@ -65,12 +68,14 @@ export default function CinematicScrollHero() {
         console.warn("Initial autoplay blocked/ready:", err);
       });
     }
-    // Pre-buffer subsequent videos in background
-    videoRefs.current.forEach((vid, idx) => {
-      if (vid && idx !== 0) {
-        vid.load();
+    // Lazily buffer the second video after the initial page has settled (5 seconds)
+    const timer = setTimeout(() => {
+      if (videoRefs.current[1]) {
+        videoRefs.current[1].preload = "metadata";
       }
-    });
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -88,7 +93,7 @@ export default function CinematicScrollHero() {
               autoPlay={idx === 0}
               muted
               playsInline
-              preload="auto"
+              preload={idx === 0 ? "metadata" : "none"}
               poster={track.poster}
               onEnded={() => handleVideoEnded(idx)}
               className={`absolute inset-0 w-full h-full object-cover object-center ${

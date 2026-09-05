@@ -65,7 +65,7 @@ export default function ScrollyTellingProcess() {
           className="absolute inset-0 w-full h-full z-0"
           style={{ opacity: vid1Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
+          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
             {/* Fallback to process video if step1.mp4 is missing */}
             <source src="/videos/proces/step1.mp4" type="video/mp4" />
           </video>
@@ -76,7 +76,7 @@ export default function ScrollyTellingProcess() {
           className="absolute inset-0 w-full h-full z-0"
           style={{ opacity: vid2Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
+          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
             <source src="/videos/proces/step2.mp4" type="video/mp4" />
           </video>
         </motion.div>
@@ -86,7 +86,7 @@ export default function ScrollyTellingProcess() {
           className="absolute inset-0 w-full h-full z-0"
           style={{ opacity: vid3Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline className="w-full h-full object-cover object-center">
+          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
             <source src="/videos/proces/step3.mp4" type="video/mp4" />
           </video>
         </motion.div>

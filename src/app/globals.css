@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..800;1,400..800&family=Great+Vibes&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -73,15 +72,15 @@
   --spacing-gutter: 24px;
   --spacing-section-gap-desktop: 120px;
 
-  --font-label-caps: 'Outfit', sans-serif;
-  --font-headline-md: 'Playfair Display', serif;
-  --font-headline-lg: 'Playfair Display', serif;
-  --font-display-hero-mobile: 'Playfair Display', serif;
-  --font-display-hero: 'Playfair Display', serif;
-  --font-body-lg: 'Outfit', sans-serif;
-  --font-button: 'Outfit', sans-serif;
-  --font-body-md: 'Outfit', sans-serif;
-  --font-cursive: var(--font-cursive);
+  --font-label-caps: var(--font-sans), 'Outfit', sans-serif;
+  --font-headline-md: var(--font-serif), 'Playfair Display', serif;
+  --font-headline-lg: var(--font-serif), 'Playfair Display', serif;
+  --font-display-hero-mobile: var(--font-serif), 'Playfair Display', serif;
+  --font-display-hero: var(--font-serif), 'Playfair Display', serif;
+  --font-body-lg: var(--font-sans), 'Outfit', sans-serif;
+  --font-button: var(--font-sans), 'Outfit', sans-serif;
+  --font-body-md: var(--font-sans), 'Outfit', sans-serif;
+  --font-cursive: var(--font-logo), 'Great Vibes', cursive;
 
   --text-label-caps: 12px;
   --text-label-caps--line-height: 1.2;

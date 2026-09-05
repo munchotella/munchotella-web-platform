@@ -140,8 +140,8 @@ export default async function RootLayout({
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
         <link rel="shortcut icon" href="/favicon-48x48.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        {/* Critical LCP Hero Poster Preload */}
+        <link rel="preload" as="image" href="/delux_mini_waffle_official.png" fetchPriority="high" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -199,7 +199,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-accent-gold selection:text-white">
+      <body className="min-h-full flex flex-col font-sans bg-[#1A120B] text-foreground selection:bg-accent-gold selection:text-white">
         {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
