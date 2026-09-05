@@ -57,8 +57,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('helpFaq')}</Link></li>
               <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
-              <li><Link href="/legal#terms" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('termsAndDelivery')}</Link></li>
-              <li><Link href="/legal#privacy" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('privacy')}</Link></li>
+              <li><Link href="/legal" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('legalAndDelivery')}</Link></li>
             </ul>
           </div>
           
