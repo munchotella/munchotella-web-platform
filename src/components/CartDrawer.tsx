@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ChevronLeft, CreditCard, Banknote, CheckCircle, MapPin, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { translateTopping } from "@/utils/toppingTranslations";
 import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { auth } from "@/lib/firebase";
@@ -18,6 +19,7 @@ const libraries: any[] = ["places"];
 export default function CartDrawer() {
   const router = useRouter();
   const t = useTranslations("CartDrawer");
+  const locale = useLocale();
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [view, setView] = useState<'cart' | 'checkout' | 'otp' | 'success'>('cart');
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', paymentMethod: 'cash' });
@@ -199,7 +201,7 @@ export default function CartDrawer() {
                             
                             {item.selectedToppings && item.selectedToppings.length > 0 && (
                               <p className="text-[11px] text-[#736A60] mt-1 font-sans leading-tight">
-                                ➕ {item.selectedToppings.map((t: any) => `${(t.name || '').replace(/^(Extra|Доп\.)\s+/i, '')} (+${t.price} MDL)`).join(", ")}
+                                ➕ {item.selectedToppings.map((t: any) => `${translateTopping(t.name, locale)} (+${t.price} MDL)`).join(", ")}
                               </p>
                             )}
 

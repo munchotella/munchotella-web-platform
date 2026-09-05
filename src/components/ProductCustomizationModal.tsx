@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { translateTopping } from "@/utils/toppingTranslations";
 
 export type ProductItem = {
   id: number | string;
@@ -31,6 +32,7 @@ export default function ProductCustomizationModal({
 }: ProductCustomizationModalProps) {
   const { addToCart } = useCart();
   const t = useTranslations("Toppings");
+  const locale = useLocale();
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
 
@@ -220,7 +222,7 @@ export default function ProductCustomizationModal({
                     <div key={groupIndex} className="mb-6">
                       <div className="flex items-center gap-2 mb-4">
                         <h4 className="text-[16px] font-bold text-[#1A1A1A]">
-                          {group.title.replace(/Toppings Extra/i, 'Toppings')}
+                          {translateTopping(group.title, locale)}
                         </h4>
                         <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">
                           {t('optional')}
@@ -230,6 +232,7 @@ export default function ProductCustomizationModal({
                       <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white">
                         {group.options.map((topping: any, index: number) => {
                           const cleanToppingName = topping.name.replace(/^(Extra|Доп\.)\s+/i, '');
+                          const translatedToppingName = translateTopping(cleanToppingName, locale);
                           const isSelected = selectedToppings.some((t) => t.name === topping.name || t.name === cleanToppingName);
                           return (
                             <div
@@ -241,7 +244,7 @@ export default function ProductCustomizationModal({
                             >
                               <div className="flex flex-row items-center gap-3">
                                 <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
-                                  {cleanToppingName}
+                                  {translatedToppingName}
                                 </span>
                                 <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
                                   (+{topping.price} MDL)

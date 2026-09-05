@@ -30,7 +30,8 @@ import LiveStoreStatus from "@/components/LiveStoreStatus";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { translateTopping } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
 import PaymentBadges from "@/components/PaymentBadges";
@@ -55,6 +56,7 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
+  const locale = useLocale();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
 
@@ -1106,7 +1108,7 @@ export default function CheckoutPage() {
                         <h4 className="font-bold text-sm text-[#1A120B] leading-tight">{item.name}</h4>
                         {item.selectedToppings && item.selectedToppings.length > 0 && (
                           <p className="text-[11px] text-[#736A60] mt-1 leading-relaxed">
-                            {item.selectedToppings.map((t) => (t.name || '').replace(/^(Extra|Доп\.)\s+/i, '')).join(" • ")}
+                            {item.selectedToppings.map((t) => translateTopping(t.name, locale)).join(" • ")}
                           </p>
                         )}
                       </div>
