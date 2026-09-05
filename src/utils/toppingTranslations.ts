@@ -39,15 +39,16 @@ export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string
     ru: 'Фисташки',
     en: 'Pistachio',
   },
+  // Aliases for Fistic (normalized to Fistic)
   'Fistic Mărunțit': {
-    ro: 'Fistic mărunțit',
-    ru: 'Измельченные фисташки',
-    en: 'Crushed Pistachio',
+    ro: 'Fistic',
+    ru: 'Фисташки',
+    en: 'Pistachio',
   },
   'Fistic mărunțit': {
-    ro: 'Fistic mărunțit',
-    ru: 'Измельченные фисташки',
-    en: 'Crushed Pistachio',
+    ro: 'Fistic',
+    ru: 'Фисташки',
+    en: 'Pistachio',
   },
   'Alune': {
     ro: 'Alune',
@@ -79,12 +80,18 @@ export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string
     ru: 'Шарик мороженого',
     en: 'A scoop of ice cream',
   },
-  'Porție de fructe fresh': {
-    ro: 'Porție de fructe fresh',
-    ru: 'Порция свежих фруктов',
-    en: 'Fresh fruit portion',
-  },
   'Fructe mix': {
+    ro: 'Fructe mix',
+    ru: 'Микс фруктов',
+    en: 'Mixed fruits',
+  },
+  // Aliases for Fructe mix (normalized to Fructe mix)
+  'Porție de fructe fresh': {
+    ro: 'Fructe mix',
+    ru: 'Микс фруктов',
+    en: 'Mixed fruits',
+  },
+  'Porție de fructe': {
     ro: 'Fructe mix',
     ru: 'Микс фруктов',
     en: 'Mixed fruits',
