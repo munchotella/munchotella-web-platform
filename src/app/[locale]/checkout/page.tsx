@@ -1106,7 +1106,7 @@ export default function CheckoutPage() {
                         <h4 className="font-bold text-sm text-[#1A120B] leading-tight">{item.name}</h4>
                         {item.selectedToppings && item.selectedToppings.length > 0 && (
                           <p className="text-[11px] text-[#736A60] mt-1 leading-relaxed">
-                            {item.selectedToppings.map((t) => t.name).join(" • ")}
+                            {item.selectedToppings.map((t) => (t.name || '').replace(/^(Extra|Доп\.)\s+/i, '')).join(" • ")}
                           </p>
                         )}
                       </div>

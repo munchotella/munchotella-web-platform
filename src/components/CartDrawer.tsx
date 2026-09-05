@@ -199,7 +199,7 @@ export default function CartDrawer() {
                             
                             {item.selectedToppings && item.selectedToppings.length > 0 && (
                               <p className="text-[11px] text-[#736A60] mt-1 font-sans leading-tight">
-                                ➕ {item.selectedToppings.map((t: any) => `${t.name} (+${t.price} MDL)`).join(", ")}
+                                ➕ {item.selectedToppings.map((t: any) => `${(t.name || '').replace(/^(Extra|Доп\.)\s+/i, '')} (+${t.price} MDL)`).join(", ")}
                               </p>
                             )}
 

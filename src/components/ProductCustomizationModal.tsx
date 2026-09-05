@@ -220,7 +220,7 @@ export default function ProductCustomizationModal({
                     <div key={groupIndex} className="mb-6">
                       <div className="flex items-center gap-2 mb-4">
                         <h4 className="text-[16px] font-bold text-[#1A1A1A]">
-                          {group.title}
+                          {group.title.replace(/Toppings Extra/i, 'Toppings')}
                         </h4>
                         <span className="text-[12px] bg-[#EAE1DB]/50 text-[#50453B] px-2 py-0.5 rounded-full font-medium ml-auto">
                           {t('optional')}
@@ -229,18 +229,19 @@ export default function ProductCustomizationModal({
 
                       <div className="flex flex-col border border-[#EAE1DB] rounded-[20px] overflow-hidden bg-white">
                         {group.options.map((topping: any, index: number) => {
-                          const isSelected = selectedToppings.some((t) => t.name === topping.name);
+                          const cleanToppingName = topping.name.replace(/^(Extra|Доп\.)\s+/i, '');
+                          const isSelected = selectedToppings.some((t) => t.name === topping.name || t.name === cleanToppingName);
                           return (
                             <div
                               key={topping.name}
-                              onClick={(e) => toggleTopping(e, { name: topping.name, price: topping.price })}
+                              onClick={(e) => toggleTopping(e, { name: cleanToppingName, price: topping.price })}
                               className={`group flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-[#F9F9FB] select-none ${
                                 index !== group.options.length - 1 ? "border-b border-[#EAE1DB]" : ""
                               } ${isSelected ? "bg-[#FFFCF6]" : ""}`}
                             >
                               <div className="flex flex-row items-center gap-3">
                                 <span className={`text-[17px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#1A120B]"}`}>
-                                  {topping.name}
+                                  {cleanToppingName}
                                 </span>
                                 <span className={`text-[15px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#736A60]"}`}>
                                   (+{topping.price} MDL)
