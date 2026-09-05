@@ -244,6 +244,103 @@ export default function MenuPage() {
           </div>
         )}
       </div>
+
+      {/* Schema.org Structured Data: Menu & MenuSection & MenuItem */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "@id": `https://www.munchotella.md/${locale === "ro" ? "" : locale + "/"}menu#menu`,
+            "name": t("title"),
+            "description": t("desc"),
+            "inLanguage": locale === "ru" ? "ru-MD" : locale === "en" ? "en-US" : "ro-MD",
+            "hasMenuSection": [
+              {
+                "@type": "MenuSection",
+                "name": "Waffles",
+                "description": "Waffles americane calde, mini waffles artizanale, Nutella® originală și toppinguri crocante.",
+                "hasMenuItem": menuItems
+                  .filter((i) => i.rawCategory === "waffles")
+                  .map((i) => ({
+                    "@type": "MenuItem",
+                    "name": i.name,
+                    "description": i.desc || `${i.name} preparat proaspăt la comandă la Munchotella Chișinău.`,
+                    "image": i.img,
+                    "offers": {
+                      "@type": "Offer",
+                      "price": String(i.numericPrice || parseFloat(i.price) || 0),
+                      "priceCurrency": "MDL",
+                      "availability": "https://schema.org/InStock",
+                      "url": `https://www.munchotella.md/${locale === "ro" ? "" : locale + "/"}menu`
+                    }
+                  }))
+              },
+              {
+                "@type": "MenuSection",
+                "name": "Crepes",
+                "description": "Clătite franțuzești artizanale, Crepe Dubai cu kataif și fistic 100% pur, ciocolată belgiană și fructe proaspete.",
+                "hasMenuItem": menuItems
+                  .filter((i) => i.rawCategory === "crepes")
+                  .map((i) => ({
+                    "@type": "MenuItem",
+                    "name": i.name,
+                    "description": i.desc || `${i.name} preparat proaspăt la comandă la Munchotella Chișinău.`,
+                    "image": i.img,
+                    "offers": {
+                      "@type": "Offer",
+                      "price": String(i.numericPrice || parseFloat(i.price) || 0),
+                      "priceCurrency": "MDL",
+                      "availability": "https://schema.org/InStock",
+                      "url": `https://www.munchotella.md/${locale === "ro" ? "" : locale + "/"}menu`
+                    }
+                  }))
+              },
+              {
+                "@type": "MenuSection",
+                "name": "Pancakes & Sweet Bites",
+                "description": "Pancakes pufoase americane și rulouri Sweet Sushi crepe umplute cu Nutella® și fructe proaspete.",
+                "hasMenuItem": menuItems
+                  .filter((i) => i.rawCategory === "pancakes" || i.rawCategory === "specials")
+                  .map((i) => ({
+                    "@type": "MenuItem",
+                    "name": i.name,
+                    "description": i.desc || `${i.name} preparat proaspăt la comandă la Munchotella Chișinău.`,
+                    "image": i.img,
+                    "offers": {
+                      "@type": "Offer",
+                      "price": String(i.numericPrice || parseFloat(i.price) || 0),
+                      "priceCurrency": "MDL",
+                      "availability": "https://schema.org/InStock",
+                      "url": `https://www.munchotella.md/${locale === "ro" ? "" : locale + "/"}menu`
+                    }
+                  }))
+              },
+              {
+                "@type": "MenuSection",
+                "name": t("catDrinks"),
+                "description": "Băuturi răcoritoare și milkshake-uri artizanale din înghețată și ciocolată belgiană.",
+                "hasMenuItem": menuItems
+                  .filter((i) => i.rawCategory === "drinks")
+                  .map((i) => ({
+                    "@type": "MenuItem",
+                    "name": i.name,
+                    "description": i.desc || `${i.name} disponibil la Munchotella Boutique Chișinău.`,
+                    "image": i.img,
+                    "offers": {
+                      "@type": "Offer",
+                      "price": String(i.numericPrice || parseFloat(i.price) || 0),
+                      "priceCurrency": "MDL",
+                      "availability": "https://schema.org/InStock",
+                      "url": `https://www.munchotella.md/${locale === "ro" ? "" : locale + "/"}menu`
+                    }
+                  }))
+              }
+            ]
+          })
+        }}
+      />
     </div>
   );
 }
