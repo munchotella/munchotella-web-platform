@@ -8,6 +8,7 @@ import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 import NotificationsDropdown from "./NotificationsDropdown";
 import { User, LogOut, Menu, X, ShoppingBag, Phone } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import NumberTicker from "@/components/ui/NumberTicker";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { useTranslations } from "next-intl";
