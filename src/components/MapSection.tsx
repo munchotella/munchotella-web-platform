@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslations } from 'next-intl';
+import { MapPin, Clock } from "lucide-react";
 
 // Coordonate aproximative pentru Nicolae Testemițeanu 21/1, Chișinău
 const center = {
@@ -51,7 +52,7 @@ export default function MapSection() {
           </p>
           
           <div className="flex items-start gap-4 mb-6">
-            <span className="material-symbols-outlined text-[#D4A853] text-[28px] mt-1">location_on</span>
+            <MapPin className="w-7 h-7 text-[#D4A853] shrink-0 mt-1" />
             <div>
               <h4 className="font-bold text-[#1A120B] text-lg">{t('boutiqueName')}</h4>
               <p className="text-[#736A60] mt-1">{t('address1')}<br/>{t('address2')}</p>
@@ -59,7 +60,7 @@ export default function MapSection() {
           </div>
 
           <div className="flex items-start gap-4">
-            <span className="material-symbols-outlined text-[#D4A853] text-[28px] mt-1">schedule</span>
+            <Clock className="w-7 h-7 text-[#D4A853] shrink-0 mt-1" />
             <div>
               <h4 className="font-bold text-[#1A120B] text-lg">{t('scheduleTitle')}</h4>
               <p className="text-[#736A60] mt-1">{t('schedule1')}<br/><span className="text-[#D4A853] font-bold text-[14px]">{t('schedule2')}</span></p>

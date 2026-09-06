@@ -7,7 +7,7 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import ScrollyTellingProcess from "@/components/ui/ScrollyTellingProcess";
 import MapSection from "@/components/MapSection";
 
-import { Star } from "lucide-react";
+import { Star, MapPin, ArrowUpRight } from "lucide-react";
 import StickyBottomBar from "@/components/StickyBottomBar";
 import { useCart } from "@/context/CartContext";
 
@@ -107,14 +107,14 @@ export default function MunchotellaBoutique() {
       <div className="bg-[#1A120B] text-[#D4A853] py-4 border-y border-[#D4A853]/20 relative z-20 shadow-lg">
         <div className="max-w-[1400px] mx-auto px-4 flex flex-col lg:flex-row lg:flex-nowrap lg:whitespace-nowrap items-center justify-center gap-4 lg:gap-8 text-[11px] lg:text-xs font-bold uppercase tracking-widest text-center">
           <div className="flex items-center space-x-2.5">
-            <span className="material-symbols-outlined text-sm text-[#D4A853]">location_on</span>
+            <MapPin className="w-3.5 h-3.5 text-[#D4A853] shrink-0" />
             <span className="text-[#FFFDF8]">{t('location')}</span>
           </div>
           <span className="hidden md:inline text-white/30">•</span>
           <LiveStoreStatus />
           <span className="hidden md:inline text-white/30">•</span>
           <div className="flex items-center space-x-2.5">
-            <span className="material-symbols-outlined text-sm text-[#D4A853]">star</span>
+            <Star className="w-3.5 h-3.5 text-[#D4A853] fill-[#D4A853] shrink-0" />
             <span className="text-[#FFFDF8]">{t('rating')}</span>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function MunchotellaBoutique() {
           <div className="mt-16 text-center">
             <a href="/menu" className="inline-flex items-center justify-center space-x-2 border-b-2 border-primary text-primary text-[14px] font-bold uppercase tracking-wider hover:text-[#D4A853] hover:border-[#D4A853] transition-colors duration-300 pb-1">
               <span>{t('viewMenu')}</span>
-              <span className="material-symbols-outlined text-sm">arrow_outward</span>
+              <ArrowUpRight className="w-4 h-4" />
             </a>
             
             {/* Features Section (Scrollytelling Editorial Process) */}

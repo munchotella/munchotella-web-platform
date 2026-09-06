@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import LogoIconSVG from "./LogoIconSVG";
 import LogoTextSVG from "./LogoTextSVG";
 import { useTranslations } from 'next-intl';
+import { MapPin, Phone, Mail, Lock } from 'lucide-react';
 
 import PaymentBadges from "./PaymentBadges";
 
@@ -29,15 +30,15 @@ export default function Footer() {
 
             <div className="flex flex-col space-y-4">
               <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
-                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">location_on</span>
+                <MapPin className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>Nicolae Testemițeanu 21/1, Chișinău</span>
               </a>
               <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
-                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">phone</span>
+                <Phone className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>079 006 499</span>
               </a>
               <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
-                <span className="material-symbols-outlined text-[18px] group-hover:text-[#D4A853]">mail</span>
+                <Mail className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>munchotella@gmail.com</span>
               </a>
             </div>
@@ -95,7 +96,7 @@ export default function Footer() {
             <PaymentBadges variant="footer" />
           </div>
           <div className="flex items-center gap-2 text-white/50 text-[12px]">
-            <span className="material-symbols-outlined text-[16px] text-[#00B497]">lock</span>
+            <Lock className="w-4 h-4 shrink-0 text-[#00B497]" />
             <span>Securizat 256-bit SSL • Partener maib</span>
           </div>
         </div>
