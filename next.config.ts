@@ -17,13 +17,13 @@ const ContentSecurityPolicy = [
   // img-src: Cloudinary, Google avatars, Facebook, Maps tiles, Analytics, GTM
   "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://graph.facebook.com https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com https://cdn.prod.website-files.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://googleads.g.doubleclick.net https://www.google.md",
   // connect-src: API Munchotella (Render) + Firebase + Sentry + Google Maps API/Tiles + Google Analytics/GTM + Vercel Insights
-  "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://o0.ingest.sentry.io wss://munchotella-api.onrender.com https://maps.googleapis.com https://*.googleapis.com https://*.google.com https://*.gstatic.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://*.googletagmanager.com https://vitals.vercel-insights.com data: blob:",
+  "connect-src 'self' https://munchotella-api.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://auth.munchotella.md https://o0.ingest.sentry.io wss://munchotella-api.onrender.com https://maps.googleapis.com https://*.googleapis.com https://*.google.com https://*.gstatic.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://*.googletagmanager.com https://vitals.vercel-insights.com data: blob:",
   // worker-src: necesar pentru web workers (vector tiles Google Maps)
   "worker-src 'self' blob:",
   // child-src: iframe / web workers
-  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com",
+  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://auth.munchotella.md",
   // frame-src: Firebase auth popup and Google Maps iframe
-  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md",
+  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md https://auth.munchotella.md",
   // media-src: audio/video propriu
   "media-src 'self'",
   // object-src: blochează complet plugin-urile (Flash etc.)
