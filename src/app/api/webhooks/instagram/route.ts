@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -362,7 +363,6 @@ const MENU_CATALOG = [
     aliases: ["cafea", "espresso", "espreso", "cappuccino", "capucino", "latte", "americano", "cafea neagra", "cafea cu lapte", "кофе", "капучино", "латте", "эспрессо", "американо"]
   }
 ];
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("hub.mode");
@@ -384,12 +384,17 @@ async function logAIActivity(senderId: string, channel: string, messageText: str
     'human_assisted_pause_active': 'Pauză (Asistență Umană)',
     'human_handoff_triggered': 'Escalat la Om',
     'order_cancelled': 'Comandă Anulată / Coș Golit',
+    'cart_quantity_adjusted': 'Ajustare Coș / Scoatere Produs',
+    'preorder_inquiry_answered': 'Precomandă / Programare Înregistrată',
+    'ingredients_inquiry_answered': 'Informații Ingrediente & Alergeni',
+    'clarification_sent': 'Clarificare Contextuală',
     'order_completed_link_generated': 'Link Finalizare Trimis',
     'awaiting_product': 'Întrebare Generală / Start',
     'product_added': 'Comandă Preluată Automat de AI',
+    'compound_products_added': 'Comandă Multiplă Preluată de AI',
     'product_clarification_sent': 'Clarificare Produs',
-    'awaiting_drinks': 'Așteaptă Băuturi',
-    'gemini_response': 'Răspuns AI Generat'
+    'customer_inquiry_answered': 'Întrebare FAQ Răspunsă',
+    'gemini_response': 'Răspuns AI Concierge Generat'
   };
 
   const aiAction = actionMap[status] || 'Interacțiune Procesată';
@@ -405,9 +410,7 @@ async function logAIActivity(senderId: string, channel: string, messageText: str
       telegramAlertSent,
       timestamp: new Date()
     });
-  } catch (err) {
-    console.error("Eroare la salvarea log-ului AI:", err);
-  }
+  } catch (_) {}
 }
 
 async function notifyAgencyDashboard(payload: {
@@ -445,153 +448,104 @@ async function notifyAgencyDashboard(payload: {
   await Promise.allSettled(tasks);
 }
 
-export async function POST(request: Request) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// PERSISTENȚĂ SESIUNI CONVERSAȚIONALE: DUAL STORAGE (FIRESTORE + MONGODB)
+// ═══════════════════════════════════════════════════════════════════════════════
+const inMemorySessions = new Map<string, any>();
+
+async function getSession(senderId: string) {
+  const cached = inMemorySessions.get(senderId);
+  if (cached && (Date.now() - (cached.lastUpdated || 0) < 4 * 60 * 60 * 1000)) {
+    if (!cached.history) cached.history = [];
+    if (!cached.cart) cached.cart = [];
+    return cached;
+  }
+
+  // 1. Firebase Firestore (Persistent pe Vercel Serverless)
   try {
-    const rawText = await request.text();
-
-    // ═══ SECURITATE: Verificare Semnătură Criptografică Meta (X-Hub-Signature-256) ═══
-    const appSecret = process.env.META_APP_SECRET;
-    const signatureHeader = request.headers.get('x-hub-signature-256') || '';
-
-    if (appSecret && signatureHeader && signatureHeader.startsWith('sha256=')) {
-      try {
-        const expectedSignature = 'sha256=' + crypto.createHmac('sha256', appSecret).update(rawText, 'utf8').digest('hex');
-        const sigBuffer = Buffer.from(signatureHeader, 'utf8');
-        const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
-        if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
-          console.warn("⚠️ Webhook Meta: Semnătură X-Hub-Signature-256 diferită de META_APP_SECRET.");
-        }
-      } catch (err) {
-        console.warn("⚠️ Eroare verificare semnătură:", err);
+    const sessionRef = doc(db, 'instagram_order_sessions', senderId);
+    const snap = await getDoc(sessionRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data && (Date.now() - (data.lastUpdated || 0) < 4 * 60 * 60 * 1000)) {
+        if (!data.history) data.history = [];
+        if (!data.cart) data.cart = [];
+        inMemorySessions.set(senderId, data);
+        return data;
       }
     }
+  } catch (firestoreErr) {
+    console.warn("Atenționare citire sesiune Firestore:", firestoreErr);
+  }
 
-    let body: any = null;
-    try {
-      body = JSON.parse(rawText);
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch (_) {}
-      }
-    } catch (e) {
-      body = rawText;
+  // 2. MongoDB Fallback
+  try {
+    const { db: mongoDb } = await connectToDatabase();
+    const mongoDoc = await mongoDb.collection('instagram_order_sessions').findOne({ senderId });
+    if (mongoDoc && mongoDoc.lastUpdated && (Date.now() - mongoDoc.lastUpdated < 4 * 60 * 60 * 1000)) {
+      if (!mongoDoc.history) mongoDoc.history = [];
+      if (!mongoDoc.cart) mongoDoc.cart = [];
+      inMemorySessions.set(senderId, mongoDoc);
+      return mongoDoc;
     }
+  } catch (_) {}
 
-    try {
-      const { db: mongoDb } = await connectToDatabase();
-      await mongoDb.collection('debug_webhooks').insertOne({
-        timestamp: new Date(),
-        rawText,
-        body,
-        signatureHeader
-      });
-    } catch (e) {}
+  const initial = {
+    senderId,
+    state: 'IDLE',
+    cart: [],
+    history: [],
+    scheduledTime: null,
+    isHumanAssistedUntil: 0,
+    lastUpdated: Date.now()
+  };
+  inMemorySessions.set(senderId, initial);
+  return initial;
+}
 
-    let senderId: string | null = null;
-    let messageText: string | null = null;
-    let isEcho = false;
-    let channel: 'instagram' | 'messenger' = 'instagram';
+async function saveSession(senderId: string, sessionData: any) {
+  const updatedData = {
+    ...sessionData,
+    lastUpdated: Date.now()
+  };
+  inMemorySessions.set(senderId, updatedData);
 
-    if (body && typeof body === 'object') {
-      // 1. Detectare Facebook Messenger sau Instagram Direct
-      if (body.object === 'page') {
-        channel = 'messenger';
-      } else {
-        channel = 'instagram';
-      }
+  // 1. Salvare în Firebase Firestore
+  try {
+    const sessionRef = doc(db, 'instagram_order_sessions', senderId);
+    await setDoc(sessionRef, updatedData, { merge: true });
+  } catch (firestoreErr) {
+    console.warn("Atenționare salvare sesiune Firestore:", firestoreErr);
+  }
 
-      if (Array.isArray(body?.entry)) {
-        for (const entry of body.entry) {
-          if (Array.isArray(entry?.messaging)) {
-            for (const item of entry.messaging) {
-              if (item?.message?.is_echo) {
-                isEcho = true;
-                continue;
-              }
-              const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
-              const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
-              
-              if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
-                isEcho = true;
-                continue;
-              }
+  // 2. Salvare în MongoDB (Atlas)
+  try {
+    const { db: mongoDb } = await connectToDatabase();
+    await mongoDb.collection('instagram_order_sessions').updateOne(
+      { senderId },
+      { $set: updatedData },
+      { upsert: true }
+    );
+  } catch (_) {}
+}
 
-              if (sId && text) {
-                senderId = String(sId);
-                messageText = text;
-                break;
-              }
-            }
-          } else if (Array.isArray(entry?.changes)) {
-            for (const change of entry.changes) {
-              const val = change?.value;
-              if (val) {
-                if (val?.message?.is_echo || val?.is_echo) {
-                  isEcho = true;
-                  continue;
-                }
-                const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
-                const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
-                
-                if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
-                  isEcho = true;
-                  continue;
-                }
-
-                if (sId && typeof text === 'string') {
-                  senderId = String(sId);
-                  messageText = text;
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (isEcho) {
-      console.log("Ignorat mesaj ecou / propriu.");
-      return NextResponse.json({ success: true, status: 'echo_ignored' });
-    }
-
-    if (senderId && messageText) {
-      console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
-      const debugResult = await processMessage(senderId, messageText, channel);
-      await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
-      
-      // Instantly synchronize message with Munchotella AI Agency Operations Center
-      const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
-      await notifyAgencyDashboard({
-        platform: channel,
-        asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
-        sender_id: senderId,
-        customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
-        customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
-        message_text: messageText,
-        reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
-        status: debugResult.status || 'gemini_response'
-      });
-
-      return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
-    } else {
-      return NextResponse.json({ 
-        success: true, 
-        warning: 'lipsesc_date', 
-        extracted: { senderId, messageText, channel }, 
-        bodyType: typeof body, 
-        rawText,
-        body 
-      });
-    }
-
-  } catch (error: any) {
-    console.error('Eroare Webhook Meta:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+function appendToHistory(session: any, role: 'user' | 'assistant', text: string) {
+  if (!session.history) session.history = [];
+  session.history.push({
+    role,
+    text: text.trim(),
+    timestamp: Date.now()
+  });
+  if (session.history.length > 20) {
+    session.history = session.history.slice(-20);
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// LINGVISTICĂ & FUZZY MATCHING (LEVENSHTEIN + DICE)
+// ═══════════════════════════════════════════════════════════════════════════════
 function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
-  const cyrillicPattern = /[\u0400-\u04FF]/;
+  const cyrillicPattern = /[Ѐ-ӿ]/;
   if (cyrillicPattern.test(text)) {
     return 'ru';
   }
@@ -604,7 +558,7 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   ];
   
   const hasEnPhrase = enPhrases.some(p => lower.includes(p));
-  const hasRoIndicators = /(\b(vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi)\b)/i.test(text);
+  const hasRoIndicators = /((vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi))/i.test(text);
 
   if (hasEnPhrase && !hasRoIndicators) {
     return 'en';
@@ -613,7 +567,6 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   return 'ro';
 }
 
-// ─── ALGORITM FUZZY MATCHING (LEVENSHTEIN + DICE COEFFICIENT) ───
 function levenshtein(a: string, b: string): number {
   const an = a ? a.length : 0;
   const bn = b ? b.length : 0;
@@ -663,12 +616,10 @@ function calculateSimilarity(str1: string, str2: string): number {
   const maxLen = Math.max(s1.length, s2.length);
   const lenRatio = minLen / maxLen;
 
-  // Substring matching doar dacă lungimea este foarte apropiată sau dacă e cuvânt distinct
   if (minLen >= 3 && (s1.includes(s2) || s2.includes(s1))) {
-    // Excludere fals-pozitiv: 'cola' în 'ciocolata' / 'ciocolată'
     if ((s1.includes('ciocolat') || s2.includes('ciocolat')) && (s1 === 'cola' || s2 === 'cola' || s1 === 'coca-cola' || s2 === 'coca-cola')) {
-      // nu e cola
-    } else if (lenRatio >= 0.70 || new RegExp(`\\b${s2.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(s1) || new RegExp(`\\b${s1.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(s2)) {
+      // Excludere cola din ciocolata
+    } else if (lenRatio >= 0.70 || new RegExp(`\b${s2.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`).test(s1) || new RegExp(`\b${s1.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`).test(s2)) {
       return Math.max(0.85, lenRatio);
     }
   }
@@ -677,8 +628,6 @@ function calculateSimilarity(str1: string, str2: string): number {
   const levScore = 1 - (levDist / maxLen);
   const diceScore = diceCoefficient(s1, s2);
   
-  // Pentru cuvinte scurte (<= 4 caractere, ex: 'ceai', 'cola', 'apa', 'dorna', 'fanta')
-  // Orice nepotrivire de mai mult de 1 caracter sau scor < 0.80 este o potrivire falsă (ex: 'azi' vs 'ceai', 'dulce' vs 'cola')
   if (minLen <= 4) {
     if (levDist <= 1 && levScore >= 0.80) {
       return levScore;
@@ -692,8 +641,8 @@ function calculateSimilarity(str1: string, str2: string): number {
 function cleanTextForMatching(text: string): string {
   let t = text.toLowerCase().trim();
   const stopwords = [
-    /\b(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)\b/gi,
-    /\b(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
+    /(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)/gi,
+    /(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
   ];
   for (const sw of stopwords) {
     t = t.replace(sw, ' ');
@@ -701,31 +650,233 @@ function cleanTextForMatching(text: string): string {
   return t.replace(/\s+/g, ' ').trim();
 }
 
-function matchProductInText(text: string): { 
-  product: typeof MENU_CATALOG[0] | null, 
-  quantity: number, 
-  customization?: string,
-  score: number,
-  suggestedProduct?: typeof MENU_CATALOG[0] | null
-} {
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ (ROBUST ALIAS EXPANSION)
+// ═══════════════════════════════════════════════════════════════════════════════
+function handleCartAdjustment(text: string, session: any, lang: string): { handled: boolean, replyText?: string, status?: string } {
   const lower = text.toLowerCase().trim();
-  
-  // Detectare dacă mesajul este o întrebare generală FAQ sau salut fără intenție explicită de comandă
-  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(text);
-  const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(text);
+  const currentCart = session.cart || [];
+  if (currentCart.length === 0) return { handled: false };
 
-  // Dacă e întrebare generală FAQ sau salut și nu e comandă explicită, NU facem potrivire de produs
-  if (isGeneralQuestion && !isExplicitOrder) {
-    return {
-      product: null,
-      suggestedProduct: null,
-      score: 0,
-      quantity: 1,
-      customization: undefined
-    };
+  const isAdjustmentVerb = /((scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2|fara|fără|nu mai vreau|nu vreau|убери|уберите|удали|удалите|не хочу|не надо|без))/i.test(lower);
+  if (!isAdjustmentVerb) return { handled: false };
+
+  const matchedCartIndices: number[] = [];
+
+  for (let i = 0; i < currentCart.length; i++) {
+    const cartItem = currentCart[i];
+    const catalogItem = MENU_CATALOG.find(c => c.id === cartItem.id);
+
+    const rawNames = [
+      cartItem.name.toLowerCase(),
+      ...(catalogItem?.aliases || [])
+    ];
+
+    const expandedTerms = new Set<string>();
+    for (const term of rawNames) {
+      expandedTerms.add(term);
+      if (term.includes('-')) {
+        expandedTerms.add(term.replace(/-/g, ' '));
+        term.split('-').forEach(part => {
+          if (part.length >= 3) expandedTerms.add(part);
+        });
+      }
+      term.split(' ').forEach(w => {
+        if (w.length >= 3) expandedTerms.add(w);
+      });
+    }
+
+    let isItemMatched = false;
+    for (const term of expandedTerms) {
+      if (new RegExp(`\b${term.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`, 'i').test(lower) || lower.includes(term)) {
+        isItemMatched = true;
+        break;
+      }
+    }
+    if (!isItemMatched) {
+      const cleaned = cleanTextForMatching(lower);
+      for (const term of expandedTerms) {
+        if (calculateSimilarity(cleaned, term) >= 0.75) {
+          isItemMatched = true;
+          break;
+        }
+      }
+    }
+
+    if (isItemMatched) {
+      matchedCartIndices.push(i);
+    }
   }
 
-  // Detectare cantitate
+  // Dacă utilizatorul are 1 singur produs în coș și zice „scoate” / „șterge” fără să specifice numele exact
+  if (matchedCartIndices.length === 0 && currentCart.length === 1 && (lower.includes('scoate') || lower.includes('șterge') || lower.includes('sterge') || lower.includes('nu mai vreau') || lower.includes('убери'))) {
+    matchedCartIndices.push(0);
+  }
+
+  if (matchedCartIndices.length === 0) {
+    return { handled: false };
+  }
+
+  const removedNames: string[] = [];
+  matchedCartIndices.sort((a, b) => b - a);
+
+  for (const idx of matchedCartIndices) {
+    const targetItem = currentCart[idx];
+    
+    let desiredExactQty: number | null = null;
+    const exactMatch = lower.match(/(lasa|lasă|sa fie|să fie|pune)?\s*doar\s*(\d+|unu|una|un|doua|două|trei)/i);
+    if (exactMatch) {
+      const rawVal = exactMatch[2].toLowerCase();
+      if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') desiredExactQty = 1;
+      else if (rawVal === 'doua' || rawVal === 'două') desiredExactQty = 2;
+      else if (rawVal === 'trei') desiredExactQty = 3;
+      else desiredExactQty = parseInt(rawVal, 10);
+    }
+
+    let subtractQty: number | null = null;
+    const subtractMatch = lower.match(/(scoate|scoateti|scoateți|scade|elimina|elimină|șterge|sterge|убери)\s*(\d+|unu|una|un|doua|două|trei)?/i);
+    if (subtractMatch && subtractMatch[2]) {
+      const rawVal = subtractMatch[2].toLowerCase();
+      if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') subtractQty = 1;
+      else if (rawVal === 'doua' || rawVal === 'două') subtractQty = 2;
+      else if (rawVal === 'trei') subtractQty = 3;
+      else subtractQty = parseInt(rawVal, 10);
+    }
+
+    if (desiredExactQty !== null && desiredExactQty >= 0) {
+      if (desiredExactQty === 0) {
+        removedNames.push(targetItem.name);
+        currentCart.splice(idx, 1);
+      } else {
+        targetItem.quantity = desiredExactQty;
+      }
+    } else if (subtractQty !== null && subtractQty > 0) {
+      targetItem.quantity -= subtractQty;
+      if (targetItem.quantity <= 0) {
+        removedNames.push(targetItem.name);
+        currentCart.splice(idx, 1);
+      }
+    } else {
+      // Comandă directă de scoatere (ex: „scoate cola”, „șterge clătita”, „nu mai vreau pancake”)
+      removedNames.push(targetItem.name);
+      currentCart.splice(idx, 1);
+    }
+  }
+
+  session.cart = [...currentCart];
+  const totalSum = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
+
+  let replyText = "";
+  if (session.cart.length === 0) {
+    replyText = lang === 'ru'
+      ? `Убрал ${removedNames.join(', ')} из заказа. Сейчас ваша корзина пуста! 🧇 Что бы вы хотели заказать? ✨`
+      : `Am scos ${removedNames.join(', ')} din coș. Acum coșul dvs. este gol! 🧇 Ce bunătăți ați dori să adăugăm? ✨`;
+  } else {
+    const remainingSummary = session.cart.map((it: any) => `${it.quantity > 1 ? it.quantity + 'x ' : ''}${it.name}`).join(' + ');
+    replyText = lang === 'ru'
+      ? `Готово! Обновил заказ: сейчас в корзине ${remainingSummary} (Итого: ${totalSum} MDL). 🧇 Хотите добавить напиток или оформляем доставку? ✨`
+      : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Mai doriți ceva delicios sau finalizăm comanda? ✨`;
+  }
+
+  return { handled: true, replyText, status: 'cart_quantity_adjusted' };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 2: ANULARE TOTALĂ COMANDĂ (GOLIRE COMPLETĂ COȘ)
+// ═══════════════════════════════════════════════════════════════════════════════
+function isGlobalOrderCancellation(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const cancelKeywords = [
+    'anuleaza comanda', 'anulează comanda', 'anulati comanda', 'anulați comanda',
+    'anulez comanda', 'anulez tot', 'anuleaza tot', 'anulează tot',
+    'goleste cosul', 'golește coșul', 'goleste cos', 'golește coș',
+    'sterge tot cosul', 'șterge tot coșul', 'sterge tot din cos', 'șterge tot din coș',
+    'nu mai vreau nimic', 'nu mai doresc nimic', 'anulare comanda', 'anulare comandă',
+    'reset', 'cancel order', 'cancel', 'отмена заказа', 'отмените заказ', 'очистить корзину'
+  ];
+  return cancelKeywords.some(kw => lower.includes(kw));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 3: PRECOMENZI, PROGRAMĂRI ORĂ ȘI DINE-IN INTELLIGENCE
+// ═══════════════════════════════════════════════════════════════════════════════
+function handlePreorderAndScheduling(text: string, session: any, lang: string): { handled: boolean, replyText?: string } {
+  const lower = text.toLowerCase().trim();
+
+  const isDineIn = /(\b(pe loc|la mese|la masa|la masă|in cafenea|în cafenea|in local|în local|venim la voi|servim acolo|mancam acolo|mâncăm acolo|посидеть|в кафе|на месте)\b)/i.test(lower);
+  const isWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('среду');
+  
+  const hasPreorderKeyword = /(\b(precomanda|precomandă|precomenzi|pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|[iî]n avans|programat[aă]?|pe cand|pe când|pe diseara|pe diseară|diseara|diseară|pe maine|pe mâine|pe mîine|pe miine|pentru maine|pentru mâine|pentru mîine|pentru miine|предзаказ|на потом|попозже|на вечер|на завтра)\b)/i.test(lower);
+  const timeMatch = lower.match(/\b(?:la\s*ora|pentru\s*ora|ora|la)\s*(\d{1,2}(?::\d{2})?)\b/i);
+  const dayMatch = lower.match(/\b(m[aâîi]{1,2}ne|disear[aă]|azi|ast[aă]zi|miercuri|joi|vineri|s[aă]mb[aă]t[aă]|duminic[aă]|luni|mar[tț]i|завтра|сегодня|вечером)\b/i);
+
+  // Dacă utilizatorul răspunde la întrebarea anterioară a robotului precizând doar ora
+  const lastBotMsg = (session.history || []).filter((m: any) => m.role === 'assistant').slice(-1)[0];
+  const botJustAskedTime = lastBotMsg && (lastBotMsg.text.includes('ce oră') || lastBotMsg.text.includes('ce ora') || lastBotMsg.text.includes('какое время'));
+
+  if (!hasPreorderKeyword && !timeMatch && !isDineIn && !botJustAskedTime) {
+    return { handled: false };
+  }
+
+  // Avertisment explicit: Miercuri este închis
+  if (isWednesday) {
+    const wedReply = lang === 'ru'
+      ? "Обратите внимание: по средам у нас выходной день! 🧇 Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
+      : "Vă informăm cu drag că Miercuri este singura noastră zi liberă săptămânală (închis)! 🧇 Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
+    return { handled: true, replyText: wedReply };
+  }
+
+  const detectedHour = timeMatch ? timeMatch[1] : null;
+  const targetDay = dayMatch ? (dayMatch[1].toLowerCase().includes('m') ? 'mâine' : dayMatch[1]) : (lower.includes('disear') ? 'diseară' : 'mâine');
+
+  if (detectedHour) {
+    session.scheduledTime = `${targetDay === 'diseară' ? 'Diseară' : 'Mâine'} la ora ${detectedHour}`;
+    
+    if (session.cart && session.cart.length > 0) {
+      const summary = session.cart.map((it: any) => `${it.quantity > 1 ? it.quantity + 'x ' : ''}${it.name}`).join(' + ');
+      const total = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
+      
+      const reply = lang === 'ru'
+        ? `Отлично! 🥰 Зафиксировал ${isDineIn ? 'визит в кафе' : 'предзаказ'} на ${targetDay} к ${detectedHour}! В вашем заказе: ${summary} (Итого: ${total} MDL). Оформляем или добавим что-нибудь еще? 🧇✨`
+        : `Excelent! 🥰 Am notat cu mare drag ${isDineIn ? 'că vă așteptăm pe loc la cafenea' : 'comanda programată'} pentru ${targetDay} la ora ${detectedHour}! În coș aveți: ${summary} (Total: ${total} MDL). Doriți să finalizăm comanda sau mai adăugăm ceva delicios? 🧇✨`;
+      return { handled: true, replyText: reply };
+    } else {
+      const reply = lang === 'ru'
+        ? `Отлично! 🥰 С удовольствием записал ${isDineIn ? 'бронь на месте' : 'предзаказ'} на ${targetDay} к ${detectedHour}! Какие десерты из меню Munchotella приготовить для вас к этому времени? 🧇✨`
+        : `Excelent! 🥰 Am notat cu drag ${isDineIn ? 'că vă așteptăm pe loc în cafenea' : 'programarea'} pentru ${targetDay} la ora ${detectedHour}! Ce bunătăți din meniul Munchotella ați dori să vă pregătim pentru această oră? 🧇✨`;
+      return { handled: true, replyText: reply };
+    }
+  }
+
+  // Dacă a cerut precomandă pentru mâine sau mai târziu, dar FĂRĂ să specifice ora exactă
+  if (hasPreorderKeyword || isDineIn) {
+    const reply = lang === 'ru'
+      ? `С огромным удовольствием! 🥰 Принимаем предзаказы на ${targetDay} ${isDineIn ? 'на месте в кафе' : 'с доставкой'} в часы нашей работы (16:00 - 00:00). Подскажите, пожалуйста, к какому точно времени приготовить заказ и какие десерты вы выбрали? 🧇✨`
+      : `Cu cel mai mare drag! 🥰 Preluăm cu bucurie comenzi programate pentru ${targetDay} ${isDineIn ? 'pe loc în cafenea' : 'cu livrare rapidă'} (intervalul nostru de lucru este 16:00 - 00:00). La ce oră ați dori să fie gata comanda și ce bunătăți doriți să vă pregătim? 🧇✨`;
+    return { handled: true, replyText: reply };
+  }
+
+  return { handled: false };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 4: COMPOUND PRODUCT PARSER (COMENZI MULTIPLE ÎNTR-UN SINGUR MESAJ)
+// ═══════════════════════════════════════════════════════════════════════════════
+interface ExtractedProductMatch {
+  product: typeof MENU_CATALOG[0];
+  quantity: number;
+  customization?: string;
+  score: number;
+}
+
+function matchSingleProductInSegment(segment: string): ExtractedProductMatch | null {
+  const lower = segment.toLowerCase().trim();
+  if (!lower || lower.length < 2) return null;
+
+  const isFAQ = /(\b(cat costa|cât costă|program|orar|deschis|adresa|locatie|unde|livrare|mese|terasa)\b)/i.test(lower);
+  const isExplicit = /(\b(vreau|adaug[aă]|pune|da-mi|comand[aă]|хочу|добавь)\b)/i.test(lower);
+  if (isFAQ && !isExplicit) return null;
+
   let quantity = 1;
   const qtyMatch = lower.match(/\b(\d+)\s*(porți[ie]?|buc[aă]ți?|doze?|sticle?|pahare?|x)?\b/);
   if (qtyMatch && parseInt(qtyMatch[1]) > 0 && parseInt(qtyMatch[1]) <= 20) {
@@ -736,62 +887,43 @@ function matchProductInText(text: string): {
     quantity = 3;
   }
 
-  // Detectare preferințe / excluderi
   let customization: string | undefined = undefined;
-  if (lower.includes('fără fistic') || lower.includes('fara fistic') || lower.includes('без фисташек') || lower.includes('без фисташки') || lower.includes('no pistachio')) {
+  if (lower.includes('fără fistic') || lower.includes('fara fistic') || lower.includes('без фисташек')) {
     customization = "Fără fistic";
-  } else if (lower.includes('fără arahide') || lower.includes('fara arahide') || lower.includes('fără alune') || lower.includes('fara alune') || lower.includes('без арахиса') || lower.includes('no peanuts')) {
+  } else if (lower.includes('fără arahide') || lower.includes('fara arahide') || lower.includes('fără alune') || lower.includes('без арахиса')) {
     customization = "Fără arahide";
   } else if (lower.includes('fără zahăr') || lower.includes('fara zahar')) {
     customization = "Fără zahăr adăugat";
   }
 
-  const cleaned = cleanTextForMatching(text);
-  let bestFoodMatch: typeof MENU_CATALOG[0] | null = null;
-  let bestFoodScore = 0;
-  let bestDrinkMatch: typeof MENU_CATALOG[0] | null = null;
-  let bestDrinkScore = 0;
+  const cleaned = cleanTextForMatching(segment);
+  let bestMatch: typeof MENU_CATALOG[0] | null = null;
+  let bestScore = 0;
 
   for (const item of MENU_CATALOG) {
     const isDrink = item.category === 'drinks';
-    const allAliases = [item.name.toLowerCase(), ...(item.aliases || [])];
-    
-    for (const alias of allAliases) {
+    const aliases = [item.name.toLowerCase(), ...(item.aliases || [])];
+
+    for (const alias of aliases) {
       if (cleaned === alias) {
-        if (isDrink) {
-          bestDrinkScore = 1.0;
-          bestDrinkMatch = item;
-        } else {
-          bestFoodScore = 1.0;
-          bestFoodMatch = item;
-        }
-        break;
+        return { product: item, quantity, customization, score: 1.0 };
       }
 
-      const fullScore = calculateSimilarity(cleaned, alias);
-      if (isDrink && fullScore > bestDrinkScore) {
-        bestDrinkScore = fullScore;
-        bestDrinkMatch = item;
-      } else if (!isDrink && fullScore > bestFoodScore) {
-        bestFoodScore = fullScore;
-        bestFoodMatch = item;
+      const score = calculateSimilarity(cleaned, alias);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = item;
       }
 
-      // Verificare pe cuvinte individuale și fraze (lungime minimă 3 litere)
-      const words = cleaned.split(' ').filter(w => w.length >= 3);
-      if (words.length > 0) {
-        for (let i = 0; i < words.length; i++) {
-          for (let j = i + 1; j <= words.length; j++) {
-            const phrase = words.slice(i, j).join(' ');
-            if (phrase.length >= 3) {
-              const phraseScore = calculateSimilarity(phrase, alias);
-              if (isDrink && phraseScore > bestDrinkScore) {
-                bestDrinkScore = phraseScore;
-                bestDrinkMatch = item;
-              } else if (!isDrink && phraseScore > bestFoodScore) {
-                bestFoodScore = phraseScore;
-                bestFoodMatch = item;
-              }
+      const tokens = cleaned.split(' ').filter(w => w.length >= 3);
+      for (let i = 0; i < tokens.length; i++) {
+        for (let j = i + 1; j <= tokens.length; j++) {
+          const phrase = tokens.slice(i, j).join(' ');
+          if (phrase.length >= 3) {
+            const pScore = calculateSimilarity(phrase, alias);
+            if (pScore > bestScore) {
+              bestScore = pScore;
+              bestMatch = item;
             }
           }
         }
@@ -799,221 +931,53 @@ function matchProductInText(text: string): {
     }
   }
 
-  // Praguri sigure de toleranță:
-  // Băuturile necesită o potrivire foarte sigură (0.85+) fără comandă explicită, sau 0.75+ cu intenție de comandă.
-  // Deserturile necesită 0.80+ (sau 0.70+ cu intenție de comandă).
-  const drinkThreshold = isExplicitOrder ? 0.75 : 0.85;
-  const foodThreshold = isExplicitOrder ? 0.70 : 0.80;
-
-  if (bestDrinkScore >= drinkThreshold && (bestDrinkScore >= bestFoodScore || bestFoodScore < foodThreshold)) {
-    return {
-      product: bestDrinkMatch,
-      suggestedProduct: null,
-      score: bestDrinkScore,
-      quantity,
-      customization
-    };
+  const threshold = bestMatch?.category === 'drinks' ? 0.76 : 0.72;
+  if (bestMatch && bestScore >= threshold) {
+    return { product: bestMatch, quantity, customization, score: bestScore };
   }
 
-  if (bestFoodScore >= foodThreshold) {
-    return {
-      product: bestFoodMatch,
-      suggestedProduct: null,
-      score: bestFoodScore,
-      quantity,
-      customization
-    };
-  }
-
-  // Sugestii când scorul este parțial (doar dacă mesajul nu e întrebare generală și are relevanță minimă 0.65)
-  if (!isGeneralQuestion) {
-    if (bestDrinkScore >= 0.65 && bestDrinkMatch) {
-      return {
-        product: null,
-        suggestedProduct: bestDrinkMatch,
-        score: bestDrinkScore,
-        quantity,
-        customization
-      };
-    }
-
-    if (bestFoodScore >= 0.65 && bestFoodMatch) {
-      return {
-        product: null,
-        suggestedProduct: bestFoodMatch,
-        score: bestFoodScore,
-        quantity,
-        customization
-      };
-    }
-  }
-
-  return {
-    product: null,
-    suggestedProduct: null,
-    score: Math.max(bestFoodScore, bestDrinkScore),
-    quantity,
-    customization
-  };
+  return null;
 }
 
-import { connectToDatabase } from '@/lib/mongodb';
+function matchCompoundProductsInText(text: string): ExtractedProductMatch[] {
+  const lower = text.toLowerCase().trim();
 
-const inMemorySessions = new Map<string, any>();
-
-async function getSession(senderId: string) {
-  const cached = inMemorySessions.get(senderId);
-  if (cached && (Date.now() - (cached.lastUpdated || 0) < 2 * 60 * 60 * 1000)) {
-    if (!cached.history) cached.history = [];
-    return cached;
+  // Protecție: dacă mesajul conține verbe de scoatere / ștergere, NU adăugăm produse!
+  const hasNegativeIntent = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|nu mai vreau|nu vreau|fara|fără|убери|удали|не хочу|не надо|без)\b)/i.test(lower);
+  if (hasNegativeIntent) {
+    return [];
   }
 
-  try {
-    const { db: mongoDb } = await connectToDatabase();
-    const doc = await mongoDb.collection('instagram_order_sessions').findOne({ senderId });
-    if (doc) {
-      if (doc.lastUpdated && (Date.now() - doc.lastUpdated < 2 * 60 * 60 * 1000)) {
-        if (!doc.history) doc.history = [];
-        inMemorySessions.set(senderId, doc);
-        return doc;
+  // Împărțire în segmente după conjuncții: „și”, „si”, „+”, „,”, „iar”, „plus”, „и”, „а также”
+  const delimiterRegex = /(?:\b(?:[sș]i\s+o|[sș]i\s+un|si\s+o|si\s+un|[sș]i|plus|iar|и|а\s+также)\b|[,+&])/gi;
+  const segments = lower.split(delimiterRegex).map(s => s.trim()).filter(s => s.length >= 3);
+
+  const matchedItems: ExtractedProductMatch[] = [];
+  const seenProductIds = new Set<string>();
+
+  if (segments.length > 1) {
+    for (const seg of segments) {
+      const match = matchSingleProductInSegment(seg);
+      if (match && !seenProductIds.has(match.product.id)) {
+        seenProductIds.add(match.product.id);
+        matchedItems.push(match);
       }
     }
-  } catch (err) {
-    console.warn("Atenționare citire sesiune MongoDB (se folosește memoria locală):", err);
   }
 
-  const initial = {
-    senderId,
-    state: 'IDLE',
-    cart: [],
-    history: [],
-    isHumanAssistedUntil: 0,
-    lastUpdated: Date.now()
-  };
-  inMemorySessions.set(senderId, initial);
-  return initial;
-}
-
-async function saveSession(senderId: string, sessionData: any) {
-  const updatedData = {
-    ...sessionData,
-    lastUpdated: Date.now()
-  };
-  inMemorySessions.set(senderId, updatedData);
-
-  try {
-    const { db: mongoDb } = await connectToDatabase();
-    await mongoDb.collection('instagram_order_sessions').updateOne(
-      { senderId },
-      { $set: updatedData },
-      { upsert: true }
-    );
-  } catch (err) {
-    console.warn("Atenționare salvare sesiune MongoDB:", err);
-  }
-}
-
-function appendToHistory(session: any, role: 'user' | 'assistant', text: string) {
-  if (!session.history) session.history = [];
-  session.history.push({
-    role,
-    text: text.trim(),
-    timestamp: Date.now()
-  });
-  if (session.history.length > 15) {
-    session.history = session.history.slice(-15);
-  }
-}
-
-// ─── HANDLER 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ ───
-function handleCartAdjustment(text: string, session: any, lang: string): { handled: boolean, replyText?: string, status?: string } {
-  const lower = text.toLowerCase().trim();
-  const currentCart = session.cart || [];
-  if (currentCart.length === 0) return { handled: false };
-
-  const isAdjustmentVerb = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2)\b)/i.test(lower);
-  if (!isAdjustmentVerb) return { handled: false };
-
-  let targetIndex = -1;
-  for (let i = 0; i < currentCart.length; i++) {
-    const item = currentCart[i];
-    const itemName = item.name.toLowerCase();
-    const words = itemName.split(' ').filter((w: string) => w.length >= 3);
-    if (lower.includes(itemName) || words.some((w: string) => lower.includes(w))) {
-      targetIndex = i;
-      break;
+  if (matchedItems.length === 0) {
+    const singleMatch = matchSingleProductInSegment(text);
+    if (singleMatch) {
+      matchedItems.push(singleMatch);
     }
   }
 
-  if (targetIndex === -1 && currentCart.length === 1) {
-    targetIndex = 0;
-  }
-
-  if (targetIndex === -1) {
-    return { handled: false };
-  }
-
-  const targetItem = currentCart[targetIndex];
-
-  let desiredExactQty: number | null = null;
-  const exactMatch = lower.match(/\b(lasa|lasă|sa fie|să fie|pune)?\s*doar\s*(\d+|unu|una|un|doua|două|trei)\b/i);
-  if (exactMatch) {
-    const rawVal = exactMatch[2].toLowerCase();
-    if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') desiredExactQty = 1;
-    else if (rawVal === 'doua' || rawVal === 'două') desiredExactQty = 2;
-    else if (rawVal === 'trei') desiredExactQty = 3;
-    else desiredExactQty = parseInt(rawVal, 10);
-  }
-
-  let subtractQty: number | null = null;
-  const subtractMatch = lower.match(/\b(scoate|scoateti|scoateți|scade|elimina|elimină|șterge|sterge)\s*(\d+|unu|una|un|doua|două|trei)?\b/i);
-  if (subtractMatch && subtractMatch[2]) {
-    const rawVal = subtractMatch[2].toLowerCase();
-    if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') subtractQty = 1;
-    else if (rawVal === 'doua' || rawVal === 'două') subtractQty = 2;
-    else if (rawVal === 'trei') subtractQty = 3;
-    else subtractQty = parseInt(rawVal, 10);
-  } else if (subtractMatch && !subtractMatch[2] && desiredExactQty === null) {
-    subtractQty = 1;
-  }
-
-  if (desiredExactQty !== null && desiredExactQty >= 0) {
-    if (desiredExactQty === 0) {
-      currentCart.splice(targetIndex, 1);
-    } else {
-      targetItem.quantity = desiredExactQty;
-    }
-  } else if (subtractQty !== null && subtractQty > 0) {
-    targetItem.quantity -= subtractQty;
-    if (targetItem.quantity <= 0) {
-      currentCart.splice(targetIndex, 1);
-    }
-  } else {
-    targetItem.quantity -= 1;
-    if (targetItem.quantity <= 0) {
-      currentCart.splice(targetIndex, 1);
-    }
-  }
-
-  session.cart = [...currentCart];
-  const totalSum = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
-  
-  let replyText = "";
-  if (session.cart.length === 0) {
-    replyText = lang === 'ru'
-      ? "Я убрал товар из корзины. Сейчас ваша корзина пуста! 🧇 Что бы вы хотели заказать?"
-      : "Am scos produsul din coș. Acum coșul dvs. este gol! 🧇 Ce bunătăți ați dori să adăugăm?";
-  } else {
-    const remainingSummary = session.cart.map((it: any) => `${it.quantity}x ${it.name}`).join(' + ');
-    replyText = lang === 'ru'
-      ? `Готово! Обновил корзину: осталось ${remainingSummary} (Итого: ${totalSum} MDL)! 🧇 Хотите добавить напиток или оформляем? ✨`
-      : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Mai doriți ceva delicios sau finalizăm comanda? ✨`;
-  }
-
-  return { handled: true, replyText, status: 'cart_quantity_adjusted' };
+  return matchedItems;
 }
 
-// ─── HANDLER 2: ÎNTREBĂRI DESPRE INGREDIENTE ȘI ALERGENI ───
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 5: ÎNTREBĂRI DESPRE INGREDIENTE & ALERGENI
+// ═══════════════════════════════════════════════════════════════════════════════
 function handleIngredientsInquiry(text: string, lang: string): { handled: boolean, replyText?: string, product?: any } {
   const lower = text.toLowerCase().trim();
   const isIngQ = /(\b(ingrediente|ce ingrediente|ce contine|ce conține|din ce e|din ce este|compozitie|compoziție|reteta|rețeta|ce puneti|ce puneți|ce e pus|ce are|alergeni|alergie|alun[eă]|fistic|arahide|zahar|zahăr|состав|что входит|из чего|аллерген)\b)/i.test(lower);
@@ -1050,23 +1014,9 @@ function handleIngredientsInquiry(text: string, lang: string): { handled: boolea
   return { handled: true, replyText, product: matchedProduct };
 }
 
-// ─── HANDLER 3: PRECOMENZI / COMANDĂ PE MAI TÂRZIU ───
-function handlePreorderInquiry(text: string, lang: string): { handled: boolean, replyText?: string } {
-  const lower = text.toLowerCase().trim();
-  const isPreorder = /(\b(pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|la o anumita ora|la o anumită oră|pentru ora|pentru diseara|pentru diseară|precomanda|precomandă|precomenzi|programa|programare|comanda in avans|comandă în avans|pe cand|pe când|pe diseara|pe diseară|pe maine|pe mâine|на потом|попозже|к определенному времени|предзаказ|на вечер)\b)/i.test(lower);
-  if (!isPreorder) return { handled: false };
-
-  let replyText = "";
-  if (lang === 'ru') {
-    replyText = "Конечно! 🥰 Мы с удовольствием принимаем предзаказы на любое удобное для вас время в часы нашей работы (16:00 - 00:00). На какое время вы хотите доставку и какие десерты приготовить для вас? 🧇✨";
-  } else {
-    replyText = "Sigur că da! 🥰 Preluăm cu mare drag comenzi programate pentru orice oră din timpul programului nostru (16:00 - 00:00). Pentru ce oră aproximativă doriți să ajungă comanda și ce bunătăți ați dori să vă pregătim? 🧇✨";
-  }
-
-  return { handled: true, replyText };
-}
-
-// ─── HANDLER 4: CLARIFICARE ȘI CONFORT CONVERSAȚIONAL ('?', 'cum adică?') ───
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 6: CLARIFICARE ȘI CONFORT CONVERSAȚIONAL ('?', 'cum adică?')
+// ═══════════════════════════════════════════════════════════════════════════════
 function handleClarificationOrConfusion(text: string, session: any, lang: string): { handled: boolean, replyText?: string } {
   const t = text.trim();
   const isConfusion = /^([?？!！.,\s]+|cum adica\??|cum adică\??|nu inteleg|nu înțeleg|de ce\??|adica\??|adică\??|что\??|почему\??|в смысле\??)$/i.test(t);
@@ -1091,6 +1041,117 @@ function handleClarificationOrConfusion(text: string, session: any, lang: string
   return { handled: true, replyText };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// HANDLER 7: FAQ COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ, DIETAR)
+// ═══════════════════════════════════════════════════════════════════════════════
+function handleCustomerInquiries(text: string, lang: string): { handled: boolean, replyText?: string } {
+  const lower = text.toLowerCase().trim();
+
+  const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(lower);
+  const isHoursQ = /((program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня))/i.test(lower);
+  const isAddressQ = /((unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес))/i.test(lower);
+  const isDeliveryQ = /((livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород))/i.test(lower);
+  const isPaymentQ = /((plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными))/i.test(lower);
+  const isDietaryQ = /((halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина))/i.test(lower);
+  const isFreshnessQ = /((ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые))/i.test(lower);
+  const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса)/i.test(lower);
+
+  if (isGreetingOnly) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇"
+        : "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇"
+    };
+  }
+
+  if (isHoursQ) {
+    const mentionsWednesday = lower.includes('miercuri') || lower.includes('среда');
+    if (mentionsWednesday) {
+      return {
+        handled: true,
+        replyText: lang === 'ru'
+          ? "Внимание: по средам у нас выходной день! 🧇 В остальные дни мы открыты ежедневно с 16:00 до 00:00!"
+          : "Atenție: Miercuri este singura noastră zi liberă săptămânală (închis)! 🧇 În restul săptămânii suntem deschiși zilnic de la 16:00 până la 00:00! ✨"
+      };
+    }
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим быструю доставку! 🧇✨"
+        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! 🧇✨"
+    };
+  }
+
+  if (isAddressQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! Ждем вас в гости в уютном кафе! 🧇✨"
+        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! Vă așteptăm cu mult drag în cafeneaua noastră primitoare! 🧇✨"
+    };
+  }
+
+  if (isDeliveryQ) {
+    const isSuburb = lower.includes('durlesti') || lower.includes('durlești') || lower.includes('ialoveni') || lower.includes('truseni') || lower.includes('trușeni') || lower.includes('colonita') || lower.includes('colonița') || lower.includes('cricova') || lower.includes('stauceni') || lower.includes('stăuceni') || lower.includes('suburbi');
+    if (isSuburb) {
+      return {
+        handled: true,
+        replyText: lang === 'ru'
+          ? "К сожалению, в пригороды доставки сейчас нет, но мы с радостью ждем вас в кафе на ул. Testemițeanu 21/1 или оформим заказ на вынос! 🧇"
+          : "Din păcate, momentan nu livrăm în suburbii, dar vă așteptăm cu drag direct la cafenea pe Str. Nicolae Testemițeanu 21/1 sau puteți comanda cu ridicare la pachet! 🧇"
+      };
+    }
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Да, доставляем по всему Кишиневу в термобоксах! Стоимость доставки 50-70 MDL (рассчитывается точно при оформлении). Доставка занимает 35-45 минут! 🛵✨"
+        : "Bună! 🥰 Livrăm rapid și ambalat termic în tot Chișinăul! Costul livrării este de 50-70 lei (calculat la checkout), iar deserturile ajung calde în 35-45 min! 🛵✨"
+    };
+  }
+
+  if (isPaymentQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Оплатить заказ можно картой онлайн на сайте, картой курьеру при получении (терминал POS), или наличными в MDL! 💳💵"
+        : "Puteți achita comod: online cu cardul direct pe site la plasarea comenzii, cu cardul la livrare (curierul are POS), sau cash (MDL) la primire! 💳💵"
+    };
+  }
+
+  if (isDietaryQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Все наши десерты 100% вегетарианские, готовятся только из отборных ингредиентов (бельгийский шоколад, Nutella, свежие ягоды) и не содержат животного желатина! 🍓✨"
+        : "Toate deserturile noastre sunt 100% vegetariene, preparate din ingrediente dulci premium (ciocolată belgiană, Nutella originală, fructe proaspete) și nu conțin gelatină animală sau grăsimi! 🍓✨"
+    };
+  }
+
+  if (isFreshnessQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Десерты выпекаются индивидуально прямо под ваш заказ и упаковываются в специальные термобоксы, чтобы приехать хрустящими и теплыми! 🧇🔥"
+        : "Deserturile noastre sunt preparate pe loc la primirea comenzii și sunt ambalate în cutii termice speciale pentru ca waffles-urile și clătitele să ajungă crocante și fierbinți la dvs.! 🧇🔥"
+    };
+  }
+
+  if (isSeatingSimpleQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Да, у нас уютное кафе на ул. Testemițeanu 21/1, где можно приятно провести время и насладиться теплыми десертами прямо на месте! Ждем вас в гости! 🧇✨"
+        : "Da, vă așteptăm cu mult drag în cafeneaua noastră din Chișinău, pe Str. Nicolae Testemițeanu 21/1! Avem sală primitoare unde deserturile se servesc calde și proaspete! 🧇✨"
+    };
+  }
+
+  return { handled: false };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MOTORUL PRINCIPAL COGNITIV: processMessage
+// ═══════════════════════════════════════════════════════════════════════════════
 export async function processMessage(
   senderId: string, 
   messageText: string, 
@@ -1108,6 +1169,7 @@ export async function processMessage(
       return { success: true, status: 'human_assisted_pause_active' };
     }
 
+    // ─── PAS 0: ASISTENȚĂ UMANĂ / RECLAMAȚIE ───
     const isOperatorRequested = lowerMsg.includes('operator') || lowerMsg.includes('om real') || lowerMsg.includes('persoana') || lowerMsg.includes('persoană') || lowerMsg.includes('человек') || lowerMsg.includes('оператор') || lowerMsg.includes('human') || lowerMsg.includes('angajat');
     const isComplaintOrIssue = /(\b(reclamatie|reclamație|nemultumit|nemulțumit|lipseste|lipsește|gresit|greșit|comanda mea|unde e comanda|intarzie|întârzie|problema|problemă|bani|retur|banii inapoi|banii înapoi|curierul|jaloba|жалоба|претензия|где заказ|ошибка|опоздал)\b)/i.test(messageText);
 
@@ -1136,23 +1198,6 @@ export async function processMessage(
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
-    // ─── PAS 1: ANULARE COMANDĂ & GOLIRE COȘ ───
-    const isCancelOrder = /(\b(anuleaza|anulează|anulati|anulați|anulez|sterge|șterge|golește|goleste|nu mai vreau|nu mai doresc|nu vreau nimic|reset|cancel|отмена|отмените|очистить|не хочу)\b)/i.test(lowerMsg) && 
-      (lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('cos') || lowerMsg.includes('coș') || lowerMsg.includes('tot') || lowerMsg.includes('toată') || lowerMsg.includes('toata') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('nu mai doresc') || lowerMsg.includes('заказ') || lowerMsg.includes('корзин'));
-
-    if (isCancelOrder || lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('anulati comanda') || lowerMsg.includes('anulați comanda') || lowerMsg.includes('nu mai vreau comanda') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
-      session.cart = [];
-      session.state = 'IDLE';
-      const cancelReply = lang === 'ru'
-        ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
-        : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
-
-      appendToHistory(session, 'assistant', cancelReply);
-      await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
-      return { success: true, status: 'order_cancelled', replyText: cancelReply };
-    }
-
     const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
       const currentCart = currentSession.cart || [];
       if (!currentCart || currentCart.length === 0) {
@@ -1168,9 +1213,10 @@ export async function processMessage(
       const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
       
       const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
+      const schedParam = currentSession.scheduledTime ? `&scheduled=${encodeURIComponent(currentSession.scheduledTime)}` : '';
       const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
 
-      const url = `https://www.munchotella.md/${currentLang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}`;
+      const url = `https://www.munchotella.md/${currentLang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}${schedParam}`;
       const buttonTitle = currentLang === 'ru' 
         ? `🛍️ Корзина (${totalSum} MDL)` 
         : currentLang === 'en' 
@@ -1180,7 +1226,7 @@ export async function processMessage(
       return { url, buttonTitle, totalSum };
     };
 
-    // ─── PAS 2: AJUSTARE CANTITĂȚI ÎN COȘ (ex: 'scoateți 2', 'să fie doar unu') ───
+    // ─── PAS 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ (RULAT ÎNAINTE DE CANCEL!) ───
     const cartAdjustResult = handleCartAdjustment(messageText, session, lang);
     if (cartAdjustResult.handled && cartAdjustResult.replyText) {
       appendToHistory(session, 'assistant', cartAdjustResult.replyText);
@@ -1190,8 +1236,23 @@ export async function processMessage(
       return { success: true, status: 'cart_quantity_adjusted', replyText: cartAdjustResult.replyText, cart: session.cart };
     }
 
-    // ─── PAS 3: ÎNTREBĂRI DESPRE PRECOMENZI (ex: 'pot comanda pe mai târziu?') ───
-    const preorderResult = handlePreorderInquiry(messageText, lang);
+    // ─── PAS 2: ANULARE TOTALĂ COMANDĂ & GOLIRE COȘ ───
+    if (isGlobalOrderCancellation(messageText)) {
+      session.cart = [];
+      session.state = 'IDLE';
+      session.scheduledTime = null;
+      const cancelReply = lang === 'ru'
+        ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
+        : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
+
+      appendToHistory(session, 'assistant', cancelReply);
+      await saveSession(senderId, session);
+      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
+      return { success: true, status: 'order_cancelled', replyText: cancelReply };
+    }
+
+    // ─── PAS 3: PRECOMENZI, PROGRAMĂRI ORĂ ȘI DINE-IN (RULAT ÎNAINTE DE FAQ!) ───
+    const preorderResult = handlePreorderAndScheduling(messageText, session, lang);
     if (preorderResult.handled && preorderResult.replyText) {
       appendToHistory(session, 'assistant', preorderResult.replyText);
       await saveSession(senderId, session);
@@ -1200,7 +1261,7 @@ export async function processMessage(
       return { success: true, status: 'preorder_inquiry_answered', replyText: preorderResult.replyText };
     }
 
-    // ─── PAS 4: ÎNTREBĂRI DESPRE INGREDIENTE & ALERGENI (ex: 'ce ingrediente are waffle stick?') ───
+    // ─── PAS 4: ÎNTREBĂRI DESPRE INGREDIENTE & ALERGENI ───
     const ingResult = handleIngredientsInquiry(messageText, lang);
     if (ingResult.handled && ingResult.replyText) {
       appendToHistory(session, 'assistant', ingResult.replyText);
@@ -1239,40 +1300,43 @@ export async function processMessage(
       return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText: checkoutText };
     }
 
-    // ─── PAS 7: DETECTARE COMANDĂ PRODUS SPECIFIC ───
-    const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(messageText);
-    const matched = matchProductInText(messageText);
+    // ─── PAS 7: DETECTARE COMANDĂ (PRODUSE MULTIPLE SAU INDIVIDUALE) ───
+    const compoundMatches = matchCompoundProductsInText(messageText);
 
-    if (matched.product) {
-      const itemToAdd = {
-        id: matched.product.id,
-        name: matched.product.name,
-        price: matched.product.price,
-        image: matched.product.image,
-        quantity: matched.quantity,
-        customization: matched.customization
-      };
+    if (compoundMatches.length > 0) {
+      for (const m of compoundMatches) {
+        const itemToAdd = {
+          id: m.product.id,
+          name: m.product.name,
+          price: m.product.price,
+          image: m.product.image,
+          quantity: m.quantity,
+          customization: m.customization
+        };
 
-      const existingIndex = (session.cart || []).findIndex((i: any) => i.id === itemToAdd.id && i.customization === itemToAdd.customization);
-      if (existingIndex > -1) {
-        session.cart[existingIndex].quantity += itemToAdd.quantity;
-      } else {
-        session.cart = [...(session.cart || []), itemToAdd];
+        const existingIndex = (session.cart || []).findIndex((i: any) => i.id === itemToAdd.id && i.customization === itemToAdd.customization);
+        if (existingIndex > -1) {
+          session.cart[existingIndex].quantity += itemToAdd.quantity;
+        } else {
+          session.cart = [...(session.cart || []), itemToAdd];
+        }
       }
 
-      let customNoteText = "";
-      if (matched.customization) {
-        customNoteText = ` (${matched.customization})`;
-      }
+      const hasDrinks = compoundMatches.some(m => m.product.category === 'drinks');
+      session.state = hasDrinks ? 'AWAITING_DRINKS' : 'AWAITING_MORE_DESSERTS';
 
-      const isDrink = matched.product.category === 'drinks';
-      session.state = isDrink ? 'AWAITING_DRINKS' : 'AWAITING_MORE_DESSERTS';
+      const totalSum = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
+      const addedItemsSummary = compoundMatches.map(m => `${m.quantity > 1 ? m.quantity + 'x ' : ''}${m.product.name}${m.customization ? ` (${m.customization})` : ''}`).join(' + ');
 
       let addReply = "";
       if (lang === 'ru') {
-        addReply = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 ${isDrink ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое?'}`;
+        addReply = compoundMatches.length > 1
+          ? `С удовольствием добавил в заказ: ${addedItemsSummary}! 🧇 Итого в корзине: ${totalSum} MDL. ${hasDrinks ? 'Оформляем заказ или добавить еще что-нибудь сладкое?' : 'Хотите добавить прохладительный напиток или оформляем? ✨'}`
+          : `С удовольствием добавил ${addedItemsSummary} (${compoundMatches[0].product.price * compoundMatches[0].quantity} MDL) в ваш заказ! 🧇 ${hasDrinks ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое или напиток?'}`;
       } else {
-        addReply = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 ${isDrink ? 'Doriți să finalizăm comanda sau mai adăugăm ceva?' : 'Mai doriți încă ceva dulce sau un alt preparat?'}`;
+        addReply = compoundMatches.length > 1
+          ? `Am adăugat cu drag în coș: ${addedItemsSummary}! 🧇 Total coș: ${totalSum} MDL. ${hasDrinks ? 'Doriți să finalizăm comanda sau mai adăugăm ceva dulce?' : 'Doriți să adăugăm și o băutură răcoritoare sau finalizăm comanda? ✨'}`
+          : `Am adăugat cu drag ${addedItemsSummary} (${compoundMatches[0].product.price * compoundMatches[0].quantity} MDL) în coșul dvs.! 🧇 ${hasDrinks ? 'Doriți să finalizăm comanda sau mai adăugăm ceva?' : 'Mai doriți încă ceva dulce sau o băutură răcoritoare?'}`;
       }
 
       appendToHistory(session, 'assistant', addReply);
@@ -1280,111 +1344,86 @@ export async function processMessage(
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendDispatchGenericCard(senderId, channel, matched.product, addReply, cartUrl, cartButtonTitle, menuUrl);
-      return { success: true, status: 'product_added', cart: session.cart, replyText: addReply, cartUrl, cartButtonTitle, score: matched.score };
+      
+      await sendDispatchGenericCard(senderId, channel, compoundMatches[0].product, addReply, cartUrl, cartButtonTitle, menuUrl);
+      return { 
+        success: true, 
+        status: compoundMatches.length > 1 ? 'compound_products_added' : 'product_added', 
+        cart: session.cart, 
+        replyText: addReply, 
+        cartUrl, 
+        cartButtonTitle 
+      };
     }
 
-    if (!matched.product && matched.suggestedProduct) {
-      const suggested = matched.suggestedProduct;
-      let clarifyReply = lang === 'ru'
-        ? `Вы имели в виду ${suggested.name} (${suggested.price} MDL)? 🧇 Нажмите ниже, чтобы открыть и оформить заказ! ✨`
-        : `Ați dorit să spuneți ${suggested.name} (${suggested.price} MDL)? 🧇 Puteți continua mai jos cu coșul sau accesați meniul complet! ✨`;
-
-      appendToHistory(session, 'assistant', clarifyReply);
+    // ─── PAS 8: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
+    const faqResult = handleCustomerInquiries(messageText, lang);
+    if (faqResult.handled && faqResult.replyText) {
+      appendToHistory(session, 'assistant', faqResult.replyText);
       await saveSession(senderId, session);
-
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, clarifyReply, cartUrl, cartButtonTitle);
-      return { success: true, status: 'product_clarification_sent', replyText: clarifyReply };
+      await sendDispatchResponse(senderId, channel, faqResult.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
     }
 
-    // ─── PAS 8: FAQ STANDARDIZAT (ORAR, LOCAȚIE, LIVRARE, MESE) ───
-    const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(messageText.trim());
-    const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня)\b)/i.test(messageText);
-    const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
-    const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
-    const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
-
+    // ─── PAS 9: MOTOR COGNITIV GEMINI FLASH (CU CONTEXT CONVERSAȚIONAL COMPLET) ───
     let replyText = "";
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      const historySnippets = (session.history || []).slice(-12).map((m: any) => 
+        `${m.role === 'user' ? 'Client' : 'Munchotella AI'}: "${m.text}"`
+      ).join('\n');
 
-    if (isGreetingOnly) {
-      replyText = lang === 'ru'
-        ? "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇"
-        : "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇";
-    } else if (isHoursQ) {
-      replyText = lang === 'ru'
-        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим доставку на дом! ✨"
-        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! ✨";
-    } else if (isAddressQ) {
-      replyText = lang === 'ru'
-        ? "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇"
-        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
-    } else if (isDeliveryQ) {
-      replyText = lang === 'ru'
-        ? "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Стоимость рассчитывается при оформлении на сайте (в среднем 50-70 леев). Меню по кнопке ниже! 🧇"
-        : "Bună! 🥰 Da, facem livrare în tot Chișinăul! Costul livrării se calculează la checkout (în medie 50-70 lei). Puteți comanda pe butonul de mai jos! 🧇";
-    } else if (isSeatingQ) {
-      replyText = lang === 'ru'
-        ? "Да, у нас уютное кафе, где можно приятно провести время и насладиться теплыми десертами! Ждем вас в гости! 🧇✨"
-        : "Da, avem cafenea frumos amenajată unde puteți savura deserturile noastre calde chiar pe loc! Vă așteptăm cu mult drag! 🧇✨";
-    }
+      const currentCartSummary = (session.cart && session.cart.length > 0)
+        ? session.cart.map((it: any) => `${it.quantity}x ${it.name} (${it.price * it.quantity} MDL)`).join(', ')
+        : 'Coș gol';
 
-    // ─── PAS 9: MOTOR COGNITIV GEMINI FLASH (CU MEMORIE CONVERSAȚIONALĂ COMPLETĂ) ───
-    if (!replyText) {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (apiKey) {
-        const historySnippets = (session.history || []).slice(-10).map((m: any) => 
-          `${m.role === 'user' ? 'Client' : 'Munchotella AI'}: "${m.text}"`
-        ).join('\\n');
+      const schedInfo = session.scheduledTime ? `Programare/Oră menționată: ${session.scheduledTime}` : 'Comandă imediată';
 
-        const currentCartSummary = (session.cart && session.cart.length > 0)
-          ? session.cart.map((it: any) => `${it.quantity}x ${it.name} (${it.price * it.quantity} MDL)`).join(', ')
-          : 'Coș gol';
-
-        const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1).
+      const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1).
 Program: 16:00 - 00:00 (Miercuri: Închis).
 Produse principale: Crepe Dubai cu fistic și cataif (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), băuturi răcoritoare.
 Reguli esențiale:
-1. Răspunde cald, politicos, concis și natural (maxim 1-2 propoziții, stil uman de concierge).
+1. Răspunde cald, politicos, concis și natural (maxim 1-2 propoziții, stil uman de concierge primitor).
 2. Dacă mesajul clientului este o întrebare, răspunde clar și la obiect.
-3. Dacă mesajul este ambiguu sau clientul pare nesigur, formulează o întrebare scurtă și prietenoasă de clarificare.
-4. NU inventa produse. NU folosi cuvântul 'americane' sau 'nuci'.
-5. Dacă clientul dorește să comande pe mai târziu / precomandă, confirmă cu drag că se poate și întreabă la ce oră dorește livrarea.
+3. Dacă clientul vrea să facă o precomandă pe mâine sau pe mai târziu, confirmă cu mult drag și întreabă la ce oră dorește să fie gata/livrată comanda (interval 16:00 - 00:00).
+4. Dacă clientul întreabă despre ingrediente sau alergeni, explică clar și prietenos.
+5. NU inventa produse. NU folosi cuvintele 'americane' sau 'nuci'. Folosește exclusiv denumirile oficiale.
 
 [Istoric recent conversație]:
 ${historySnippets}
 
 [Coșul curent al clientului]: ${currentCartSummary}
+[${schedInfo}]
 [Limbă: ${lang.toUpperCase()}]
 [Mesaj primit acum]: "${messageText}"
 [Răspunsul tău scurt și profesionist]:`;
 
-        const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-3.7-flash'];
-        for (const modelName of candidateModels) {
+      const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-3.7-flash'];
+      for (const modelName of candidateModels) {
+        try {
+          const ai = new GoogleGenAI({ apiKey });
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: dynamicPrompt,
+          });
+          if (response.text) {
+            replyText = response.text;
+            break;
+          }
+        } catch (genAiErr: any) {
           try {
-            const ai = new GoogleGenAI({ apiKey });
-            const response = await ai.models.generateContent({
-              model: modelName,
-              contents: dynamicPrompt,
+            const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: dynamicPrompt }] }] })
             });
-            if (response.text) {
-              replyText = response.text;
+            const restData = await restRes.json();
+            if (restData?.candidates?.[0]?.content?.parts?.[0]?.text) {
+              replyText = restData.candidates[0].content.parts[0].text;
               break;
             }
-          } catch (genAiErr: any) {
-            try {
-              const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: dynamicPrompt }] }] })
-              });
-              const restData = await restRes.json();
-              if (restData?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                replyText = restData.candidates[0].content.parts[0].text;
-                break;
-              }
-            } catch (_) {}
-          }
+          } catch (_) {}
         }
       }
     }
@@ -1418,7 +1457,9 @@ ${historySnippets}
   }
 }
 
-
+// ═══════════════════════════════════════════════════════════════════════════════
+// DISPATCH & META GRAPH API TRANSPORT
+// ═══════════════════════════════════════════════════════════════════════════════
 async function sendDispatchResponse(
   senderId: string,
   channel: 'instagram' | 'messenger',
@@ -1610,3 +1651,147 @@ async function notifyStaffViaTelegram(options: {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENTRY POINT POST WEBHOOK META
+// ═══════════════════════════════════════════════════════════════════════════════
+export async function POST(request: Request) {
+  try {
+    const rawText = await request.text();
+
+    const appSecret = process.env.META_APP_SECRET;
+    const signatureHeader = request.headers.get('x-hub-signature-256') || '';
+
+    if (appSecret && signatureHeader && signatureHeader.startsWith('sha256=')) {
+      try {
+        const expectedSignature = 'sha256=' + crypto.createHmac('sha256', appSecret).update(rawText, 'utf8').digest('hex');
+        const sigBuffer = Buffer.from(signatureHeader, 'utf8');
+        const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+        if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+          console.warn("⚠️ Webhook Meta: Semnătură X-Hub-Signature-256 diferită de META_APP_SECRET.");
+        }
+      } catch (err) {
+        console.warn("⚠️ Eroare verificare semnătură:", err);
+      }
+    }
+
+    let body: any = null;
+    try {
+      body = JSON.parse(rawText);
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch (_) {}
+      }
+    } catch (e) {
+      body = rawText;
+    }
+
+    try {
+      const { db: mongoDb } = await connectToDatabase();
+      await mongoDb.collection('debug_webhooks').insertOne({
+        timestamp: new Date(),
+        rawText,
+        body,
+        signatureHeader
+      });
+    } catch (_) {}
+
+    let senderId: string | null = null;
+    let messageText: string | null = null;
+    let isEcho = false;
+    let channel: 'instagram' | 'messenger' = 'instagram';
+
+    if (body && typeof body === 'object') {
+      if (body.object === 'page') {
+        channel = 'messenger';
+      } else {
+        channel = 'instagram';
+      }
+
+      if (Array.isArray(body?.entry)) {
+        for (const entry of body.entry) {
+          if (Array.isArray(entry?.messaging)) {
+            for (const item of entry.messaging) {
+              if (item?.message?.is_echo) {
+                isEcho = true;
+                continue;
+              }
+              const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
+              const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
+              
+              if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
+                isEcho = true;
+                continue;
+              }
+
+              if (sId && text) {
+                senderId = String(sId);
+                messageText = text;
+                break;
+              }
+            }
+          } else if (Array.isArray(entry?.changes)) {
+            for (const change of entry.changes) {
+              const val = change?.value;
+              if (val) {
+                if (val?.message?.is_echo || val?.is_echo) {
+                  isEcho = true;
+                  continue;
+                }
+                const sId = val?.from?.id || val?.from || val?.sender?.id || val?.sender;
+                const text = val?.text?.body || val?.text || val?.message?.text || val?.message;
+                
+                if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
+                  isEcho = true;
+                  continue;
+                }
+
+                if (sId && typeof text === 'string') {
+                  senderId = String(sId);
+                  messageText = text;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (isEcho) {
+      console.log("Ignorat mesaj ecou / propriu.");
+      return NextResponse.json({ success: true, status: 'echo_ignored' });
+    }
+
+    if (senderId && messageText) {
+      console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
+      const debugResult = await processMessage(senderId, messageText, channel);
+      await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
+      
+      const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
+      await notifyAgencyDashboard({
+        platform: channel,
+        asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
+        sender_id: senderId,
+        customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
+        customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
+        message_text: messageText,
+        reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
+        status: debugResult.status || 'gemini_response'
+      });
+
+      return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
+    } else {
+      return NextResponse.json({ 
+        success: true, 
+        warning: 'lipsesc_date', 
+        extracted: { senderId, messageText, channel }, 
+        bodyType: typeof body, 
+        rawText,
+        body 
+      });
+    }
+
+  } catch (error: any) {
+    console.error('Eroare Webhook Meta:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
