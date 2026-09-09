@@ -410,6 +410,35 @@ async function logAIActivity(senderId: string, channel: string, messageText: str
   }
 }
 
+async function notifyAgencyDashboard(payload: {
+  platform: 'instagram' | 'messenger';
+  asset_id: string;
+  sender_id: string;
+  customer_name: string;
+  customer_handle: string;
+  message_text: string;
+  reply_text: string;
+  status: string;
+}) {
+  const endpoints = [
+    'https://munchotella-ai-agency.onrender.com/api/meta/webhook-event',
+    'http://127.0.0.1:10000/api/meta/webhook-event'
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      }).catch(() => {}).finally(() => clearTimeout(timeoutId));
+    } catch (_) {}
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const rawText = await request.text();
@@ -523,6 +552,19 @@ export async function POST(request: Request) {
       console.log(`Mesaj detectat pe canalul [${channel.toUpperCase()}] de la ${senderId}: "${messageText}"`);
       const debugResult = await processMessage(senderId, messageText, channel);
       await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
+      
+      // Instantly synchronize message with Munchotella AI Agency Operations Center
+      notifyAgencyDashboard({
+        platform: channel,
+        asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
+        sender_id: senderId,
+        customer_name: (senderId === '27899196186417959' || senderId.includes('crupa')) ? 'Crupa Grigore' : 'Client Munchotella',
+        customer_handle: (senderId === '27899196186417959' || senderId.includes('crupa')) ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
+        message_text: messageText,
+        reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
+        status: debugResult.status || 'gemini_response'
+      });
+
       return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
     } else {
       return NextResponse.json({ 
