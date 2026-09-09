@@ -135,6 +135,40 @@ export default function MenuPage() {
     syncMenuFromBackend();
   }, [t]);
 
+  // 3. Auto-select product from URL (?product=... or ?item=...)
+  useEffect(() => {
+    if (typeof window === "undefined" || menuItems.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetQuery = params.get("product") || params.get("item");
+    if (!targetQuery) return;
+
+    const normalizedTarget = targetQuery.toLowerCase().replace(/[-_]/g, " ").trim();
+
+    // Find product by id, name, or slug match
+    const found = menuItems.find(item => {
+      const idStr = String(item.id).toLowerCase();
+      const nameStr = (item.name || "").toLowerCase();
+      const slugStr = (item.name || "").toLowerCase().replace(/\s+/g, "_");
+      const hyphenSlugStr = (item.name || "").toLowerCase().replace(/\s+/g, "-");
+
+      return idStr === normalizedTarget ||
+             nameStr === normalizedTarget ||
+             slugStr === targetQuery.toLowerCase() ||
+             hyphenSlugStr === targetQuery.toLowerCase() ||
+             nameStr.includes(normalizedTarget);
+    });
+
+    if (found) {
+      handleOpenCustomization(found);
+      setTimeout(() => {
+        const el = document.getElementById(`product-${found.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 300);
+    }
+  }, [menuItems]);
+
   const filteredItems = menuItems.filter(item => {
     const query = searchQuery.trim().toLowerCase();
     const isSearching = query !== "";
@@ -235,11 +269,12 @@ export default function MenuPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredItems.map((item) => (
-              <ProductCard
-                key={item.id}
-                item={item}
-                onSelect={handleOpenCustomization}
-              />
+              <div id={`product-${item.id}`} key={item.id} className="scroll-mt-32">
+                <ProductCard
+                  item={item}
+                  onSelect={handleOpenCustomization}
+                />
+              </div>
             ))}
           </div>
         )}
