@@ -1064,8 +1064,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇"
-        : "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇"
+        ? "Здравствуйте! 🥰 Чем мы можем вас порадовать сегодня? 🧇"
+        : "Bună! 🥰 Cu ce bunătăți vă putem îndulci astăzi? 🧇"
     };
   }
 
@@ -1075,15 +1075,15 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "Внимание: по средам у нас выходной день! 🧇 В остальные дни мы открыты ежедневно с 16:00 до 00:00!"
-          : "Atenție: Miercuri este singura noastră zi liberă săptămânală (închis)! 🧇 În restul săptămânii suntem deschiși zilnic de la 16:00 până la 00:00! ✨"
+          ? "По средам у нас выходной день! 🧇 В остальные дни ждем вас с 16:00 до 00:00! ✨"
+          : "Miercuri este singura noastră zi liberă (închis)! 🧇 În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
       };
     }
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим быструю доставку! 🧇✨"
-        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! 🧇✨"
+        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной). Ждем вас с радостью! 🧇✨"
+        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis). Vă așteptăm cu drag! 🧇✨"
     };
   }
 
@@ -1091,8 +1091,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! Ждем вас в гости в уютном кафе! 🧇✨"
-        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! Vă așteptăm cu mult drag în cafeneaua noastră primitoare! 🧇✨"
+        ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițeanu 21/1. Ждем вас в гости! 🧇✨"
+        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1. Vă așteptăm cu drag! 🧇✨"
     };
   }
 
@@ -1102,15 +1102,15 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "К сожалению, в пригороды доставки сейчас нет, но мы с радостью ждем вас в кафе на ул. Testemițeanu 21/1 или оформим заказ на вынос! 🧇"
-          : "Din păcate, momentan nu livrăm în suburbii, dar vă așteptăm cu drag direct la cafenea pe Str. Nicolae Testemițeanu 21/1 sau puteți comanda cu ridicare la pachet! 🧇"
+          ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițeanu 21/1 или на вынос! 🧇"
+          : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițeanu 21/1 sau la pachet! 🧇"
       };
     }
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Да, доставляем по всему Кишиневу в термобоксах! Стоимость доставки 50-70 MDL (рассчитывается точно при оформлении). Доставка занимает 35-45 минут! 🛵✨"
-        : "Bună! 🥰 Livrăm rapid și ambalat termic în tot Chișinăul! Costul livrării este de 50-70 lei (calculat la checkout), iar deserturile ajung calde în 35-45 min! 🛵✨"
+        ? "Да, доставляем по Кишиневу в термобоксах за 35-45 минут (тариф 50-70 MDL). 🛵✨"
+        : "Livrăm rapid în tot Chișinăul în 35-45 min, în cutii termice (taxa 50-70 lei). 🛵✨"
     };
   }
 
@@ -1118,8 +1118,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Оплатить заказ можно картой онлайн на сайте, картой курьеру при получении (терминал POS), или наличными в MDL! 💳💵"
-        : "Puteți achita comod: online cu cardul direct pe site la plasarea comenzii, cu cardul la livrare (curierul are POS), sau cash (MDL) la primire! 💳💵"
+        ? "Можно оплатить картой онлайн, картой курьеру через POS-терминал или наличными при получении. 💳💵"
+        : "Puteți achita online cu cardul, cu cardul la curier (POS) sau cash la primire. 💳💵"
     };
   }
 
@@ -1127,8 +1127,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Все наши десерты 100% вегетарианские, готовятся только из отборных ингредиентов (бельгийский шоколад, Nutella, свежие ягоды) и не содержат животного желатина! 🍓✨"
-        : "Toate deserturile noastre sunt 100% vegetariene, preparate din ingrediente dulci premium (ciocolată belgiană, Nutella originală, fructe proaspete) și nu conțin gelatină animală sau grăsimi! 🍓✨"
+        ? "Все десерты 100% вегетарианские, из отборных ингредиентов, без животного желатина. 🍓✨"
+        : "Toate deserturile sunt 100% vegetariene, din ingrediente proaspete și fără gelatină animală. 🍓✨"
     };
   }
 
@@ -1136,8 +1136,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Десерты выпекаются индивидуально прямо под ваш заказ и упаковываются в специальные термобоксы, чтобы приехать хрустящими и теплыми! 🧇🔥"
-        : "Deserturile noastre sunt preparate pe loc la primirea comenzii și sunt ambalate în cutii termice speciale pentru ca waffles-urile și clătitele să ajungă crocante și fierbinți la dvs.! 🧇🔥"
+        ? "Десерты выпекаются на месте под заказ и пакуются в термобоксы, приезжают хрустящими и горячими! 🧇🔥"
+        : "Deserturile se prepară proaspăt la comandă și ajung fierbinți și crocante în cutii termice! 🧇🔥"
     };
   }
 
@@ -1145,8 +1145,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Да, у нас уютное кафе на ул. Testemițeanu 21/1, где можно приятно провести время и насладиться теплыми десертами прямо на месте! Ждем вас в гости! 🧇✨"
-        : "Da, vă așteptăm cu mult drag în cafeneaua noastră din Chișinău, pe Str. Nicolae Testemițeanu 21/1! Avem sală primitoare unde deserturile se servesc calde și proaspete! 🧇✨"
+        ? "Да, у нас есть уютный зал на ул. Testemițeanu 21/1, где можно насладиться горячими десертами! Ждем вас! 🧇✨"
+        : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițeanu 21/1! 🧇✨"
     };
   }
 
@@ -1294,8 +1294,8 @@ export async function processMessage(
     if (faqResult.handled && faqResult.replyText) {
       appendToHistory(session, 'assistant', faqResult.replyText);
       await saveSession(senderId, session);
-      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, faqResult.replyText, cartUrl, cartButtonTitle);
+      // Răspuns direct, uman și curat FĂRĂ linkuri sau carduri atașate deranjant în Instagram Direct
+      await sendDispatchResponse(senderId, channel, faqResult.replyText, "", "");
       return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
     }
 
@@ -1389,11 +1389,12 @@ export async function processMessage(
 Program: 16:00 - 00:00 (Miercuri: Închis).
 Produse principale: Crepe Dubai cu fistic și cataif (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), băuturi răcoritoare.
 Reguli esențiale:
-1. Răspunde cald, politicos, concis și natural (maxim 1-2 propoziții, stil uman de concierge primitor).
-2. Dacă mesajul clientului este o întrebare, răspunde clar și la obiect.
-3. Dacă clientul vrea să facă o precomandă pe mâine sau pe mai târziu, confirmă cu mult drag și întreabă la ce oră dorește să fie gata/livrată comanda (interval 16:00 - 00:00).
-4. Dacă clientul întreabă despre ingrediente sau alergeni, explică clar și prietenos.
-5. NU inventa produse. NU folosi cuvintele 'americane' sau 'nuci'. Folosește exclusiv denumirile oficiale.
+1. Răspunde ULTRA-SCURT, cald și natural (1 singură propoziție, maxim 2 foarte scurte, exact ca un ospătar amabil pe chat, NU ca un robot corporatist).
+2. Fără texte lungi sau introduceri pompoase. Treci direct la răspunsul dorit de client.
+3. Dacă clientul vrea o precomandă, confirmă scurt și întreabă doar ora dorită (interval 16:00 - 00:00).
+4. La întrebări generale (orar, adresă, livrare), răspunde scurt și direct la obiect, fără texte de umplutură.
+5. NU include linkuri în text (linkurile se transmit separat doar dacă este cazul).
+6. NU inventa produse. NU folosi cuvintele 'americane' sau 'nuci'. Folosește exclusiv denumirile oficiale.
 
 [Istoric recent conversație]:
 ${historySnippets}
@@ -1643,14 +1644,22 @@ async function sendDispatchResponse(
   url: string,
   buttonTitle: string
 ) {
-  // Pe Instagram Direct, template_type "button" nu este suportat de Meta.
-  // Trimitem mesaj de text nativ, elegant structurat cu linkul aferent.
-  if (channel === 'messenger' && url && buttonTitle) {
+  // Dacă nu este specificat URL sau buton, trimitem doar textul curat conversațional
+  if (!url || !buttonTitle || url.trim().length === 0 || buttonTitle.trim().length === 0) {
+    return await sendMetaTextMessage(senderId, text.trim());
+  }
+
+  // Pe Facebook Messenger, folosim template_type "button" nativ
+  if (channel === 'messenger') {
     return await sendMetaButtonResponse(senderId, text, url, buttonTitle);
   } else {
-    const fullText = (url && buttonTitle)
-      ? `${text.trim()}\n\n📲 ${buttonTitle}: ${url}`
-      : text.trim();
+    // Pe Instagram Direct, atașăm linkul doar dacă reprezintă o acțiune explicită de comandă / coș activ
+    const isGenericMenu = buttonTitle.toLowerCase().includes('meniu') || buttonTitle.toLowerCase().includes('меню');
+    if (isGenericMenu) {
+      // Evităm linkurile redundante la meniu pe mesaje conversaționale obositoare
+      return await sendMetaTextMessage(senderId, text.trim());
+    }
+    const fullText = `${text.trim()}\n\n📲 ${buttonTitle}: ${url}`;
     return await sendMetaTextMessage(senderId, fullText);
   }
 }
