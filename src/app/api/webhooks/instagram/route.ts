@@ -567,6 +567,10 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   return 'ro';
 }
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function levenshtein(a: string, b: string): number {
   const an = a ? a.length : 0;
   const bn = b ? b.length : 0;
@@ -619,7 +623,7 @@ function calculateSimilarity(str1: string, str2: string): number {
   if (minLen >= 3 && (s1.includes(s2) || s2.includes(s1))) {
     if ((s1.includes('ciocolat') || s2.includes('ciocolat')) && (s1 === 'cola' || s2 === 'cola' || s1 === 'coca-cola' || s2 === 'coca-cola')) {
       // Excludere cola din ciocolata
-    } else if (lenRatio >= 0.70 || new RegExp(`\b${s2.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`).test(s1) || new RegExp(`\b${s1.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`).test(s2)) {
+    } else if (lenRatio >= 0.70 || new RegExp(`\b${escapeRegex(s2)}\b`).test(s1) || new RegExp(`\b${escapeRegex(s1)}\b`).test(s2)) {
       return Math.max(0.85, lenRatio);
     }
   }
@@ -688,7 +692,7 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
 
     let isItemMatched = false;
     for (const term of expandedTerms) {
-      if (new RegExp(`\b${term.replace(/[.*+?^${}()|[\]\]/g, '\$&')}\b`, 'i').test(lower) || lower.includes(term)) {
+      if (new RegExp(`\b${escapeRegex(term)}\b`, 'i').test(lower) || lower.includes(term)) {
         isItemMatched = true;
         break;
       }
