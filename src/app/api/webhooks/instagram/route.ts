@@ -558,7 +558,7 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   ];
   
   const hasEnPhrase = enPhrases.some(p => lower.includes(p));
-  const hasRoIndicators = /((vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi))/i.test(text);
+  const hasRoIndicators = /(\b(vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi)\b)/i.test(text);
 
   if (hasEnPhrase && !hasRoIndicators) {
     return 'en';
@@ -645,8 +645,8 @@ function calculateSimilarity(str1: string, str2: string): number {
 function cleanTextForMatching(text: string): string {
   let t = text.toLowerCase().trim();
   const stopwords = [
-    /(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)/gi,
-    /(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
+    /\b(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)\b/gi,
+    /\b(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
   ];
   for (const sw of stopwords) {
     t = t.replace(sw, ' ');
@@ -662,7 +662,7 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
   const currentCart = session.cart || [];
   if (currentCart.length === 0) return { handled: false };
 
-  const isAdjustmentVerb = /((scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2|fara|fără|nu mai vreau|nu vreau|убери|уберите|удали|удалите|не хочу|не надо|без))/i.test(lower);
+  const isAdjustmentVerb = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2|fara|fără|nu mai vreau|nu vreau|убери|уберите|удали|удалите|не хочу|не надо|без)\b)/i.test(lower);
   if (!isAdjustmentVerb) return { handled: false };
 
   const matchedCartIndices: number[] = [];
@@ -728,7 +728,7 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
     const targetItem = currentCart[idx];
     
     let desiredExactQty: number | null = null;
-    const exactMatch = lower.match(/(lasa|lasă|sa fie|să fie|pune)?\s*doar\s*(\d+|unu|una|un|doua|două|trei)/i);
+    const exactMatch = lower.match(/\b(lasa|lasă|sa fie|să fie|pune)?\s*doar\s*(\d+|unu|una|un|doua|două|trei)\b/i);
     if (exactMatch) {
       const rawVal = exactMatch[2].toLowerCase();
       if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') desiredExactQty = 1;
@@ -738,7 +738,7 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
     }
 
     let subtractQty: number | null = null;
-    const subtractMatch = lower.match(/(scoate|scoateti|scoateți|scade|elimina|elimină|șterge|sterge|убери)\s*(\d+|unu|una|un|doua|două|trei)?/i);
+    const subtractMatch = lower.match(/\b(scoate|scoateti|scoateți|scade|elimina|elimină|șterge|sterge|убери)\s*(\d+|unu|una|un|doua|două|trei)?\b/i);
     if (subtractMatch && subtractMatch[2]) {
       const rawVal = subtractMatch[2].toLowerCase();
       if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') subtractQty = 1;
@@ -1052,12 +1052,12 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
   const lower = text.toLowerCase().trim();
 
   const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(lower);
-  const isHoursQ = /((program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня))/i.test(lower);
-  const isAddressQ = /((unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес))/i.test(lower);
-  const isDeliveryQ = /((livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород))/i.test(lower);
-  const isPaymentQ = /((plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными))/i.test(lower);
-  const isDietaryQ = /((halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина))/i.test(lower);
-  const isFreshnessQ = /((ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые))/i.test(lower);
+  const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня)\b)/i.test(lower);
+  const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес)\b)/i.test(lower);
+  const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(lower);
+  const isPaymentQ = /(\b(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными)\b)/i.test(lower);
+  const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина)\b)/i.test(lower);
+  const isFreshnessQ = /(\b(ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые)\b)/i.test(lower);
   const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса)/i.test(lower);
 
   if (isGreetingOnly) {
@@ -1289,6 +1289,16 @@ export async function processMessage(
       return { success: true, status: 'clarification_sent', replyText: clarifyResult.replyText };
     }
 
+    // ─── PAS 5: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
+    const faqResult = handleCustomerInquiries(messageText, lang);
+    if (faqResult.handled && faqResult.replyText) {
+      appendToHistory(session, 'assistant', faqResult.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, faqResult.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
+    }
+
     // ─── PAS 6: CHECKOUT INTENT ───
     const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
     if ((session.cart && session.cart.length > 0) && isCheckoutIntent) {
@@ -1360,15 +1370,6 @@ export async function processMessage(
       };
     }
 
-    // ─── PAS 8: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
-    const faqResult = handleCustomerInquiries(messageText, lang);
-    if (faqResult.handled && faqResult.replyText) {
-      appendToHistory(session, 'assistant', faqResult.replyText);
-      await saveSession(senderId, session);
-      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, faqResult.replyText, cartUrl, cartButtonTitle);
-      return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
-    }
 
     // ─── PAS 9: MOTOR COGNITIV GEMINI FLASH (CU CONTEXT CONVERSAȚIONAL COMPLET) ───
     let replyText = "";
@@ -1403,7 +1404,7 @@ ${historySnippets}
 [Mesaj primit acum]: "${messageText}"
 [Răspunsul tău scurt și profesionist]:`;
 
-      const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-3.7-flash'];
+      const candidateModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-2.5-flash'];
       for (const modelName of candidateModels) {
         try {
           const ai = new GoogleGenAI({ apiKey });
