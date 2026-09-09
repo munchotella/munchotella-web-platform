@@ -554,12 +554,13 @@ export async function POST(request: Request) {
       await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
       
       // Instantly synchronize message with Munchotella AI Agency Operations Center
+      const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
       notifyAgencyDashboard({
         platform: channel,
         asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
         sender_id: senderId,
-        customer_name: (senderId === '27899196186417959' || senderId.includes('crupa')) ? 'Crupa Grigore' : 'Client Munchotella',
-        customer_handle: (senderId === '27899196186417959' || senderId.includes('crupa')) ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
+        customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
+        customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
         message_text: messageText,
         reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
         status: debugResult.status || 'gemini_response'
