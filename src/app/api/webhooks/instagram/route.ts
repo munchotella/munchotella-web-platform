@@ -628,8 +628,13 @@ function calculateSimilarity(str1: string, str2: string): number {
   const levScore = 1 - (levDist / maxLen);
   const diceScore = diceCoefficient(s1, s2);
   
-  if (minLen < 4) {
-    return levScore >= 0.5 ? levScore : 0;
+  // Pentru cuvinte scurte (<= 4 caractere, ex: 'ceai', 'cola', 'apa', 'dorna', 'fanta')
+  // Orice nepotrivire de mai mult de 1 caracter sau scor < 0.80 este o potrivire falsă (ex: 'azi' vs 'ceai', 'dulce' vs 'cola')
+  if (minLen <= 4) {
+    if (levDist <= 1 && levScore >= 0.80) {
+      return levScore;
+    }
+    return 0;
   }
 
   return Math.max(levScore, diceScore);
@@ -656,9 +661,20 @@ function matchProductInText(text: string): {
 } {
   const lower = text.toLowerCase().trim();
   
-  // Detectare dacă mesajul este o întrebare generală FAQ fără intenție explicită de comandă
-  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить)\b)/i.test(text);
-  const isExplicitOrder = /(\b(vreau|sa comand|să comand|adaugă|adauga|pune|da-mi|хочу|заказать|добавь|порция|portie|porție|cola|fanta|sprite|bautura|băutură|ceai|cafea|dorna|limonada)\b)/i.test(text);
+  // Detectare dacă mesajul este o întrebare generală FAQ sau salut fără intenție explicită de comandă
+  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(text);
+  const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(text);
+
+  // Dacă e întrebare generală FAQ sau salut și nu e comandă explicită, NU facem potrivire de produs
+  if (isGeneralQuestion && !isExplicitOrder) {
+    return {
+      product: null,
+      suggestedProduct: null,
+      score: 0,
+      quantity: 1,
+      customization: undefined
+    };
+  }
 
   // Detectare cantitate
   let quantity = 1;
@@ -712,13 +728,13 @@ function matchProductInText(text: string): {
         bestFoodMatch = item;
       }
 
-      // Verificare pe cuvinte individuale și fraze
-      const words = cleaned.split(' ').filter(w => w.length >= 2);
+      // Verificare pe cuvinte individuale și fraze (lungime minimă 3 litere)
+      const words = cleaned.split(' ').filter(w => w.length >= 3);
       if (words.length > 0) {
         for (let i = 0; i < words.length; i++) {
           for (let j = i + 1; j <= words.length; j++) {
             const phrase = words.slice(i, j).join(' ');
-            if (phrase.length >= 2) {
+            if (phrase.length >= 3) {
               const phraseScore = calculateSimilarity(phrase, alias);
               if (isDrink && phraseScore > bestDrinkScore) {
                 bestDrinkScore = phraseScore;
@@ -734,21 +750,13 @@ function matchProductInText(text: string): {
     }
   }
 
-  // Dacă e întrebare generală FAQ și nu e comandă explicită, nu declanșăm potrivire forțată sub 0.85
-  if (isGeneralQuestion && !isExplicitOrder && Math.max(bestFoodScore, bestDrinkScore) < 0.85) {
-    return {
-      product: null,
-      suggestedProduct: null,
-      score: 0,
-      quantity,
-      customization
-    };
-  }
+  // Praguri sigure de toleranță:
+  // Băuturile necesită o potrivire foarte sigură (0.85+) fără comandă explicită, sau 0.75+ cu intenție de comandă.
+  // Deserturile necesită 0.80+ (sau 0.70+ cu intenție de comandă).
+  const drinkThreshold = isExplicitOrder ? 0.75 : 0.85;
+  const foodThreshold = isExplicitOrder ? 0.70 : 0.80;
 
-  // Regula de toleranță cerută:
-  // Pentru băuturi: acceptare directă de la un scor de 40% (0.40) - adică robotul este sigur chiar și de la 40%, adăugând băutura direct!
-  // Pentru mâncare (deserturi): acceptare directă de la un scor de 70% (0.70).
-  if (bestDrinkScore >= 0.40 && (bestDrinkScore >= bestFoodScore || bestFoodScore < 0.70)) {
+  if (bestDrinkScore >= drinkThreshold && (bestDrinkScore >= bestFoodScore || bestFoodScore < foodThreshold)) {
     return {
       product: bestDrinkMatch,
       suggestedProduct: null,
@@ -758,7 +766,7 @@ function matchProductInText(text: string): {
     };
   }
 
-  if (bestFoodScore >= 0.70) {
+  if (bestFoodScore >= foodThreshold) {
     return {
       product: bestFoodMatch,
       suggestedProduct: null,
@@ -768,25 +776,27 @@ function matchProductInText(text: string): {
     };
   }
 
-  // Sugestii când scorul este parțial
-  if (bestDrinkScore >= 0.25 && bestDrinkMatch) {
-    return {
-      product: null,
-      suggestedProduct: bestDrinkMatch,
-      score: bestDrinkScore,
-      quantity,
-      customization
-    };
-  }
+  // Sugestii când scorul este parțial (doar dacă mesajul nu e întrebare generală și are relevanță minimă 0.65)
+  if (!isGeneralQuestion) {
+    if (bestDrinkScore >= 0.65 && bestDrinkMatch) {
+      return {
+        product: null,
+        suggestedProduct: bestDrinkMatch,
+        score: bestDrinkScore,
+        quantity,
+        customization
+      };
+    }
 
-  if (bestFoodScore >= 0.50 && bestFoodMatch) {
-    return {
-      product: null,
-      suggestedProduct: bestFoodMatch,
-      score: bestFoodScore,
-      quantity,
-      customization
-    };
+    if (bestFoodScore >= 0.65 && bestFoodMatch) {
+      return {
+        product: null,
+        suggestedProduct: bestFoodMatch,
+        score: bestFoodScore,
+        quantity,
+        customization
+      };
+    }
   }
 
   return {
@@ -909,16 +919,18 @@ export async function processMessage(
 
     let replyText = "";
 
-    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|orar|deschis|închis|inchis|adresa|adresă|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить)\b)/i.test(messageText);
+    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
 
-    const isOrderIntent = !isFaqQuestion && (
+    const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(messageText);
+
+    const isOrderIntent = isExplicitOrder || (!isFaqQuestion && (
       lowerMsg.includes('vreau sa comand') || lowerMsg.includes('vreau să comand') || 
       lowerMsg.includes('as dori sa comand') || lowerMsg.includes('aș dori să comand') || 
       lowerMsg.includes('fac o comanda') || lowerMsg.includes('fac o comandă') || 
       lowerMsg.startsWith('comanda') || lowerMsg.startsWith('comandă') || 
       lowerMsg.includes('хочу заказать') || lowerMsg.includes('сделать заказ') || 
       lowerMsg.includes('i want to order')
-    );
+    ));
 
     const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
       const currentCart = currentSession.cart || [];
@@ -965,7 +977,9 @@ export async function processMessage(
 
     const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
 
-    const matched = matchProductInText(messageText);
+    const matched = (!isFaqQuestion || isExplicitOrder)
+      ? matchProductInText(messageText)
+      : { product: null, suggestedProduct: null, score: 0, quantity: 1, customization: undefined };
 
     if (session.state === 'IDLE' && isOrderIntent && !matched.product && !matched.suggestedProduct) {
       session.state = 'AWAITING_PRODUCT';
@@ -1099,16 +1113,30 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
     const finalPrompt = `${baseMenuPrompt}\n\n${adminCustomPrompt ? `[Instrucțiuni Admin: ${adminCustomPrompt}]\n` : ""}\n[Limbă: ${lang.toUpperCase()}]\n[Mesaj client: "${messageText}"]\n[Răspuns scurt, cald, uman (1-2 propoziții)]:`;
 
     // 1. Verificare deterministă pentru întrebările frecvente esențiale (FAQ oficiale)
+    const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(messageText.trim());
+    const isMenuOrSweetsQ = /(\b(ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|что сладкое|какие десерты|что есть|что есть вкусного|десерты|сладости|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
     const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
     const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
     const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
     const isPaymentQ = /(plata|plată|achitare|achita|achit|plătesc|platesc|plati|plăti|card|cash|numerar|transfer|cum platesc|cum plătesc|cum achit|cum pot achita|tichete|оплата|как оплатить)/i.test(messageText);
     const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
-    const isHoursQ = /(\b(program|orar|deschis|inchis|închis|pana la|până la|la cat|la cât|lucrati|lucrați|до скольки|график|часы работы|открыты)\b)/i.test(messageText);
+    const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня)\b)/i.test(messageText);
     const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
     const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
 
-    if (isCurrencyQ) {
+    if (isGreetingOnly) {
+      if (lang === 'ru') {
+        replyText = "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇";
+      } else {
+        replyText = "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇";
+      }
+    } else if (isMenuOrSweetsQ) {
+      if (lang === 'ru') {
+        replyText = "У нас богатый выбор авторских десертов! 🧇🍓 Наши хиты: Crepe Dubai с фисташкой и хрустящим катаифи (265 MDL), Royal Pancakes с Nutella и фруктами (165 MDL), Delux Mini Waffles (160 MDL) и Waffle Sticks! Посмотрите все меню по кнопке ниже! ✨";
+      } else {
+        replyText = "Avem cele mai delicioase deserturi artizanale! 🧇🍓 Vedetele noastre sunt: Crepe Dubai cu fistic și cataif crocant (265 MDL), Royal Pancakes pufoase cu Nutella și fructe (165 MDL), Delux Mini Waffles (160 MDL) și Waffle Sticks! Puteți explora meniul complet și comanda direct mai jos! ✨";
+      }
+    } else if (isCurrencyQ) {
       if (lang === 'ru') {
         replyText = "Здравствуйте! Уточняем и вернемся с ответом.";
       } else {
@@ -1155,9 +1183,9 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
       }
     } else if (isHoursQ) {
       if (lang === 'ru') {
-        replyText = "Мы открыты с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью! ✨";
+        replyText = "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим доставку на дом! ✨";
       } else {
-        replyText = "Suntem deschiși de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu drag! ✨";
+        replyText = "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! ✨";
       }
     } else if (isAddressQ) {
       if (lang === 'ru') {
