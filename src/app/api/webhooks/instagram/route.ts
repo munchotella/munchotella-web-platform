@@ -1272,7 +1272,7 @@ export async function processMessage(
       await saveSession(senderId, session);
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       if (ingResult.product) {
-        await sendDispatchGenericCard(senderId, channel, ingResult.product, ingResult.replyText, cartUrl, cartButtonTitle, `https://www.munchotella.md/${lang}/menu`);
+        await sendDispatchGenericCard(senderId, channel, ingResult.product, ingResult.replyText, cartUrl, cartButtonTitle, `https://www.munchotella.md/${lang}/menu`, lang);
       } else {
         await sendDispatchResponse(senderId, channel, ingResult.replyText, cartUrl, cartButtonTitle);
       }
@@ -1349,7 +1349,7 @@ export async function processMessage(
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
       
-      await sendDispatchGenericCard(senderId, channel, compoundMatches[0].product, addReply, cartUrl, cartButtonTitle, menuUrl);
+      await sendDispatchGenericCard(senderId, channel, compoundMatches[0].product, addReply, cartUrl, cartButtonTitle, menuUrl, lang);
       return { 
         success: true, 
         status: compoundMatches.length > 1 ? 'compound_products_added' : 'product_added', 
@@ -1502,7 +1502,9 @@ async function sendMetaGenericCard(
   product: typeof MENU_CATALOG[0],
   cartUrl: string,
   cartButtonTitle: string,
-  menuUrl: string
+  menuUrl: string,
+  channel: 'instagram' | 'messenger' = 'instagram',
+  lang: string = 'ro'
 ) {
   const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
@@ -1521,24 +1523,51 @@ async function sendMetaGenericCard(
     safeSubtitle = safeSubtitle.substring(0, 77) + "...";
   }
 
-  // 3. Titluri butoane: strict <= 20 caractere (cerință strictă Meta Graph API)
-  const safeCartTitle = cartButtonTitle.length > 20 ? cartButtonTitle.substring(0, 20) : cartButtonTitle;
+  // 3. Link direct către produsul din meniu (cu deschidere modală și scroll la poziție)
+  const productDirectUrl = `https://www.munchotella.md/${lang}/menu?product=${encodeURIComponent(product.id)}`;
 
-  const buttons: any[] = [];
-  if (cartUrl) {
-    buttons.push({
-      type: "web_url",
-      url: cartUrl,
-      title: safeCartTitle
-    });
+  // 4. Configurare Butoane (Meta permite maxim 3 butoane pe generic card, strict <= 20 caractere per titlu):
+  // Buton 1: Deschide direct fișa produsului (toppings & detalii)
+  const detailsTitle = lang === 'ru' ? "🧇 О товаре" : lang === 'en' ? "🧇 View item" : "🧇 Vezi produsul";
+  
+  // Buton 2: Comandă / Adaugă în coș
+  let actionTitle = "";
+  let actionUrl = "";
+
+  if (cartUrl && cartButtonTitle && !cartButtonTitle.toLowerCase().includes("meniu") && !cartButtonTitle.toLowerCase().includes("меню")) {
+    actionTitle = cartButtonTitle.length > 20 ? cartButtonTitle.substring(0, 20) : cartButtonTitle;
+    actionUrl = cartUrl;
+  } else {
+    // Dacă coșul era gol, generăm un link cu produsul direct preîncărcat în coș cu 1-click!
+    const singleProductCart = [{
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1
+    }];
+    const encodedSingleCart = Buffer.from(unescape(encodeURIComponent(JSON.stringify(singleProductCart)))).toString('base64');
+    actionUrl = `https://www.munchotella.md/${lang}/menu?preloadedCart=${encodeURIComponent(encodedSingleCart)}&openCart=true`;
+    actionTitle = lang === 'ru' 
+      ? `🛒 Заказать (${product.price}L)` 
+      : lang === 'en' 
+      ? `🛒 Order (${product.price}L)` 
+      : `🛒 Comandă (${product.price}L)`;
+    if (actionTitle.length > 20) actionTitle = actionTitle.substring(0, 20);
   }
-  if (menuUrl) {
-    buttons.push({
+
+  const buttons: any[] = [
+    {
       type: "web_url",
-      url: menuUrl,
-      title: "🧇 Meniu"
-    });
-  }
+      url: productDirectUrl,
+      title: detailsTitle.substring(0, 20)
+    },
+    {
+      type: "web_url",
+      url: actionUrl,
+      title: actionTitle.substring(0, 20)
+    }
+  ];
 
   try {
     const genericPayload = {
@@ -1553,7 +1582,11 @@ async function sendMetaGenericCard(
                 title: safeTitle,
                 subtitle: safeSubtitle,
                 image_url: product.image,
-                buttons: buttons.length > 0 ? buttons : undefined
+                default_action: {
+                  type: "web_url",
+                  url: productDirectUrl
+                },
+                buttons
               }
             ]
           }
@@ -1569,11 +1602,11 @@ async function sendMetaGenericCard(
     const sendResult = await metaRes.json();
 
     if (sendResult?.error) {
-      console.warn("Meta generic card failed:", sendResult.error);
-      const fallbackUrl = cartUrl || menuUrl;
-      if (fallbackUrl) {
-        return await sendMetaTextMessage(senderId, `🥞 ${safeTitle}\n${safeSubtitle}\n\n📲 ${safeCartTitle}: ${fallbackUrl}`);
-      }
+      console.warn("Meta generic card failed, falling back to text:", sendResult.error);
+      return await sendMetaTextMessage(
+        senderId, 
+        `🥞 ${safeTitle}\n${safeSubtitle}\n\n🔗 ${detailsTitle}: ${productDirectUrl}\n📲 ${actionTitle}: ${actionUrl}`
+      );
     }
 
     return sendResult;
@@ -1590,15 +1623,16 @@ async function sendDispatchGenericCard(
   text: string,
   cartUrl: string,
   cartButtonTitle: string,
-  menuUrl: string
+  menuUrl: string,
+  lang: string = 'ro'
 ) {
   // Pasul 1: Trimite mesajul conversațional cald și complet (răspunsul la întrebare / ingrediente / confirmare coș)
   if (text && text.trim().length > 0) {
     await sendMetaTextMessage(senderId, text.trim());
   }
 
-  // Pasul 2: Trimite cardul vizual cu imaginea de produs, preț și butoane de acțiune
-  return await sendMetaGenericCard(senderId, product, cartUrl, cartButtonTitle, menuUrl);
+  // Pasul 2: Trimite cardul vizual cu imaginea de produs, preț și butoane optimizate fără duplicate
+  return await sendMetaGenericCard(senderId, product, cartUrl, cartButtonTitle, menuUrl, channel, lang);
 }
 
 async function sendDispatchResponse(
