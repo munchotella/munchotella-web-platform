@@ -864,6 +864,7 @@ const inMemorySessions = new Map<string, any>();
 async function getSession(senderId: string) {
   const cached = inMemorySessions.get(senderId);
   if (cached && (Date.now() - (cached.lastUpdated || 0) < 2 * 60 * 60 * 1000)) {
+    if (!cached.history) cached.history = [];
     return cached;
   }
 
@@ -872,6 +873,7 @@ async function getSession(senderId: string) {
     const doc = await mongoDb.collection('instagram_order_sessions').findOne({ senderId });
     if (doc) {
       if (doc.lastUpdated && (Date.now() - doc.lastUpdated < 2 * 60 * 60 * 1000)) {
+        if (!doc.history) doc.history = [];
         inMemorySessions.set(senderId, doc);
         return doc;
       }
@@ -884,6 +886,7 @@ async function getSession(senderId: string) {
     senderId,
     state: 'IDLE',
     cart: [],
+    history: [],
     isHumanAssistedUntil: 0,
     lastUpdated: Date.now()
   };
@@ -910,6 +913,184 @@ async function saveSession(senderId: string, sessionData: any) {
   }
 }
 
+function appendToHistory(session: any, role: 'user' | 'assistant', text: string) {
+  if (!session.history) session.history = [];
+  session.history.push({
+    role,
+    text: text.trim(),
+    timestamp: Date.now()
+  });
+  if (session.history.length > 15) {
+    session.history = session.history.slice(-15);
+  }
+}
+
+// ─── HANDLER 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ ───
+function handleCartAdjustment(text: string, session: any, lang: string): { handled: boolean, replyText?: string, status?: string } {
+  const lower = text.toLowerCase().trim();
+  const currentCart = session.cart || [];
+  if (currentCart.length === 0) return { handled: false };
+
+  const isAdjustmentVerb = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2)\b)/i.test(lower);
+  if (!isAdjustmentVerb) return { handled: false };
+
+  let targetIndex = -1;
+  for (let i = 0; i < currentCart.length; i++) {
+    const item = currentCart[i];
+    const itemName = item.name.toLowerCase();
+    const words = itemName.split(' ').filter((w: string) => w.length >= 3);
+    if (lower.includes(itemName) || words.some((w: string) => lower.includes(w))) {
+      targetIndex = i;
+      break;
+    }
+  }
+
+  if (targetIndex === -1 && currentCart.length === 1) {
+    targetIndex = 0;
+  }
+
+  if (targetIndex === -1) {
+    return { handled: false };
+  }
+
+  const targetItem = currentCart[targetIndex];
+
+  let desiredExactQty: number | null = null;
+  const exactMatch = lower.match(/\b(lasa|lasă|sa fie|să fie|pune)?\s*doar\s*(\d+|unu|una|un|doua|două|trei)\b/i);
+  if (exactMatch) {
+    const rawVal = exactMatch[2].toLowerCase();
+    if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') desiredExactQty = 1;
+    else if (rawVal === 'doua' || rawVal === 'două') desiredExactQty = 2;
+    else if (rawVal === 'trei') desiredExactQty = 3;
+    else desiredExactQty = parseInt(rawVal, 10);
+  }
+
+  let subtractQty: number | null = null;
+  const subtractMatch = lower.match(/\b(scoate|scoateti|scoateți|scade|elimina|elimină|șterge|sterge)\s*(\d+|unu|una|un|doua|două|trei)?\b/i);
+  if (subtractMatch && subtractMatch[2]) {
+    const rawVal = subtractMatch[2].toLowerCase();
+    if (rawVal === 'unu' || rawVal === 'una' || rawVal === 'un') subtractQty = 1;
+    else if (rawVal === 'doua' || rawVal === 'două') subtractQty = 2;
+    else if (rawVal === 'trei') subtractQty = 3;
+    else subtractQty = parseInt(rawVal, 10);
+  } else if (subtractMatch && !subtractMatch[2] && desiredExactQty === null) {
+    subtractQty = 1;
+  }
+
+  if (desiredExactQty !== null && desiredExactQty >= 0) {
+    if (desiredExactQty === 0) {
+      currentCart.splice(targetIndex, 1);
+    } else {
+      targetItem.quantity = desiredExactQty;
+    }
+  } else if (subtractQty !== null && subtractQty > 0) {
+    targetItem.quantity -= subtractQty;
+    if (targetItem.quantity <= 0) {
+      currentCart.splice(targetIndex, 1);
+    }
+  } else {
+    targetItem.quantity -= 1;
+    if (targetItem.quantity <= 0) {
+      currentCart.splice(targetIndex, 1);
+    }
+  }
+
+  session.cart = [...currentCart];
+  const totalSum = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
+  
+  let replyText = "";
+  if (session.cart.length === 0) {
+    replyText = lang === 'ru'
+      ? "Я убрал товар из корзины. Сейчас ваша корзина пуста! 🧇 Что бы вы хотели заказать?"
+      : "Am scos produsul din coș. Acum coșul dvs. este gol! 🧇 Ce bunătăți ați dori să adăugăm?";
+  } else {
+    const remainingSummary = session.cart.map((it: any) => `${it.quantity}x ${it.name}`).join(' + ');
+    replyText = lang === 'ru'
+      ? `Готово! Обновил корзину: осталось ${remainingSummary} (Итого: ${totalSum} MDL)! 🧇 Хотите добавить напиток или оформляем? ✨`
+      : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Mai doriți ceva delicios sau finalizăm comanda? ✨`;
+  }
+
+  return { handled: true, replyText, status: 'cart_quantity_adjusted' };
+}
+
+// ─── HANDLER 2: ÎNTREBĂRI DESPRE INGREDIENTE ȘI ALERGENI ───
+function handleIngredientsInquiry(text: string, lang: string): { handled: boolean, replyText?: string, product?: any } {
+  const lower = text.toLowerCase().trim();
+  const isIngQ = /(\b(ingrediente|ce ingrediente|ce contine|ce conține|din ce e|din ce este|compozitie|compoziție|reteta|rețeta|ce puneti|ce puneți|ce e pus|ce are|alergeni|alergie|alun[eă]|fistic|arahide|zahar|zahăr|состав|что входит|из чего|аллерген)\b)/i.test(lower);
+  if (!isIngQ) return { handled: false };
+
+  let matchedProduct: typeof MENU_CATALOG[0] | null = null;
+  for (const item of MENU_CATALOG) {
+    const aliases = [item.name.toLowerCase(), ...(item.aliases || [])];
+    for (const al of aliases) {
+      if (lower.includes(al) || calculateSimilarity(cleanTextForMatching(lower), al) >= 0.72) {
+        matchedProduct = item;
+        break;
+      }
+    }
+    if (matchedProduct) break;
+  }
+
+  if (!matchedProduct) return { handled: false };
+
+  const ing = matchedProduct.ingredients;
+  const allergenNote = matchedProduct.hasFistic 
+    ? (lang === 'ru' ? " (содержит фисташку)" : " (conține fistic)")
+    : matchedProduct.hasArahide 
+    ? (lang === 'ru' ? " (содержит арахис)" : " (conține arahide)")
+    : (lang === 'ru' ? " (без фисташек и без арахиса)" : " (nu conține fistic sau arahide)");
+
+  let replyText = "";
+  if (lang === 'ru') {
+    replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) содержит: ${ing}${allergenNote}. 🧇 Если у вас есть аллергия или особые пожелания, мы с радостью приготовим индивидуально! Добавить в заказ? ✨`;
+  } else {
+    replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) conține: ${ing}${allergenNote}. 🧇 Dacă aveți vreo preferință sau alergie, bucătarul nostru o poate personaliza cu drag! Doriți să adăugăm o porție în coș? ✨`;
+  }
+
+  return { handled: true, replyText, product: matchedProduct };
+}
+
+// ─── HANDLER 3: PRECOMENZI / COMANDĂ PE MAI TÂRZIU ───
+function handlePreorderInquiry(text: string, lang: string): { handled: boolean, replyText?: string } {
+  const lower = text.toLowerCase().trim();
+  const isPreorder = /(\b(pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|la o anumita ora|la o anumită oră|pentru ora|pentru diseara|pentru diseară|precomanda|precomandă|precomenzi|programa|programare|comanda in avans|comandă în avans|pe cand|pe când|pe diseara|pe diseară|pe maine|pe mâine|на потом|попозже|к определенному времени|предзаказ|на вечер)\b)/i.test(lower);
+  if (!isPreorder) return { handled: false };
+
+  let replyText = "";
+  if (lang === 'ru') {
+    replyText = "Конечно! 🥰 Мы с удовольствием принимаем предзаказы на любое удобное для вас время в часы нашей работы (16:00 - 00:00). На какое время вы хотите доставку и какие десерты приготовить для вас? 🧇✨";
+  } else {
+    replyText = "Sigur că da! 🥰 Preluăm cu mare drag comenzi programate pentru orice oră din timpul programului nostru (16:00 - 00:00). Pentru ce oră aproximativă doriți să ajungă comanda și ce bunătăți ați dori să vă pregătim? 🧇✨";
+  }
+
+  return { handled: true, replyText };
+}
+
+// ─── HANDLER 4: CLARIFICARE ȘI CONFORT CONVERSAȚIONAL ('?', 'cum adică?') ───
+function handleClarificationOrConfusion(text: string, session: any, lang: string): { handled: boolean, replyText?: string } {
+  const t = text.trim();
+  const isConfusion = /^([?？!！.,\s]+|cum adica\??|cum adică\??|nu inteleg|nu înțeleg|de ce\??|adica\??|adică\??|что\??|почему\??|в смысле\??)$/i.test(t);
+  if (!isConfusion) return { handled: false };
+
+  const lastBotMsg = (session.history || []).filter((m: any) => m.role === 'assistant').slice(-1)[0];
+  let replyText = "";
+  if (lastBotMsg && lastBotMsg.text) {
+    if (lang === 'ru') {
+      replyText = "Прошу прощения, если выразился непонятно! 🥰 Я готов ответить на любые ваши вопросы по меню или заказу. Подскажите, пожалуйста, чем я могу вам помочь прямо сейчас? 🧇";
+    } else {
+      replyText = "Mă scuzați dacă am fost neclar mai devreme! 🥰 Vă stau la dispoziție cu orice detalii despre meniul nostru, prețuri sau comenzi. Spuneți-mi vă rog, cu ce vă pot ajuta mai exact? 🧇";
+    }
+  } else {
+    if (lang === 'ru') {
+      replyText = "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Подскажите, что вас интересует? 🧇";
+    } else {
+      replyText = "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Spuneți-mi vă rog, ce ați dori să aflați sau să comandați? 🧇";
+    }
+  }
+
+  return { handled: true, replyText };
+}
+
 export async function processMessage(
   senderId: string, 
   messageText: string, 
@@ -920,6 +1101,7 @@ export async function processMessage(
     const lowerMsg = messageText.toLowerCase().trim();
 
     let session = await getSession(senderId);
+    appendToHistory(session, 'user', messageText);
 
     if (session.isHumanAssistedUntil && session.isHumanAssistedUntil > Date.now()) {
       console.log(`Conversația cu ${senderId} [${channel}] este preluată de un operator uman. Botul rămâne în pauză.`);
@@ -933,7 +1115,6 @@ export async function processMessage(
       session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
       await saveSession(senderId, session);
 
-      // Trimitere alertă instantă în grupul de Telegram al angajaților
       await notifyStaffViaTelegram({
         channel,
         senderId,
@@ -949,40 +1130,28 @@ export async function processMessage(
             ? "Ne cerem scuze pentru neplăceri! 🤝 Am trimis imediat o alertă echipei noastre și un coleg verifică situația pentru a vă răspunde aici în câteva momente!"
             : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!");
 
+      appendToHistory(session, 'assistant', handoffReply);
+      await saveSession(senderId, session);
       await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
+    // ─── PAS 1: ANULARE COMANDĂ & GOLIRE COȘ ───
     const isCancelOrder = /(\b(anuleaza|anulează|anulati|anulați|anulez|sterge|șterge|golește|goleste|nu mai vreau|nu mai doresc|nu vreau nimic|reset|cancel|отмена|отмените|очистить|не хочу)\b)/i.test(lowerMsg) && 
       (lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('cos') || lowerMsg.includes('coș') || lowerMsg.includes('tot') || lowerMsg.includes('toată') || lowerMsg.includes('toata') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('nu mai doresc') || lowerMsg.includes('заказ') || lowerMsg.includes('корзин'));
 
-    if (isCancelOrder || lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('anulati comanda') || lowerMsg.includes('anulați comanda') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
+    if (isCancelOrder || lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('anulati comanda') || lowerMsg.includes('anulați comanda') || lowerMsg.includes('nu mai vreau comanda') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
       session.cart = [];
       session.state = 'IDLE';
-      await saveSession(senderId, session);
-
       const cancelReply = lang === 'ru'
         ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
         : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
 
+      appendToHistory(session, 'assistant', cancelReply);
+      await saveSession(senderId, session);
       await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
-
-    let replyText = "";
-
-    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
-
-    const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(messageText);
-
-    const isOrderIntent = isExplicitOrder || (!isFaqQuestion && (
-      lowerMsg.includes('vreau sa comand') || lowerMsg.includes('vreau să comand') || 
-      lowerMsg.includes('as dori sa comand') || lowerMsg.includes('aș dori să comand') || 
-      lowerMsg.includes('fac o comanda') || lowerMsg.includes('fac o comandă') || 
-      lowerMsg.startsWith('comanda') || lowerMsg.startsWith('comandă') || 
-      lowerMsg.includes('хочу заказать') || lowerMsg.includes('сделать заказ') || 
-      lowerMsg.includes('i want to order')
-    ));
 
     const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
       const currentCart = currentSession.cart || [];
@@ -1011,44 +1180,68 @@ export async function processMessage(
       return { url, buttonTitle, totalSum };
     };
 
-    const generateCheckoutReply = async () => {
-      const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
+    // ─── PAS 2: AJUSTARE CANTITĂȚI ÎN COȘ (ex: 'scoateți 2', 'să fie doar unu') ───
+    const cartAdjustResult = handleCartAdjustment(messageText, session, lang);
+    if (cartAdjustResult.handled && cartAdjustResult.replyText) {
+      appendToHistory(session, 'assistant', cartAdjustResult.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, cartAdjustResult.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'cart_quantity_adjusted', replyText: cartAdjustResult.replyText, cart: session.cart };
+    }
 
-      if (lang === 'ru') {
-        replyText = `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`;
+    // ─── PAS 3: ÎNTREBĂRI DESPRE PRECOMENZI (ex: 'pot comanda pe mai târziu?') ───
+    const preorderResult = handlePreorderInquiry(messageText, lang);
+    if (preorderResult.handled && preorderResult.replyText) {
+      appendToHistory(session, 'assistant', preorderResult.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, preorderResult.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'preorder_inquiry_answered', replyText: preorderResult.replyText };
+    }
+
+    // ─── PAS 4: ÎNTREBĂRI DESPRE INGREDIENTE & ALERGENI (ex: 'ce ingrediente are waffle stick?') ───
+    const ingResult = handleIngredientsInquiry(messageText, lang);
+    if (ingResult.handled && ingResult.replyText) {
+      appendToHistory(session, 'assistant', ingResult.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      if (ingResult.product) {
+        await sendDispatchGenericCard(senderId, channel, ingResult.product, ingResult.replyText, cartUrl, cartButtonTitle, `https://www.munchotella.md/${lang}/menu`);
       } else {
-        replyText = `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
+        await sendDispatchResponse(senderId, channel, ingResult.replyText, cartUrl, cartButtonTitle);
       }
+      return { success: true, status: 'ingredients_inquiry_answered', replyText: ingResult.replyText, product: ingResult.product };
+    }
+
+    // ─── PAS 5: CLARIFICARE PENTRU '?' SAU MESAJ AMBIGUU ───
+    const clarifyResult = handleClarificationOrConfusion(messageText, session, lang);
+    if (clarifyResult.handled && clarifyResult.replyText) {
+      appendToHistory(session, 'assistant', clarifyResult.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, clarifyResult.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'clarification_sent', replyText: clarifyResult.replyText };
+    }
+
+    // ─── PAS 6: CHECKOUT INTENT ───
+    const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
+    if ((session.cart && session.cart.length > 0) && isCheckoutIntent) {
+      const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
+      let checkoutText = lang === 'ru'
+        ? `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`
+        : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
 
       session.state = 'IDLE';
+      appendToHistory(session, 'assistant', checkoutText);
       await saveSession(senderId, session);
-
-      await sendDispatchResponse(senderId, channel, replyText, finalCartUrl, finalButtonTitle);
-      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText };
-    };
-
-    const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
-
-    const matched = (!isFaqQuestion || isExplicitOrder)
-      ? matchProductInText(messageText)
-      : { product: null, suggestedProduct: null, score: 0, quantity: 1, customization: undefined };
-
-    if (session.state === 'IDLE' && isOrderIntent && !matched.product && !matched.suggestedProduct) {
-      session.state = 'AWAITING_PRODUCT';
-      await saveSession(senderId, session);
-
-      replyText = lang === 'ru'
-        ? "С удовольствием! 🧇 Что бы вы хотели заказать сегодня из меню Munchotella?"
-        : "Cu mare drag! 🧇 Ce bunătăți ați dori să comandați astăzi din meniul Munchotella?";
-
-      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
-      return { success: true, status: 'awaiting_product', replyText };
+      await sendDispatchResponse(senderId, channel, checkoutText, finalCartUrl, finalButtonTitle);
+      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText: checkoutText };
     }
 
-    if ((session.cart && session.cart.length > 0) && isCheckoutIntent && !matched.product) {
-      return await generateCheckoutReply();
-    }
+    // ─── PAS 7: DETECTARE COMANDĂ PRODUS SPECIFIC ───
+    const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(messageText);
+    const matched = matchProductInText(messageText);
 
     if (matched.product) {
       const itemToAdd = {
@@ -1074,202 +1267,116 @@ export async function processMessage(
 
       const isDrink = matched.product.category === 'drinks';
       session.state = isDrink ? 'AWAITING_DRINKS' : 'AWAITING_MORE_DESSERTS';
-      await saveSession(senderId, session);
 
+      let addReply = "";
       if (lang === 'ru') {
-        replyText = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 ${isDrink ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое?'}`;
+        addReply = `С удовольствием добавил ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) в ваш заказ! 🧇 ${isDrink ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое?'}`;
       } else {
-        replyText = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 ${isDrink ? 'Doriți să finalizăm comanda sau mai adăugăm ceva?' : 'Mai doriți încă ceva dulce sau un alt preparat?'}`;
+        addReply = `Am adăugat cu drag ${itemToAdd.quantity > 1 ? itemToAdd.quantity + 'x ' : ''}${matched.product.name}${customNoteText} (${matched.product.price * itemToAdd.quantity} MDL) în coșul dvs.! 🧇 ${isDrink ? 'Doriți să finalizăm comanda sau mai adăugăm ceva?' : 'Mai doriți încă ceva dulce sau un alt preparat?'}`;
       }
+
+      appendToHistory(session, 'assistant', addReply);
+      await saveSession(senderId, session);
 
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
       const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendDispatchGenericCard(senderId, channel, matched.product, replyText, cartUrl, cartButtonTitle, menuUrl);
-      return { success: true, status: 'product_added', cart: session.cart, replyText, cartUrl, cartButtonTitle, score: matched.score };
+      await sendDispatchGenericCard(senderId, channel, matched.product, addReply, cartUrl, cartButtonTitle, menuUrl);
+      return { success: true, status: 'product_added', cart: session.cart, replyText: addReply, cartUrl, cartButtonTitle, score: matched.score };
     }
 
     if (!matched.product && matched.suggestedProduct) {
       const suggested = matched.suggestedProduct;
-      let clarifyReply = "";
-      if (lang === 'ru') {
-        clarifyReply = `Вы имели в виду ${suggested.name} (${suggested.price} MDL)? 🧇 Нажмите ниже, чтобы открыть и оформить заказ! ✨`;
-      } else {
-        clarifyReply = `Ați dorit să spuneți ${suggested.name} (${suggested.price} MDL)? 🧇 Puteți continua mai jos cu coșul sau accesați meniul complet! ✨`;
-      }
+      let clarifyReply = lang === 'ru'
+        ? `Вы имели в виду ${suggested.name} (${suggested.price} MDL)? 🧇 Нажмите ниже, чтобы открыть и оформить заказ! ✨`
+        : `Ați dorit să spuneți ${suggested.name} (${suggested.price} MDL)? 🧇 Puteți continua mai jos cu coșul sau accesați meniul complet! ✨`;
 
-      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-      await sendDispatchGenericCard(senderId, channel, suggested, clarifyReply, cartUrl, cartButtonTitle, menuUrl);
-      return { success: true, status: 'product_clarification_sent', suggestedProduct: suggested.name, replyText: clarifyReply, score: matched.score };
-    }
-
-    const isNegative = lowerMsg === 'nu' || lowerMsg.startsWith('nu ') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('atat') || lowerMsg.includes('atât') || lowerMsg.includes('nimic') || lowerMsg.includes('mersi') || lowerMsg === 'нет' || lowerMsg.startsWith('нет ') || lowerMsg.includes('больше ничего') || lowerMsg.includes('спасибо') || lowerMsg === 'no';
-
-    if (session.state === 'AWAITING_MORE_DESSERTS' && isNegative) {
-      session.state = 'AWAITING_DRINKS';
+      appendToHistory(session, 'assistant', clarifyReply);
       await saveSession(senderId, session);
 
-      replyText = lang === 'ru'
-        ? "Хотите добавить освежающий напиток? У нас есть Ice Lemonade (90 MDL) или густой Milkshake (Oreo, Kinder, Nutella, Клубника — 135 MDL)? 🥤"
-        : "Doriți să adăugăm și o băutură răcoritoare? Avem Ice Lemonade naturală (90 MDL) sau Milkshake cremos (Oreo, Kinder, Nutella, Căpșuni — 135 MDL)? 🥤";
-
       const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
-      return { success: true, status: 'awaiting_drinks', replyText, cartUrl, cartButtonTitle };
+      await sendDispatchResponse(senderId, channel, clarifyReply, cartUrl, cartButtonTitle);
+      return { success: true, status: 'product_clarification_sent', replyText: clarifyReply };
     }
 
-    if (session.state === 'AWAITING_DRINKS' && (isNegative || isCheckoutIntent || lowerMsg.includes('da') || lowerMsg.includes('da finalizam') || lowerMsg.includes('da finalizăm') || lowerMsg.includes('da trimite'))) {
-      return await generateCheckoutReply();
-    }
-
-    const baseMenuPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1). Website: www.munchotella.md.
-
-REGULI STRICTE DE AUR:
-1. NU folosi NICIODATĂ cuvântul 'laborator' (suntem cafenea / Waffle Boutique artizanal).
-2. NU folosi NICIODATĂ cuvântul 'nuci' (în rețetele noastre nu există nuci). Singurele ingrediente din această categorie sunt FISTIC și ARAHIDE (prezente doar la Crepe Dubai, Delux crepe și Delux mini waffle).
-3. NU folosi NICIODATĂ cuvântul 'americane' sau 'waffles americane'. Spune doar 'waffle', 'waffles' sau denumirea exactă din meniu.
-4. Răspunde SCURT, CALD și DIRECT (maxim 1-3 propoziții).
-5. Dacă clientul cere un preparat fără fistic sau fără arahide (ex: Delux mini waffle fără fistic): confirmă că bucătarul va pregăti desertul fără fistic și enumeră exact ingredientele reale care rămân pe produs (Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, arahide).
-
-LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
-- Waffles: Waffle sticks (145 MDL), Delux mini waffle (160 MDL), Nutella Mini waffles (145 MDL), Lotus Mini waffles (200 MDL), Fruits waffle (150 MDL), Nutella waffle (145 MDL), Lotus waffle (200 MDL), Delux waffle (160 MDL), Biscoff waffle (200 MDL).
-- Crepes & Specialități: Delux crepe (165 MDL), Biscoff crepe (205 MDL), Fruits crepe (145 MDL), Oreo crepe (145 MDL), Kinder crepe (145 MDL), Crepe Dubai (265 MDL), Chocolate bites (165 MDL), Royal sushi (155 MDL), Sushi banana (140 MDL).
-- Pancakes: Biskoff pancakes (190 MDL), Fruits pancakes (170 MDL), Royal pancakes (165 MDL).
-- Băuturi: Ice Lemonade (90 MDL), Milkshake Oreo / Kinder / Nutella / Strawberry (135 MDL), Black/Green Tea (50 MDL), Coca-Cola (20 MDL), Fanta (20 MDL), Sprite (20 MDL), Apă Dorna (15 MDL), Cafea / Espresso (40 MDL).
-- Program oficial: 16:00 - 00:00 (Miercuri: Închis).
-- Locație: Chișinău, Str. Nicolae Testemițeanu 21/1.
-- Mese / Cafenea / Terasă: Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului.
-- Timp preparare & Livrare: Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute.
-- Valută / Schimb (Euro, Dolari etc.): Răspunde strict: "Bună, precizăm și revenim cu un răspuns."
-- Metode de plată: Online cu cardul pe site sau numerar la curier la livrare (NU menționa POS la curier).
-- Livrare & Reguli:
-  * Livrăm în tot orașul Chișinău (toate sectoarele). Prețul livrării se calculează pe site la checkout (în medie 50-70 lei).
-  * NU facem livrare în suburbii (Trușeni, Colonița, Cricova, Ialoveni, Durlești, Stăuceni etc.).
-  * Preluare gratuită din boutique (Takeaway).
-- Tonul răspunsurilor: SCURT, CALD, NATURAL și PRIETENOS (maxim 1-2 propoziții, exact ca un om pe chat). Fără detalii tehnice inutile sau formule matematice.`;
-
-    let tone = "elegant";
-    let adminCustomPrompt = "";
-
-    try {
-      const { db: mongoDb } = await connectToDatabase();
-      const settingsDoc = await mongoDb.collection('settings').findOne({ _id: 'ai' as any });
-      if (settingsDoc) {
-        if (settingsDoc.systemPrompt) adminCustomPrompt = settingsDoc.systemPrompt;
-        if (settingsDoc.tone) tone = settingsDoc.tone;
-      }
-    } catch (dbErr) {
-      console.warn("Nu s-au putut încărca setările AI din Admin:", dbErr);
-    }
-
-    const finalPrompt = `${baseMenuPrompt}\n\n${adminCustomPrompt ? `[Instrucțiuni Admin: ${adminCustomPrompt}]\n` : ""}\n[Limbă: ${lang.toUpperCase()}]\n[Mesaj client: "${messageText}"]\n[Răspuns scurt, cald, uman (1-2 propoziții)]:`;
-
-    // 1. Verificare deterministă pentru întrebările frecvente esențiale (FAQ oficiale)
+    // ─── PAS 8: FAQ STANDARDIZAT (ORAR, LOCAȚIE, LIVRARE, MESE) ───
     const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(messageText.trim());
-    const isMenuOrSweetsQ = /(\b(ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|что сладкое|какие десерты|что есть|что есть вкусного|десерты|сладости|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
-    const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
-    const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
-    const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
-    const isPaymentQ = /(plata|plată|achitare|achita|achit|plătesc|platesc|plati|plăti|card|cash|numerar|transfer|cum platesc|cum plătesc|cum achit|cum pot achita|tichete|оплата|как оплатить)/i.test(messageText);
-    const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
     const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня)\b)/i.test(messageText);
     const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|где находитесь|адрес)\b)/i.test(messageText);
-    const isCostQ = /(cat costa|cât costă|cat cost|cât cost|cat e livrarea|cât e livrarea|ce pret|ce preț|costă|costa|tarife|tarif|preț|pret|сколько стоит)/i.test(messageText);
+    const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(messageText);
+    const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
+
+    let replyText = "";
 
     if (isGreetingOnly) {
-      if (lang === 'ru') {
-        replyText = "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇";
-      } else {
-        replyText = "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇";
-      }
-    } else if (isMenuOrSweetsQ) {
-      if (lang === 'ru') {
-        replyText = "У нас богатый выбор авторских десертов! 🧇🍓 Наши хиты: Crepe Dubai с фисташкой и хрустящим катаифи (265 MDL), Royal Pancakes с Nutella и фруктами (165 MDL), Delux Mini Waffles (160 MDL) и Waffle Sticks! Посмотрите все меню по кнопке ниже! ✨";
-      } else {
-        replyText = "Avem cele mai delicioase deserturi artizanale! 🧇🍓 Vedetele noastre sunt: Crepe Dubai cu fistic și cataif crocant (265 MDL), Royal Pancakes pufoase cu Nutella și fructe (165 MDL), Delux Mini Waffles (160 MDL) și Waffle Sticks! Puteți explora meniul complet și comanda direct mai jos! ✨";
-      }
-    } else if (isCurrencyQ) {
-      if (lang === 'ru') {
-        replyText = "Здравствуйте! Уточняем и вернемся с ответом.";
-      } else {
-        replyText = "Bună, precizăm și revenim cu un răspuns.";
-      }
-    } else if (isTimeQ) {
-      if (lang === 'ru') {
-        replyText = "Приготовление десерта занимает в среднем 20-30 минут, а доставка курьером обычно занимает 30-45 минут! 🛵";
-      } else {
-        replyText = "Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 30-45 minute! 🛵";
-      }
-    } else if (isSeatingQ) {
-      if (lang === 'ru') {
-        replyText = "У нас есть уютное кафе, специально обустроенное для приятного отдыха и наслаждения нашими десертами. Также мы осуществляем доставку по Кишиневу! 🧇";
-      } else {
-        replyText = "Avem cafenea, local special amenajat pentru a petrece timp frumos și pentru a servi deserturile noastre speciale. De asemenea efectuăm și livrare în zona Chișinăului! 🧇";
-      }
-    } else if (isPaymentQ) {
-      if (lang === 'ru') {
-        replyText = "Можно оплатить онлайн картой на сайте или наличными курьеру при доставке! 💳";
-      } else {
-        replyText = "Puteți achita online cu cardul pe site sau numerar la curier la livrare! 💳";
-      }
-    } else if (isDeliveryQ) {
-      const isSuburbMention = /(\b(suburbii|suburbie|truseni|trușeni|colonita|colonița|cricova|ialoveni|stauceni|stăuceni|bubuieci|durlesti|durlești|пригород|колоница|трушены|крикова|яловены)\b)/i.test(messageText);
-      if (isSuburbMention) {
-        if (lang === 'ru') {
-          replyText = "Здравствуйте! 🥰 К сожалению, доставляем только по Кишиневу, в пригороды доставки нет.";
-        } else {
-          replyText = "Bună! 🥰 Nu, din păcate facem livrare doar în Chișinău.";
-        }
-      } else if (isCostQ) {
-        if (lang === 'ru') {
-          replyText = "Доставка по Кишиневу в среднем 50-70 лей (рассчитывается на сайте при вводе адреса)! 🛵";
-        } else {
-          replyText = "Livrarea în Chișinău este în medie 50-70 lei (se calculează exact pe site la introducerea adresei)! 🛵";
-        }
-      } else {
-        if (lang === 'ru') {
-          replyText = "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Меню и заказ доступны по кнопке ниже! 🧇";
-        } else {
-          replyText = "Bună! 🥰 Da, facem livrare în tot Chișinăul! Puteți vedea meniul și comanda pe butonul de mai jos! 🧇";
-        }
-      }
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🥰 Добро пожаловать в Munchotella Waffle Boutique! Чем мы можем вас порадовать сегодня? Меню доступно по кнопке ниже! 🧇"
+        : "Bună! 🥰 Bine ați venit la Munchotella Waffle Boutique! Cu ce bunătăți vă putem îndulci astăzi? Puteți descoperi meniul mai jos! 🧇";
     } else if (isHoursQ) {
-      if (lang === 'ru') {
-        replyText = "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим доставку на дом! ✨";
-      } else {
-        replyText = "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! ✨";
-      }
+      replyText = lang === 'ru'
+        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной)! Ждем вас с радостью в кафе или оформим доставку на дом! ✨"
+        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis)! Vă așteptăm cu mult drag în boutique sau cu livrare la domiciliu! ✨";
     } else if (isAddressQ) {
-      if (lang === 'ru') {
-        replyText = "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇";
-      } else {
-        replyText = "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
-      }
+      replyText = lang === 'ru'
+        ? "Мы находимся в Кишиневе, по адресу ул. Nicolae Testemițeanu 21/1! 🧇"
+        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1! 🧇";
+    } else if (isDeliveryQ) {
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🥰 Да, доставляем по всему Кишиневу! Стоимость рассчитывается при оформлении на сайте (в среднем 50-70 леев). Меню по кнопке ниже! 🧇"
+        : "Bună! 🥰 Da, facem livrare în tot Chișinăul! Costul livrării se calculează la checkout (în medie 50-70 lei). Puteți comanda pe butonul de mai jos! 🧇";
+    } else if (isSeatingQ) {
+      replyText = lang === 'ru'
+        ? "Да, у нас уютное кафе, где можно приятно провести время и насладиться теплыми десертами! Ждем вас в гости! 🧇✨"
+        : "Da, avem cafenea frumos amenajată unde puteți savura deserturile noastre calde chiar pe loc! Vă așteptăm cu mult drag! 🧇✨";
     }
 
-    // 2. Procesare conversațională inteligentă cu Gemini (Gemini 3.7-flash principal)
+    // ─── PAS 9: MOTOR COGNITIV GEMINI FLASH (CU MEMORIE CONVERSAȚIONALĂ COMPLETĂ) ───
     if (!replyText) {
       const apiKey = process.env.GEMINI_API_KEY;
       if (apiKey) {
-        const candidateModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
+        const historySnippets = (session.history || []).slice(-10).map((m: any) => 
+          `${m.role === 'user' ? 'Client' : 'Munchotella AI'}: "${m.text}"`
+        ).join('\\n');
+
+        const currentCartSummary = (session.cart && session.cart.length > 0)
+          ? session.cart.map((it: any) => `${it.quantity}x ${it.name} (${it.price * it.quantity} MDL)`).join(', ')
+          : 'Coș gol';
+
+        const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1).
+Program: 16:00 - 00:00 (Miercuri: Închis).
+Produse principale: Crepe Dubai cu fistic și cataif (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), băuturi răcoritoare.
+Reguli esențiale:
+1. Răspunde cald, politicos, concis și natural (maxim 1-2 propoziții, stil uman de concierge).
+2. Dacă mesajul clientului este o întrebare, răspunde clar și la obiect.
+3. Dacă mesajul este ambiguu sau clientul pare nesigur, formulează o întrebare scurtă și prietenoasă de clarificare.
+4. NU inventa produse. NU folosi cuvântul 'americane' sau 'nuci'.
+5. Dacă clientul dorește să comande pe mai târziu / precomandă, confirmă cu drag că se poate și întreabă la ce oră dorește livrarea.
+
+[Istoric recent conversație]:
+${historySnippets}
+
+[Coșul curent al clientului]: ${currentCartSummary}
+[Limbă: ${lang.toUpperCase()}]
+[Mesaj primit acum]: "${messageText}"
+[Răspunsul tău scurt și profesionist]:`;
+
+        const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-3.7-flash'];
         for (const modelName of candidateModels) {
           try {
             const ai = new GoogleGenAI({ apiKey });
             const response = await ai.models.generateContent({
               model: modelName,
-              contents: finalPrompt,
+              contents: dynamicPrompt,
             });
             if (response.text) {
               replyText = response.text;
               break;
             }
           } catch (genAiErr: any) {
-            console.warn(`SDK warning pe ${modelName}, încercăm REST...`);
             try {
               const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: dynamicPrompt }] }] })
               });
               const restData = await restRes.json();
               if (restData?.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -1282,16 +1389,13 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
       }
     }
 
-    // 3. Fallback generic prietenos dacă nu s-a generat niciun răspuns
+    // ─── PAS 10: FALLBACK FINAL PRIETENOS ───
     if (!replyText) {
-      if (lang === 'ru') {
-        replyText = "Здравствуйте! 🥰 С удовольствием поможем вам выбрать десерт! Откройте меню по кнопке ниже! 🧇";
-      } else {
-        replyText = "Bună! 🥰 Vă ajutăm cu cel mai mare drag să alegeți ceva delicios! Puteți deschide meniul mai jos! 🧇";
-      }
+      replyText = lang === 'ru'
+        ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? 🧇"
+        : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? 🧇";
     }
 
-    // Curățare finală a textului
     replyText = replyText
       .replace(/waffles?\s+americane?/gi, 'waffles')
       .replace(/waffle\s+american[aăe]?/gi, 'waffle')
@@ -1301,17 +1405,19 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
       .replace(/\s+/g, ' ')
       .trim();
 
-    const menuUrl = `https://www.munchotella.md/${lang}/menu`;
-    const buttonTitle = lang === 'ru' ? "🧇 Открыть Меню" : lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul";
+    appendToHistory(session, 'assistant', replyText);
+    await saveSession(senderId, session);
 
-    const sendResult = await sendDispatchResponse(senderId, channel, replyText, menuUrl, buttonTitle);
-    return { success: true, sendResult, replyText, menuUrl, buttonTitle, status: 'gemini_response' };
+    const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+    const sendResult = await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
+    return { success: true, sendResult, replyText, cartUrl, cartButtonTitle, status: 'gemini_response' };
 
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
     return { error: err?.message || String(err), stack: err?.stack };
   }
 }
+
 
 async function sendDispatchResponse(
   senderId: string,
