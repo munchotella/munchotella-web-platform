@@ -425,18 +425,24 @@ async function notifyAgencyDashboard(payload: {
     'http://127.0.0.1:10000/api/meta/webhook-event'
   ];
 
-  for (const url of endpoints) {
+  const tasks = endpoints.map(async (url) => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      fetch(url, {
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         signal: controller.signal
-      }).catch(() => {}).finally(() => clearTimeout(timeoutId));
-    } catch (_) {}
-  }
+      });
+      clearTimeout(timeoutId);
+      return res.status;
+    } catch (_) {
+      return null;
+    }
+  });
+
+  await Promise.allSettled(tasks);
 }
 
 export async function POST(request: Request) {
@@ -555,7 +561,7 @@ export async function POST(request: Request) {
       
       // Instantly synchronize message with Munchotella AI Agency Operations Center
       const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
-      notifyAgencyDashboard({
+      await notifyAgencyDashboard({
         platform: channel,
         asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
         sender_id: senderId,
@@ -705,7 +711,7 @@ function matchProductInText(text: string): {
   const lower = text.toLowerCase().trim();
   
   // Detectare dacă mesajul este o întrebare generală FAQ sau salut fără intenție explicită de comandă
-  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(text);
+  const isGeneralQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(text);
   const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(text);
 
   // Dacă e întrebare generală FAQ sau salut și nu e comandă explicită, NU facem potrivire de produs
@@ -947,7 +953,10 @@ export async function processMessage(
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
-    if (lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
+    const isCancelOrder = /(\b(anuleaza|anulează|anulati|anulați|anulez|sterge|șterge|golește|goleste|nu mai vreau|nu mai doresc|nu vreau nimic|reset|cancel|отмена|отмените|очистить|не хочу)\b)/i.test(lowerMsg) && 
+      (lowerMsg.includes('comanda') || lowerMsg.includes('comandă') || lowerMsg.includes('cos') || lowerMsg.includes('coș') || lowerMsg.includes('tot') || lowerMsg.includes('toată') || lowerMsg.includes('toata') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('nu mai doresc') || lowerMsg.includes('заказ') || lowerMsg.includes('корзин'));
+
+    if (isCancelOrder || lowerMsg.includes('anuleaza comanda') || lowerMsg.includes('anulează comanda') || lowerMsg.includes('anulati comanda') || lowerMsg.includes('anulați comanda') || lowerMsg.includes('nu mai vreau') || lowerMsg.includes('reset') || lowerMsg.includes('goleste cosul') || lowerMsg.includes('golește coșul') || lowerMsg.includes('отмена заказа') || lowerMsg.includes('cancel order')) {
       session.cart = [];
       session.state = 'IDLE';
       await saveSession(senderId, session);
@@ -962,7 +971,7 @@ export async function processMessage(
 
     let replyText = "";
 
-    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
+    const isFaqQuestion = /(\b(unde|cat costa|cât costă|cat timp|cât timp|in cat|în cât|cand ajunge|când ajunge|cat dureaza|cât durează|mese|masa|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|program|programul|orar|orarul|deschis|deschisi|deschiși|deschisa|deschisă|închis|inchis|inchisi|închiși|lucrati|lucrați|lucra-ti|azi|astazi|astăzi|maine|mâine|seara|dimineata|dimineața|la cat|la cât|la ce ora|la ce oră|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|livrati|livrați|livrare|preturi|prețuri|plata|plată|achita|achitare|cum pot|cum platesc|cum plătesc|metode de plata|pana la|până la|valuta|valută|euro|dolari|ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|servus|hei|hey|hello|hi|привет|здравствуйте|добрый день|добрый вечер|до скольки|где находитесь|доставка|сколько стоит|посидеть|столик|время|как оплатить|работаете|открыты|открыто|сегодня|завтра|сладкое|десерты|что есть|что есть вкусного|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
 
     const isExplicitOrder = /(\b(vreau sa comand|vreau să comand|sa comand|să comand|as dori sa comand|aș dori să comand|vreau|as dori|aș dori|adaugă|adauga|adaugi|pune|pune-mi|da-mi|dă-mi|comanda|comandă|doresc|fa-mi|fă-mi|хочу заказать|хочу|заказать|добавь|добавьте|положи|дайте|заказ)\b)/i.test(messageText);
 
@@ -1157,7 +1166,7 @@ LISTA PRODUSELOR OFICIALE (PREȚURI COMPLETE ÎN MDL):
 
     // 1. Verificare deterministă pentru întrebările frecvente esențiale (FAQ oficiale)
     const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(messageText.trim());
-    const isMenuOrSweetsQ = /(\b(ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|что сладкое|какие десерты|что есть|что есть вкусного|десерты|сладости|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
+    const isMenuOrSweetsQ = /(\b(ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ingrediente|ce ingrediente|ce contine|ce conține|compozitie|compoziție|din ce e|din ce este|ce pui|ce puneti|ce puneți|состав|какой состав|что входит|из чего|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|что сладкое|какие десерты|что есть|что есть вкусного|десерты|сладости|что посоветуете|посоветуйте|меню)\b)/i.test(messageText);
     const isCurrencyQ = /(euro|eur|\$|dolari|dolar|valuta|valută|schimb|обмен|евро|доллар|валют)/i.test(messageText);
     const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|сколько ждать|время доставки|через сколько)/i.test(messageText);
     const isSeatingQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|rezervare|rezervari|rezervări|interior|столик|места|посидеть|терраса|бронь)/i.test(messageText);
