@@ -1458,34 +1458,44 @@ ${historySnippets}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// DISPATCH & META GRAPH API TRANSPORT
+// DISPATCH & META GRAPH API TRANSPORT (ROBUST INSTAGRAM DIRECT & MESSENGER)
 // ═══════════════════════════════════════════════════════════════════════════════
-async function sendDispatchResponse(
-  senderId: string,
-  channel: 'instagram' | 'messenger',
-  text: string,
-  url: string,
-  buttonTitle: string
-) {
-  return await sendMetaResponse(senderId, text, url, buttonTitle);
-}
 
-async function sendDispatchGenericCard(
-  senderId: string,
-  channel: 'instagram' | 'messenger',
-  product: typeof MENU_CATALOG[0],
-  text: string,
-  cartUrl: string,
-  cartButtonTitle: string,
-  menuUrl: string
-) {
-  return await sendMetaGenericCard(senderId, product, text, cartUrl, cartButtonTitle, menuUrl);
+async function sendMetaTextMessage(senderId: string, text: string) {
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  if (!metaAccessToken) {
+    console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
+    return { error: "Missing META_PAGE_ACCESS_TOKEN" };
+  }
+
+  // Meta Graph API text limit: 1000 caractere per mesaj
+  const safeText = text.length > 1000 ? text.substring(0, 997) + "..." : text;
+
+  try {
+    const payload = {
+      recipient: { id: senderId },
+      message: { text: safeText }
+    };
+
+    const res = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data?.error) {
+      console.warn("Meta sendMetaTextMessage warning:", data.error);
+    }
+    return data;
+  } catch (err) {
+    console.error("Eroare trimitere Meta text message:", err);
+    return { error: String(err) };
+  }
 }
 
 async function sendMetaGenericCard(
   senderId: string,
   product: typeof MENU_CATALOG[0],
-  text: string,
   cartUrl: string,
   cartButtonTitle: string,
   menuUrl: string
@@ -1495,7 +1505,36 @@ async function sendMetaGenericCard(
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
     return { error: "Missing META_PAGE_ACCESS_TOKEN" };
   }
-  const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
+
+  // 1. Titlu element: strict <= 80 caractere (cerință strictă Meta Graph API)
+  const rawTitle = `${product.name} (${product.price} MDL)`;
+  const safeTitle = rawTitle.length > 80 ? rawTitle.substring(0, 77) + "..." : rawTitle;
+
+  // 2. Subtitlu element: rezumat compact ingrediente (strict <= 80 caractere, garantat să nu fie respins cu cod 100)
+  const rawSubtitle = product.ingredients || "Munchotella Waffle Boutique Chișinău";
+  let safeSubtitle = rawSubtitle.trim();
+  if (safeSubtitle.length > 80) {
+    safeSubtitle = safeSubtitle.substring(0, 77) + "...";
+  }
+
+  // 3. Titluri butoane: strict <= 20 caractere (cerință strictă Meta Graph API)
+  const safeCartTitle = cartButtonTitle.length > 20 ? cartButtonTitle.substring(0, 20) : cartButtonTitle;
+
+  const buttons: any[] = [];
+  if (cartUrl) {
+    buttons.push({
+      type: "web_url",
+      url: cartUrl,
+      title: safeCartTitle
+    });
+  }
+  if (menuUrl) {
+    buttons.push({
+      type: "web_url",
+      url: menuUrl,
+      title: "🧇 Meniu"
+    });
+  }
 
   try {
     const genericPayload = {
@@ -1507,21 +1546,10 @@ async function sendMetaGenericCard(
             template_type: "generic",
             elements: [
               {
-                title: `${product.name} (${product.price} MDL)`,
-                subtitle: cleanText || product.ingredients || "Munchotella Waffle Boutique",
+                title: safeTitle,
+                subtitle: safeSubtitle,
                 image_url: product.image,
-                buttons: [
-                  {
-                    type: "web_url",
-                    url: cartUrl,
-                    title: cartButtonTitle
-                  },
-                  {
-                    type: "web_url",
-                    url: menuUrl,
-                    title: "🧇 Meniu"
-                  }
-                ]
+                buttons: buttons.length > 0 ? buttons : undefined
               }
             ]
           }
@@ -1534,27 +1562,69 @@ async function sendMetaGenericCard(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(genericPayload)
     });
-    let sendResult = await metaRes.json();
+    const sendResult = await metaRes.json();
 
     if (sendResult?.error) {
-      console.warn("Meta generic card template warning, fallback to button template:", sendResult.error);
-      return await sendMetaResponse(senderId, text, cartUrl, cartButtonTitle);
+      console.warn("Meta generic card failed:", sendResult.error);
+      const fallbackUrl = cartUrl || menuUrl;
+      if (fallbackUrl) {
+        return await sendMetaTextMessage(senderId, `🥞 ${safeTitle}\n${safeSubtitle}\n\n📲 ${safeCartTitle}: ${fallbackUrl}`);
+      }
     }
 
     return sendResult;
   } catch (err) {
     console.error("Eroare trimitere Meta generic card:", err);
-    return await sendMetaResponse(senderId, text, cartUrl, cartButtonTitle);
+    return { error: String(err) };
   }
 }
 
-async function sendMetaResponse(senderId: string, text: string, url: string, buttonTitle: string) {
+async function sendDispatchGenericCard(
+  senderId: string,
+  channel: 'instagram' | 'messenger',
+  product: typeof MENU_CATALOG[0],
+  text: string,
+  cartUrl: string,
+  cartButtonTitle: string,
+  menuUrl: string
+) {
+  // Pasul 1: Trimite mesajul conversațional cald și complet (răspunsul la întrebare / ingrediente / confirmare coș)
+  if (text && text.trim().length > 0) {
+    await sendMetaTextMessage(senderId, text.trim());
+  }
+
+  // Pasul 2: Trimite cardul vizual cu imaginea de produs, preț și butoane de acțiune
+  return await sendMetaGenericCard(senderId, product, cartUrl, cartButtonTitle, menuUrl);
+}
+
+async function sendDispatchResponse(
+  senderId: string,
+  channel: 'instagram' | 'messenger',
+  text: string,
+  url: string,
+  buttonTitle: string
+) {
+  // Pe Instagram Direct, template_type "button" nu este suportat de Meta.
+  // Trimitem mesaj de text nativ, elegant structurat cu linkul aferent.
+  if (channel === 'messenger' && url && buttonTitle) {
+    return await sendMetaButtonResponse(senderId, text, url, buttonTitle);
+  } else {
+    const fullText = (url && buttonTitle)
+      ? `${text.trim()}\n\n📲 ${buttonTitle}: ${url}`
+      : text.trim();
+    return await sendMetaTextMessage(senderId, fullText);
+  }
+}
+
+async function sendMetaButtonResponse(senderId: string, text: string, url: string, buttonTitle: string) {
   const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
     return { error: "Missing META_PAGE_ACCESS_TOKEN" };
   }
+
   const cleanText = text.replace(/https?:\/\/(www\.)?munchotella\.md\/[a-z]{2}\/menu\S*/gi, '').trim();
+  const safeButtonTitle = buttonTitle.length > 20 ? buttonTitle.substring(0, 20) : buttonTitle;
 
   try {
     const buttonPayload = {
@@ -1564,12 +1634,12 @@ async function sendMetaResponse(senderId: string, text: string, url: string, but
           type: "template",
           payload: {
             template_type: "button",
-            text: cleanText || text,
+            text: (cleanText || text).substring(0, 640),
             buttons: [
               {
                 type: "web_url",
                 url: url,
-                title: buttonTitle
+                title: safeButtonTitle
               }
             ]
           }
@@ -1586,22 +1656,13 @@ async function sendMetaResponse(senderId: string, text: string, url: string, but
 
     if (sendResult?.error) {
       console.warn("Meta button template warning, fallback to text:", sendResult.error);
-      const textPayload = {
-        recipient: { id: senderId },
-        message: { text: `${text}\n\n🌐 ${url}` }
-      };
-      const fallbackRes = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(textPayload)
-      });
-      sendResult = await fallbackRes.json();
+      return await sendMetaTextMessage(senderId, `${text.trim()}\n\n📲 ${safeButtonTitle}: ${url}`);
     }
 
     return sendResult;
   } catch (err) {
-    console.error("Eroare trimitere Meta:", err);
-    return { error: String(err) };
+    console.error("Eroare trimitere Meta button response:", err);
+    return await sendMetaTextMessage(senderId, `${text.trim()}\n\n📲 ${safeButtonTitle}: ${url}`);
   }
 }
 
