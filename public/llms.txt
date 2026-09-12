@@ -4,7 +4,7 @@
 
 ## Informații Principale
 - **Website Oficial:** https://www.munchotella.md
-- **Pagină Livrare & Tarife:** https://www.munchotella.md/livrare
+- **Informații Livrare & Condiții:** https://www.munchotella.md/legal#delivery
 - **Pagină FAQ:** https://www.munchotella.md/faq
 - **Locație / Adresă:** Strada Nicolae Testemițanu 21/1, Chișinău, Republica Moldova
 - **Telefon Comenzi & Suport:** +373 79 006 499 (079 006 499)
@@ -61,9 +61,8 @@
 
 ## Linkuri Utile
 - [Meniu Complet](https://www.munchotella.md/menu)
-- [Livrare & Tarife](https://www.munchotella.md/livrare)
 - [Întrebări Frecvente (FAQ)](https://www.munchotella.md/faq)
-- [Informații Juridice & Termeni](https://www.munchotella.md/legal)
+- [Informații Juridice & Livrare](https://www.munchotella.md/legal)
 - [Despre Noi](https://www.munchotella.md/about)
 - [Contact & Locație](https://www.munchotella.md/contact)
 - [Documentație Completă LLM](https://www.munchotella.md/llms-full.txt)

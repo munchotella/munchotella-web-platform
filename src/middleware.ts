@@ -36,8 +36,9 @@ export default function middleware(req: NextRequest) {
   const cleanPath = pathname.replace(/^\/(ro|ru|en)/, '');
   const langPrefix = pathname.match(/^\/(ro|ru|en)/)?.[0] || '';
 
-  if (cleanPath === '/delivery') {
-    url.pathname = langPrefix ? `${langPrefix}/livrare` : '/livrare';
+  if (cleanPath === '/delivery' || cleanPath === '/livrare') {
+    url.pathname = langPrefix ? `${langPrefix}/legal` : '/legal';
+    url.hash = 'delivery';
     return NextResponse.redirect(url, 308);
   }
   if (cleanPath === '/termeni' || cleanPath === '/termeni-si-conditii' || cleanPath === '/terms') {

@@ -45,12 +45,22 @@ const nextConfig: any = {
     return [
       {
         source: '/delivery',
-        destination: '/livrare',
+        destination: '/legal#delivery',
         permanent: true,
       },
       {
         source: '/:locale(ro|en|ru)/delivery',
-        destination: '/:locale/livrare',
+        destination: '/:locale/legal#delivery',
+        permanent: true,
+      },
+      {
+        source: '/livrare',
+        destination: '/legal#delivery',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/livrare',
+        destination: '/:locale/legal#delivery',
         permanent: true,
       },
       {

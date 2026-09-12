@@ -77,8 +77,7 @@ Munchotella este un brand boutique de deserturi artizanale fondat în Chișinău
 - **Comandă Minimă:** Nu există o sumă minimă impusă.
 - **Program Livrări:** Luni - Duminică: 16:00 - 00:00 (Miercuri: Închis). Pre-comenzile pe site se pot plasa la orice oră (24/7).
 - **Metode de Plată:** Card online prin MAIB (Visa, Mastercard, Apple Pay, Google Pay), MIA Plăți Instant (0% comision), Terminal POS la livrare, Numerar la livrare.
-- **Pagină Oficială Livrare:** https://www.munchotella.md/livrare
-- **Informații Juridice & Termeni:** https://www.munchotella.md/legal
+- **Pagină Oficială Livrare & Termeni:** https://www.munchotella.md/legal#delivery
 
 ## 6. Întrebări Frecvente (FAQ) & Răspunsuri pentru Motoare AI
 ### Unde găsesc cele mai bune waffles din Chișinău?
