@@ -110,11 +110,11 @@ export default function FAQClient({ faqItems }: { faqItems: FAQItem[] }) {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-[#736A60] uppercase tracking-wider">{tContact("addressTitle")}</p>
-                  <p className="text-sm font-bold text-[#1A120B]">Str. Testemițanu 21/1</p>
+                  <p className="text-sm font-bold text-[#1A120B]">Strada Nicolae Testemițanu 21/1</p>
                 </div>
               </div>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Beanu+21%2F1+Chisinau"
+                href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#D4A853] hover:text-[#1A120B] transition-colors pt-2 border-t border-[#E8E2D9]/60"

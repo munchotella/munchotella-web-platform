@@ -29,13 +29,13 @@ export default function Footer() {
             </Link>
 
             <div className="flex flex-col space-y-4">
-              <a href="https://maps.google.com/?q=Nicolae+Testemițeanu+21/1" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
+              <a href="https://maps.google.com/?q=Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <MapPin className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
-                <span>Nicolae Testemițeanu 21/1, Chișinău</span>
+                <span>Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</span>
               </a>
               <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <Phone className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
-                <span>079 006 499</span>
+                <span>+373 79 006 499</span>
               </a>
               <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
                 <Mail className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
@@ -56,6 +56,7 @@ export default function Footer() {
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('support')}</h4>
             <ul className="space-y-4">
+              <li><Link href="/livrare" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deliveryInfo')}</Link></li>
               <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('helpFaq')}</Link></li>
               <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
               <li><Link href="/legal" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('legalAndDelivery')}</Link></li>

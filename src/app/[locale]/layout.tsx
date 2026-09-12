@@ -149,20 +149,20 @@ export default async function RootLayout({
               "currenciesAccepted": "MDL",
               "paymentAccepted": "Cash, Credit Card",
               "hasMenu": "https://www.munchotella.md/menu",
-              "telephone": "+37379006499",
+              "telephone": "+373 79 006 499",
               "email": "munchotella@gmail.com",
               "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "Str. Nicolae Testemițanu 21/1",
+                "streetAddress": "Strada Nicolae Testemițanu 21/1",
                 "addressLocality": "Chișinău",
                 "addressRegion": "Chișinău",
                 "postalCode": "MD-2025",
-                "addressCountry": "MD"
+                "addressCountry": "Moldova"
               },
               "geo": {
                 "@type": "GeoCoordinates",
-                "latitude": 46.9986,
-                "longitude": 28.8354
+                "latitude": 46.99643870,
+                "longitude": 28.83484630
               },
               "openingHoursSpecification": [
                 {
@@ -179,10 +179,39 @@ export default async function RootLayout({
                   "closes": "00:00"
                 }
               ],
+              "areaServed": {
+                "@type": "GeoCircle",
+                "geoMidpoint": {
+                  "@type": "GeoCoordinates",
+                  "latitude": 46.99643870,
+                  "longitude": 28.83484630
+                },
+                "geoRadius": "10000"
+              },
+              "potentialAction": [
+                {
+                  "@type": "OrderAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "https://www.munchotella.md/menu",
+                    "inLanguage": ["ro", "ru", "en"],
+                    "actionPlatform": [
+                      "http://schema.org/DesktopWebPlatform",
+                      "http://schema.org/MobileWebPlatform"
+                    ]
+                  },
+                  "deliveryMethod": [
+                    "http://purl.org/goodrelations/v1#DeliveryModeDirectDownload",
+                    "http://purl.org/goodrelations/v1#DeliveryModeMail"
+                  ]
+                }
+              ],
               "sameAs": [
-                "https://www.instagram.com/munchotella.md/",
+                "https://www.instagram.com/munchotella.md",
+                "https://www.facebook.com/Munchotella",
                 "https://www.tiktok.com/@munchotella",
-                "https://www.facebook.com/munchotella"
+                "https://yandex.md/maps/org/munchotella/7214982774/",
+                "https://restaurantguru.com/Munchotella-Chisinau"
               ]
             })
           }}

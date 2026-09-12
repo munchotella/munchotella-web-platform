@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.munchotella.md';
   const locales = ['ro', 'en', 'ru'];
-  const routes = ['', '/menu', '/about', '/contact', '/checkout', '/faq'];
+  const routes = ['', '/menu', '/livrare', '/about', '/contact', '/checkout', '/faq', '/legal'];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
@@ -13,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         url: `${baseUrl}/${locale}${route}`,
         lastModified: new Date(),
         changeFrequency: 'daily',
-        priority: route === '' ? 1.0 : 0.8,
+        priority: route === '' ? 1.0 : (route === '/menu' || route === '/livrare') ? 0.9 : 0.8,
       });
     });
   });

@@ -41,6 +41,70 @@ const nextConfig: any = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/delivery',
+        destination: '/livrare',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/delivery',
+        destination: '/:locale/livrare',
+        permanent: true,
+      },
+      {
+        source: '/termeni',
+        destination: '/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/termeni',
+        destination: '/:locale/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/termeni-si-conditii',
+        destination: '/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/termeni-si-conditii',
+        destination: '/:locale/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/terms',
+        destination: '/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/terms',
+        destination: '/:locale/legal#terms',
+        permanent: true,
+      },
+      {
+        source: '/politica-confidentialitate',
+        destination: '/legal#privacy',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/politica-confidentialitate',
+        destination: '/:locale/legal#privacy',
+        permanent: true,
+      },
+      {
+        source: '/privacy',
+        destination: '/legal#privacy',
+        permanent: true,
+      },
+      {
+        source: '/:locale(ro|en|ru)/privacy',
+        destination: '/:locale/legal#privacy',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [],

@@ -123,9 +123,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-serif text-lg font-bold text-[#1A120B] mb-1">{t('addressTitle')}</h4>
-                    <p className="text-[#736A60] text-sm font-light mb-3">Strada Nicolae Testemițeanu 21/1, Chișinău</p>
+                    <p className="text-[#736A60] text-sm font-light mb-3">Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</p>
                     <a
-                      href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Beanu+21%2F1+Chisinau"
+                      href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#D4A853] hover:text-[#1A120B] transition-colors"
@@ -143,8 +143,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('phoneEmailTitle')}</p>
-                      <a href="tel:079006499" className="font-serif text-lg font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors block">
-                        079 006 499
+                      <a href="tel:+37379006499" className="font-serif text-lg font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors block">
+                        +373 79 006 499
                       </a>
                       <a href="mailto:munchotella@gmail.com" className="text-[#736A60] text-sm hover:text-[#D4A853] transition-colors mt-1 block">
                         munchotella@gmail.com

@@ -32,6 +32,23 @@ export default function middleware(req: NextRequest) {
     }
   }
 
+  // Redirecționări inteligente pentru boți AI și utilizatori către paginile corecte
+  const cleanPath = pathname.replace(/^\/(ro|ru|en)/, '');
+  const langPrefix = pathname.match(/^\/(ro|ru|en)/)?.[0] || '';
+
+  if (cleanPath === '/delivery') {
+    url.pathname = langPrefix ? `${langPrefix}/livrare` : '/livrare';
+    return NextResponse.redirect(url, 308);
+  }
+  if (cleanPath === '/termeni' || cleanPath === '/termeni-si-conditii' || cleanPath === '/terms') {
+    url.pathname = langPrefix ? `${langPrefix}/legal` : '/legal';
+    return NextResponse.redirect(url, 308);
+  }
+  if (cleanPath === '/privacy' || cleanPath === '/politica-confidentialitate') {
+    url.pathname = langPrefix ? `${langPrefix}/legal` : '/legal';
+    return NextResponse.redirect(url, 308);
+  }
+
   // Executa rutarea i18n pentru toate celelalte cazuri
   return intlMiddleware(req);
 }

@@ -148,11 +148,11 @@ export default function LegalPage() {
                   </div>
                   <div>
                     <p className="text-[#736A60]">Adresă:</p>
-                    <p className="font-bold text-[#1A120B]">Str. Nicolae Testemițeanu 21/1, Chișinău, Moldova</p>
+                    <p className="font-bold text-[#1A120B]">Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</p>
                   </div>
                   <div>
                     <p className="text-[#736A60]">Contact:</p>
-                    <p className="font-bold text-[#1A120B]">079 006 499 • munchotella@gmail.com</p>
+                    <p className="font-bold text-[#1A120B]">+373 79 006 499 • munchotella@gmail.com</p>
                   </div>
                 </div>
                 <div className="pt-3 border-t border-[#E8E2D9]">

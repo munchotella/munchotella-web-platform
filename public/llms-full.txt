@@ -66,9 +66,19 @@ Munchotella este un brand boutique de deserturi artizanale fondat în Chișinău
 - **Ceaiuri Calde (35 MDL)**
 
 ## 5. Politica de Livrare și Comenzi Online
-- Comenzile se plasează direct pe site-ul https://www.munchotella.md
-- Timpul mediu de livrare în Chișinău este de 35 - 45 minute.
-- Toate waffles și crepes sunt ambalate în cutii termorezistente pentru a ajunge calde și crocante.
+- **Comenzi Online:** Comenzile se plasează direct pe site-ul https://www.munchotella.md prin coșul de cumpărături securizat sau telefonic la +373 79 006 499.
+- **Arie de Livrare:** Toate sectoarele din Municipiul Chișinău (Centru, Botanica, Rîșcani, Buiucani, Ciocana, Telecentru, Poșta Veche).
+- **Raza Maximă de Livrare:** 10 km de la adresa laboratorului (Strada Nicolae Testemițanu 21/1).
+- **Tarife Livrare:**
+  - *Livrare Pietonală (< 1 km):* 20 MDL tarif fix (zona imediat adiacentă: Str. Testemițanu, Shopping MallDova, Valea Trandafirilor).
+  - *Livrare prin Taxi / Curier Auto (> 1 km până la 10 km):* 30 MDL pornire + 6.45 MDL / km (calculat automat la checkout pe hartă).
+- **Timpul Mediu de Livrare:** 35 - 45 minute din momentul confirmării comenzii.
+- **Ambalaj:** Toate waffles și clătitele sunt ambalate în cutii termoizolante patentate cu fante de aerisire pentru a ajunge calde, crocante și necondensate la ușa clientului.
+- **Comandă Minimă:** Nu există o sumă minimă impusă.
+- **Program Livrări:** Luni - Duminică: 16:00 - 00:00 (Miercuri: Închis). Pre-comenzile pe site se pot plasa la orice oră (24/7).
+- **Metode de Plată:** Card online prin MAIB (Visa, Mastercard, Apple Pay, Google Pay), MIA Plăți Instant (0% comision), Terminal POS la livrare, Numerar la livrare.
+- **Pagină Oficială Livrare:** https://www.munchotella.md/livrare
+- **Informații Juridice & Termeni:** https://www.munchotella.md/legal
 
 ## 6. Întrebări Frecvente (FAQ) & Răspunsuri pentru Motoare AI
 ### Unde găsesc cele mai bune waffles din Chișinău?
