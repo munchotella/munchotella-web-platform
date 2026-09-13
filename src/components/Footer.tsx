@@ -29,15 +29,15 @@ export default function Footer() {
             </Link>
 
             <div className="flex flex-col space-y-4">
-              <a href="https://maps.google.com/?q=Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
+              <a href="https://maps.google.com/?q=Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-2 md:py-0 min-h-[40px] md:min-h-0">
                 <MapPin className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</span>
               </a>
-              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
+              <a href="tel:+37379006499" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-2 md:py-0 min-h-[40px] md:min-h-0">
                 <Phone className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>+373 79 006 499</span>
               </a>
-              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-1.5 md:py-0">
+              <a href="mailto:munchotella@gmail.com" className="flex items-center space-x-3 text-white/60 text-[15px] hover:text-white transition-colors group py-2 md:py-0 min-h-[40px] md:min-h-0">
                 <Mail className="w-[18px] h-[18px] shrink-0 group-hover:text-[#D4A853] transition-colors" />
                 <span>munchotella@gmail.com</span>
               </a>
@@ -46,21 +46,21 @@ export default function Footer() {
           
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('explore')}</h4>
-            <ul className="space-y-4">
-              <li><Link href="/about" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('ourStory')}</Link></li>
-              <li><Link href="/menu" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('fullMenu')}</Link></li>
-              <li><Link href="/#testimonials" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('reviews')}</Link></li>
+            <ul className="space-y-3">
+              <li><Link href="/about" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('ourStory')}</Link></li>
+              <li><Link href="/menu" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('fullMenu')}</Link></li>
+              <li><Link href="/#testimonials" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('reviews')}</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-[#D4A853] text-[15px] font-bold uppercase mb-6 tracking-widest">{t('support')}</h4>
-            <ul className="space-y-4">
-              <li><Link href="/faq" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('helpFaq')}</Link></li>
-              <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
-              <li><Link href="/livrare" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deliveryInfo')}</Link></li>
-              <li><Link href="/legal" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('legalAndDelivery')}</Link></li>
-              <li><Link href="/delete-account" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deleteAccount')}</Link></li>
+            <ul className="space-y-3">
+              <li><Link href="/faq" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('helpFaq')}</Link></li>
+              <li><Link href="/contact" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
+              <li><Link href="/livrare" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deliveryInfo')}</Link></li>
+              <li><Link href="/legal" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('legalAndDelivery')}</Link></li>
+              <li><Link href="/delete-account" className="py-2 md:py-0 min-h-[40px] md:min-h-0 flex items-center md:inline-flex text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deleteAccount')}</Link></li>
             </ul>
           </div>
           

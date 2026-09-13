@@ -133,7 +133,7 @@ export default function Navbar() {
           {totalItems > 0 ? (
             <button 
               onClick={() => setIsCartOpen(true)}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all duration-300 active:scale-95 ml-1 sm:ml-2 shadow-md ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 min-h-[44px] rounded-full transition-all duration-300 active:scale-95 ml-1 sm:ml-2 shadow-md cursor-pointer ${
                 effectiveIsScrolled ? "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]" : "bg-white text-[#1A120B] hover:bg-white/90"
               }`}
             >
@@ -147,7 +147,7 @@ export default function Navbar() {
             <button 
               onClick={() => setIsCartOpen(true)}
               aria-label="Cart" 
-              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ${
+              className={`flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full transition-colors active:scale-95 cursor-pointer ${
                 effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A120B]" : "hover:bg-white/10 text-white"
               }`}
             >

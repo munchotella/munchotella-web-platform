@@ -176,16 +176,20 @@ export default function CinematicScrollHero() {
 
       {/* Playlist Indicator */}
       {HERO_PLAYLIST.length > 1 && (
-        <div className="absolute bottom-8 right-8 z-20 flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+        <div className="absolute bottom-8 right-8 z-20 flex items-center bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
           {HERO_PLAYLIST.map((track, idx) => (
             <button
               key={idx}
               onClick={() => switchToTrack(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
-              }`}
+              className="p-2 min-h-[36px] flex items-center justify-center cursor-pointer"
               aria-label={`Select shot ${idx + 1}`}
-            />
+            >
+              <span
+                className={`h-2 rounded-full transition-all duration-300 block ${
+                  idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}
