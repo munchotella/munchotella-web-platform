@@ -36,22 +36,36 @@ export default function ProductCustomizationModal({
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
 
-  // Fallback Hardcoded Toppings (In case offline cache 'menu.json' without modifiers is active)
-  const ALL_TOPPINGS: ToppingOption[] = [
-    { name: t("extraNutella"), price: 55 },
-    { name: t("extraWhiteChocolate"), price: 45 },
-    { name: t("extraStrawberry"), price: 30 },
-    { name: t("extraBanana"), price: 25 },
-    { name: t("extraKiwi"), price: 30 },
-    { name: t("freshFruit"), price: 55 },
-    { name: t("extraPistachio"), price: 50 },
-    { name: t("pistachioPaste"), price: 65 },
-    { name: t("extraOreo"), price: 25 },
-    { name: t("extraKinder"), price: 25 },
-    { name: t("kinderBueno"), price: 35 },
-    { name: t("extraPeanuts"), price: 25 },
-    { name: t("extraLotus"), price: 55 },
-    { name: t("iceCream"), price: 30 },
+  // Standard Food Modifiers: Exactly 14 items across Personalizare (8) and Toppinguri (6)
+  const STANDARD_FOOD_MODIFIERS: { title: string; isRequired?: boolean; multiSelect?: boolean; options: ToppingOption[] }[] = [
+    {
+      title: "Personalizare",
+      isRequired: false,
+      multiSelect: true,
+      options: [
+        { name: "Nutella®", price: 55 },
+        { name: "Ciocolată Albă", price: 45 },
+        { name: "Cremă de Lotus", price: 55 },
+        { name: "Pastă de fistic", price: 65 },
+        { name: "Kinder", price: 25 },
+        { name: "Kinder Bueno", price: 35 },
+        { name: "Mix de fructe", price: 55 },
+        { name: "Bilă de înghețată", price: 30 },
+      ],
+    },
+    {
+      title: "Toppinguri",
+      isRequired: false,
+      multiSelect: true,
+      options: [
+        { name: "Alune", price: 25 },
+        { name: "Fistic", price: 50 },
+        { name: "Oreo", price: 25 },
+        { name: "Banană", price: 25 },
+        { name: "Căpșune", price: 30 },
+        { name: "Kiwi", price: 30 },
+      ],
+    },
   ];
 
   let renderModifierGroups: { title: string; options: ToppingOption[] }[] = [];
@@ -60,45 +74,25 @@ export default function ProductCustomizationModal({
     const isDrink = product.rawCategory === "drinks" || 
                     product.rawCategory === "băuturi" || 
                     product.rawCategory === "напитки" || 
-                    product.category === "drinks";
+                    product.category === "drinks" ||
+                    (product.name && (
+                      product.name.toLowerCase().includes("milk shake") ||
+                      product.name.toLowerCase().includes("milkshake") ||
+                      product.name.toLowerCase().includes("lemonade") ||
+                      product.name.toLowerCase().includes("tea") ||
+                      product.name.toLowerCase().includes("ceai") ||
+                      product.name.toLowerCase().includes("coca") ||
+                      product.name.toLowerCase().includes("fanta") ||
+                      product.name.toLowerCase().includes("dorna")
+                    ));
     
     if (!isDrink) {
       if (Array.isArray(product.modifiers) && product.modifiers.length > 0) {
         // DYNAMIC LOGIC: Fetched from Database API
         renderModifierGroups = product.modifiers;
       } else {
-        // FALLBACK LOGIC: Offline cache fallback
-        const descLower = (product.desc || "").toLowerCase();
-        const nameLower = (product.name || "").toLowerCase();
-
-        const AVAILABLE_TOPPINGS = ALL_TOPPINGS.filter((topping) => {
-          if (topping.name === t("freshFruit")) return true;
-          if (topping.name === t("iceCream")) return true;
-          if (topping.name === t("pistachioPaste")) {
-            return descLower.includes("pistachio cream") || descLower.includes("katayf") || nameLower.includes("dubai");
-          }
-          if (topping.name === t("kinderBueno")) return descLower.includes("kinder bueno");
-          if (topping.name === t("extraKiwi")) return descLower.includes("kiwi");
-          if (topping.name === t("extraNutella")) return descLower.includes("nutella");
-          if (topping.name === t("extraStrawberry")) return descLower.includes("strawberry");
-          if (topping.name === t("extraBanana")) return descLower.includes("banana");
-          if (topping.name === t("extraPistachio")) return descLower.includes("pistachio") && !topping.name.includes("Pastă"); 
-          if (topping.name === t("extraOreo")) return descLower.includes("oreo");
-          if (topping.name === t("extraKinder")) return (descLower.includes("kinder") && !descLower.includes("kinder bueno")) || descLower.includes("kinder");
-          if (topping.name === t("extraPeanuts")) return descLower.includes("peanuts");
-          if (topping.name === t("extraWhiteChocolate")) return descLower.includes("white chocolate");
-          if (topping.name === t("extraLotus")) return descLower.includes("lotus");
-          return true;
-        });
-
-        if (AVAILABLE_TOPPINGS.length > 0) {
-          renderModifierGroups = [
-            {
-              title: 'Personalizare', // Generic fallback title
-              options: AVAILABLE_TOPPINGS
-            }
-          ];
-        }
+        // Fallback to standard 14 items
+        renderModifierGroups = STANDARD_FOOD_MODIFIERS;
       }
     }
   }

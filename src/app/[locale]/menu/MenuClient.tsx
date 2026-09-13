@@ -78,6 +78,7 @@ export default function MenuClient() {
       rawCategory: item.category?.toLowerCase() || "",
       desc,
       img: item.image,
+      modifiers: item.modifiers,
       badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
     };
   }).sort((a: any, b: any) => getCategoryIndex(a.rawCategory) - getCategoryIndex(b.rawCategory));
