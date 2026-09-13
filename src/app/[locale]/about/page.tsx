@@ -12,7 +12,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'About' });
 
   return {
-    title: t('metaTitle', { default: 'Povestea Noastră & Filosofia Gustului Artizanal | Munchotella' }),
+    title: t('metaTitle', { default: 'Povestea Noastră și Filosofia Gustului Artizanal | Munchotella' }),
     description: t('metaDescription', { default: 'Descoperă universul Munchotella: waffles coapte pe loc, pastă pură de fistic sicilian 100%, Nutella® originală și deserturi fără compromisuri în Chișinău.' }),
     alternates: {
       canonical: locale === 'ro' ? 'https://www.munchotella.md/about' : `https://www.munchotella.md/${locale}/about`,
@@ -32,7 +32,7 @@ export async function generateMetadata({
           url: 'https://www.munchotella.md/dubai_pistachio_crepe_ref.png',
           width: 1200,
           height: 630,
-          alt: 'Munchotella Artisan Waffle & Crepe Kitchen',
+          alt: 'Munchotella Artisan Waffle and Crepe Kitchen',
         },
       ],
     },

@@ -457,7 +457,7 @@ export default function AuthModal() {
                 {modalStep === "ONBOARDING_NAME" 
                   ? "Cum te numești?" 
                   : modalStep === "ONBOARDING_TERMS" 
-                  ? "Termeni & Condiții" 
+                  ? "Termeni și Condiții" 
                   : isForgotPassword 
                   ? "Recuperare Parolă" 
                   : (isLogin ? "Bine ai revenit" : "Devino Membru")}
@@ -533,7 +533,7 @@ export default function AuthModal() {
               {modalStep === "ONBOARDING_TERMS" && (
                 <div className="flex flex-col space-y-4">
                   <p className="text-sm text-[#1A120B]/70 leading-relaxed bg-white p-4 rounded-xl border border-[#E8E2D9]">
-                    Te rugăm să confirmi că ești de acord cu <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Termenii & Condițiile</a> și <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Politica de Confidențialitate</a> Munchotella.
+                    Te rugăm să confirmi că ești de acord cu <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Termenii și Condițiile</a> și <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Politica de Confidențialitate</a> Munchotella.
                   </p>
 
                   <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-xl hover:bg-black/5 transition-colors">

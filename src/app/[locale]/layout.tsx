@@ -28,7 +28,7 @@ const greatVibesFont = Great_Vibes({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.munchotella.md"),
-  title: "Munchotella | Ceva Dulce în Chișinău — Waffles & Crepes Premium",
+  title: "Munchotella | Ceva Dulce în Chișinău — Waffles și Crepes Premium",
   description: "Vrei ceva dulce în Chișinău? Munchotella îți aduce cele mai delicioase waffles americane, mini waffles, clătite franțuzești cu Nutella®, fructe proaspete și livrare rapidă la ușa ta!",
   keywords: [
     "ceva dulce",
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Munchotella | Ceva Dulce în Chișinău",
-    description: "Waffles & Crepes proaspete cu Nutella® originală și livrare rapidă în Chișinău.",
+    description: "Waffles și Crepes proaspete cu Nutella® originală și livrare rapidă în Chișinău.",
     url: "https://www.munchotella.md",
     siteName: "Munchotella",
     images: [
@@ -174,7 +174,7 @@ export default async function RootLayout({
               "openingHoursSpecification": [
                 {
                   "@type": "OpeningHoursSpecification",
-                  "name": "Bucătărie Caldă & Livrare Nocturnă la Domiciliu",
+                  "name": "Bucătărie Caldă și Livrare Nocturnă la Domiciliu",
                   "description": "Preparare proaspătă pe loc și livrare rapidă în Chișinău în cutii termoizolante",
                   "dayOfWeek": [
                     "Monday",

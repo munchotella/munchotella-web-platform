@@ -12,7 +12,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'Contact' });
 
   return {
-    title: t('metaTitle', { default: 'Contact & Locație Boutique Chișinău | Munchotella' }),
+    title: t('metaTitle', { default: 'Contact și Locație Boutique Chișinău | Munchotella' }),
     description: t('metaDescription', { default: 'Contactează boutique-ul Munchotella din Str. Nicolae Testemițanu 21/1 Chișinău. Comenzi telefonice la +373 79 006 499, asistență comenzi și hartă acces.' }),
     alternates: {
       canonical: locale === 'ro' ? 'https://www.munchotella.md/contact' : `https://www.munchotella.md/${locale}/contact`,

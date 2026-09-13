@@ -14,8 +14,8 @@ export async function generateMetadata({
   const title = locale === "ru"
     ? "Munchotella | Часто задаваемые вопросы (FAQ) — Вафли, Блинчики и Доставка Кишинёв"
     : locale === "en"
-    ? "Munchotella | Frequently Asked Questions (FAQ) — Waffles, Crepes & Delivery Chisinau"
-    : "Munchotella | Întrebări Frecvente (FAQ) — Waffles, Crepes & Livrare Chișinău";
+    ? "Munchotella | Frequently Asked Questions (FAQ) — Waffles, Crepes and Delivery Chisinau"
+    : "Munchotella | Întrebări Frecvente (FAQ) — Waffles, Crepes și Livrare Chișinău";
 
   const description = locale === "ru"
     ? "Узнайте всё о десертах Munchotella в Кишинёве: лучшие вафли, Дубайский блинчик со 100% фисташкой, график горячей доставки до 00:00 и заказ онлайн."

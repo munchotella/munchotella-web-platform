@@ -95,7 +95,7 @@ export default function LegalPage() {
                     href="/delete-account" 
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#C09640] uppercase tracking-wider shrink-0 py-1"
                   >
-                    <span>Ștergere Cont & Date</span>
+                    <span>Ștergere Cont și Date</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -151,7 +151,7 @@ export default function LegalPage() {
           <section id="merchant" className="scroll-mt-32">
             <AnimateIn direction="up" delay={0.4}>
               <div className="bg-white p-8 rounded-3xl border border-[#E8E2D9] shadow-sm space-y-4 text-sm text-[#4A4238]">
-                <h3 className="font-serif text-xl font-bold text-[#1A120B]">Date Identificare Comerciant & Plăți</h3>
+                <h3 className="font-serif text-xl font-bold text-[#1A120B]">Date Identificare Comerciant și Plăți</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#E8E2D9]">
                   <div>
                     <p className="text-[#736A60]">Denumire Juridică:</p>
