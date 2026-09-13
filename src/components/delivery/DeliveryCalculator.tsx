@@ -87,7 +87,7 @@ export default function DeliveryCalculator({ dict }: DeliveryCalculatorProps) {
           </span>
           <div className="flex items-baseline gap-3 mb-3">
             <span className="text-4xl font-serif text-[#1A120B] font-bold">
-              {calculatedPrice} MDL
+              ~{calculatedPrice} MDL
             </span>
             <span className="text-xs px-3 py-1 rounded-full font-mono uppercase tracking-wider bg-[#FAF7F2] border border-[#D4A853]/40 text-[#9E721D] font-bold">
               {dict.autoBadge}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { PackageCheck, Clock, Navigation, ShieldCheck, ArrowRight, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { PackageCheck, Clock, Navigation, Flame, ArrowRight, HelpCircle, PhoneCall } from 'lucide-react';
 import DeliveryCalculator from '@/components/delivery/DeliveryCalculator';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 
@@ -55,7 +55,7 @@ export default async function DeliveryPage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'DeliveryPage' });
 
-  // Schema structurata Schema.org sincronizata cu tariful unic transparent
+  // Schema structurata Schema.org sincronizata cu tariful orientativ de taxi
   const deliverySchema = {
     "@context": "https://schema.org",
     "@type": "DeliveryService",
@@ -77,10 +77,10 @@ export default async function DeliveryPage({
     "hasDeliveryMethod": [
       {
         "@type": "DeliveryChargeSpecification",
-        "name": "Livrare Curier Auto Chișinău (1 - 10 km)",
+        "name": "Livrare Curier Auto / Taxi Chișinău (1 - 10 km)",
         "price": "30",
         "priceCurrency": "MDL",
-        "description": "30 MDL tarif de bază + 6.45 MDL per fiecare kilometru parcurs, calculat automat prin Google Maps API",
+        "description": "Tarif orientativ: 30 MDL tarif de bază + 6.45 MDL per fiecare kilometru parcurs, calculat automat prin Google Maps API. În caz de condiții meteo nefavorabile sau ore de vârf pe rețeaua de taxi, clientul este contactat telefonic.",
         "eligibleTransactionVolume": {
           "@type": "PriceSpecification",
           "priceCurrency": "MDL"
@@ -90,7 +90,7 @@ export default async function DeliveryPage({
     "deliveryLeadTime": {
       "@type": "QuantitativeValue",
       "minValue": 35,
-      "maxValue": 45,
+      "maxValue": 50,
       "unitCode": "MIN"
     }
   };
@@ -163,7 +163,7 @@ export default async function DeliveryPage({
       <section className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 text-center pt-6 pb-16">
         <AnimateIn direction="up">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A120B] text-[#D4A853] text-xs font-mono uppercase tracking-[0.25em] mb-6 shadow-sm">
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <Flame className="w-3.5 h-3.5 text-[#D4A853]" />
             <span>{t('badge')}</span>
           </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#1A120B] font-bold leading-[1.15] mb-6 max-w-3xl mx-auto">
@@ -229,7 +229,7 @@ export default async function DeliveryPage({
                 </div>
 
                 <div className="space-y-4 pt-2">
-                  {/* Card 1: Formula Tarifară Directă */}
+                  {/* Card 1: Formula Tarifară Estimativă */}
                   <div className="bg-[#FAF7F2] p-6 rounded-2xl border border-[#E8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
@@ -239,16 +239,16 @@ export default async function DeliveryPage({
                       <p className="text-[#736A60] text-xs mt-1 max-w-sm leading-relaxed">{t('fareDesc')}</p>
                     </div>
                     <div className="text-left sm:text-right shrink-0">
-                      <span className="text-2xl sm:text-3xl font-serif text-[#1A120B] font-bold block">
-                        30 MDL
+                      <span className="text-lg sm:text-xl font-serif text-[#1A120B] font-bold block">
+                        {t('fareRate')}
                       </span>
                       <span className="text-[#736A60] text-xs font-sans font-medium">
-                        + 6.45 MDL / km
+                        tarif estimativ de pornire
                       </span>
                     </div>
                   </div>
 
-                  {/* Card 2: Standardul Cald Inclus Gratuit */}
+                  {/* Card 2: Ambalaj & Confirmare Telefonică */}
                   <div className="bg-[#FAF7F2] p-6 rounded-2xl border border-[#E8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
@@ -256,16 +256,16 @@ export default async function DeliveryPage({
                       </span>
                       <h3 className="font-serif text-xl font-bold text-[#1A120B] flex items-center gap-2">
                         <span>{t('qualityName')}</span>
-                        <CheckCircle2 className="w-4 h-4 text-[#9E721D]" />
+                        <PhoneCall className="w-4 h-4 text-[#9E721D]" />
                       </h3>
                       <p className="text-[#736A60] text-xs mt-1 max-w-sm leading-relaxed">{t('qualityDesc')}</p>
                     </div>
                     <div className="text-left sm:text-right shrink-0">
-                      <span className="text-2xl sm:text-3xl font-serif text-[#9E721D] font-bold block">
-                        0 MDL
+                      <span className="text-xl sm:text-2xl font-serif text-[#9E721D] font-bold block">
+                        {t('freeIncluded')}
                       </span>
                       <span className="text-[#736A60] text-xs font-sans font-medium">
-                        {t('freeIncluded')}
+                        {t('freeSubtext')}
                       </span>
                     </div>
                   </div>
