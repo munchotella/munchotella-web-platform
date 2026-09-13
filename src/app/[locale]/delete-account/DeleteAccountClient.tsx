@@ -199,8 +199,8 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <UserCheck className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#9E721D] uppercase tracking-wider mb-1">
+                      <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-pulse" />
                       {t("statusLoggedIn")}
                     </div>
                     <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
@@ -247,7 +247,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <UserCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E721D] block mb-0.5">
                       {t("dossierCol1Title")}
                     </span>
                     <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
@@ -262,7 +262,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E721D] block mb-0.5">
                       {t("dossierCol1Title")}
                     </span>
                     <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
@@ -277,7 +277,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <Bell className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E721D] block mb-0.5">
                       {t("dossierCol1Title")}
                     </span>
                     <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
@@ -292,7 +292,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <Receipt className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-amber-700 block mb-0.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#736A60] block mb-0.5">
                       {t("dossierCol2Title")}
                     </span>
                     <p className="text-xs sm:text-sm text-[#736A60] leading-relaxed">
@@ -315,7 +315,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <div className="w-11 h-11 rounded-2xl bg-[#1A120B] text-[#D4A853] flex items-center justify-center">
                       <Smartphone className="w-5 h-5" />
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#D4A853]/15 text-[#9E721D] border border-[#D4A853]/30">
                       {t("cardAppBadge")}
                     </span>
                   </div>
@@ -337,7 +337,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <div className="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#1A120B] flex items-center justify-center">
                       <Globe className="w-5 h-5" />
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#FAF7F2] text-[#736A60] border border-[#E8E2D9]">
                       {t("cardWebBadge")}
                     </span>
                   </div>
@@ -367,7 +367,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                     <div className="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#D4A853] flex items-center justify-center">
                       <Phone className="w-5 h-5" />
                     </div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#FAF7F2] text-[#9E721D] border border-[#E8E2D9]">
                       {t("cityLocation")}
                     </span>
                   </div>
@@ -414,25 +414,25 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
 
                 {/* Mesaj de Succes cu Număr de Referință */}
                 {ticketSuccess ? (
-                  <div className="p-6 sm:p-8 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center max-w-lg mx-auto">
-                    <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <div className="p-6 sm:p-8 rounded-2xl bg-[#FFFCF6] border-2 border-[#D4A853]/40 text-center max-w-lg mx-auto shadow-sm">
+                    <div className="w-14 h-14 rounded-full bg-[#1A120B] text-[#D4A853] flex items-center justify-center mx-auto mb-4 border-2 border-[#D4A853]/30 shadow-sm">
                       <Check className="w-7 h-7" />
                     </div>
-                    <h3 className="font-serif text-xl font-bold text-emerald-950 mb-2">
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B] mb-2">
                       {t("submitSuccessTitle")}
                     </h3>
-                    <p className="text-sm text-emerald-800 leading-relaxed mb-5">
+                    <p className="text-sm text-[#736A60] leading-relaxed mb-5">
                       {t("submitSuccessDesc")}
                     </p>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-emerald-300 font-mono font-bold text-sm text-emerald-950 mb-6 shadow-sm">
-                      <span className="text-xs text-emerald-600 uppercase font-sans">{t("ticketNumber")}</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FAF7F2] border border-[#D4A853]/40 font-mono font-bold text-sm text-[#1A120B] mb-6 shadow-xs">
+                      <span className="text-xs text-[#9E721D] uppercase font-sans">{t("ticketNumber")}</span>
                       <span>{ticketSuccess}</span>
                     </div>
                     <div>
                       <button
                         type="button"
                         onClick={() => setTicketSuccess(null)}
-                        className="text-xs text-emerald-700 hover:text-emerald-900 font-bold uppercase tracking-wider underline"
+                        className="text-xs text-[#9E721D] hover:text-[#1A120B] font-bold uppercase tracking-wider underline transition-colors"
                       >
                         {t("submitAnother")}
                       </button>
@@ -563,7 +563,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
 
             {directDeleteSuccess ? (
               <div className="text-center py-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 rounded-full bg-[#1A120B] text-[#D4A853] flex items-center justify-center mx-auto mb-4 border-2 border-[#D4A853]/30 shadow-sm">
                   <Check className="w-7 h-7" />
                 </div>
                 <h3 className="font-serif text-xl font-bold text-[#1A120B] mb-2">
