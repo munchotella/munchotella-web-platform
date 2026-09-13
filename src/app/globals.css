@@ -72,6 +72,9 @@
   --spacing-gutter: 24px;
   --spacing-section-gap-desktop: 120px;
 
+  --font-serif: var(--font-serif), 'Playfair Display', Georgia, serif;
+  --font-sans: var(--font-sans), 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-logo: var(--font-logo), 'Great Vibes', cursive;
   --font-label-caps: var(--font-sans), 'Outfit', sans-serif;
   --font-headline-md: var(--font-serif), 'Playfair Display', serif;
   --font-headline-lg: var(--font-serif), 'Playfair Display', serif;

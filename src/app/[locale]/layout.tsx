@@ -8,18 +8,21 @@ import { getMessages } from "next-intl/server";
 
 const playfairFont = Playfair_Display({
   weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
   variable: "--font-serif",
 });
 
 const outfitFont = Outfit({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
   variable: "--font-sans",
 });
 
 const greatVibesFont = Great_Vibes({
   weight: "400",
   subsets: ["latin"],
+  display: "swap",
   variable: "--font-logo",
 });
 
