@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { MapPin, Clock } from "lucide-react";
 
-// Coordonate aproximative pentru Nicolae Testemițeanu 21/1, Chișinău
+// Coordonate aproximative pentru Nicolae Testemițanu 21/1, Chișinău
 const center = {
   lat: 46.9975,
   lng: 28.8250,

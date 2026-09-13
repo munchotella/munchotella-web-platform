@@ -131,6 +131,9 @@ export default async function RootLayout({
         <link rel="shortcut icon" href="/favicon-48x48.png" />
         {/* Critical LCP Hero Poster Preload */}
         <link rel="preload" as="image" href="/delux_mini_waffle_official.png" fetchPriority="high" />
+        {/* LLM Knowledge Graph Discovery */}
+        <link rel="alternate" type="text/markdown" title="LLM Knowledge Graph" href="/llms.txt" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -143,17 +146,18 @@ export default async function RootLayout({
               "url": "https://www.munchotella.md",
               "logo": "https://www.munchotella.md/icon-512.png",
               "image": "https://www.munchotella.md/Mini_Waffle_platter_with_toppings_202607181714.jpeg",
-              "description": "Boutique artizanal de deserturi premium în Chișinău: Waffles americane, mini waffles, clătite franțuzești (crepes) cu Nutella® originală și fistic sicilian 100%.",
+              "description": "Boutique artizanal de deserturi premium în Chișinău: Waffles americane proaspete, mini waffles, clătite franțuzești (crepes) cu Nutella® originală, pastă pură de fistic sicilian 100% și livrare caldă nocturnă.",
               "servesCuisine": ["Dessert", "Waffles", "Crepes", "Artisan Bakery"],
-              "priceRange": "$$",
+              "priceRange": "85 MDL - 265 MDL",
               "currenciesAccepted": "MDL",
-              "paymentAccepted": "Cash, Credit Card",
+              "paymentAccepted": "Cash, Credit Card, Apple Pay, Google Pay, MIA Plăți Instant",
               "hasMenu": "https://www.munchotella.md/menu",
               "telephone": "+373 79 006 499",
               "email": "munchotella@gmail.com",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "Strada Nicolae Testemițanu 21/1",
+                "addressSublocality": "Sectorul Centru / Zona Shopping MallDova",
                 "addressLocality": "Chișinău",
                 "addressRegion": "Chișinău",
                 "postalCode": "MD-2025",
@@ -167,6 +171,8 @@ export default async function RootLayout({
               "openingHoursSpecification": [
                 {
                   "@type": "OpeningHoursSpecification",
+                  "name": "Bucătărie Caldă & Livrare Nocturnă la Domiciliu",
+                  "description": "Preparare proaspătă pe loc și livrare rapidă în Chișinău în cutii termoizolante",
                   "dayOfWeek": [
                     "Monday",
                     "Tuesday",
@@ -176,7 +182,23 @@ export default async function RootLayout({
                     "Sunday"
                   ],
                   "opens": "16:00",
-                  "closes": "00:00"
+                  "closes": "23:59"
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "name": "Pre-Comenzi Online Non-Stop",
+                  "description": "Sistem digital 24/7 pentru plasarea pre-comenzilor cu livrare programată",
+                  "dayOfWeek": [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday"
+                  ],
+                  "opens": "00:00",
+                  "closes": "23:59"
                 }
               ],
               "areaServed": {
@@ -200,19 +222,27 @@ export default async function RootLayout({
                       "http://schema.org/MobileWebPlatform"
                     ]
                   },
-                  "deliveryMethod": [
-                    "http://purl.org/goodrelations/v1#DeliveryModeDirectDownload",
-                    "http://purl.org/goodrelations/v1#DeliveryModeMail"
-                  ]
+                  "deliveryMethod": "http://purl.org/goodrelations/v1#DeliveryModeOwnFleet"
                 }
               ],
+              "makesOffer": {
+                "@id": "https://www.munchotella.md/livrare/#service"
+              },
               "sameAs": [
+                "https://maps.google.com/?cid=17565342111005886474",
                 "https://www.instagram.com/munchotella.md",
                 "https://www.facebook.com/Munchotella",
                 "https://www.tiktok.com/@munchotella",
                 "https://yandex.md/maps/org/munchotella/7214982774/",
                 "https://restaurantguru.com/Munchotella-Chisinau"
-              ]
+              ],
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "reviewCount": "128",
+                "bestRating": "5",
+                "worstRating": "1"
+              }
             })
           }}
         />

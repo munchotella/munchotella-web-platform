@@ -36,10 +36,11 @@ export default function middleware(req: NextRequest) {
   const cleanPath = pathname.replace(/^\/(ro|ru|en)/, '');
   const langPrefix = pathname.match(/^\/(ro|ru|en)/)?.[0] || '';
 
-  if (cleanPath === '/delivery' || cleanPath === '/livrare') {
-    url.pathname = langPrefix ? `${langPrefix}/legal` : '/legal';
-    url.hash = 'delivery';
-    return NextResponse.redirect(url, 308);
+  // Redirecționare istorică curată: /delivery -> /livrare (HTTP 301 Permanent, FĂRĂ hash fragment)
+  if (cleanPath === '/delivery') {
+    url.pathname = langPrefix ? `${langPrefix}/livrare` : '/livrare';
+    url.hash = '';
+    return NextResponse.redirect(url, 301);
   }
   if (cleanPath === '/termeni' || cleanPath === '/termeni-si-conditii' || cleanPath === '/terms') {
     url.pathname = langPrefix ? `${langPrefix}/legal` : '/legal';

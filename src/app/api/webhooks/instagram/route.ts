@@ -1091,8 +1091,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițeanu 21/1. Ждем вас в гости! 🧇✨"
-        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițeanu 21/1. Vă așteptăm cu drag! 🧇✨"
+        ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițanu 21/1. Ждем вас в гости! 🧇✨"
+        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițanu 21/1. Vă așteptăm cu drag! 🧇✨"
     };
   }
 
@@ -1102,8 +1102,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițeanu 21/1 или на вынос! 🧇"
-          : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițeanu 21/1 sau la pachet! 🧇"
+          ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițanu 21/1 или на вынос! 🧇"
+          : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițanu 21/1 sau la pachet! 🧇"
       };
     }
     return {
@@ -1145,8 +1145,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Да, у нас есть уютный зал на ул. Testemițeanu 21/1, где можно насладиться горячими десертами! Ждем вас! 🧇✨"
-        : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițeanu 21/1! 🧇✨"
+        ? "Да, у нас есть уютный зал на ул. Testemițanu 21/1, где можно насладиться горячими десертами! Ждем вас! 🧇✨"
+        : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițanu 21/1! 🧇✨"
     };
   }
 
@@ -1385,7 +1385,7 @@ export async function processMessage(
 
       const schedInfo = session.scheduledTime ? `Programare/Oră menționată: ${session.scheduledTime}` : 'Comandă imediată';
 
-      const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițeanu 21/1).
+      const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițanu 21/1).
 Program: 16:00 - 00:00 (Miercuri: Închis).
 Produse principale: Crepe Dubai cu fistic și cataif (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), băuturi răcoritoare.
 Reguli esențiale:

@@ -171,12 +171,12 @@ export default function OrderTrackingPage() {
             </div>
             {orderData.deliveryType === "pickup" ? (
               <>
-                <p className="text-white/80">Nicolae Testemițeanu 21/1</p>
+                <p className="text-white/80">Nicolae Testemițanu 21/1</p>
                 <p className="text-white/60 text-sm mt-1">Preluare din Boutique</p>
               </>
             ) : (
               <>
-                <p className="text-white/80">{orderData.customer?.address || "Str. Nicolae Testemițeanu 29"}</p>
+                <p className="text-white/80">{orderData.customer?.address || "Str. Nicolae Testemițanu 29"}</p>
                 {orderData.customer?.notes && (
                   <p className="text-white/60 text-sm mt-1">Note: {orderData.customer.notes}</p>
                 )}

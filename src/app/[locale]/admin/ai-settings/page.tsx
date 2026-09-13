@@ -129,7 +129,7 @@ export default function AiSettingsPage() {
       time: "23:04",
       channel: "Instagram",
       user: "@diana_cr",
-      userMessage: "Vreau să comand 2 Waffles Dubai la Testemițeanu 21.",
+      userMessage: "Vreau să comand 2 Waffles Dubai la Testemițanu 21.",
       action: "order_placed",
       actionText: "Comandă Preluată Automat de AI",
       model: "Gemini 2.0 Flash",

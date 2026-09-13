@@ -36,7 +36,7 @@ import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
 import PaymentBadges from "@/components/PaymentBadges";
 
-// GPS Coordonate Restaurant Munchotella — Nicolae Testemițeanu 21/1, Chișinău
+// GPS Coordonate Restaurant Munchotella — Nicolae Testemițanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
   lat: 46.996452,
   lng: 28.834809,
@@ -677,7 +677,7 @@ export default function CheckoutPage() {
                         </div>
                         <div>
                           <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupTitle')}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițeanu 21/1</p>
+                          <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițanu 21/1</p>
                         </div>
                       </button>
                     </div>

@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/'],
+        disallow: ['/api/', '/admin/', '/*/checkout', '/checkout'],
       },
       {
         userAgent: [
@@ -27,7 +27,7 @@ export default function robots(): MetadataRoute.Robots {
           'cohere-ai',
         ],
         allow: '/',
-        disallow: ['/api/', '/admin/'],
+        disallow: ['/api/', '/admin/', '/*/checkout', '/checkout'],
       },
     ],
     sitemap: 'https://www.munchotella.md/sitemap.xml',

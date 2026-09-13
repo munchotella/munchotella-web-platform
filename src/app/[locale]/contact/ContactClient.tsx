@@ -1,0 +1,471 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { ChevronLeft, Phone, MapPin, Clock, Send, ShoppingBag, CheckCircle2, ArrowUpRight, MessageSquare, Heart, ThumbsUp, Share2, Smartphone, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AnimateIn } from "@/components/ui/AnimateIn";
+import MapSection from "@/components/MapSection";
+import { useTranslations } from 'next-intl';
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import CountrySelector from "@/components/ui/CountrySelector";
+import { ALL_COUNTRIES, Country } from "@/data/countries";
+
+export default function ContactClient() {
+  const t = useTranslations('Contact');
+  const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
+  const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
+  const [view, setView] = useState<'form' | 'otp' | 'success'>('form');
+  const [isSending, setIsSending] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const initRecaptcha = () => {
+    if (!(window as any).recaptchaVerifierContact) {
+      (window as any).recaptchaVerifierContact = new RecaptchaVerifier(auth, 'recaptcha-contact', {
+        'size': 'invisible',
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSending(true);
+    setErrorMsg('');
+    
+    try {
+      if (typeof window !== 'undefined' && auth) {
+        initRecaptcha();
+        const appVerifier = (window as any).recaptchaVerifierContact;
+        // Format phone using selected country code
+        const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
+        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
+        const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
+        setConfirmationResult(confirmation);
+        setIsSending(false);
+        setView('otp');
+      } else {
+        throw new Error("Firebase auth not available");
+      }
+    } catch (error) {
+      console.error("Error triggering OTP:", error);
+      alert("A apărut o eroare la trimiterea SMS-ului. Te rog să încerci din nou.");
+      setIsSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmationResult) return;
+    setIsSending(true);
+    setErrorMsg('');
+
+    try {
+      await confirmationResult.confirm(otpCode);
+      
+      // Dacă codul e corect, trimitem efectiv mesajul pe server
+      const res = await fetch("/api/contact", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setView('success');
+        setFormData({ name: "", phone: "", message: "" });
+        setTimeout(() => {
+          setView('form');
+        }, 4000);
+      } else {
+        setErrorMsg("A apărut o eroare la salvarea mesajului.");
+      }
+    } catch (error) {
+      console.error("Cod incorect:", error);
+      setErrorMsg("Codul SMS introdus este incorect.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans selection:bg-[#D4A853] selection:text-white">
+
+
+      {/* Main Content Layout */}
+      <main className="max-w-[1400px] mx-auto px-6 md:px-12 pt-32 pb-16">
+        
+        {/* Top Section: Info & Form */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-24">
+          
+          {/* Left Column: Direct Info */}
+          <div className="lg:col-span-5 space-y-10">
+            <AnimateIn direction="up">
+              <div>
+                <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">{t('weAreHere')}</span>
+                <h2 className="font-serif text-4xl md:text-5xl font-bold text-[#1A120B] mb-5 leading-tight">
+                  {t('letsTalk')}
+                </h2>
+                <p className="text-[#736A60] font-light text-base leading-relaxed max-w-md">
+                  {t('subtitle')}
+                </p>
+              </div>
+            </AnimateIn>
+
+            <AnimateIn direction="up" delay={0.1}>
+              <div className="space-y-4">
+                {/* Adresă */}
+                <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm hover:border-[#D4A853]/60 transition-all flex items-start gap-5">
+                  <div className="w-12 h-12 rounded-full bg-[#D4A853]/10 text-[#D4A853] flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif text-lg font-bold text-[#1A120B] mb-1">{t('addressTitle')}</h4>
+                    <p className="text-[#736A60] text-sm font-light mb-3">Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</p>
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#D4A853] hover:text-[#1A120B] transition-colors"
+                    >
+                      <span>{t('openMap')}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+                {/* Info Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                  <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-[#1A120B]/5 text-[#1A120B] flex items-center justify-center">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('phoneEmailTitle')}</p>
+                      <a href="tel:+37379006499" className="font-serif text-lg font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors block">
+                        +373 79 006 499
+                      </a>
+                      <a href="mailto:munchotella@gmail.com" className="text-[#736A60] text-sm hover:text-[#D4A853] transition-colors mt-1 block">
+                        munchotella@gmail.com
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-[#1A120B]/5 text-[#1A120B] flex items-center justify-center">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('scheduleTitle')}</p>
+                      <p className="font-serif text-[15px] font-bold text-[#1A120B]">
+                        {t('scheduleTime')}
+                      </p>
+                      <p className="text-[#D4A853] text-[13px] font-bold mt-1">{t('scheduleClosed')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AnimateIn>
+          </div>
+          
+          {/* Right Column: Contact Form */}
+          <div className="lg:col-span-7">
+            <AnimateIn direction="up" delay={0.15}>
+              <div className="bg-[#FFFCF6] p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center relative min-h-[460px]">
+                {view === 'form' && (
+                  <div className="mb-8">
+                    <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
+                    <p className="text-[#736A60] font-light text-sm">
+                      {t('formSubtitle')}
+                    </p>
+                  </div>
+                )}
+
+                <AnimatePresence mode="wait">
+                  {view === 'success' ? (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                      transition={{ type: "spring", bounce: 0.4, duration: 0.7 }}
+                      className="bg-white border border-[#D4A853]/20 p-10 md:p-12 rounded-[2rem] text-center shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]"
+                    >
+                      {/* Ripple Background Effect */}
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0.5 }}
+                        animate={{ scale: 4, opacity: 0 }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="absolute w-40 h-40 bg-[#D4A853]/10 rounded-full"
+                      />
+                      
+                      {/* Animated Check Icon */}
+                      <div className="relative mb-6 z-10">
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", delay: 0.2, bounce: 0.6 }}
+                          className="w-24 h-24 bg-gradient-to-tr from-[#D4A853] to-[#F3D799] rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(212,168,83,0.3)]"
+                        >
+                          <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <motion.path
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: 1 }}
+                              transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </motion.div>
+                      </div>
+
+                      {/* Animated Text */}
+                      <motion.h4 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7, duration: 0.5 }}
+                        className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3 z-10"
+                      >
+                        {t('messageSent') || "Mesaj trimis!"}
+                      </motion.h4>
+                      
+                      <motion.p 
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9, duration: 0.5 }}
+                        className="text-base md:text-lg text-[#736A60] font-light max-w-sm mx-auto z-10"
+                      >
+                        {t('messageSentDesc') || "Îți mulțumim! Te vom contacta în cel mai scurt timp posibil."}
+                      </motion.p>
+                    </motion.div>
+                  ) : view === 'otp' ? (
+                    <motion.div
+                      key="otp"
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="space-y-6 py-2"
+                    >
+                      <div className="flex flex-col items-center justify-center text-center space-y-4 mb-6">
+                        <div className="w-16 h-16 bg-[#F5F2EC] rounded-full flex items-center justify-center shadow-inner">
+                          <Smartphone className="w-8 h-8 text-[#D4A853]" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('validateNumber')}</h3>
+                          <p className="text-[#736A60] text-sm leading-relaxed">{t('smsNote')} <br/><span className="font-bold text-[#1A120B] text-base">{selectedCountry.dialCode} {formData.phone.replace(/^0+/, '')}</span></p>
+                        </div>
+                      </div>
+
+                      {errorMsg && (
+                        <div className="bg-red-50 text-red-600 p-3.5 rounded-2xl text-sm border border-red-100 text-center font-medium">
+                          {errorMsg}
+                        </div>
+                      )}
+
+                      <form onSubmit={handleVerifyOtp} className="space-y-6">
+                        <div>
+                          <input 
+                            type="text" 
+                            required
+                            maxLength={6}
+                            placeholder="000000"
+                            className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-4 py-4 text-center text-3xl tracking-[0.4em] font-bold outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all shadow-sm text-[#1A120B]"
+                            value={otpCode}
+                            onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          />
+                        </div>
+                        <button 
+                          type="submit"
+                          disabled={isSending || otpCode.length < 6}
+                          className={`w-full text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${isSending || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] hover:shadow-xl hover:-translate-y-0.5'}`}
+                        >
+                          <span>{isSending ? (t('submittingReview') || 'Se verifică...') : (t('verifyCode') || 'Confirmă și Trimite')}</span>
+                          {!isSending && <CheckCircle2 className="w-4 h-4" />}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setView('form');
+                            setOtpCode('');
+                            setErrorMsg('');
+                          }}
+                          className="w-full text-center text-xs font-bold uppercase tracking-widest text-[#736A60] hover:text-[#D4A853] transition-colors py-2 block"
+                        >
+                          ← Înapoi la completare date
+                        </button>
+                      </form>
+                    </motion.div>
+                  ) : (
+                    <motion.form
+                      key="form"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onSubmit={handleSubmit}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('fullName')}</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder={t('yourName')}
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full bg-white border border-[#E8E2D9] rounded-2xl px-5 py-4 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('phoneNumber')}</label>
+                          <div className="relative flex items-center bg-white border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                            <CountrySelector
+                              selectedCountry={selectedCountry}
+                              onSelect={(country) => setSelectedCountry(country)}
+                            />
+                            <input
+                              type="tel"
+                              required
+                              placeholder={t('phonePlaceholder') || "79 000 000"}
+                              value={formData.phone}
+                              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                              className="w-full bg-transparent border-none px-4 py-4 outline-none text-[#1A120B] text-sm shadow-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-[#736A60] mb-2 pl-1">{t('message')}</label>
+                        <textarea
+                          rows={4}
+                          required
+                          placeholder={t('messagePlaceholder')}
+                          value={formData.message}
+                          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          className="w-full bg-white border border-[#E8E2D9] rounded-2xl p-5 outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] text-sm shadow-sm resize-none"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isSending}
+                        className="w-full bg-[#1A120B] hover:bg-[#D4A853] disabled:opacity-70 disabled:hover:bg-[#1A120B] text-[#FFFDF8] hover:text-[#1A120B] font-bold text-[13px] uppercase tracking-widest py-4 rounded-2xl transition-all duration-300 min-h-[56px] flex items-center justify-center gap-3 cursor-pointer shadow-md"
+                      >
+                        <span>{isSending ? (t('submittingReview') || 'Se trimite...') : t('sendMessage')}</span>
+                        <Send className={`w-4 h-4 ${isSending ? 'animate-pulse' : ''}`} />
+                      </button>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+                
+                <div id="recaptcha-contact"></div>
+              </div>
+            </AnimateIn>
+          </div>
+        </div>
+
+        {/* Social Media Showcase (Bento Grid) */}
+        <AnimateIn direction="up" delay={0.2}>
+          <div className="mb-24 pt-8 border-t border-[#E8E2D9]/60">
+            <div className="text-center mb-10">
+              <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">{t('community')}</span>
+              <h3 className="font-serif text-3xl font-bold text-[#1A120B]">{t('socialMedia')}</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              
+              {/* Instagram Screenshot Card */}
+              <a href="https://www.instagram.com/munchotella.md/" target="_blank" rel="noopener noreferrer" className="block cursor-pointer group relative rounded-3xl overflow-hidden aspect-[4/5] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] p-1 hover:-translate-y-2 transition-all duration-500 shadow-md hover:shadow-xl">
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
+                <div className="w-full h-full bg-[#1A120B] rounded-[22px] overflow-hidden relative">
+                  <img src="https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb3799de38d298ead5916_Waffle%20sticks%2095%20lei.png" alt="Instagram" className="w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700" />
+                  
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-transparent to-transparent z-20 flex flex-col justify-between p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]">
+                        <div className="w-full h-full bg-[#1A120B] rounded-full border border-black flex items-center justify-center font-serif text-white font-bold text-xs">M</div>
+                      </div>
+                      <span className="text-white font-bold text-sm drop-shadow-md">@munchotella.md</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-white">
+                        <Heart className="w-6 h-6 fill-white text-white" />
+                        <MessageSquare className="w-6 h-6 text-white" />
+                        <Send className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase border border-white/30 hover:bg-white hover:text-black transition-colors">{t('follow')}</div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+
+              {/* TikTok Screenshot Card */}
+              <a href="https://www.tiktok.com/@munchotella" target="_blank" rel="noopener noreferrer" className="block cursor-pointer group relative rounded-3xl overflow-hidden aspect-[4/5] bg-black p-1 hover:-translate-y-2 transition-all duration-500 shadow-md hover:shadow-xl">
+                <div className="w-full h-full rounded-[22px] overflow-hidden relative border border-white/10">
+                  <img src="https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png" alt="TikTok" className="w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700" />
+                  
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/40 z-20 flex flex-col justify-between p-6">
+                    <div className="flex justify-between items-start">
+                       <span className="text-white font-bold text-sm drop-shadow-md flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                         <span className="text-[#00f2fe] font-serif font-black tracking-tighter text-lg leading-none">T</span>
+                         TikTok
+                       </span>
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                      <span className="text-white font-bold text-sm drop-shadow-md">@munchotella</span>
+                      <p className="text-white/90 text-xs line-clamp-2 leading-relaxed">{t('tiktokDesc')}</p>
+                      <div className="mt-3 flex items-center gap-3">
+                         <div className="bg-[#fe2c55] px-5 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#e0264b] transition-colors">{t('follow')}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+
+              {/* Facebook Card */}
+              <a href="https://www.facebook.com/munchotella" target="_blank" rel="noopener noreferrer" className="block cursor-pointer group relative rounded-3xl overflow-hidden aspect-[4/5] bg-gradient-to-br from-[#1877F2] to-[#0E5A99] p-1 hover:-translate-y-2 transition-all duration-500 shadow-md hover:shadow-xl">
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
+                <div className="w-full h-full bg-[#1A120B] rounded-[22px] overflow-hidden relative">
+                  <img src="https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png" alt="Facebook" className="w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700" />
+                  
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-[#1A120B]/40 to-transparent z-20 flex flex-col justify-between p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white p-[2px]">
+                        <div className="w-full h-full bg-[#1877F2] rounded-full flex items-center justify-center font-serif text-white font-bold text-xl leading-none pt-1 pr-0.5">f</div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-white font-bold text-sm drop-shadow-md leading-tight">Munchotella</span>
+                        <span className="text-white/80 text-[10px]">{t('dessertRestaurant')}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="flex items-center gap-4 text-white">
+                        <ThumbsUp className="w-6 h-6 text-white" />
+                        <MessageSquare className="w-6 h-6 text-white" />
+                        <Share2 className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="bg-[#1877F2] px-4 py-2 rounded-full text-white text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#166fe5] transition-colors">{t('follow')}</div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+              
+            </div>
+          </div>
+        </AnimateIn>
+
+      </main>
+
+      {/* Map Embed Section at Bottom (Full Width) */}
+      <AnimateIn direction="up">
+        <MapSection />
+      </AnimateIn>
+
+    </div>
+  );
+}
