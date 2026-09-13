@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
+import LogoIconSVG from "@/components/LogoIconSVG";
 import { 
   ShieldCheck, 
   Trash2, 
@@ -15,11 +16,15 @@ import {
   FileText, 
   Smartphone, 
   Globe, 
-  Headphones, 
   Send, 
   Check, 
   Loader2, 
-  X 
+  X,
+  Lock,
+  UserCheck,
+  MapPin,
+  Bell,
+  Receipt
 } from "lucide-react";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 
@@ -31,7 +36,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
   const t = useTranslations("DeleteAccount");
   const { user, token, logout } = useAuth();
 
-  // Formular Web State
+  // Web Request Form State
   const [contactInput, setContactInput] = useState("");
   const [reasonInput, setReasonInput] = useState("");
   const [confirmCheckbox, setConfirmCheckbox] = useState(false);
@@ -39,13 +44,13 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
   const [formError, setFormError] = useState<string | null>(null);
   const [ticketSuccess, setTicketSuccess] = useState<string | null>(null);
 
-  // Modal Stergere Directa (Utilizatori Autentificati)
+  // Direct Delete Modal State (Authenticated User)
   const [showDirectModal, setShowDirectModal] = useState(false);
   const [isDeletingDirectly, setIsDeletingDirectly] = useState(false);
   const [directDeleteSuccess, setDirectDeleteSuccess] = useState(false);
   const [directDeleteError, setDirectDeleteError] = useState<string | null>(null);
 
-  // Trimitere Formular Web (pentru cei fara aplicatie sau delogati)
+  // Submit Web Deletion Request (Unauthenticated / Uninstalled App)
   const handleWebRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -94,7 +99,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
     }
   };
 
-  // Stergere Directa din Backend pentru utilizatorul logat
+  // Direct Deletion via Live API for Logged In User
   const handleExecuteDirectDelete = async () => {
     try {
       setIsDeletingDirectly(true);
@@ -139,9 +144,9 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
 
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-[#1A120B] pt-28 pb-32 selection:bg-[#D4A853] selection:text-white">
-      <div className="max-w-[880px] mx-auto px-5 sm:px-8 md:px-12">
+      <div className="max-w-[920px] mx-auto px-5 sm:px-8 md:px-12">
         
-        {/* Navigare / Breadcrumb */}
+        {/* Breadcrumb Editorial */}
         <AnimateIn direction="up">
           <nav className="flex items-center gap-2 text-xs sm:text-sm text-[#736A60] mb-8" aria-label="Breadcrumb">
             <Link 
@@ -155,14 +160,26 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
             <span className="text-[#1A120B] font-semibold">{t("breadcrumbCurrent")}</span>
           </nav>
 
-          {/* Header Editorial */}
-          <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4A853]/15 text-[#9E721D] border border-[#D4A853]/30 text-xs sm:text-sm font-bold uppercase tracking-wider mb-5">
-              <ShieldCheck className="w-4 h-4 text-[#D4A853]" />
-              {t("heroBadge")}
+          {/* Signature Hero Section — Grounded in Munchotella's Artisan World */}
+          <div className="text-center mb-14 sm:mb-16">
+            
+            {/* Signature Emblem Seal */}
+            <div className="relative inline-flex items-center justify-center mb-6">
+              <div className="w-20 h-20 rounded-3xl bg-[#1A120B] flex items-center justify-center text-[#D4A853] shadow-md border-2 border-[#D4A853]/30 transition-transform duration-300 hover:scale-105">
+                <LogoIconSVG className="w-12 h-12 text-[#f3922c]" />
+              </div>
+              <span className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-[#D4A853] text-[#1A120B] flex items-center justify-center shadow-sm">
+                <ShieldCheck className="w-4 h-4" />
+              </span>
             </div>
 
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A120B] tracking-tight mb-4">
+            <div className="inline-block mb-3">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#9E721D] bg-[#D4A853]/15 px-3.5 py-1 rounded-full border border-[#D4A853]/30">
+                {t("heroEyebrow")}
+              </span>
+            </div>
+
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A120B] tracking-tight mb-4 max-w-2xl mx-auto">
               {t("heroTitle")}
             </h1>
 
@@ -172,24 +189,27 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
           </div>
         </AnimateIn>
 
-        {/* Zona Inteligenta Utilizator Conectat (Daca este autentificat) */}
+        {/* Zona 1: Sesiunea Utilizatorului Logat (Dacă este autentificat pe web) */}
         {user && (
           <AnimateIn direction="up" delay={0.05}>
             <div className="mb-10 p-6 sm:p-8 rounded-3xl bg-[#FFFCF6] border-2 border-[#D4A853]/40 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A853]/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-              
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-                <div>
-                  <div className="inline-flex items-center gap-2 text-xs font-bold text-[#D4A853] uppercase tracking-wider mb-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    {t("statusLoggedIn")}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#1A120B] text-[#D4A853] flex items-center justify-center shrink-0">
+                    <UserCheck className="w-6 h-6" />
                   </div>
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
-                    {t("connectedAs")}: {user.name || user.phone}
-                  </h3>
-                  <p className="text-sm text-[#736A60] mt-1 max-w-md">
-                    {t("btnDirectDeleteDesc")}
-                  </p>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      {t("statusLoggedIn")}
+                    </div>
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
+                      {t("connectedAs")}: {user.name || user.phone}
+                    </h3>
+                    <p className="text-sm text-[#736A60] mt-1">
+                      {t("btnDirectDeleteDesc")}
+                    </p>
+                  </div>
                 </div>
 
                 <button
@@ -206,203 +226,199 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
         )}
 
         <div className="space-y-10">
-          
-          {/* Bento Grid 1: Cele 3 Metode Oficiale de Stergere */}
+
+          {/* Zona 2: Dosarul Datelor Tale (Structure is Information) */}
           <AnimateIn direction="up" delay={0.1}>
+            <div className="bg-[#FFFCF6] p-6 sm:p-9 rounded-3xl border border-[#E8E2D9] shadow-sm">
+              <div className="max-w-xl mb-6">
+                <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-2 flex items-center gap-2.5">
+                  <FileText className="w-6 h-6 text-[#D4A853]" />
+                  <span>{t("dossierTitle")}</span>
+                </h2>
+                <p className="text-sm text-[#736A60] leading-relaxed">
+                  {t("dossierSubtitle")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 1. Identitate */}
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80 flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shrink-0 text-[#1A120B] shadow-2xs">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                      {t("dossierCol1Title")}
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
+                      {t("dataDeleted1")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. Harta & Adrese */}
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80 flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shrink-0 text-[#1A120B] shadow-2xs">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                      {t("dossierCol1Title")}
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
+                      {t("dataDeleted2")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Notificări & Dispozitive */}
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80 flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shrink-0 text-[#1A120B] shadow-2xs">
+                    <Bell className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 block mb-0.5">
+                      {t("dossierCol1Title")}
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#4A4238] font-medium leading-relaxed">
+                      {t("dataDeleted3")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Evidență Fiscală Anonimă */}
+                <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80 flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-[#E8E2D9] flex items-center justify-center shrink-0 text-[#D4A853] shadow-2xs">
+                    <Receipt className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-700 block mb-0.5">
+                      {t("dossierCol2Title")}
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#736A60] leading-relaxed">
+                      {t("dataRetainedDesc")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </AnimateIn>
+
+          {/* Zona 3: Cele 3 Opțiuni Concrete de Acțiune (Bento Triad) */}
+          <AnimateIn direction="up" delay={0.15}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               
-              {/* Card 1: Aplicatie Mobila */}
-              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between hover:border-[#D4A853]/50 transition-colors">
+              {/* Opțiunea 1: Aplicația Mobilă */}
+              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#1A120B] text-[#D4A853] flex items-center justify-center">
-                      <Smartphone className="w-6 h-6" />
+                    <div className="w-11 h-11 rounded-2xl bg-[#1A120B] text-[#D4A853] flex items-center justify-center">
+                      <Smartphone className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                       {t("cardAppBadge")}
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-3">
+                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">
                     {t("cardAppTitle")}
                   </h3>
 
-                  <ul className="space-y-2.5 text-sm text-[#736A60]">
-                    <li className="flex items-start gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-[#1A120B] text-white text-[11px] flex items-center justify-center font-mono shrink-0 mt-0.5">1</span>
-                      <span>{t("cardAppStep1")}</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-[#1A120B] text-white text-[11px] flex items-center justify-center font-mono shrink-0 mt-0.5">2</span>
-                      <span>{t("cardAppStep2")}</span>
-                    </li>
-                    <li className="flex items-start gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-[#1A120B] text-white text-[11px] flex items-center justify-center font-mono shrink-0 mt-0.5">3</span>
-                      <span>{t("cardAppStep3")}</span>
-                    </li>
-                  </ul>
+                  <p className="text-xs sm:text-sm text-[#736A60] leading-relaxed">
+                    {t("cardAppDesc")}
+                  </p>
                 </div>
               </div>
 
-              {/* Card 2: Formular Web Fara Aplicatie */}
-              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between hover:border-[#D4A853]/50 transition-colors">
+              {/* Opțiunea 2: Formular Web (Fără Aplicație) */}
+              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#1A120B] flex items-center justify-center">
-                      <Globe className="w-6 h-6" />
+                    <div className="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#1A120B] flex items-center justify-center">
+                      <Globe className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                       {t("cardWebBadge")}
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-3">
+                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">
                     {t("cardWebTitle")}
                   </h3>
 
-                  <p className="text-sm text-[#736A60] leading-relaxed mb-4">
+                  <p className="text-xs sm:text-sm text-[#736A60] leading-relaxed">
                     {t("cardWebDesc")}
                   </p>
                 </div>
 
                 <a
-                  href="#web-request-form"
-                  className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#C09640] uppercase tracking-wider mt-2 py-2"
+                  href="#cerere-web"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#C09640] uppercase tracking-wider pt-4"
                 >
-                  <span>Completează formularul</span>
+                  <span>Mergi la formular</span>
                   <span>↓</span>
                 </a>
               </div>
 
-              {/* Card 3: Asistenta Directa la Chisinau */}
-              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between hover:border-[#D4A853]/50 transition-colors">
+              {/* Opțiunea 3: Contact Uman Direct la Chișinău */}
+              <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#E8E2D9] shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#D4A853] flex items-center justify-center">
-                      <Headphones className="w-6 h-6" />
+                    <div className="w-11 h-11 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9] text-[#D4A853] flex items-center justify-center">
+                      <Phone className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                       Chișinău
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-3">
+                  <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">
                     {t("cardSupportTitle")}
                   </h3>
 
-                  <p className="text-xs text-[#736A60] mb-4">
+                  <p className="text-xs text-[#736A60] mb-3">
                     {t("cardSupportDesc")}
                   </p>
 
-                  <div className="space-y-2.5 text-sm">
-                    <a
-                      href="tel:+37379006499"
-                      className="flex items-center gap-2.5 font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors py-1"
-                    >
-                      <Phone className="w-4 h-4 text-[#D4A853] shrink-0" />
-                      <span>+373 79 006 499</span>
-                    </a>
-                    <a
-                      href="mailto:munchotella@gmail.com?subject=Solicitare%20Stergere%20Date%20Munchotella"
-                      className="flex items-center gap-2.5 text-[#736A60] hover:text-[#1A120B] transition-colors py-1 text-xs"
-                    >
-                      <Mail className="w-4 h-4 text-[#D4A853] shrink-0" />
-                      <span className="truncate">munchotella@gmail.com</span>
-                    </a>
-                  </div>
+                  <a
+                    href="tel:+37379006499"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors py-1"
+                  >
+                    <Phone className="w-4 h-4 text-[#D4A853]" />
+                    <span>+373 79 006 499</span>
+                  </a>
                 </div>
 
-                <span className="text-[11px] text-[#736A60]/80 mt-4 block">
+                <span className="text-[11px] text-[#736A60]/80 mt-3 block">
                   {t("cardSupportHours")}
                 </span>
               </div>
             </div>
           </AnimateIn>
 
-          {/* Bento Grid 2: Transparenta si Categorii de Date */}
-          <AnimateIn direction="up" delay={0.15}>
-            <div className="bg-[#FFFCF6] p-6 sm:p-8 rounded-3xl border border-[#E8E2D9] shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <FileText className="w-6 h-6 text-[#D4A853]" />
-                <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
-                  {t("dataDeletedTitle")}
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Date Eliminate Definitiv */}
-                <div className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80">
-                  <h4 className="font-bold text-sm text-[#1A120B] uppercase tracking-wider mb-4 flex items-center gap-2 text-emerald-700">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                    Eliminate definitiv la confirmare
-                  </h4>
-                  <ul className="space-y-3 text-sm text-[#4A4238]">
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                      <span>{t("dataDeleted1")}</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                      <span>{t("dataDeleted2")}</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                      <span>{t("dataDeleted3")}</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-2 shrink-0" />
-                      <span>{t("dataDeleted4")}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Date Anonimizate Conform Legii RM */}
-                <div className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D9]/80 flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-bold text-sm text-[#1A120B] uppercase tracking-wider mb-4 flex items-center gap-2 text-amber-700">
-                      <ShieldCheck className="w-4 h-4 shrink-0 text-amber-600" />
-                      {t("dataRetainedTitle")}
-                    </h4>
-                    <p className="text-sm text-[#4A4238] leading-relaxed">
-                      {t("dataRetainedDesc")}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-[#E8E2D9] flex items-center justify-between text-xs text-[#736A60]">
-                    <span>{t("dataRetainedBadge")}</span>
-                    <Link href="/legal" className="text-[#D4A853] hover:underline font-medium">
-                      Politica de Confidențialitate →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </AnimateIn>
-
-          {/* Bento Grid 3: Formular Web Interactiv (Cerință Oficială Store 2024+) */}
-          <section id="web-request-form" className="scroll-mt-32">
+          {/* Zona 4: Formular Web Interactiv (Cerință Store 2024+) */}
+          <section id="cerere-web" className="scroll-mt-32">
             <AnimateIn direction="up" delay={0.2}>
               <div className="bg-[#FFFCF6] p-6 sm:p-10 rounded-3xl border border-[#E8E2D9] shadow-sm relative overflow-hidden">
-                <div className="max-w-xl">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] uppercase tracking-wider mb-2">
-                    <Globe className="w-3.5 h-3.5" />
-                    Web Deletion Portal
+                <div className="max-w-xl mb-8">
+                  <span className="text-xs font-bold text-[#D4A853] uppercase tracking-widest block mb-1">
+                    Portal Securizat Web
                   </span>
-                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A120B] mb-3">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A120B] mb-2">
                     {t("formTitle")}
                   </h2>
-                  <p className="text-sm text-[#736A60] leading-relaxed mb-8">
+                  <p className="text-sm text-[#736A60] leading-relaxed">
                     {t("formSubtitle")}
                   </p>
                 </div>
 
-                {/* Notificare de Succes cu Numar de Tichet */}
+                {/* Mesaj de Succes cu Număr de Referință */}
                 {ticketSuccess ? (
-                  <div className="p-6 sm:p-8 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-center max-w-lg mx-auto">
-                    <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-4">
+                  <div className="p-6 sm:p-8 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center max-w-lg mx-auto">
+                    <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto mb-4 shadow-sm">
                       <Check className="w-7 h-7" />
                     </div>
-                    <h3 className="font-serif text-xl font-bold text-emerald-900 mb-2">
+                    <h3 className="font-serif text-xl font-bold text-emerald-950 mb-2">
                       {t("submitSuccessTitle")}
                     </h3>
                     <p className="text-sm text-emerald-800 leading-relaxed mb-5">
@@ -426,13 +442,13 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                   /* Formular Propriu-Zis */
                   <form onSubmit={handleWebRequestSubmit} className="space-y-6 max-w-xl">
                     {formError && (
-                      <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-start gap-2.5">
+                      <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-start gap-2.5">
                         <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
                         <span>{formError}</span>
                       </div>
                     )}
 
-                    {/* Camp Contact */}
+                    {/* Câmp Contact */}
                     <div>
                       <label 
                         htmlFor="contactInput" 
@@ -447,11 +463,11 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                         value={contactInput}
                         onChange={(e) => setContactInput(e.target.value)}
                         placeholder={t("inputContactPlaceholder")}
-                        className="w-full bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl py-3.5 px-4 text-[#1A120B] text-sm sm:text-base focus:outline-none focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 transition-all min-h-[48px]"
+                        className="w-full bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl py-3.5 px-4 text-[#1A120B] text-sm sm:text-base focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/15 transition-all min-h-[48px]"
                       />
                     </div>
 
-                    {/* Camp Motiv (Optional) */}
+                    {/* Câmp Gând de Plecare (Opțional) */}
                     <div>
                       <label 
                         htmlFor="reasonInput" 
@@ -465,11 +481,11 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                         value={reasonInput}
                         onChange={(e) => setReasonInput(e.target.value)}
                         placeholder={t("inputReasonPlaceholder")}
-                        className="w-full bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl py-3 px-4 text-[#1A120B] text-sm focus:outline-none focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 transition-all resize-none"
+                        className="w-full bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl py-3 px-4 text-[#1A120B] text-sm focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/15 transition-all resize-none"
                       />
                     </div>
 
-                    {/* Checkbox Acord Obligatoriu */}
+                    {/* Checkbox Acord Ferm */}
                     <div className="flex items-start gap-3 pt-1">
                       <input
                         id="confirmCheckbox"
@@ -486,7 +502,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                       </label>
                     </div>
 
-                    {/* Buton Submit */}
+                    {/* Buton Submit (Active Voice) */}
                     <div className="pt-2">
                       <button
                         type="submit"
@@ -512,14 +528,14 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
             </AnimateIn>
           </section>
 
-          {/* Mesaj de Incheiere Cald (Sensory Copywriting Farewell) */}
+          {/* Mesaj de Rămas-Bun Cald (Sensory Copywriting Farewell) */}
           <AnimateIn direction="up" delay={0.25}>
-            <div className="p-6 rounded-3xl bg-[#FFFCF6] border border-[#D4A853]/20 text-center max-w-2xl mx-auto shadow-sm">
+            <div className="p-8 rounded-3xl bg-[#FFFCF6] border border-[#D4A853]/25 text-center max-w-2xl mx-auto shadow-sm">
               <p className="text-sm sm:text-base text-[#736A60] italic leading-relaxed">
                 „{t("farewellNote")}”
               </p>
-              <div className="mt-3 text-xs font-bold text-[#D4A853] uppercase tracking-wider">
-                — Echipa Munchotella Chișinău
+              <div className="mt-4 text-xs font-bold text-[#D4A853] uppercase tracking-widest">
+                — Echipa Munchotella • Chișinău
               </div>
             </div>
           </AnimateIn>
@@ -527,7 +543,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
         </div>
       </div>
 
-      {/* Modal Confirmare Stergere Directa Utilizator Autentificat */}
+      {/* Modal Confirmare Ștergere Directă pentru Utilizator Autentificat */}
       {showDirectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div 
