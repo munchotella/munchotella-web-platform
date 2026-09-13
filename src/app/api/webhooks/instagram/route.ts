@@ -681,11 +681,11 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
       expandedTerms.add(term);
       if (term.includes('-')) {
         expandedTerms.add(term.replace(/-/g, ' '));
-        term.split('-').forEach(part => {
+        term.split('-').forEach((part: string) => {
           if (part.length >= 3) expandedTerms.add(part);
         });
       }
-      term.split(' ').forEach(w => {
+      term.split(' ').forEach((w: string) => {
         if (w.length >= 3) expandedTerms.add(w);
       });
     }

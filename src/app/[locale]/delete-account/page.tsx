@@ -63,6 +63,25 @@ export default async function DeleteAccountPage({
       "name": "Munchotella",
       "url": "https://www.munchotella.md"
     },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Munchotella",
+      "url": "https://www.munchotella.md",
+      "logo": "https://www.munchotella.md/icon-512.png"
+    },
+    "mainEntity": {
+      "@type": "Action",
+      "name": "User Account and Data Deletion Request",
+      "description": "Public self-service and administrative account deletion request mechanism per Google Play and GDPR standards.",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": locale === "ro" ? "https://www.munchotella.md/delete-account" : `https://www.munchotella.md/${locale}/delete-account`,
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform"
+        ]
+      }
+    },
     "breadcrumb": {
       "@type": "BreadcrumbList",
       "itemListElement": [

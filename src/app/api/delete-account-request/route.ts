@@ -13,16 +13,62 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+const MESSAGES: Record<string, {
+  rateLimit: string;
+  contactRequired: string;
+  contactInvalid: string;
+  confirmedRequired: string;
+  reasonTooLong: string;
+  successMessage: string;
+  internalError: string;
+}> = {
+  ro: {
+    rateLimit: 'Ai depășit limita de solicitări permise. Te rugăm să aștepți câteva minute înainte de a încerca din nou sau să ne contactezi telefonic la +373 79 006 499.',
+    contactRequired: 'Numărul de telefon sau adresa de email este obligatorie.',
+    contactInvalid: 'Datele de contact introduse sunt invalide.',
+    confirmedRequired: 'Confirmarea acordului de ștergere este obligatorie.',
+    reasonTooLong: 'Motivul specificat depășește limita maximă de 1000 de caractere.',
+    successMessage: 'Cererea de ștergere a fost recepționată cu succes.',
+    internalError: 'A apărut o eroare internă la procesarea cererii. Te rugăm să încerci din nou.'
+  },
+  en: {
+    rateLimit: 'You have exceeded the allowed request limit. Please wait a few minutes before trying again or call us at +373 79 006 499.',
+    contactRequired: 'The phone number or email address is required.',
+    contactInvalid: 'The contact information provided is invalid.',
+    confirmedRequired: 'Confirmation of deletion consent is required.',
+    reasonTooLong: 'The specified reason exceeds the maximum limit of 1000 characters.',
+    successMessage: 'Your deletion request has been successfully received.',
+    internalError: 'An internal error occurred while processing your request. Please try again.'
+  },
+  ru: {
+    rateLimit: 'Вы превысили лимит запросов. Пожалуйста, подождите несколько минут или свяжитесь с нами по телефону +373 79 006 499.',
+    contactRequired: 'Номер телефона или адрес электронной почты обязателен.',
+    contactInvalid: 'Указанные контактные данные недействительны.',
+    confirmedRequired: 'Необходимо подтвердить согласие на удаление.',
+    reasonTooLong: 'Указанная причина превышает лимит в 1000 символов.',
+    successMessage: 'Запрос на удаление был успешно принят.',
+    internalError: 'Произошла внутренняя ошибка при обработке запроса. Пожалуйста, попробуйте снова.'
+  }
+};
+
 export async function POST(request: Request) {
+  let locale = 'ro';
   try {
-    // 1. Verificare Rate Limiting (Maxim 3 solicitări per 15 minute per IP pentru a preveni abuzurile)
+    // 1. Extragere preliminară corp cerere pentru detectare limbă (i18n)
+    const body = await request.json().catch(() => ({}));
+    if (typeof body.locale === 'string' && ['ro', 'ru', 'en'].includes(body.locale.trim())) {
+      locale = body.locale.trim();
+    }
+    const msg = MESSAGES[locale] || MESSAGES.ro;
+
+    // 2. Verificare Rate Limiting (Maxim 3 solicitări per 15 minute per IP pentru a preveni abuzurile)
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(`delete_req_${clientIp}`, 3, 15 * 60 * 1000);
 
     if (!rateLimit.success) {
       return NextResponse.json(
         { 
-          error: 'Ai depășit limita de solicitări permise. Te rugăm să aștepți câteva minute înainte de a încerca din nou sau să ne contactezi telefonic la +373 79 006 499.',
+          error: msg.rateLimit,
           code: 'RATE_LIMIT_EXCEEDED'
         },
         { 
@@ -37,37 +83,35 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Extragere & Validare Date Payload
-    const body = await request.json();
+    // 3. Extragere & Validare Date Payload
     const contact = typeof body.contact === 'string' ? body.contact.trim() : '';
     const reason = typeof body.reason === 'string' ? body.reason.trim() : '';
     const confirmed = Boolean(body.confirmed);
-    const locale = typeof body.locale === 'string' ? body.locale.trim() : 'ro';
 
     if (!contact) {
       return NextResponse.json(
-        { error: 'Numărul de telefon sau adresa de email este obligatorie.' },
+        { error: msg.contactRequired },
         { status: 400 }
       );
     }
 
     if (contact.length < 4 || contact.length > 150) {
       return NextResponse.json(
-        { error: 'Datele de contact introduse sunt invalide.' },
+        { error: msg.contactInvalid },
         { status: 400 }
       );
     }
 
     if (!confirmed) {
       return NextResponse.json(
-        { error: 'Confirmarea acordului de ștergere este obligatorie.' },
+        { error: msg.confirmedRequired },
         { status: 400 }
       );
     }
 
     if (reason.length > 1000) {
       return NextResponse.json(
-        { error: 'Motivul specificat depășește limita maximă de 1000 de caractere.' },
+        { error: msg.reasonTooLong },
         { status: 400 }
       );
     }
@@ -160,13 +204,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       ticketId,
-      message: 'Cererea de ștergere a fost recepționată cu succes.'
+      message: msg.successMessage
     }, { status: 200 });
 
   } catch (error) {
     console.error('Error in delete-account-request API route:', error);
+    const msg = MESSAGES[locale] || MESSAGES.ro;
     return NextResponse.json(
-      { error: 'A apărut o eroare internă la procesarea cererii. Te rugăm să încerci din nou.' },
+      { error: msg.internalError },
       { status: 500 }
     );
   }

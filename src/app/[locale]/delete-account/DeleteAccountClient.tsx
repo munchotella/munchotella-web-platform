@@ -355,7 +355,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                   href="#cerere-web"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#C09640] uppercase tracking-wider pt-4"
                 >
-                  <span>Mergi la formular</span>
+                  <span>{t("goToForm")}</span>
                   <span>↓</span>
                 </a>
               </div>
@@ -368,7 +368,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                       <Phone className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                      Chișinău
+                      {t("cityLocation")}
                     </span>
                   </div>
 
@@ -402,7 +402,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
               <div className="bg-[#FFFCF6] p-6 sm:p-10 rounded-3xl border border-[#E8E2D9] shadow-sm relative overflow-hidden">
                 <div className="max-w-xl mb-8">
                   <span className="text-xs font-bold text-[#D4A853] uppercase tracking-widest block mb-1">
-                    Portal Securizat Web
+                    {t("secureWebPortal")}
                   </span>
                   <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A120B] mb-2">
                     {t("formTitle")}
@@ -535,7 +535,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
                 „{t("farewellNote")}”
               </p>
               <div className="mt-4 text-xs font-bold text-[#D4A853] uppercase tracking-widest">
-                — Echipa Munchotella • Chișinău
+                {t("teamSignature")}
               </div>
             </div>
           </AnimateIn>
@@ -556,7 +556,7 @@ export default function DeleteAccountClient({ locale }: DeleteAccountClientProps
               type="button"
               onClick={() => !isDeletingDirectly && setShowDirectModal(false)}
               className="absolute top-5 right-5 text-[#736A60] hover:text-[#1A120B] transition-colors p-1"
-              aria-label="Închide"
+              aria-label={t("modalBtnClose")}
             >
               <X className="w-5 h-5" />
             </button>
