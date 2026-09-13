@@ -167,73 +167,75 @@ export default function ProductCustomizationModal({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
-              className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col md:flex-row max-h-[90dvh] md:max-h-[min(590px,calc(100dvh-2.5rem))] md:h-[590px] pointer-events-auto border border-[#EAE1DB]/70"
+              className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col max-h-[90dvh] md:max-h-[min(590px,calc(100dvh-2.5rem))] md:h-[590px] pointer-events-auto border border-[#EAE1DB]/70"
             >
               {/* Drag Handle for Mobile */}
-              <div className="w-full h-5 flex items-center justify-center absolute top-0 left-0 z-30 md:hidden">
+              <div className="w-full h-5 flex items-center justify-center absolute top-0 left-0 z-30 md:hidden pointer-events-none">
                 <div className="w-12 h-1.5 bg-[#EAE1DB] rounded-full mt-2"></div>
               </div>
 
-              {/* Close Button Mobile (over image) */}
+              {/* Close Button Mobile (fixed at top-right of dialog, stays pinned over scrolling content) */}
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Închide fereastra"
-                className="md:hidden absolute top-3 right-3 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-white/90 text-[#1A1A1A] backdrop-blur-md flex items-center justify-center hover:bg-white transition-all cursor-pointer z-40 shadow-md border border-black/5"
+                className="md:hidden absolute top-3 right-3 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white/90 text-[#1A1A1A] backdrop-blur-md flex items-center justify-center hover:bg-white transition-all cursor-pointer z-50 shadow-md border border-black/5"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
-              <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FFFFFF] md:bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
-                {/* Product Image - Large Hero Display (Straus-style) */}
-                <div className="relative w-full h-[240px] sm:h-[270px] md:h-56 lg:h-64 shrink-0 bg-[#F5EFEB] overflow-hidden">
-                  <img
-                    src={product.img}
-                    alt={product.name}
-                    className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                  />
-                </div>
+              {/* UNIFIED SCROLLABLE BODY ON MOBILE / TWO-COLUMN LAYOUT ON DESKTOP */}
+              <div className="flex-1 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row no-scrollbar min-h-0">
+                {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
+                <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FFFFFF] md:bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
+                  {/* Product Image - Large Hero Display (Straus-style) */}
+                  <div className="relative w-full h-[240px] sm:h-[270px] md:h-56 lg:h-64 shrink-0 bg-[#F5EFEB] overflow-hidden">
+                    <img
+                      src={product.img}
+                      alt={product.name}
+                      className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
 
-                {/* Product Details */}
-                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-start">
-                  <div>
-                    <p className="text-[13px] text-[#999999] mb-1 font-normal select-none leading-5">
-                      *Produsele din imagine sunt cu titlu de prezentare
-                    </p>
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-sans text-[18px] sm:text-[20px] font-bold text-[#1A202C] leading-snug">
-                        {product.name}
-                      </h3>
-                      <span className="font-sans text-[18px] font-bold text-[#D4A373] whitespace-nowrap">
-                        {product.price} MDL
-                      </span>
-                    </div>
-                    {product.desc && (
-                      <p className="text-[#777777] text-[14px] leading-[21px] mt-1.5">
-                        {product.desc}
+                  {/* Product Details */}
+                  <div className="p-4 sm:p-5 flex-1 flex flex-col justify-start">
+                    <div>
+                      <p className="text-[13px] text-[#999999] mb-1 font-normal select-none leading-5">
+                        *Produsele din imagine sunt cu titlu de prezentare
                       </p>
-                    )}
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="font-sans text-[18px] sm:text-[20px] font-bold text-[#1A202C] leading-snug">
+                          {product.name}
+                        </h3>
+                        <span className="font-sans text-[18px] font-bold text-[#D4A373] whitespace-nowrap">
+                          {product.price} MDL
+                        </span>
+                      </div>
+                      {product.desc && (
+                        <p className="text-[#777777] text-[14px] leading-[21px] mt-1.5">
+                          {product.desc}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* RIGHT COLUMN (Desktop) / BOTTOM SECTION (Mobile): Customization & Actions */}
-              <div className="w-full md:w-[60%] lg:w-[62%] flex-1 flex flex-col min-h-0 bg-white">
-                {/* Desktop Close Button Header */}
-                <div className="hidden md:flex items-center justify-end px-5 pt-3 pb-1 bg-white shrink-0">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    aria-label="Închide fereastra"
-                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                {/* RIGHT COLUMN (Desktop) / BOTTOM SECTION (Mobile): Customization & Actions */}
+                <div className="w-full md:w-[60%] lg:w-[62%] flex flex-col md:overflow-y-auto no-scrollbar bg-white">
+                  {/* Desktop Close Button Header */}
+                  <div className="hidden md:flex items-center justify-end px-5 pt-3 pb-1 bg-white shrink-0">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      aria-label="Închide fereastra"
+                      className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                {/* Scrollable Toppings Body */}
-                <div className="p-4 md:px-6 md:py-3.5 flex-1 overflow-y-auto no-scrollbar space-y-3">
+                  {/* Toppings Body */}
+                  <div className="p-4 md:px-6 md:py-3.5 flex-1 space-y-3">
                   {renderModifierGroups.length > 0 ? (
                     renderModifierGroups.map((group, groupIndex) => (
                       <div key={groupIndex} className="space-y-2">
@@ -286,53 +288,54 @@ export default function ProductCustomizationModal({
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Fixed Bottom CTA & Quantity Footer - Straus: 16px buttons & text */}
-                <div className="p-4 md:px-6 md:py-4 border-t border-[#EAE1DB] bg-[#FFFFFF] shrink-0 shadow-[0_-4px_20px_rgba(26,26,26,0.03)]">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[14px] font-medium text-[#777777]">
-                      {t('quantity')}
+              {/* Fixed Bottom CTA & Quantity Footer - Straus: Pinned at the bottom outside scroll container */}
+              <div className="p-4 md:px-6 md:py-4 border-t border-[#EAE1DB] bg-[#FFFFFF] shrink-0 shadow-[0_-4px_20px_rgba(26,26,26,0.03)] z-30">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[14px] font-medium text-[#777777]">
+                    {t('quantity')}
+                  </span>
+                  <div className="flex items-center bg-[#FFFAF5] border border-[#EAE1DB] rounded-full p-0.5 shadow-inner">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setQuantity((q) => Math.max(1, q - 1));
+                      }}
+                      className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-8 md:w-10 text-center font-bold text-[16px] text-[#1A202C]">
+                      {quantity}
                     </span>
-                    <div className="flex items-center bg-[#FFFAF5] border border-[#EAE1DB] rounded-full p-0.5 shadow-inner">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setQuantity((q) => Math.max(1, q - 1));
-                        }}
-                        className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="w-8 md:w-10 text-center font-bold text-[16px] text-[#1A202C]">
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setQuantity((q) => q + 1);
-                        }}
-                        className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setQuantity((q) => q + 1);
+                      }}
+                      className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    className="w-full min-h-[48px] bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 px-6 rounded-full font-semibold text-[16px] normal-case tracking-normal transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)] active:scale-[0.98]"
-                  >
-                    <span>{t('addToCart')}</span>
-                    <span className="bg-white/20 backdrop-blur-sm text-white px-3.5 py-1 rounded-full text-[15px] font-bold">
-                      {totalPrice} MDL
-                    </span>
-                  </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="w-full min-h-[48px] bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 px-6 rounded-full font-semibold text-[16px] normal-case tracking-normal transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)] active:scale-[0.98]"
+                >
+                  <span>{t('addToCart')}</span>
+                  <span className="bg-white/20 backdrop-blur-sm text-white px-3.5 py-1 rounded-full text-[15px] font-bold">
+                    {totalPrice} MDL
+                  </span>
+                </button>
               </div>
             </motion.div>
           </div>
