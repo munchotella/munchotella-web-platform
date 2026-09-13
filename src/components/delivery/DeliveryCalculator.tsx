@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Calculator, Navigation, Info, ArrowRight } from 'lucide-react';
+import { Calculator, MapPin, Info, ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
 interface DeliveryCalculatorProps {
@@ -64,7 +64,7 @@ export default function DeliveryCalculator({ dict }: DeliveryCalculatorProps) {
               placeholder={dict.distancePlaceholder}
               className="w-full bg-[#FAF7F2] border border-[#E8E2D9] focus:border-[#D4A853] focus:bg-white text-[#1A120B] rounded-xl px-4 py-3.5 pl-11 text-base focus:outline-none transition-all placeholder:text-[#A89F91]"
             />
-            <Navigation className="w-5 h-5 text-[#9E721D] absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <MapPin className="w-5 h-5 text-[#9E721D] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#736A60] text-sm font-mono font-medium">
               km
             </span>

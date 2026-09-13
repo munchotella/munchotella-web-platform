@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { PackageCheck, Clock, Navigation, Flame, ArrowRight, HelpCircle, PhoneCall } from 'lucide-react';
+import { Truck, Package, ChefHat, Car, MapPin, ArrowRight, HelpCircle, PhoneCall } from 'lucide-react';
 import DeliveryCalculator from '@/components/delivery/DeliveryCalculator';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 
@@ -163,7 +163,7 @@ export default async function DeliveryPage({
       <section className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 text-center pt-6 pb-16">
         <AnimateIn direction="up">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A120B] text-[#D4A853] text-xs font-mono uppercase tracking-[0.25em] mb-6 shadow-sm">
-            <Flame className="w-3.5 h-3.5 text-[#D4A853]" />
+            <Truck className="w-3.5 h-3.5 text-[#D4A853]" />
             <span>{t('badge')}</span>
           </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#1A120B] font-bold leading-[1.15] mb-6 max-w-3xl mx-auto">
@@ -175,12 +175,12 @@ export default async function DeliveryPage({
         </AnimateIn>
       </section>
 
-      {/* 3 Piloni Senzoriali & Tehnologici */}
+      {/* 3 Piloni Senzoriali și Tehnologici */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
         <AnimateIn direction="up" delay={0.1}>
           <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
             <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
-              <PackageCheck className="w-6 h-6" />
+              <Package className="w-6 h-6" />
             </div>
             <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature1Title')}</h2>
             <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature1Desc')}</p>
@@ -190,7 +190,7 @@ export default async function DeliveryPage({
         <AnimateIn direction="up" delay={0.2}>
           <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
             <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
-              <Clock className="w-6 h-6" />
+              <ChefHat className="w-6 h-6" />
             </div>
             <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature2Title')}</h2>
             <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature2Desc')}</p>
@@ -200,7 +200,7 @@ export default async function DeliveryPage({
         <AnimateIn direction="up" delay={0.3}>
           <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
             <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
-              <Navigation className="w-6 h-6" />
+              <Car className="w-6 h-6" />
             </div>
             <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature3Title')}</h2>
             <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature3Desc')}</p>
@@ -212,7 +212,7 @@ export default async function DeliveryPage({
       <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Coloana Stanga: Detalierea Formulei Tarifare & Standardul Cald (7 col) */}
+          {/* Coloana Stanga: Detalierea Formulei Tarifare și Standardul Cald (7 col) */}
           <div className="lg:col-span-7">
             <AnimateIn direction="up" delay={0.2}>
               <div className="bg-white border border-[#E8E2D9] rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
@@ -235,7 +235,10 @@ export default async function DeliveryPage({
                       <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
                         {t('fareLabel')}
                       </span>
-                      <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('fareName')}</h3>
+                      <h3 className="font-serif text-xl font-bold text-[#1A120B] flex items-center gap-2">
+                        <span>{t('fareName')}</span>
+                        <MapPin className="w-4 h-4 text-[#9E721D]" />
+                      </h3>
                       <p className="text-[#736A60] text-xs mt-1 max-w-sm leading-relaxed">{t('fareDesc')}</p>
                     </div>
                     <div className="text-left sm:text-right shrink-0">
@@ -248,7 +251,7 @@ export default async function DeliveryPage({
                     </div>
                   </div>
 
-                  {/* Card 2: Ambalaj & Confirmare Telefonică */}
+                  {/* Card 2: Ambalaj și Confirmare Telefonică */}
                   <div className="bg-[#FAF7F2] p-6 rounded-2xl border border-[#E8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
