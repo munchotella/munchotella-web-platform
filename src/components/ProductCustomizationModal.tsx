@@ -191,20 +191,22 @@ export default function ProductCustomizationModal({
               </button>
 
               {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
-              <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
-                {/* Product Image */}
-                <div className="relative h-28 sm:h-36 md:h-44 lg:h-48 w-full shrink-0 bg-[#F9F9FB] overflow-hidden">
+              <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FFFFFF] md:bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
+                {/* Product Image - Full Uncropped Display (Straus-style) */}
+                <div className="relative w-full h-48 sm:h-56 md:h-52 lg:h-60 shrink-0 bg-[#FFFFFF] flex items-center justify-center p-3 overflow-hidden">
                   <img
                     src={product.img}
                     alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    className="w-full h-full max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
                 </div>
 
                 {/* Product Details */}
                 <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-start">
                   <div>
+                    <p className="text-[11px] text-[#8C827A] mb-1 font-medium select-none">
+                      *Produsele din imagine sunt cu titlu de prezentare
+                    </p>
                     <div className="flex justify-between items-start gap-2">
                       <h3 className="font-sans text-[17px] sm:text-[19px] md:text-[21px] font-bold text-[#1A1A1A] leading-tight tracking-tight">
                         {product.name}

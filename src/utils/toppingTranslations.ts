@@ -70,6 +70,11 @@ export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string
     ru: 'Клубника',
     en: 'Strawberries',
   },
+  'Căpșune': {
+    ro: 'Căpșune',
+    ru: 'Клубника',
+    en: 'Strawberries',
+  },
   'Căpșună': {
     ro: 'Căpșuni',
     ru: 'Клубника',
@@ -81,25 +86,39 @@ export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string
     en: 'Kiwi',
   },
   'O bilă de înghețată': {
-    ro: 'O bilă de înghețată',
+    ro: 'Bilă de înghețată',
+    ru: 'Шарик мороженого',
+    en: 'A scoop of ice cream',
+  },
+  'Bilă de înghețată': {
+    ro: 'Bilă de înghețată',
     ru: 'Шарик мороженого',
     en: 'A scoop of ice cream',
   },
   'Fructe mix': {
-    ro: 'Fructe mix',
+    ro: 'Mix de fructe',
     ru: 'Микс фруктов',
     en: 'Mixed fruits',
   },
-  // Aliases for Fructe mix (normalized to Fructe mix)
+  'Mix de fructe': {
+    ro: 'Mix de fructe',
+    ru: 'Микс фруктов',
+    en: 'Mixed fruits',
+  },
   'Porție de fructe fresh': {
-    ro: 'Fructe mix',
+    ro: 'Mix de fructe',
     ru: 'Микс фруктов',
     en: 'Mixed fruits',
   },
   'Porție de fructe': {
-    ro: 'Fructe mix',
+    ro: 'Mix de fructe',
     ru: 'Микс фруктов',
     en: 'Mixed fruits',
+  },
+  'Cremă de Lotus': {
+    ro: 'Cremă de Lotus',
+    ru: 'Крем Lotus Biscoff',
+    en: 'Lotus Biscoff Cream',
   },
 
   // ── Brand Names (Same across languages) ──
