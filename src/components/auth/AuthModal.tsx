@@ -430,7 +430,7 @@ export default function AuthModal() {
     <AnimatePresence>
       {isAuthModalOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md"
           variants={backdropVariants}
           initial="hidden"
           animate="visible"
@@ -438,22 +438,23 @@ export default function AuthModal() {
           onClick={() => setIsAuthModalOpen(false)}
         >
           <motion.div
-            className="relative w-full max-w-md bg-[#FAF8F5] rounded-3xl shadow-2xl border border-[#E8E2D9] overflow-visible"
+            className="relative w-full max-w-md bg-[#FAF8F5] rounded-3xl shadow-2xl border border-[#E8E2D9] max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden"
             variants={modalVariants}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Banner */}
-            <div className="relative bg-[#1A120B] p-8 text-center rounded-t-3xl overflow-hidden">
+            <div className="relative bg-[#1A120B] px-6 py-5 sm:px-8 sm:py-6 text-center rounded-t-3xl overflow-hidden shrink-0">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#D4A853_1px,transparent_1px)] [background-size:16px_16px]"></div>
               
               <button 
                 onClick={() => setIsAuthModalOpen(false)}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 hover:text-[#D4A853] transition-colors z-20 cursor-pointer"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 hover:text-[#D4A853] transition-colors z-20 cursor-pointer"
+                aria-label="Închide fereastra"
               >
                 <X size={18} />
               </button>
 
-              <h2 className="font-serif text-3xl text-white font-bold tracking-tight relative z-10">
+              <h2 className="font-serif text-2xl sm:text-3xl text-white font-bold tracking-tight relative z-10 px-8 sm:px-0">
                 {modalStep === "ONBOARDING_NAME" 
                   ? "Cum te numești?" 
                   : modalStep === "ONBOARDING_TERMS" 
@@ -462,7 +463,7 @@ export default function AuthModal() {
                   ? "Recuperare Parolă" 
                   : (isLogin ? "Bine ai revenit" : "Devino Membru")}
               </h2>
-              <p className="text-[#D4A853] text-sm mt-2 font-medium tracking-wide relative z-10">
+              <p className="text-[#D4A853] text-xs sm:text-sm mt-1.5 font-medium tracking-wide relative z-10 px-4 sm:px-0">
                 {modalStep === "ONBOARDING_NAME"
                   ? "Spune-ne numele tău pentru comenzi"
                   : modalStep === "ONBOARDING_TERMS"
@@ -474,7 +475,7 @@ export default function AuthModal() {
             </div>
 
             {/* Form Area */}
-            <div className="p-7 sm:p-8 pb-10">
+            <div className="p-5 sm:p-7 md:p-8 overflow-y-auto flex-1 overscroll-contain">
               {errorMsg && (
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }} 

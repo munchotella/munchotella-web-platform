@@ -222,7 +222,7 @@ export default function MapPickerModal({
   return createPortal(
     <AnimatePresence>
       <div 
-        className="fixed inset-0 z-[999999] w-screen h-screen overflow-hidden bg-[#1A120B] touch-none select-none overscroll-none"
+        className="fixed inset-0 z-[999999] w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#1A120B] touch-none select-none overscroll-none"
         style={{ touchAction: "none" }}
       >
         {/* Fullscreen Interactive Map Canvas */}

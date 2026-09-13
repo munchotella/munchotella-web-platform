@@ -559,14 +559,14 @@ export default function ProfilePage() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-[32px] p-8 w-full max-w-md relative z-10 shadow-2xl border border-[#E8E2D9]"
+                className="bg-white rounded-[32px] p-6 sm:p-8 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto relative z-10 shadow-2xl border border-[#E8E2D9] flex flex-col overscroll-contain"
               >
-                <h3 className="text-2xl font-serif text-[#1A120B] mb-2 text-center">Cum a fost comanda ta?</h3>
-                <p className="text-xs text-[#1A120B]/60 text-center mb-6">
+                <h3 className="text-xl sm:text-2xl font-serif text-[#1A120B] mb-2 text-center">Cum a fost comanda ta?</h3>
+                <p className="text-xs text-[#1A120B]/60 text-center mb-5 sm:mb-6">
                   Comanda #{reviewOrder._id.slice(-6).toUpperCase()}
                 </p>
 
-                <form onSubmit={handleReviewSubmit} className="space-y-6">
+                <form onSubmit={handleReviewSubmit} className="space-y-5 sm:space-y-6">
                   {/* Stele */}
                   <div className="flex justify-center items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -574,10 +574,11 @@ export default function ProfilePage() {
                         key={star}
                         type="button"
                         onClick={() => setSelectedRating(star)}
-                        className="p-1 hover:scale-125 transition-transform"
+                        className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                        aria-label={`Acordă ${star} stele`}
                       >
                         <Star 
-                          size={32} 
+                          size={28} 
                           className={star <= selectedRating ? "text-[#D4A853] fill-[#D4A853]" : "text-[#E8E2D9]"} 
                         />
                       </button>
@@ -598,14 +599,14 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setReviewOrder(null)}
-                      className="flex-1 py-3.5 bg-gray-100 text-[#1A120B]/70 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                      className="flex-1 min-h-[44px] py-3 sm:py-3.5 bg-gray-100 text-[#1A120B]/70 rounded-xl font-bold hover:bg-gray-200 transition-colors cursor-pointer flex items-center justify-center text-sm"
                     >
                       Anulează
                     </button>
                     <button
                       type="submit"
                       disabled={submittingReview}
-                      className="flex-1 py-3.5 bg-[#1A120B] text-white rounded-xl font-bold hover:bg-[#D4A853] transition-colors disabled:opacity-50"
+                      className="flex-1 min-h-[44px] py-3 sm:py-3.5 bg-[#1A120B] text-white rounded-xl font-bold hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center text-sm"
                     >
                       {submittingReview ? "Se trimite..." : "Trimite Recenzia"}
                     </button>

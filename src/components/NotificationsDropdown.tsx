@@ -148,11 +148,11 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-[#E8E2D9] overflow-hidden z-50"
+            className="absolute right-0 mt-3 w-[calc(100vw-2.5rem)] sm:w-80 max-w-sm bg-white rounded-2xl shadow-2xl border border-[#E8E2D9] overflow-hidden z-50"
           >
             <div className="bg-[#1A120B] p-4 flex justify-between items-center text-white">
               <h3 className="font-serif font-bold text-lg">{t('title')}</h3>
-              <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors">
+              <button onClick={() => setIsOpen(false)} aria-label="Închide notificările" className="text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={18} />
               </button>
             </div>

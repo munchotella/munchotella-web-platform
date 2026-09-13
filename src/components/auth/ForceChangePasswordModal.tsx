@@ -70,24 +70,24 @@ export default function ForceChangePasswordModal() {
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="w-full max-w-[420px] bg-[#FFFCF6] rounded-[24px] shadow-2xl overflow-hidden relative flex flex-col border border-[#D4A853]/30"
+          className="w-full max-w-[420px] max-h-[calc(100dvh-2rem)] bg-[#FFFCF6] rounded-[24px] shadow-2xl overflow-hidden relative flex flex-col border border-[#D4A853]/30"
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", bounce: 0.3 }}
         >
           {/* Header */}
-          <div className="bg-[#1A120B] p-6 text-center relative overflow-hidden">
-            <div className="w-12 h-12 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center mx-auto mb-3">
-              <Lock size={22} />
+          <div className="bg-[#1A120B] p-5 sm:p-6 text-center relative overflow-hidden shrink-0">
+            <div className="w-11 h-11 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center mx-auto mb-2.5">
+              <Lock size={20} />
             </div>
-            <h2 className="text-2xl font-serif text-[#FDF9F1]">Schimbare Parolă</h2>
+            <h2 className="text-xl sm:text-2xl font-serif text-[#FDF9F1]">Schimbare Parolă</h2>
             <p className="text-[#D4A853] text-xs mt-1 font-medium">
               Te-ai autentificat cu o parolă temporară. Setează o parolă nouă pentru securitatea contului.
             </p>
           </div>
 
           {/* Form */}
-          <div className="p-6">
+          <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain">
             {errorMsg && (
               <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-medium border border-red-100 flex items-center gap-2">
                 <AlertCircle size={16} className="shrink-0" />

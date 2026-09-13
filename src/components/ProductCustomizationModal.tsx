@@ -173,7 +173,7 @@ export default function ProductCustomizationModal({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
-              className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col md:flex-row max-h-[92vh] md:h-[590px] md:max-h-[92vh] pointer-events-auto border border-[#EAE1DB]/70"
+              className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col md:flex-row max-h-[90dvh] md:max-h-[min(590px,calc(100dvh-2.5rem))] md:h-[590px] pointer-events-auto border border-[#EAE1DB]/70"
             >
               {/* Drag Handle for Mobile */}
               <div className="w-full h-5 flex items-center justify-center absolute top-0 left-0 z-30 md:hidden">
@@ -184,7 +184,8 @@ export default function ProductCustomizationModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="md:hidden absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 text-[#1A1A1A] backdrop-blur-md flex items-center justify-center hover:bg-white transition-all cursor-pointer z-40 shadow-md border border-black/5"
+                aria-label="Închide fereastra"
+                className="md:hidden absolute top-3 right-3 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-white/90 text-[#1A1A1A] backdrop-blur-md flex items-center justify-center hover:bg-white transition-all cursor-pointer z-40 shadow-md border border-black/5"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -192,7 +193,7 @@ export default function ProductCustomizationModal({
               {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
               <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
                 {/* Product Image */}
-                <div className="relative h-36 sm:h-44 md:h-52 w-full shrink-0 bg-[#F9F9FB] overflow-hidden">
+                <div className="relative h-28 sm:h-36 md:h-44 lg:h-48 w-full shrink-0 bg-[#F9F9FB] overflow-hidden">
                   <img
                     src={product.img}
                     alt={product.name}
@@ -202,18 +203,18 @@ export default function ProductCustomizationModal({
                 </div>
 
                 {/* Product Details */}
-                <div className="p-4 md:p-5 flex-1 flex flex-col justify-start">
+                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-start">
                   <div>
                     <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-sans text-[19px] md:text-[21px] font-bold text-[#1A1A1A] leading-tight tracking-tight">
+                      <h3 className="font-sans text-[17px] sm:text-[19px] md:text-[21px] font-bold text-[#1A1A1A] leading-tight tracking-tight">
                         {product.name}
                       </h3>
-                      <span className="font-sans text-[18px] md:text-[20px] font-bold text-[#D4A373] whitespace-nowrap">
+                      <span className="font-sans text-[16px] sm:text-[18px] md:text-[20px] font-bold text-[#D4A373] whitespace-nowrap">
                         {product.price} MDL
                       </span>
                     </div>
                     {product.desc && (
-                      <p className="text-[#50453B] text-[13px] leading-relaxed mt-2">
+                      <p className="text-[#50453B] text-[12px] sm:text-[13px] leading-relaxed mt-1.5 sm:mt-2">
                         {product.desc}
                       </p>
                     )}
@@ -228,7 +229,8 @@ export default function ProductCustomizationModal({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="w-7 h-7 rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                    aria-label="Închide fereastra"
+                    className="w-8 h-8 rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -327,7 +329,7 @@ export default function ProductCustomizationModal({
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="w-full bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 md:py-3.5 px-5 md:px-6 rounded-full font-bold text-[14px] uppercase tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)]"
+                    className="w-full min-h-[44px] bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 md:py-3.5 px-5 md:px-6 rounded-full font-bold text-[14px] uppercase tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)]"
                   >
                     <span>{t('addToCart')}</span>
                     <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[13px] font-bold">

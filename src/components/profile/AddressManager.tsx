@@ -220,22 +220,23 @@ export default function AddressManager() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-[32px] p-8 w-full max-w-md relative z-10 shadow-2xl"
+              className="bg-white rounded-[32px] p-6 sm:p-8 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto relative z-10 shadow-2xl flex flex-col overscroll-contain"
             >
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-6 right-6 p-2 text-[#1A120B]/40 hover:text-[#1A120B] bg-[#1A120B]/5 rounded-full transition-colors"
+                aria-label="Închide fereastra"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1A120B]/40 hover:text-[#1A120B] bg-[#1A120B]/5 rounded-full transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
               
-              <h3 className="text-2xl font-serif text-[#1A120B] mb-6">
+              <h3 className="text-xl sm:text-2xl font-serif text-[#1A120B] mb-5 sm:mb-6 pr-8 sm:pr-0">
                 {editingId ? t('editAddress') : t('addAddress')}
               </h3>
               
-              <form onSubmit={handleSave} className="space-y-6">
+              <form onSubmit={handleSave} className="space-y-5 sm:space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-[#1A120B]/70 mb-3">
+                  <label className="block text-sm font-medium text-[#1A120B]/70 mb-2.5 sm:mb-3">
                     {t('label')}
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -244,7 +245,7 @@ export default function AddressManager() {
                         key={l}
                         type="button"
                         onClick={() => setFormLabel(l)}
-                        className={`px-4 py-2 rounded-full text-sm font-bold border transition-colors ${
+                        className={`px-4 py-2 min-h-[40px] rounded-full text-sm font-bold border transition-colors cursor-pointer ${
                           formLabel === l 
                             ? "bg-[#D4A853] border-[#D4A853] text-white" 
                             : "bg-transparent border-[#E8E2D9] text-[#1A120B]/60 hover:border-[#1A120B]/20"
@@ -264,7 +265,7 @@ export default function AddressManager() {
                     <button
                       type="button"
                       onClick={() => setIsMapPickerOpen(true)}
-                      className="text-xs font-bold text-[#D4A853] hover:underline flex items-center gap-1"
+                      className="text-xs font-bold text-[#D4A853] hover:underline flex items-center gap-1 cursor-pointer py-1"
                     >
                       <Map size={14} />
                       <span>{t('pinOnMap')}</span>
@@ -280,7 +281,7 @@ export default function AddressManager() {
                         setFormStreet(address);
                       }}
                       placeholder={t('addressPlaceholder')}
-                      className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                      className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl py-3.5 sm:py-4 pl-12 pr-4 text-[#1A120B] placeholder:text-[#1A120B]/40 focus:outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-sm"
                       required={true}
                     />
                   </div>
@@ -294,7 +295,7 @@ export default function AddressManager() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full bg-[#1A120B] text-white font-bold py-4 rounded-2xl hover:bg-[#D4A853] transition-colors disabled:opacity-50"
+                  className="w-full min-h-[48px] bg-[#1A120B] text-white font-bold py-3.5 sm:py-4 rounded-2xl hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center"
                 >
                   {saving ? t('saving') : t('saveAddress')}
                 </button>

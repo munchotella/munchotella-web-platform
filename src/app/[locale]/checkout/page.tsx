@@ -1088,12 +1088,12 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right Column: Sticky Summary Panel */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-32 h-fit">
-            <div className="bg-[#FFFCF6] p-7 md:p-9 rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto no-scrollbar">
+            <div className="bg-[#FFFCF6] p-5 sm:p-7 md:p-8 rounded-[28px] md:rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
               {/* Decorative background circle */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#D4A853]/5 rounded-full blur-2xl pointer-events-none" />
               
-              <h3 className="font-serif text-2xl font-bold text-[#1A120B] pb-6 flex items-center gap-2 relative z-10">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B] pb-5 sm:pb-6 flex items-center gap-2 relative z-10">
                 {t('orderSummary')}
               </h3>
 
@@ -1326,13 +1326,14 @@ export default function CheckoutPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-[#FCF9F4] rounded-[28px] border border-[#E8E2D9] p-7 md:p-9 shadow-2xl overflow-hidden z-10"
+              className="relative w-full max-w-md bg-[#FCF9F4] rounded-[28px] border border-[#E8E2D9] p-6 sm:p-8 max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-2xl z-10 flex flex-col overscroll-contain"
             >
               {/* Close Button */}
               <button
                 type="button"
                 onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
-                className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer"
+                aria-label="Închide verificarea SMS"
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

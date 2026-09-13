@@ -95,20 +95,20 @@ export default function ContactClient() {
 
 
       {/* Main Content Layout */}
-      <main className="max-w-[1400px] mx-auto px-6 md:px-12 pt-32 pb-16">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 pt-28 sm:pt-32 pb-16">
         
         {/* Top Section: Info & Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start mb-24">
           
           {/* Left Column: Direct Info */}
-          <div className="lg:col-span-5 space-y-10">
+          <div className="lg:col-span-5 space-y-8 sm:space-y-10">
             <AnimateIn direction="up">
               <div>
                 <span className="text-[11px] font-bold uppercase text-[#D4A853] tracking-widest mb-3 block">{t('weAreHere')}</span>
-                <h2 className="font-serif text-4xl md:text-5xl font-bold text-[#1A120B] mb-5 leading-tight">
+                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A120B] mb-4 sm:mb-5 leading-tight">
                   {t('letsTalk')}
                 </h2>
-                <p className="text-[#736A60] font-light text-base leading-relaxed max-w-md">
+                <p className="text-[#736A60] font-light text-sm sm:text-base leading-relaxed max-w-md">
                   {t('subtitle')}
                 </p>
               </div>
@@ -117,18 +117,18 @@ export default function ContactClient() {
             <AnimateIn direction="up" delay={0.1}>
               <div className="space-y-4">
                 {/* Adresă */}
-                <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm hover:border-[#D4A853]/60 transition-all flex items-start gap-5">
-                  <div className="w-12 h-12 rounded-full bg-[#D4A853]/10 text-[#D4A853] flex items-center justify-center shrink-0">
+                <div className="bg-[#FFFCF6] p-5 sm:p-6 rounded-2xl border border-[#E8E2D9] shadow-sm hover:border-[#D4A853]/60 transition-all flex items-start gap-4 sm:gap-5">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#D4A853]/10 text-[#D4A853] flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-serif text-lg font-bold text-[#1A120B] mb-1">{t('addressTitle')}</h4>
-                    <p className="text-[#736A60] text-sm font-light mb-3">Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</p>
+                    <h4 className="font-serif text-base sm:text-lg font-bold text-[#1A120B] mb-1">{t('addressTitle')}</h4>
+                    <p className="text-[#736A60] text-xs sm:text-sm font-light mb-2.5 sm:mb-3">Strada Nicolae Testemițanu 21/1, Chișinău, Moldova</p>
                     <a
                       href="https://www.google.com/maps/search/?api=1&query=Munchotella+Strada+Nicolae+Testemi%C8%9Banu+21%2F1+Chisinau"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#D4A853] hover:text-[#1A120B] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#D4A853] hover:text-[#1A120B] transition-colors py-1"
                     >
                       <span>{t('openMap')}</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
@@ -137,31 +137,30 @@ export default function ContactClient() {
                 </div>
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                  <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-[#1A120B]/5 text-[#1A120B] flex items-center justify-center">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('phoneEmailTitle')}</p>
-                      <a href="tel:+37379006499" className="font-serif text-lg font-bold text-[#1A120B] hover:text-[#D4A853] transition-colors block">
-                        +373 79 006 499
-                      </a>
-                      <a href="mailto:munchotella@gmail.com" className="text-[#736A60] text-sm hover:text-[#D4A853] transition-colors mt-1 block">
-                        munchotella@gmail.com
-                      </a>
+                  <div className="bg-[#FFFCF6] p-5 sm:p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#D4A853]/10 text-[#D4A853] flex items-center justify-center shrink-0">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-base sm:text-lg font-bold text-[#1A120B]">{t('phoneTitle')}</h4>
+                        <a href="tel:+37379006499" className="text-xs sm:text-sm font-light text-[#736A60] hover:text-[#D4A853] transition-colors block py-0.5">
+                          +373 79 006 499
+                        </a>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="bg-[#FFFCF6] p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-[#1A120B]/5 text-[#1A120B] flex items-center justify-center">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-[#736A60] text-xs uppercase tracking-widest font-bold mb-1">{t('scheduleTitle')}</p>
-                      <p className="font-serif text-[15px] font-bold text-[#1A120B]">
-                        {t('scheduleTime')}
-                      </p>
-                      <p className="text-[#D4A853] text-[13px] font-bold mt-1">{t('scheduleClosed')}</p>
+
+                  <div className="bg-[#FFFCF6] p-5 sm:p-6 rounded-2xl border border-[#E8E2D9] shadow-sm flex flex-col items-start gap-4 hover:border-[#D4A853]/60 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#D4A853]/10 text-[#D4A853] flex items-center justify-center shrink-0">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-base sm:text-lg font-bold text-[#1A120B]">{t('scheduleTitle')}</h4>
+                        <p className="text-xs sm:text-sm font-light text-[#736A60]">Luni - Duminică: 16:00 - 00:00</p>
+                        <p className="text-[11px] text-[#D4A853] font-bold mt-0.5">Miercuri: Închis</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -172,11 +171,11 @@ export default function ContactClient() {
           {/* Right Column: Contact Form */}
           <div className="lg:col-span-7">
             <AnimateIn direction="up" delay={0.15}>
-              <div className="bg-[#FFFCF6] p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center relative min-h-[460px]">
+              <div className="bg-[#FFFCF6] p-6 sm:p-8 md:p-10 rounded-3xl border border-[#E8E2D9] shadow-md h-full flex flex-col justify-center relative min-h-[460px]">
                 {view === 'form' && (
-                  <div className="mb-8">
-                    <h3 className="font-serif text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
-                    <p className="text-[#736A60] font-light text-sm">
+                  <div className="mb-6 sm:mb-8">
+                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A120B] mb-2">{t('weAreHere')}</h3>
+                    <p className="text-[#736A60] font-light text-xs sm:text-sm">
                       {t('formSubtitle')}
                     </p>
                   </div>

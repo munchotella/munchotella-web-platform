@@ -79,7 +79,7 @@ export default function CinematicScrollHero() {
   }, []);
 
   return (
-    <section className="relative bg-[#1A120B] h-screen w-full overflow-hidden flex flex-col items-center justify-center">
+    <section className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
       {/* Background Video Layer with Instant Multi-Buffer (Zero Black Millisecond) */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         {HERO_PLAYLIST.map((track, idx) => {
@@ -113,7 +113,7 @@ export default function CinematicScrollHero() {
       </div>
 
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
-      <div className="relative z-20 max-w-[1200px] w-full mx-auto px-6 md:px-12 h-full flex flex-col justify-center text-left pt-20">
+      <div className="relative z-20 max-w-[1200px] w-full mx-auto px-5 sm:px-6 md:px-12 h-full flex flex-col justify-center text-left pt-16 sm:pt-20">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -121,9 +121,9 @@ export default function CinematicScrollHero() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
           }}
-          className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[68px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-6"
+          className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-[68px] font-bold tracking-tight text-[#FFFDF8] leading-[1.1] max-w-2xl mb-4 sm:mb-6"
         >
-          <div className="overflow-hidden pb-2">
+          <div className="overflow-hidden pb-1 sm:pb-2">
             <motion.div
               variants={{
                 hidden: { y: "100%", rotateZ: 3, opacity: 0 },
@@ -133,7 +133,7 @@ export default function CinematicScrollHero() {
               {t('title1')}
             </motion.div>
           </div>
-          <div className="overflow-hidden pb-2 mt-2">
+          <div className="overflow-hidden pb-1 sm:pb-2 mt-1 sm:mt-2">
             <motion.div
               variants={{
                 hidden: { y: "100%", rotateZ: 3, opacity: 0 },
@@ -150,7 +150,7 @@ export default function CinematicScrollHero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[#E8E2D9] text-base md:text-lg max-w-lg leading-relaxed mb-8 font-light"
+          className="text-[#E8E2D9] text-sm sm:text-base md:text-lg max-w-lg leading-relaxed mb-6 sm:mb-8 font-light"
         >
           {t('subtitle')}
         </motion.p>
@@ -165,7 +165,7 @@ export default function CinematicScrollHero() {
           <MagneticButton>
             <Link
               href="/menu"
-              className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer"
+              className="bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-xs sm:text-sm uppercase tracking-wider px-7 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 shadow-xl shadow-[#D4A853]/20 flex items-center space-x-2 group cursor-pointer min-h-[44px]"
             >
               <span>{t('cta')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -58,7 +58,7 @@ export default function ScrollyTellingProcess() {
 
   return (
     <section ref={containerRef} className="relative h-[400vh] w-full bg-[#1A120B]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center justify-center">
         
         {/* Background Video Layer 1 - Ciocolata */}
         <motion.div 
@@ -108,9 +108,9 @@ export default function ScrollyTellingProcess() {
         {/* Content Container */}
         <div className="relative z-20 w-full max-w-[1000px] px-6 mx-auto h-full flex flex-col items-center justify-center text-center">
           
-          <div className="absolute top-24 md:top-32 w-full text-center left-0 right-0 z-30">
+          <div className="absolute top-16 sm:top-20 md:top-28 w-full text-center left-0 right-0 z-30 px-4">
              <motion.h2 
-               className="font-serif text-3xl md:text-5xl font-bold text-[#FFFDF8]"
+               className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold text-[#FFFDF8]"
                initial={{ opacity: 0, y: 20 }}
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
@@ -126,9 +126,9 @@ export default function ScrollyTellingProcess() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
               style={{ opacity: opacity1, y: y1, scale: scale1 }}
             >
-              <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[0].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[0].titleKey as any)}</h3>
-              <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
+              <span className="font-serif text-5xl sm:text-6xl md:text-8xl font-bold text-[#D4A853]/20 mb-2 sm:mb-4 drop-shadow-2xl tracking-tighter block">{steps[0].num}</span>
+              <h3 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold text-[#FFFDF8] mb-3 sm:mb-4 tracking-tight drop-shadow-lg">{t(steps[0].titleKey as any)}</h3>
+              <p className="text-sm sm:text-base md:text-xl text-white/80 leading-relaxed font-light max-w-xl drop-shadow-md">
                 {t(steps[0].descKey as any)}
               </p>
             </motion.div>
@@ -138,9 +138,9 @@ export default function ScrollyTellingProcess() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
               style={{ opacity: opacity2, y: y2, scale: scale2 }}
             >
-              <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[1].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[1].titleKey as any)}</h3>
-              <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
+              <span className="font-serif text-5xl sm:text-6xl md:text-8xl font-bold text-[#D4A853]/20 mb-2 sm:mb-4 drop-shadow-2xl tracking-tighter block">{steps[1].num}</span>
+              <h3 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold text-[#FFFDF8] mb-3 sm:mb-4 tracking-tight drop-shadow-lg">{t(steps[1].titleKey as any)}</h3>
+              <p className="text-sm sm:text-base md:text-xl text-white/80 leading-relaxed font-light max-w-xl drop-shadow-md">
                 {t(steps[1].descKey as any)}
               </p>
             </motion.div>
@@ -150,9 +150,9 @@ export default function ScrollyTellingProcess() {
               className="absolute inset-0 flex flex-col items-center justify-center px-4"
               style={{ opacity: opacity3, y: y3, scale: scale3 }}
             >
-              <span className="font-serif text-7xl md:text-9xl font-bold text-[#D4A853]/20 mb-6 drop-shadow-2xl tracking-tighter block">{steps[2].num}</span>
-              <h3 className="font-serif text-4xl md:text-6xl font-bold text-[#FFFDF8] mb-6 tracking-tight drop-shadow-lg">{t(steps[2].titleKey as any)}</h3>
-              <p className="text-lg md:text-2xl text-white/80 leading-relaxed font-light max-w-2xl drop-shadow-md">
+              <span className="font-serif text-5xl sm:text-6xl md:text-8xl font-bold text-[#D4A853]/20 mb-2 sm:mb-4 drop-shadow-2xl tracking-tighter block">{steps[2].num}</span>
+              <h3 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold text-[#FFFDF8] mb-3 sm:mb-4 tracking-tight drop-shadow-lg">{t(steps[2].titleKey as any)}</h3>
+              <p className="text-sm sm:text-base md:text-xl text-white/80 leading-relaxed font-light max-w-xl drop-shadow-md">
                 {t(steps[2].descKey as any)}
               </p>
             </motion.div>

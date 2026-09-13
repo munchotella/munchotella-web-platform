@@ -69,11 +69,12 @@ export default function Navbar() {
         </Link>
 
         {/* Center Nav (Desktop) */}
-        <div className="hidden md:flex items-center space-x-2 text-[13px] font-bold uppercase tracking-widest">
-          <Link href="/" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${isHome ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("home")}</Link>
-          <Link href="/about" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("story")}</Link>
-          <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("menu")}</Link>
-          <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("contact")}</Link>
+        <div className="hidden md:flex items-center space-x-1 lg:space-x-2 text-[12px] lg:text-[13px] font-bold uppercase tracking-widest">
+          <Link href="/" className={`transition-all duration-300 active:scale-95 px-4 lg:px-5 py-2 rounded-full ${isHome ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("home")}</Link>
+          <Link href="/about" className={`transition-all duration-300 active:scale-95 px-4 lg:px-5 py-2 rounded-full ${pathname === "/about" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("story")}</Link>
+          <Link href="/menu" className={`transition-all duration-300 active:scale-95 px-4 lg:px-5 py-2 rounded-full ${pathname === "/menu" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("menu")}</Link>
+          <Link href="/livrare" className={`transition-all duration-300 active:scale-95 px-4 lg:px-5 py-2 rounded-full ${pathname === "/livrare" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>Livrare</Link>
+          <Link href="/contact" className={`transition-all duration-300 active:scale-95 px-4 lg:px-5 py-2 rounded-full ${pathname === "/contact" ? (effectiveIsScrolled ? "bg-[#1A120B] text-[#D4A853] shadow-md" : "bg-[#FFFCF6] text-[#1A120B] shadow-lg") : (effectiveIsScrolled ? "text-[#736A60] hover:bg-[#1A120B]/5 hover:text-[#1A120B]" : "text-white/80 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20")}`}>{t("contact")}</Link>
         </div>
 
         {/* Trailing Icons */}
@@ -132,7 +133,7 @@ export default function Navbar() {
           {totalItems > 0 ? (
             <button 
               onClick={() => setIsCartOpen(true)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 active:scale-95 ml-2 shadow-md ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all duration-300 active:scale-95 ml-1 sm:ml-2 shadow-md ${
                 effectiveIsScrolled ? "bg-[#1A1A1A] text-white hover:bg-[#2A2A2A]" : "bg-white text-[#1A120B] hover:bg-white/90"
               }`}
             >
@@ -157,11 +158,12 @@ export default function Navbar() {
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Deschide meniul mobil" className={`md:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors active:scale-95 ml-1 ${
+            aria-label="Deschide meniul mobil"
+            className={`md:hidden flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full transition-colors active:scale-95 ml-1 ${
               effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B]" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
           >
-            <Menu size={20} />
+            <Menu size={22} />
           </button>
         </div>
       </div>
@@ -175,9 +177,9 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
             style={{ backgroundColor: '#FFFCF6', opacity: 1, zIndex: 99999 }}
-            className="fixed inset-0 w-screen h-screen min-h-screen z-[99999] bg-[#FFFCF6] flex flex-col pt-6 px-6 overflow-y-auto text-[#1A120B]"
+            className="fixed inset-0 w-full h-[100dvh] max-h-[100dvh] z-[99999] bg-[#FFFCF6] flex flex-col pt-6 px-6 overflow-y-auto overscroll-contain text-[#1A120B]"
           >
-            <div className="flex justify-between items-center mb-8 shrink-0">
+            <div className="flex justify-between items-center mb-6 shrink-0">
               <Link 
                 href="/" 
                 onClick={(e) => {
@@ -186,8 +188,8 @@ export default function Navbar() {
                 }} 
                 className="flex items-center gap-2 group"
               >
-                <LogoIconSVG className="h-10 w-10 text-[#f3922c]" />
-                <LogoTextSVG className="h-[45px] w-auto text-[#1A120B]" />
+                <LogoIconSVG className="h-9 w-9 text-[#f3922c]" />
+                <LogoTextSVG className="h-[40px] w-auto text-[#1A120B]" />
               </Link>
               
               <div className="flex items-center gap-2">
@@ -199,17 +201,19 @@ export default function Navbar() {
                 
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B] transition-colors"
+                  aria-label="Închide meniul mobil"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B] transition-colors cursor-pointer"
                 >
-                  <X size={24} />
+                  <X size={22} />
                 </button>
               </div>
             </div>
             
-            <div className="flex flex-col space-y-6 text-2xl font-serif text-[#1A120B] my-auto">
+            <div className="flex flex-col space-y-5 text-xl sm:text-2xl font-serif text-[#1A120B] my-auto py-4">
               <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("home")}</Link>
               <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("story")}</Link>
               <Link href="/menu" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("menu")}</Link>
+              <Link href="/livrare" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">Livrare</Link>
               <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4A853] transition-colors">{t("contact")}</Link>
               
               {/* Auth Links in Mobile Menu */}
@@ -235,8 +239,8 @@ export default function Navbar() {
               )}
             </div>
 
-            <div className="mt-auto pb-10 border-t border-[#E8E2D9] pt-6 shrink-0">
-              <a href="tel:+37379006499" className="flex items-center gap-3 text-lg font-bold text-[#1A120B]">
+            <div className="mt-auto pb-8 border-t border-[#E8E2D9] pt-4 shrink-0">
+              <a href="tel:+37379006499" className="flex items-center gap-3 text-base sm:text-lg font-bold text-[#1A120B]">
                 <div className="w-10 h-10 rounded-full bg-[#D4A853]/10 flex items-center justify-center text-[#D4A853]">
                   <Phone className="w-5 h-5" />
                 </div>

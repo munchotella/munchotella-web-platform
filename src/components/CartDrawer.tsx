@@ -142,32 +142,33 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full max-w-md bg-[#FCF9F4] shadow-2xl z-50 flex flex-col border-l border-[#E8E2D9]"
+            className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-[#FCF9F4] shadow-2xl z-50 flex flex-col border-l border-[#E8E2D9] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-[#E8E2D9] bg-white">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-5 py-4 sm:p-6 border-b border-[#E8E2D9] bg-white shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3">
                 {(view === 'checkout' || view === 'otp') ? (
-                  <button onClick={() => setView(view === 'otp' ? 'checkout' : 'cart')} className="p-1 hover:bg-[#F5F2EC] rounded-full transition-colors mr-2">
+                  <button onClick={() => setView(view === 'otp' ? 'checkout' : 'cart')} className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#F5F2EC] rounded-full transition-colors mr-1 cursor-pointer" aria-label="Înapoi">
                     <ChevronLeft className="w-5 h-5 text-[#1A120B]" />
                   </button>
                 ) : (
                   <ShoppingBag className="w-5 h-5 text-[#1A120B]" />
                 )}
-                <h2 className="font-serif text-2xl font-medium text-[#1A120B]">
+                <h2 className="font-serif text-xl sm:text-2xl font-medium text-[#1A120B]">
                   {view === 'checkout' ? t('deliveryDetails') : view === 'otp' ? t('validateNumber') : view === 'success' ? t('orderReceived') : t('yourOrder')}
                 </h2>
               </div>
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-[#F5F2EC] rounded-full transition-colors"
+                aria-label="Închide coșul"
+                className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#F5F2EC] rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5 text-[#4e4540]" />
               </button>
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar relative">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 no-scrollbar relative overscroll-contain">
               <AnimatePresence mode="wait">
                 {view === 'cart' && (
                   <motion.div 
@@ -400,16 +401,16 @@ export default function CartDrawer() {
 
             {/* Footer / Checkout Actions */}
             {items.length > 0 && view !== 'success' && (
-              <div className="p-6 bg-white border-t border-[#E8E2D9] shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-[#736A60] font-medium">{t('subtotal')}</span>
-                  <span className="font-serif text-2xl font-bold text-[#1A120B]">{totalPrice} MDL</span>
+              <div className="p-4 sm:p-6 bg-white border-t border-[#E8E2D9] shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] shrink-0">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
+                  <span className="text-[#736A60] font-medium text-sm sm:text-base">{t('subtotal')}</span>
+                  <span className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">{totalPrice} MDL</span>
                 </div>
                 
                 {view === 'cart' ? (
                   <button 
                     onClick={handleCheckout}
-                    className="w-full bg-[#D4A853] hover:bg-[#C09640] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-colors duration-300 shadow-lg shadow-[#D4A853]/20"
+                    className="w-full min-h-[48px] bg-[#D4A853] hover:bg-[#C09640] text-white py-3.5 sm:py-4 rounded-xl font-bold uppercase tracking-widest text-xs sm:text-sm transition-colors duration-300 shadow-lg shadow-[#D4A853]/20 flex items-center justify-center cursor-pointer"
                   >
                     {t('toCheckout')}
                   </button>
@@ -418,7 +419,7 @@ export default function CartDrawer() {
                     type="submit"
                     form="checkout-form"
                     disabled={isSubmitting}
-                    className={`w-full text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-colors duration-300 shadow-lg ${isSubmitting ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#2A1D12] shadow-[#1A120B]/20'}`}
+                    className={`w-full min-h-[48px] text-white py-3.5 sm:py-4 rounded-xl font-bold uppercase tracking-widest text-xs sm:text-sm transition-colors duration-300 shadow-lg flex items-center justify-center cursor-pointer ${isSubmitting ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#2A1D12] shadow-[#1A120B]/20'}`}
                   >
                     {isSubmitting ? 'Se trimite SMS...' : 'Confirmă Adresa'}
                   </button>
@@ -427,7 +428,7 @@ export default function CartDrawer() {
                     type="submit"
                     form="otp-form"
                     disabled={isSubmitting || otpCode.length < 6}
-                    className={`w-full text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-colors duration-300 shadow-lg ${isSubmitting || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#D4A853] hover:bg-[#C09640] shadow-[#D4A853]/20'}`}
+                    className={`w-full min-h-[48px] text-white py-3.5 sm:py-4 rounded-xl font-bold uppercase tracking-widest text-xs sm:text-sm transition-colors duration-300 shadow-lg flex items-center justify-center cursor-pointer ${isSubmitting || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#D4A853] hover:bg-[#C09640] shadow-[#D4A853]/20'}`}
                   >
                     {isSubmitting ? 'Se verifică...' : 'Finalizează Comanda'}
                   </button>
