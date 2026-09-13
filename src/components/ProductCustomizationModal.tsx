@@ -202,21 +202,21 @@ export default function ProductCustomizationModal({
                 </div>
 
                 {/* Product Details */}
-                <div className="p-3.5 sm:p-4 md:p-5 flex-1 flex flex-col justify-start">
+                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-start">
                   <div>
-                    <p className="text-[11px] text-[#8C827A] mb-1 font-medium select-none">
+                    <p className="text-[13px] text-[#999999] mb-1 font-normal select-none leading-5">
                       *Produsele din imagine sunt cu titlu de prezentare
                     </p>
                     <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-sans text-[17px] sm:text-[19px] md:text-[21px] font-bold text-[#1A1A1A] leading-tight tracking-tight">
+                      <h3 className="font-sans text-[18px] sm:text-[20px] font-bold text-[#1A202C] leading-snug">
                         {product.name}
                       </h3>
-                      <span className="font-sans text-[16px] sm:text-[18px] md:text-[20px] font-bold text-[#D4A373] whitespace-nowrap">
+                      <span className="font-sans text-[18px] font-bold text-[#D4A373] whitespace-nowrap">
                         {product.price} MDL
                       </span>
                     </div>
                     {product.desc && (
-                      <p className="text-[#50453B] text-[12px] sm:text-[13px] leading-relaxed mt-1.5 sm:mt-2">
+                      <p className="text-[#777777] text-[14px] leading-[21px] mt-1.5">
                         {product.desc}
                       </p>
                     )}
@@ -238,17 +238,17 @@ export default function ProductCustomizationModal({
                   </button>
                 </div>
 
-                {/* Scrollable Toppings Body (compact to fit without scrolling) */}
-                <div className="p-3.5 md:px-5 md:py-3 flex-1 overflow-y-auto no-scrollbar space-y-2.5">
+                {/* Scrollable Toppings Body */}
+                <div className="p-4 md:px-6 md:py-3.5 flex-1 overflow-y-auto no-scrollbar space-y-3">
                   {renderModifierGroups.length > 0 ? (
                     renderModifierGroups.map((group, groupIndex) => (
-                      <div key={groupIndex} className="space-y-1.5">
-                        {/* Group Header */}
+                      <div key={groupIndex} className="space-y-2">
+                        {/* Group Header - Straus: 16px semi-bold */}
                         <div className="flex items-center justify-between pt-1">
-                          <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#736A60]">
+                          <h4 className="text-[16px] font-semibold text-[#1A202C] leading-6">
                             {translateTopping(group.title, locale)}
                           </h4>
-                          <span className="text-[10px] bg-[#F5EFEB] text-[#50453B] px-1.5 py-0.5 rounded-full font-medium">
+                          <span className="text-[12px] bg-[#F5EFEB] text-[#777777] px-2 py-0.5 rounded-full font-medium">
                             {t('optional')}
                           </span>
                         </div>
@@ -263,23 +263,23 @@ export default function ProductCustomizationModal({
                               <div
                                 key={topping.name}
                                 onClick={(e) => toggleTopping(e, { name: cleanToppingName, price: topping.price })}
-                                className={`group flex items-center justify-between py-2 px-3 md:py-2.5 md:px-3.5 cursor-pointer transition-all hover:bg-[#FAF8F5] select-none ${
+                                className={`group flex items-center justify-between py-2.5 px-3.5 md:py-3 md:px-4 cursor-pointer transition-all hover:bg-[#FAF8F5] select-none ${
                                   index !== group.options.length - 1 ? "border-b border-[#EAE1DB]" : ""
                                 } ${isSelected ? "bg-[#FFFBF5]" : ""}`}
                               >
-                                <div className="flex flex-row items-center gap-2.5">
-                                  <span className={`text-[14px] md:text-[14.5px] ${isSelected ? "font-bold text-[#1A1A1A]" : "font-medium text-[#2C241E]"}`}>
+                                <div className="flex flex-row items-center gap-3">
+                                  <div className={`w-5 h-5 rounded-[4px] flex items-center justify-center transition-all border shrink-0 ${
+                                    isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
+                                  }`}>
+                                    {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                                  </div>
+                                  <span className={`text-[16px] leading-6 ${isSelected ? "font-bold text-[#1A202C]" : "font-medium text-[#1A202C]"}`}>
                                     {translatedToppingName}
                                   </span>
-                                  <span className={`text-[12px] md:text-[13px] ${isSelected ? "text-[#D4A373] font-bold" : "text-[#8C7E72]"}`}>
-                                    (+{topping.price} MDL)
-                                  </span>
                                 </div>
-                                <div className={`w-5 h-5 md:w-5.5 md:h-5.5 rounded-full flex items-center justify-center transition-all border-2 group-hover:border-[#D4A853] ${
-                                  isSelected ? "bg-[#D4A853] border-[#D4A853] shadow-sm" : "border-[#C5BCB1] bg-white"
-                                }`}>
-                                  {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-                                </div>
+                                <span className={`text-[16px] font-medium leading-6 ${isSelected ? "text-[#D4A373] font-bold" : "text-[#777777]"}`}>
+                                  (+{topping.price} MDL)
+                                </span>
                               </div>
                             );
                           })}
@@ -287,16 +287,16 @@ export default function ProductCustomizationModal({
                       </div>
                     ))
                   ) : (
-                    <div className="py-6 text-center text-[#736A60] text-[13px]">
+                    <div className="py-6 text-center text-[#777777] text-[14px]">
                       {locale === 'ro' ? 'Acest produs nu necesită personalizare.' : locale === 'ru' ? 'Этот товар не требует настройки.' : 'No customization options for this item.'}
                     </div>
                   )}
                 </div>
 
-                {/* Fixed Bottom CTA & Quantity Footer */}
-                <div className="p-3.5 md:px-5 md:py-3.5 border-t border-[#EAE1DB] bg-[#FFFFFF] shrink-0 shadow-[0_-4px_20px_rgba(26,26,26,0.03)]">
+                {/* Fixed Bottom CTA & Quantity Footer - Straus: 16px buttons & text */}
+                <div className="p-4 md:px-6 md:py-4 border-t border-[#EAE1DB] bg-[#FFFFFF] shrink-0 shadow-[0_-4px_20px_rgba(26,26,26,0.03)]">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[13px] md:text-[14px] font-semibold text-[#50453B]">
+                    <span className="text-[14px] font-medium text-[#777777]">
                       {t('quantity')}
                     </span>
                     <div className="flex items-center bg-[#FFFAF5] border border-[#EAE1DB] rounded-full p-0.5 shadow-inner">
@@ -307,11 +307,11 @@ export default function ProductCustomizationModal({
                           e.stopPropagation();
                           setQuantity((q) => Math.max(1, q - 1));
                         }}
-                        className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FFFFFF] text-[#1A1A1A] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
+                        className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-8 md:w-10 text-center font-bold text-[14px] md:text-[15px] text-[#1A1A1A]">
+                      <span className="w-8 md:w-10 text-center font-bold text-[16px] text-[#1A202C]">
                         {quantity}
                       </span>
                       <button
@@ -321,7 +321,7 @@ export default function ProductCustomizationModal({
                           e.stopPropagation();
                           setQuantity((q) => q + 1);
                         }}
-                        className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FFFFFF] text-[#1A1A1A] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
+                        className="w-8 h-8 rounded-full bg-[#FFFFFF] text-[#1A202C] flex items-center justify-center hover:bg-[#EAE1DB]/50 transition-colors shadow-sm cursor-pointer border border-[#EAE1DB]"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -331,10 +331,10 @@ export default function ProductCustomizationModal({
                   <button
                     type="button"
                     onClick={handleAddToCart}
-                    className="w-full min-h-[44px] bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 md:py-3.5 px-5 md:px-6 rounded-full font-bold text-[14px] uppercase tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)]"
+                    className="w-full min-h-[48px] bg-[#D4A373] hover:bg-[#7D562D] text-white py-3 px-6 rounded-full font-semibold text-[16px] normal-case tracking-normal transition-all duration-300 flex items-center justify-between cursor-pointer shadow-[0_4px_14px_rgba(212,163,115,0.4)] active:scale-[0.98]"
                   >
                     <span>{t('addToCart')}</span>
-                    <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[13px] font-bold">
+                    <span className="bg-white/20 backdrop-blur-sm text-white px-3.5 py-1 rounded-full text-[15px] font-bold">
                       {totalPrice} MDL
                     </span>
                   </button>
