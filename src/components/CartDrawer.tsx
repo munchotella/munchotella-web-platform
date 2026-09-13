@@ -194,7 +194,8 @@ export default function CartDrawer() {
                               <h3 className="font-serif text-lg text-[#1A120B] font-medium leading-tight">{item.name}</h3>
                               <button
                                 onClick={() => removeFromCart(item.cartItemId)}
-                                className="text-[#736A60] hover:text-red-500 transition-colors p-1"
+                                aria-label="Șterge produsul"
+                                className="text-[#736A60] hover:text-red-500 transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center -mr-2 -mt-2 cursor-pointer"
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -218,16 +219,18 @@ export default function CartDrawer() {
                               <div className="flex items-center bg-[#F5F2EC] rounded-full p-1 border border-[#E8E2D9]">
                                 <button
                                   onClick={() => updateQuantity(item.cartItemId, -1)}
-                                  className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] transition-colors"
+                                  aria-label="Scade cantitatea"
+                                  className="w-8 h-8 min-w-[32px] min-h-[32px] sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] active:scale-95 transition-all cursor-pointer"
                                 >
-                                  <Minus className="w-3 h-3" />
+                                  <Minus className="w-3.5 h-3.5" />
                                 </button>
                                 <span className="w-8 text-center text-sm font-bold text-[#1A120B]">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.cartItemId, 1)}
-                                  className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] transition-colors"
+                                  aria-label="Crește cantitatea"
+                                  className="w-8 h-8 min-w-[32px] min-h-[32px] sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] active:scale-95 transition-all cursor-pointer"
                                 >
-                                  <Plus className="w-3 h-3" />
+                                  <Plus className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                               <span className="font-bold text-[#1A120B] text-sm">

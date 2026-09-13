@@ -230,9 +230,9 @@ export default function ProductCustomizationModal({
                     type="button"
                     onClick={onClose}
                     aria-label="Închide fereastra"
-                    className="w-8 h-8 rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 
