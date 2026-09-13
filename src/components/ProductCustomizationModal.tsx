@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
@@ -35,6 +35,15 @@ export default function ProductCustomizationModal({
   const locale = useLocale();
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
+  const dragControls = useDragControls();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Standard Food Modifiers: Exactly 14 items across Toppinguri (6) and Personalizare (8)
   const STANDARD_FOOD_MODIFIERS: { title: string; isRequired?: boolean; multiSelect?: boolean; options: ToppingOption[] }[] = [
@@ -165,13 +174,29 @@ export default function ProductCustomizationModal({
               key="modal"
               initial={{ opacity: 0, y: 40, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 40, scale: 0.98 }}
+              exit={{ opacity: 0, y: 120, transition: { duration: 0.2 } }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              drag={isMobile ? "y" : false}
+              dragDirectionLock
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.7 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 75 || info.velocity.y > 350) {
+                  onClose();
+                }
+              }}
               className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col max-h-[90dvh] md:max-h-[min(590px,calc(100dvh-2.5rem))] md:h-[590px] pointer-events-auto border border-[#EAE1DB]/70"
             >
-              {/* Drag Handle for Mobile */}
-              <div className="w-full h-5 flex items-center justify-center absolute top-0 left-0 z-30 md:hidden pointer-events-none">
-                <div className="w-12 h-1.5 bg-[#EAE1DB] rounded-full mt-2"></div>
+              {/* Interactive Drag Handle for Mobile - Swipe down to dismiss */}
+              <div
+                onPointerDown={(e) => {
+                  if (isMobile) dragControls.start(e);
+                }}
+                className="w-full h-10 flex items-center justify-center absolute top-0 left-0 z-40 md:hidden cursor-grab active:cursor-grabbing touch-none select-none"
+              >
+                <div className="w-12 h-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-md transition-all active:w-16 active:bg-white"></div>
               </div>
 
               {/* Close Button Mobile (fixed at top-right of dialog, stays pinned over scrolling content) */}
