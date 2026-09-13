@@ -1,5 +1,6 @@
 import React from "react";
-import { Shield, BookOpen, Truck } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { Shield, BookOpen, Truck, ExternalLink } from "lucide-react";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import { useTranslations } from 'next-intl';
 
@@ -83,6 +84,20 @@ export default function LegalPage() {
                 <div>
                   <h3 className="text-lg font-bold text-[#1A120B] mb-2">{t('privacy4')}</h3>
                   <p>{t('privacy4Desc')}<a href="mailto:munchotella@gmail.com" className="text-[#D4A853] hover:underline">munchotella@gmail.com</a>.</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#FFFCF6] border border-[#D4A853]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 text-sm text-[#1A120B]">
+                    <Shield className="w-4 h-4 text-[#D4A853] shrink-0" />
+                    <span>Controlul datelor: poți solicita ștergerea contului și a datelor asociate oricând.</span>
+                  </div>
+                  <Link 
+                    href="/delete-account" 
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#C09640] uppercase tracking-wider shrink-0 py-1"
+                  >
+                    <span>Ștergere Cont & Date</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
                 
                 <div className="mt-8 p-6 bg-[#E8E2D9]/30 rounded-2xl border border-[#E8E2D9]">

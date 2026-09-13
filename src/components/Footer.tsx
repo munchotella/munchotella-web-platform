@@ -60,6 +60,7 @@ export default function Footer() {
               <li><Link href="/contact" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('contact')}</Link></li>
               <li><Link href="/livrare" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deliveryInfo')}</Link></li>
               <li><Link href="/legal" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('legalAndDelivery')}</Link></li>
+              <li><Link href="/delete-account" className="block py-1.5 md:py-0 md:inline-block text-white/70 text-[16px] hover:text-[#D4A853] transition-colors">{t('deleteAccount')}</Link></li>
             </ul>
           </div>
           
