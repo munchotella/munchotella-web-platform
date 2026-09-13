@@ -89,8 +89,8 @@ export default async function DeliveryPage({
     ],
     "deliveryLeadTime": {
       "@type": "QuantitativeValue",
-      "minValue": 35,
-      "maxValue": 50,
+      "minValue": 30,
+      "maxValue": 60,
       "unitCode": "MIN"
     }
   };

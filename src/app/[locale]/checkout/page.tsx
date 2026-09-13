@@ -10,6 +10,7 @@ import {
   Truck,
   Store,
   Clock,
+  Car,
   CreditCard,
   Banknote,
   Tag,
@@ -1212,6 +1213,23 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-end mb-6">
                   <span className="font-bold text-[#1A120B] uppercase tracking-wider text-xs">{t('totalToPay')}</span>
                   <span className="font-serif text-3xl md:text-4xl font-bold text-[#D4A853] leading-none">{grandTotal} MDL</span>
+                </div>
+
+                {/* Notice Timp Execuție & Livrare Taxi (Conform aplicației mobile: 1h - 1h 30min) */}
+                <div className="mb-5 bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl p-4 space-y-2.5 text-xs text-[#736A60]">
+                  <div className="flex items-start gap-2.5">
+                    <Clock className="w-4 h-4 text-[#9E721D] shrink-0 mt-0.5" />
+                    <p className="leading-relaxed">
+                      {t('orderTimeNoticePre')}
+                      <strong className="text-[#1A120B] font-bold">{t('orderTimeNoticeBold')}</strong>
+                    </p>
+                  </div>
+                  {deliveryType === 'delivery' && (
+                    <div className="flex items-start gap-2.5 pt-2 border-t border-[#E8E2D9]/70">
+                      <Car className="w-4 h-4 text-[#9E721D] shrink-0 mt-0.5" />
+                      <p className="leading-relaxed">{t('taxiNotice')}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Terms and Conditions Acceptance Checkbox (MAIB Requirement) */}
