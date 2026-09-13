@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, Calendar, Lock, Trash2, Camera } from "lucide-react";
+import { User, Mail, Phone, Calendar, Lock, Trash2, Camera, ShieldCheck, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from 'next-intl';
+import { Link } from "@/i18n/routing";
 
 export default function AccountSettings() {
   const t = useTranslations('AccountSettings');
@@ -384,6 +385,19 @@ export default function AccountSettings() {
           <Trash2 size={18} />
           <span>{deleting ? t('deleting') : t('deleteMyAccount')}</span>
         </button>
+
+        <div className="mt-6 pt-5 border-t border-red-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <p className="text-xs text-[#736A60] leading-relaxed">
+            {t('deleteInfoPrompt')}
+          </p>
+          <Link
+            href="/delete-account"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D4A853] hover:text-[#9E721D] transition-colors shrink-0"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#D4A853]" />
+            <span>{t('deleteInfoLink')}</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

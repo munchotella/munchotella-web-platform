@@ -319,7 +319,9 @@
     "dangerZone": "Zona de Pericol",
     "dangerDesc": "Odată ce ștergi contul, toate datele tale, inclusiv istoricul de comenzi și punctele de loialitate, vor fi șterse definitiv.",
     "deleting": "Se șterge...",
-    "deleteMyAccount": "Șterge contul meu"
+    "deleteMyAccount": "Șterge contul meu",
+    "deleteInfoPrompt": "Vrei să știi exact ce date sunt șterse definitiv și ce se păstrează conform legii?",
+    "deleteInfoLink": "Detalii despre controlul datelor și retenția fiscală →"
   },
   "OrderTracking": {
     "orderPlaced": "Comandă Plasată",

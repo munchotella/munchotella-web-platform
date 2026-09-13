@@ -318,7 +318,9 @@
     "dangerZone": "Danger Zone",
     "dangerDesc": "Once you delete your account, all your data, including order history and loyalty points, will be permanently deleted.",
     "deleting": "Deleting...",
-    "deleteMyAccount": "Delete my account"
+    "deleteMyAccount": "Delete my account",
+    "deleteInfoPrompt": "Want to know exactly what data is permanently erased and what is legally retained?",
+    "deleteInfoLink": "Data control and statutory retention details →"
   },
   "OrderTracking": {
     "orderPlaced": "Order Placed",
