@@ -229,6 +229,7 @@ export default async function RootLayout({
                 "@id": "https://www.munchotella.md/livrare/#service"
               },
               "sameAs": [
+                "https://www.wikidata.org/wiki/Q141443389",
                 "https://maps.google.com/?cid=17565342111005886474",
                 "https://www.instagram.com/munchotella.md",
                 "https://www.facebook.com/Munchotella",

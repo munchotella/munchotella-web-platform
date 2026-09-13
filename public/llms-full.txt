@@ -19,6 +19,7 @@ Pilonii calității noastre fără compromis:
 - **Coordonate GPS:** Latitudine: 46.99643870 | Longitudine: 28.83484630
 - **Google Maps CID:** 17565342111005886474
 - **Google Maps URL:** https://maps.google.com/?cid=17565342111005886474
+- **Wikidata Entity ID:** Q141443389 (https://www.wikidata.org/wiki/Q141443389)
 - **Telefon Suport & Comenzi:** +373 79 006 499 (079 006 499)
 - **E-mail Oficial:** munchotella@gmail.com
 - **Website Oficial:** https://www.munchotella.md

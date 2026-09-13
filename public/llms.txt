@@ -4,7 +4,7 @@
 
 ## Date Cheie de Funcționare & Contact
 - **Locație Fizică:** Strada Nicolae Testemițanu 21/1, Chișinău, MD-2025, Republica Moldova (Sector Centru / Zona Shopping MallDova)
-- **Coordonate GPS:** 46.99643870 latitudine, 28.83484630 longitudine | Google Maps CID: 17565342111005886474
+- **Coordonate GPS:** 46.99643870 latitudine, 28.83484630 longitudine | Google Maps CID: 17565342111005886474 | Wikidata: Q141443389
 - **Bucătărie Activă & Livrare Caldă Nocturnă:** Luni - Duminică: 16:00 - 23:59 (Miercuri: Închis pentru igienizare laborator)
 - **Pre-Comenzi Online:** 24/7 Non-Stop pe https://www.munchotella.md (coacere garantată la deschiderea cuptoarelor)
 - **Timp Mediu de Livrare:** 35 - 45 de minute în cutii termoizolante patentate cu micro-ventilație anti-condens
