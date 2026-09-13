@@ -9,6 +9,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -43,37 +74,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -90,6 +90,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -124,37 +155,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -171,6 +171,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -205,37 +236,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -252,6 +252,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -286,37 +317,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -333,6 +333,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -367,37 +398,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -414,6 +414,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -448,37 +479,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -495,6 +495,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -529,37 +560,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -576,6 +576,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -610,37 +641,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -657,6 +657,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -691,37 +722,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -738,6 +738,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -772,37 +803,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -819,6 +819,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -853,37 +884,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -900,6 +900,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -934,37 +965,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -981,6 +981,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1015,37 +1046,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1062,6 +1062,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1096,37 +1127,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1143,6 +1143,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1177,37 +1208,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1224,6 +1224,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1258,37 +1289,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1305,6 +1305,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1339,37 +1370,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1386,6 +1386,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1420,37 +1451,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1467,6 +1467,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1501,37 +1532,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]
@@ -1548,6 +1548,37 @@
     "available": true,
     "modifiers": [
       {
+        "title": "Toppinguri",
+        "isRequired": false,
+        "multiSelect": true,
+        "options": [
+          {
+            "name": "Alune",
+            "price": 25
+          },
+          {
+            "name": "Fistic",
+            "price": 50
+          },
+          {
+            "name": "Oreo",
+            "price": 25
+          },
+          {
+            "name": "Banană",
+            "price": 25
+          },
+          {
+            "name": "Căpșune",
+            "price": 30
+          },
+          {
+            "name": "Kiwi",
+            "price": 30
+          }
+        ]
+      },
+      {
         "title": "Personalizare",
         "isRequired": false,
         "multiSelect": true,
@@ -1582,37 +1613,6 @@
           },
           {
             "name": "Bilă de înghețată",
-            "price": 30
-          }
-        ]
-      },
-      {
-        "title": "Toppinguri",
-        "isRequired": false,
-        "multiSelect": true,
-        "options": [
-          {
-            "name": "Alune",
-            "price": 25
-          },
-          {
-            "name": "Fistic",
-            "price": 50
-          },
-          {
-            "name": "Oreo",
-            "price": 25
-          },
-          {
-            "name": "Banană",
-            "price": 25
-          },
-          {
-            "name": "Căpșune",
-            "price": 30
-          },
-          {
-            "name": "Kiwi",
             "price": 30
           }
         ]

@@ -36,8 +36,21 @@ export default function ProductCustomizationModal({
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
 
-  // Standard Food Modifiers: Exactly 14 items across Personalizare (8) and Toppinguri (6)
+  // Standard Food Modifiers: Exactly 14 items across Toppinguri (6) and Personalizare (8)
   const STANDARD_FOOD_MODIFIERS: { title: string; isRequired?: boolean; multiSelect?: boolean; options: ToppingOption[] }[] = [
+    {
+      title: "Toppinguri",
+      isRequired: false,
+      multiSelect: true,
+      options: [
+        { name: "Alune", price: 25 },
+        { name: "Fistic", price: 50 },
+        { name: "Oreo", price: 25 },
+        { name: "Banană", price: 25 },
+        { name: "Căpșune", price: 30 },
+        { name: "Kiwi", price: 30 },
+      ],
+    },
     {
       title: "Personalizare",
       isRequired: false,
@@ -51,19 +64,6 @@ export default function ProductCustomizationModal({
         { name: "Kinder Bueno", price: 35 },
         { name: "Mix de fructe", price: 55 },
         { name: "Bilă de înghețată", price: 30 },
-      ],
-    },
-    {
-      title: "Toppinguri",
-      isRequired: false,
-      multiSelect: true,
-      options: [
-        { name: "Alune", price: 25 },
-        { name: "Fistic", price: 50 },
-        { name: "Oreo", price: 25 },
-        { name: "Banană", price: 25 },
-        { name: "Căpșune", price: 30 },
-        { name: "Kiwi", price: 30 },
       ],
     },
   ];
