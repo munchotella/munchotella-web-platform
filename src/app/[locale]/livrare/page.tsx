@@ -1,9 +1,10 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
-import { PackageCheck, Clock, Navigation, ShieldCheck, ArrowRight, HelpCircle } from 'lucide-react';
+import { Link } from '@/i18n/routing';
+import { PackageCheck, Clock, Navigation, ShieldCheck, ArrowRight, HelpCircle, CheckCircle2 } from 'lucide-react';
 import DeliveryCalculator from '@/components/delivery/DeliveryCalculator';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export async function generateMetadata({
   params,
@@ -54,12 +55,12 @@ export default async function DeliveryPage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'DeliveryPage' });
 
-  // Schema structurata conform specificatiei W3C / Schema.org
+  // Schema structurata Schema.org sincronizata cu tariful unic transparent
   const deliverySchema = {
     "@context": "https://schema.org",
     "@type": "DeliveryService",
     "@id": "https://www.munchotella.md/livrare/#service",
-    "name": "Serviciul de Livrare Caldă Nocturnă Munchotella Chișinău",
+    "name": "Serviciul de Livrare Caldă Munchotella Chișinău",
     "serviceType": "Artisan Dessert Delivery",
     "provider": {
       "@id": "https://www.munchotella.md/#restaurant"
@@ -76,19 +77,7 @@ export default async function DeliveryPage({
     "hasDeliveryMethod": [
       {
         "@type": "DeliveryChargeSpecification",
-        "name": "Livrare Pietonală Proximitate (< 1.000 metri)",
-        "price": "20",
-        "priceCurrency": "MDL",
-        "description": "Tarif fix de 20 MDL pentru perimetrul adiacent boutique-ului: Str. Nicolae Testemițanu, Shopping MallDova, parcul Valea Trandafirilor",
-        "appliesToDeliveryAddress": {
-          "@type": "PostalAddress",
-          "addressLocality": "Chișinău",
-          "addressSublocality": "Centru / MallDova / Testemițanu"
-        }
-      },
-      {
-        "@type": "DeliveryChargeSpecification",
-        "name": "Livrare Curier Auto / Taxi (1.000 m - 10.000 m)",
+        "name": "Livrare Curier Auto Chișinău (1 - 10 km)",
         "price": "30",
         "priceCurrency": "MDL",
         "description": "30 MDL tarif de bază + 6.45 MDL per fiecare kilometru parcurs, calculat automat prin Google Maps API",
@@ -152,18 +141,15 @@ export default async function DeliveryPage({
     distancePlaceholder: t('calcDistancePlaceholder'),
     calculateBtn: t('calcBtn'),
     resultTitle: t('calcResultTitle'),
-    pedestrianBadge: t('calcPedestrianBadge'),
     autoBadge: t('calcAutoBadge'),
     estimatedCost: t('calcEstimatedCost'),
     disclaimer: t('calcDisclaimer'),
     orderCta: t('calcOrderCta'),
-    tier1Name: t('tier1Label'),
-    tier2Name: t('tier2Label'),
   };
 
   return (
-    <div className="bg-[#1A120B] text-[#FCF9F4] min-h-screen selection:bg-[#D4A853] selection:text-white pt-24 pb-24">
-      {/* Injectare Date Structurate duble: DeliveryService + FAQPage */}
+    <main className="min-h-screen bg-[#FFFCF6] pt-28 pb-32 selection:bg-[#D4A853] selection:text-white">
+      {/* Date Structurate Schema.org: DeliveryService + FAQPage */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(deliverySchema) }}
@@ -173,148 +159,177 @@ export default async function DeliveryPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      {/* Hero Section Editorial */}
-      <section className="max-w-5xl mx-auto px-4 md:px-8 text-center pt-8 pb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4A853]/10 border border-[#D4A853]/30 text-[#D4A853] text-xs font-mono uppercase tracking-[0.25em] mb-6 animate-fadeIn">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>{t('badge')}</span>
-        </div>
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white font-normal leading-[1.15] mb-6 max-w-3xl mx-auto">
-          {t('heroTitle')}
-        </h1>
-        <p className="text-white/80 font-sans text-base md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-          {t('heroSubtitle')}
-        </p>
+      {/* Hero Section Editorial Warm Luxury */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 text-center pt-6 pb-16">
+        <AnimateIn direction="up">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A120B] text-[#D4A853] text-xs font-mono uppercase tracking-[0.25em] mb-6 shadow-sm">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>{t('badge')}</span>
+          </div>
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-[#1A120B] font-bold leading-[1.15] mb-6 max-w-3xl mx-auto">
+            {t('heroTitle')}
+          </h1>
+          <p className="text-[#736A60] font-sans text-base md:text-xl max-w-2xl mx-auto leading-relaxed">
+            {t('heroSubtitle')}
+          </p>
+        </AnimateIn>
       </section>
 
-      {/* Grid: 3 Piloni Tehnologici (Ambalaj Termic, Timp, Acoperire) */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
-        <div className="bg-[#241B13] border border-[#3A2C20] hover:border-[#D4A853]/40 rounded-2xl p-8 flex flex-col items-start transition-colors duration-300">
-          <div className="w-12 h-12 rounded-xl bg-[#D4A853]/10 border border-[#D4A853]/20 flex items-center justify-center text-[#D4A853] mb-6">
-            <PackageCheck className="w-6 h-6" />
+      {/* 3 Piloni Senzoriali & Tehnologici */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-20">
+        <AnimateIn direction="up" delay={0.1}>
+          <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
+            <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
+              <PackageCheck className="w-6 h-6" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature1Title')}</h2>
+            <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature1Desc')}</p>
           </div>
-          <h2 className="font-serif text-2xl text-white mb-3 font-normal">{t('feature1Title')}</h2>
-          <p className="text-white/70 text-sm leading-relaxed font-sans">{t('feature1Desc')}</p>
-        </div>
+        </AnimateIn>
 
-        <div className="bg-[#241B13] border border-[#3A2C20] hover:border-[#D4A853]/40 rounded-2xl p-8 flex flex-col items-start transition-colors duration-300">
-          <div className="w-12 h-12 rounded-xl bg-[#D4A853]/10 border border-[#D4A853]/20 flex items-center justify-center text-[#D4A853] mb-6">
-            <Clock className="w-6 h-6" />
+        <AnimateIn direction="up" delay={0.2}>
+          <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
+            <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
+              <Clock className="w-6 h-6" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature2Title')}</h2>
+            <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature2Desc')}</p>
           </div>
-          <h2 className="font-serif text-2xl text-white mb-3 font-normal">{t('feature2Title')}</h2>
-          <p className="text-white/70 text-sm leading-relaxed font-sans">{t('feature2Desc')}</p>
-        </div>
+        </AnimateIn>
 
-        <div className="bg-[#241B13] border border-[#3A2C20] hover:border-[#D4A853]/40 rounded-2xl p-8 flex flex-col items-start transition-colors duration-300">
-          <div className="w-12 h-12 rounded-xl bg-[#D4A853]/10 border border-[#D4A853]/20 flex items-center justify-center text-[#D4A853] mb-6">
-            <Navigation className="w-6 h-6" />
+        <AnimateIn direction="up" delay={0.3}>
+          <div className="bg-white border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-3xl p-8 flex flex-col items-start transition-all duration-300 shadow-sm hover:shadow-md h-full group">
+            <div className="w-12 h-12 rounded-full bg-[#1A120B] flex items-center justify-center text-[#D4A853] mb-6 group-hover:scale-105 transition-transform shadow-sm">
+              <Navigation className="w-6 h-6" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-[#1A120B] mb-3">{t('feature3Title')}</h2>
+            <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('feature3Desc')}</p>
           </div>
-          <h2 className="font-serif text-2xl text-white mb-3 font-normal">{t('feature3Title')}</h2>
-          <p className="text-white/70 text-sm leading-relaxed font-sans">{t('feature3Desc')}</p>
-        </div>
+        </AnimateIn>
       </section>
 
-      {/* Sectiune Mixta: Grila de Tarife + Calculator Interactiv Client */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 mb-24">
+      {/* Bento Grid: Tarifare Transparentă + Calculator Interactiv */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Coloana Stanga: Detalierea Pragurilor Tarifare (7 col) */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="bg-[#241B13] border border-[#3A2C20] rounded-2xl p-8 md:p-10">
-              <span className="text-[#D4A853] font-mono text-xs uppercase tracking-widest block mb-2">
-                {t('policyLabel')}
-              </span>
-              <h2 className="font-serif text-3xl md:text-4xl text-white font-normal mb-6">
-                {t('pricingTitle')}
-              </h2>
-              <p className="text-white/70 text-sm leading-relaxed mb-8">
-                {t('pricingIntro')}
-              </p>
+          {/* Coloana Stanga: Detalierea Formulei Tarifare & Standardul Cald (7 col) */}
+          <div className="lg:col-span-7">
+            <AnimateIn direction="up" delay={0.2}>
+              <div className="bg-white border border-[#E8E2D9] rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
+                <div>
+                  <span className="text-[#9E721D] font-mono text-xs uppercase tracking-widest block font-bold mb-2">
+                    {t('policyLabel')}
+                  </span>
+                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-4">
+                    {t('pricingTitle')}
+                  </h2>
+                  <p className="text-[#736A60] text-sm leading-relaxed">
+                    {t('pricingIntro')}
+                  </p>
+                </div>
 
-              <div className="space-y-4">
-                {/* Pragul 1 */}
-                <div className="bg-[#1A120B] p-6 rounded-xl border border-[#3A2C20] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[#D4A853] text-xs font-mono uppercase tracking-wider block mb-1">
-                      {t('tier1Label')}
-                    </span>
-                    <h3 className="font-serif text-xl text-white">{t('tier1Name')}</h3>
-                    <p className="text-white/60 text-xs mt-1 max-w-sm">{t('tier1Desc')}</p>
+                <div className="space-y-4 pt-2">
+                  {/* Card 1: Formula Tarifară Directă */}
+                  <div className="bg-[#FAF7F2] p-6 rounded-2xl border border-[#E8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
+                        {t('fareLabel')}
+                      </span>
+                      <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('fareName')}</h3>
+                      <p className="text-[#736A60] text-xs mt-1 max-w-sm leading-relaxed">{t('fareDesc')}</p>
+                    </div>
+                    <div className="text-left sm:text-right shrink-0">
+                      <span className="text-2xl sm:text-3xl font-serif text-[#1A120B] font-bold block">
+                        30 MDL
+                      </span>
+                      <span className="text-[#736A60] text-xs font-sans font-medium">
+                        + 6.45 MDL / km
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-3xl font-serif text-white font-bold block">20 MDL</span>
-                    <span className="text-white/40 text-xs font-sans">{t('tier1Fixed')}</span>
+
+                  {/* Card 2: Standardul Cald Inclus Gratuit */}
+                  <div className="bg-[#FAF7F2] p-6 rounded-2xl border border-[#E8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[#9E721D] text-xs font-mono uppercase tracking-wider block mb-1 font-bold">
+                        {t('qualityLabel')}
+                      </span>
+                      <h3 className="font-serif text-xl font-bold text-[#1A120B] flex items-center gap-2">
+                        <span>{t('qualityName')}</span>
+                        <CheckCircle2 className="w-4 h-4 text-[#9E721D]" />
+                      </h3>
+                      <p className="text-[#736A60] text-xs mt-1 max-w-sm leading-relaxed">{t('qualityDesc')}</p>
+                    </div>
+                    <div className="text-left sm:text-right shrink-0">
+                      <span className="text-2xl sm:text-3xl font-serif text-[#9E721D] font-bold block">
+                        0 MDL
+                      </span>
+                      <span className="text-[#736A60] text-xs font-sans font-medium">
+                        {t('freeIncluded')}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Pragul 2 */}
-                <div className="bg-[#1A120B] p-6 rounded-xl border border-[#3A2C20] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="text-[#D4A853] text-xs font-mono uppercase tracking-wider block mb-1">
-                      {t('tier2Label')}
-                    </span>
-                    <h3 className="font-serif text-xl text-white">{t('tier2Name')}</h3>
-                    <p className="text-white/60 text-xs mt-1 max-w-sm">{t('tier2Desc')}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="text-3xl font-serif text-[#D4A853] font-bold block">30 MDL</span>
-                    <span className="text-white/40 text-xs font-sans">+ 6.45 MDL / km</span>
-                  </div>
+                <div className="pt-6 border-t border-[#E8E2D9] flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <p className="text-[#736A60] text-xs leading-relaxed max-w-md">
+                    {t('pricingDisclaimer')}
+                  </p>
+                  <Link
+                    href="/menu"
+                    className="inline-flex items-center gap-2 bg-[#1A120B] hover:bg-[#2A1E14] text-[#D4A853] px-7 py-3.5 rounded-full font-sans font-bold text-xs tracking-wider uppercase transition-colors shrink-0 shadow-md"
+                  >
+                    <span>{t('ctaButton')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </div>
-
-              <div className="mt-8 pt-6 border-t border-[#3A2C20] flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-white/50 text-xs">{t('pricingDisclaimer')}</p>
-                <Link
-                  href="/menu"
-                  className="inline-flex items-center gap-2 bg-[#D4A853] hover:bg-[#E5B963] text-[#1A120B] px-6 py-3 rounded-full font-sans font-semibold text-xs tracking-wider uppercase transition-colors shrink-0"
-                >
-                  {t('ctaButton')}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
+            </AnimateIn>
           </div>
 
           {/* Coloana Dreapta: Calculatorul Interactiv (5 col) */}
           <div className="lg:col-span-5">
-            <DeliveryCalculator dict={calculatorDict} />
+            <AnimateIn direction="up" delay={0.3}>
+              <DeliveryCalculator dict={calculatorDict} />
+            </AnimateIn>
           </div>
 
         </div>
       </section>
 
-      {/* Sectiune FAQ Dedicata Livrarii (SEO & Intent Conversational) */}
-      <section className="max-w-4xl mx-auto px-4 md:px-8 mb-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 text-[#D4A853] text-xs font-mono uppercase tracking-widest mb-3">
-            <HelpCircle className="w-4 h-4" />
-            <span>{t('faqBadge')}</span>
+      {/* Sectiune FAQ Dedicata Livrarii */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 mb-8">
+        <AnimateIn direction="up" delay={0.2}>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 text-[#9E721D] text-xs font-mono uppercase tracking-widest mb-3 font-semibold">
+              <HelpCircle className="w-4 h-4" />
+              <span>{t('faqBadge')}</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B]">
+              {t('faqTitle')}
+            </h2>
           </div>
-          <h2 className="font-serif text-3xl md:text-4xl text-white font-normal">
-            {t('faqTitle')}
-          </h2>
-        </div>
 
-        <div className="space-y-4">
-          <div className="bg-[#241B13] border border-[#3A2C20] rounded-xl p-6">
-            <h3 className="font-serif text-lg text-white mb-2 font-medium">{t('faq1Q')}</h3>
-            <p className="text-white/70 text-sm leading-relaxed font-sans">{t('faq1A')}</p>
+          <div className="space-y-4">
+            <div className="bg-white border border-[#E8E2D9] rounded-2xl p-6 md:p-7 shadow-sm hover:border-[#D4A853]/50 transition-colors">
+              <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">{t('faq1Q')}</h3>
+              <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('faq1A')}</p>
+            </div>
+            <div className="bg-white border border-[#E8E2D9] rounded-2xl p-6 md:p-7 shadow-sm hover:border-[#D4A853]/50 transition-colors">
+              <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">{t('faq2Q')}</h3>
+              <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('faq2A')}</p>
+            </div>
+            <div className="bg-white border border-[#E8E2D9] rounded-2xl p-6 md:p-7 shadow-sm hover:border-[#D4A853]/50 transition-colors">
+              <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">{t('faq3Q')}</h3>
+              <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('faq3A')}</p>
+            </div>
+            <div className="bg-white border border-[#E8E2D9] rounded-2xl p-6 md:p-7 shadow-sm hover:border-[#D4A853]/50 transition-colors">
+              <h3 className="font-serif text-lg font-bold text-[#1A120B] mb-2">{t('faq4Q')}</h3>
+              <p className="text-[#736A60] text-sm leading-relaxed font-sans">{t('faq4A')}</p>
+            </div>
           </div>
-          <div className="bg-[#241B13] border border-[#3A2C20] rounded-xl p-6">
-            <h3 className="font-serif text-lg text-white mb-2 font-medium">{t('faq2Q')}</h3>
-            <p className="text-white/70 text-sm leading-relaxed font-sans">{t('faq2A')}</p>
-          </div>
-          <div className="bg-[#241B13] border border-[#3A2C20] rounded-xl p-6">
-            <h3 className="font-serif text-lg text-white mb-2 font-medium">{t('faq3Q')}</h3>
-            <p className="text-white/70 text-sm leading-relaxed font-sans">{t('faq3A')}</p>
-          </div>
-          <div className="bg-[#241B13] border border-[#3A2C20] rounded-xl p-6">
-            <h3 className="font-serif text-lg text-white mb-2 font-medium">{t('faq4Q')}</h3>
-            <p className="text-white/70 text-sm leading-relaxed font-sans">{t('faq4A')}</p>
-          </div>
-        </div>
+        </AnimateIn>
       </section>
-    </div>
+    </main>
   );
 }
