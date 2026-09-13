@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
@@ -35,8 +35,100 @@ export default function ProductCustomizationModal({
   const locale = useLocale();
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const dragControls = useDragControls();
   const [isMobile, setIsMobile] = useState(false);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startYRef = useRef(0);
+  const currentYRef = useRef(0);
+
+  const resetModalPosition = () => {
+    if (modalRef.current) {
+      modalRef.current.style.transform = "";
+      modalRef.current.style.transition = "";
+      modalRef.current.style.opacity = "";
+    }
+  };
+
+  const startDrag = (clientY: number) => {
+    if (!isMobile) return;
+    isDraggingRef.current = true;
+    startYRef.current = clientY;
+    currentYRef.current = 0;
+    if (modalRef.current) {
+      modalRef.current.style.transition = "none";
+    }
+  };
+
+  const moveDrag = (clientY: number) => {
+    if (!isDraggingRef.current || !modalRef.current) return;
+    const deltaY = clientY - startYRef.current;
+    if (deltaY > 0) {
+      currentYRef.current = deltaY;
+      modalRef.current.style.transform = `translateY(${deltaY}px)`;
+    } else {
+      currentYRef.current = deltaY * 0.2;
+      modalRef.current.style.transform = `translateY(${deltaY * 0.2}px)`;
+    }
+  };
+
+  const endDrag = () => {
+    if (!isDraggingRef.current || !modalRef.current) return;
+    isDraggingRef.current = false;
+    const finalY = currentYRef.current;
+
+    if (finalY > 75) {
+      modalRef.current.style.transition = "transform 0.22s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease-out";
+      modalRef.current.style.transform = "translateY(100%)";
+      modalRef.current.style.opacity = "0";
+      setTimeout(() => {
+        onClose();
+        resetModalPosition();
+      }, 220);
+    } else {
+      modalRef.current.style.transition = "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)";
+      modalRef.current.style.transform = "translateY(0px)";
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalPointerMove = (e: PointerEvent) => {
+      if (isDraggingRef.current) {
+        moveDrag(e.clientY);
+      }
+    };
+    const handleGlobalPointerUp = () => {
+      if (isDraggingRef.current) {
+        endDrag();
+      }
+    };
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (isDraggingRef.current && e.touches.length > 0) {
+        moveDrag(e.touches[0].clientY);
+      }
+    };
+    const handleGlobalTouchEnd = () => {
+      if (isDraggingRef.current) {
+        endDrag();
+      }
+    };
+
+    window.addEventListener("pointermove", handleGlobalPointerMove);
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+    window.addEventListener("pointercancel", handleGlobalPointerUp);
+    window.addEventListener("touchmove", handleGlobalTouchMove, { passive: true });
+    window.addEventListener("touchend", handleGlobalTouchEnd);
+    window.addEventListener("touchcancel", handleGlobalTouchEnd);
+
+    return () => {
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+      window.removeEventListener("pointercancel", handleGlobalPointerUp);
+      window.removeEventListener("touchmove", handleGlobalTouchMove);
+      window.removeEventListener("touchend", handleGlobalTouchEnd);
+      window.removeEventListener("touchcancel", handleGlobalTouchEnd);
+    };
+  }, [isMobile]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -112,11 +204,14 @@ export default function ProductCustomizationModal({
       document.body.style.overflow = "hidden";
       setSelectedToppings([]);
       setQuantity(1);
+      resetModalPosition();
     } else {
       document.body.style.overflow = "unset";
+      resetModalPosition();
     }
     return () => {
       document.body.style.overflow = "unset";
+      resetModalPosition();
     };
   }, [product, isOpen]);
 
@@ -171,32 +266,28 @@ export default function ProductCustomizationModal({
         {isOpen && (
           <div className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center p-0 md:p-4 lg:p-6 pointer-events-none">
             <motion.div
+              ref={modalRef}
               key="modal"
               initial={{ opacity: 0, y: 40, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 120, transition: { duration: 0.2 } }}
               transition={{ type: "spring", damping: 26, stiffness: 320 }}
-              drag={isMobile ? "y" : false}
-              dragDirectionLock
-              dragControls={dragControls}
-              dragListener={false}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.7 }}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 75 || info.velocity.y > 350) {
-                  onClose();
-                }
-              }}
               className="w-full max-w-full md:max-w-[780px] lg:max-w-[840px] bg-[#FFFFFF] rounded-t-[28px] md:rounded-[24px] shadow-2xl relative overflow-hidden flex flex-col max-h-[90dvh] md:max-h-[min(590px,calc(100dvh-2.5rem))] md:h-[590px] pointer-events-auto border border-[#EAE1DB]/70"
             >
               {/* Interactive Drag Handle for Mobile - Swipe down to dismiss */}
               <div
                 onPointerDown={(e) => {
-                  if (isMobile) dragControls.start(e);
+                  startDrag(e.clientY);
                 }}
-                className="w-full h-10 flex items-center justify-center absolute top-0 left-0 z-40 md:hidden cursor-grab active:cursor-grabbing touch-none select-none"
+                onTouchStart={(e) => {
+                  if (e.touches.length > 0) startDrag(e.touches[0].clientY);
+                }}
+                onMouseDown={(e) => {
+                  startDrag(e.clientY);
+                }}
+                className="w-full h-11 flex items-center justify-center absolute top-0 left-0 z-40 md:hidden cursor-grab active:cursor-grabbing touch-none select-none group"
               >
-                <div className="w-12 h-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-md transition-all active:w-16 active:bg-white"></div>
+                <div className="w-12 h-1.5 bg-white/85 backdrop-blur-md rounded-full shadow-sm transition-all group-active:w-16"></div>
               </div>
 
               {/* Close Button Mobile (fixed at top-right of dialog, stays pinned over scrolling content) */}
