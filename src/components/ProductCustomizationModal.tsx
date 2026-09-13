@@ -192,12 +192,12 @@ export default function ProductCustomizationModal({
 
               {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
               <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FFFFFF] md:bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
-                {/* Product Image - Full Uncropped Display (Straus-style) */}
-                <div className="relative w-full h-48 sm:h-56 md:h-52 lg:h-60 shrink-0 bg-[#FFFFFF] flex items-center justify-center p-3 overflow-hidden">
+                {/* Product Image - Large Hero Display (Straus-style) */}
+                <div className="relative w-full h-[240px] sm:h-[270px] md:h-56 lg:h-64 shrink-0 bg-[#F5EFEB] overflow-hidden">
                   <img
                     src={product.img}
                     alt={product.name}
-                    className="w-full h-full max-h-full max-w-full object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
+                    className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 
