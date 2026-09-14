@@ -305,13 +305,21 @@ export default function ProductCustomizationModal({
                 {/* LEFT COLUMN (Desktop) / TOP SECTION (Mobile): Product Visual & Details */}
                 <div className="w-full md:w-[40%] lg:w-[38%] bg-[#FFFFFF] md:bg-[#FDFBF9] border-b md:border-b-0 md:border-r border-[#EAE1DB] flex flex-col shrink-0 md:overflow-y-auto no-scrollbar">
                   {/* Product Image - Large Hero Display (Straus-style) */}
-                  <div className="relative w-full h-[240px] sm:h-[270px] md:h-56 lg:h-64 shrink-0 bg-[#F5EFEB] overflow-hidden">
-                    <img
-                      src={product.img}
-                      alt={product.name}
-                      className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                    />
-                  </div>
+                  {(() => {
+                    const isMilkshake = Boolean(product.name && product.name.toLowerCase().includes("shake"));
+                    return (
+                      <div className={`relative w-full h-[240px] sm:h-[270px] md:h-56 lg:h-64 shrink-0 overflow-hidden ${isMilkshake ? "bg-[#252322]" : "bg-[#F5EFEB]"}`}>
+                        <img
+                          src={product.img}
+                          alt={product.name}
+                          className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${
+                            isMilkshake ? "object-top origin-top" : "object-center"
+                          }`}
+                          style={isMilkshake ? { objectPosition: "center 0%" } : undefined}
+                        />
+                      </div>
+                    );
+                  })()}
 
                   {/* Product Details */}
                   <div className="p-4 sm:p-5 flex-1 flex flex-col justify-start">

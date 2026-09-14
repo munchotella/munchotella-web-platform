@@ -10,6 +10,14 @@ const LOCAL_OPTIMIZED_PRODUCT_IMAGES: Record<string, string> = {
   "delux mini waffle": "/images/products/delux-mini-waffle.webp",
   "lotus mini waffle": "/images/products/lotus-mini-waffle.webp",
   "lotus mini waffles": "/images/products/lotus-mini-waffle.webp",
+  "milkshake oreo": "/images/drinks/milkshake_oreo.webp",
+  "milk shake oreo": "/images/drinks/milkshake_oreo.webp",
+  "milkshake kinder": "/images/drinks/milkshake_kinder.webp",
+  "milk shake kinder": "/images/drinks/milkshake_kinder.webp",
+  "milkshake nutella": "/images/drinks/milkshake_nutella.webp",
+  "milk shake nutella": "/images/drinks/milkshake_nutella.webp",
+  "milkshake strawberry": "/images/drinks/milkshake_strawberry.webp",
+  "milk shake strawberry": "/images/drinks/milkshake_strawberry.webp",
 };
 
 /**

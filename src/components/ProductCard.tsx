@@ -23,6 +23,7 @@ export default function ProductCard({ item, onSelect }: ProductCardProps) {
   const t = useTranslations("Menu");
   const displayPrice = typeof item.price === "number" ? `${item.price} MDL` : item.price;
   const ingredients = item.desc ? item.desc.split(",").map(i => i.trim()).filter(i => i.length > 0 && !i.toLowerCase().includes("pieces")).slice(0, 3) : [];
+  const isMilkshake = item.name.toLowerCase().includes("shake");
 
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -68,13 +69,16 @@ export default function ProductCard({ item, onSelect }: ProductCardProps) {
       className="bg-[#FFFFFF] rounded-[12px] shadow-[0_2px_8px_rgba(26,26,26,0.04)] hover:shadow-[0_20px_40px_rgba(26,26,26,0.12)] active:scale-[0.98] transition-all duration-300 flex flex-col h-full group cursor-pointer border border-[#EAE1DB]/30 overflow-hidden relative"
     >
       {/* Top Heavy Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F9F9FB]">
+      <div className={`relative aspect-[4/3] w-full overflow-hidden ${isMilkshake ? "bg-[#252322]" : "bg-[#F9F9FB]"}`}>
         <img
           src={item.img}
           alt={item.name}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
+            isMilkshake ? "object-top origin-top" : "object-center"
+          }`}
+          style={isMilkshake ? { objectPosition: "center 0%" } : undefined}
         />
 
         {item.badge && (
