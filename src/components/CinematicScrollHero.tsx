@@ -212,6 +212,7 @@ export default function CinematicScrollHero() {
           return (
             <video
               key={track.src}
+              src={track.src}
               ref={(el) => {
                 videoRefs.current[idx] = el;
               }}
@@ -225,13 +226,9 @@ export default function CinematicScrollHero() {
               className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ${
                 isActive
                   ? "opacity-90 z-10"
-                  : isPending
-                  ? "opacity-0 z-0"
-                  : "opacity-0 -z-10 pointer-events-none"
+                  : "opacity-0 z-0 pointer-events-none"
               }`}
-            >
-              <source src={track.src} type="video/mp4" />
-            </video>
+            />
           );
         })}
 
