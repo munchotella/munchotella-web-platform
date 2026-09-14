@@ -10,21 +10,18 @@ import { Link } from "@/i18n/routing";
 const HERO_PLAYLIST = [
   {
     src: "/videos/hero_waffle_v2.mp4",
-    webm: "/videos/hero_waffle_v2.webm",
     poster: "/delux_mini_waffle_official.png",
     titleKey: "video1Title",
     subtitleKey: "video1Subtitle"
   },
   {
     src: "/videos/hero_sushi_v2.mp4",
-    webm: "/videos/hero_sushi_v2.webm",
     poster: "/royal_sushi_official.png",
     titleKey: "video2Title",
     subtitleKey: "video2Subtitle"
   },
   {
     src: "/videos/hero_biscoff_v2.mp4",
-    webm: "/videos/hero_biscoff_v2.webm",
     poster: "/lotus_biscoff_waffle_ref.png",
     titleKey: "video3Title",
     subtitleKey: "video3Subtitle"
@@ -39,13 +36,18 @@ export default function CinematicScrollHero() {
   const switchToTrack = (nextIndex: number) => {
     const nextVideo = videoRefs.current[nextIndex];
     if (nextVideo) {
+      nextVideo.muted = true;
+      nextVideo.defaultMuted = true;
       if (nextVideo.preload !== "auto") {
         nextVideo.preload = "auto";
       }
       nextVideo.currentTime = 0;
-      nextVideo.play().catch((err) => {
-        console.warn("Video playback autoplay blocked/ready:", err);
-      });
+      const playPromise = nextVideo.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Video playback autoplay blocked/ready:", err);
+        });
+      }
     }
     // Pause other videos to optimize GPU/CPU
     videoRefs.current.forEach((vid, idx) => {
@@ -64,27 +66,51 @@ export default function CinematicScrollHero() {
   };
 
   useEffect(() => {
-    // Initial start for first video
+    // Initial start for first video with explicit mute assurance for iOS
     const firstVideo = videoRefs.current[0];
     if (firstVideo) {
-      firstVideo.play().catch((err) => {
-        console.warn("Initial autoplay blocked/ready:", err);
-      });
+      firstVideo.muted = true;
+      firstVideo.defaultMuted = true;
+      const playPromise = firstVideo.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Initial autoplay blocked/ready:", err);
+        });
+      }
     }
-    // Lazily buffer the second video after the initial page has settled (5 seconds)
+
+    // Fallback for iOS Low Power Mode: unlock video on first user tap or scroll
+    const handleFirstInteraction = () => {
+      const activeVideo = videoRefs.current[0];
+      if (activeVideo && activeVideo.paused) {
+        activeVideo.muted = true;
+        activeVideo.play().catch(() => {});
+      }
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
+    };
+
+    window.addEventListener("touchstart", handleFirstInteraction, { once: true, passive: true });
+    window.addEventListener("scroll", handleFirstInteraction, { once: true, passive: true });
+
+    // Lazily buffer the second video after the initial page has settled (4 seconds)
     const timer = setTimeout(() => {
       if (videoRefs.current[1]) {
         videoRefs.current[1].preload = "metadata";
       }
-    }, 5000);
+    }, 4000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
+    };
   }, []);
 
   return (
     <section className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
       {/* Background Video Layer with Instant Multi-Buffer (Zero Black Millisecond) */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
         {HERO_PLAYLIST.map((track, idx) => {
           const isActive = idx === currentTrackIndex;
           return (
@@ -93,19 +119,19 @@ export default function CinematicScrollHero() {
               ref={(el) => {
                 videoRefs.current[idx] = el;
               }}
-              autoPlay={idx === 0}
+              autoPlay
               muted
+              defaultMuted
               playsInline
-              preload={idx === 0 ? "metadata" : "none"}
+              preload={idx === 0 ? "auto" : "none"}
               poster={track.poster}
               onEnded={() => handleVideoEnded(idx)}
-              className={`absolute inset-0 w-full h-full object-cover object-center ${
+              className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ${
                 isActive
                   ? "opacity-90 z-10 block"
                   : "opacity-0 z-0 pointer-events-none"
               }`}
             >
-              <source src={track.webm} type="video/webm" />
               <source src={track.src} type="video/mp4" />
             </video>
           );
