@@ -10,18 +10,21 @@ import { Link } from "@/i18n/routing";
 const HERO_PLAYLIST = [
   {
     src: "/videos/hero_waffle_v2.mp4",
+    webm: "/videos/hero_waffle_v2.webm",
     poster: "/delux_mini_waffle_official.png",
     titleKey: "video1Title",
     subtitleKey: "video1Subtitle"
   },
   {
     src: "/videos/hero_sushi_v2.mp4",
+    webm: "/videos/hero_sushi_v2.webm",
     poster: "/royal_sushi_official.png",
     titleKey: "video2Title",
     subtitleKey: "video2Subtitle"
   },
   {
     src: "/videos/hero_biscoff_v2.mp4",
+    webm: "/videos/hero_biscoff_v2.webm",
     poster: "/lotus_biscoff_waffle_ref.png",
     titleKey: "video3Title",
     subtitleKey: "video3Subtitle"
@@ -102,6 +105,7 @@ export default function CinematicScrollHero() {
                   : "opacity-0 z-0 pointer-events-none"
               }`}
             >
+              <source src={track.webm} type="video/webm" />
               <source src={track.src} type="video/mp4" />
             </video>
           );
