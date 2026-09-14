@@ -109,14 +109,14 @@ export default function CinematicScrollHero() {
   };
 
   const handleVideoEnded = (idx: number) => {
-    if (idx === currentTrackIndex) {
-      const nextIndex = (currentTrackIndex + 1) % HERO_PLAYLIST.length;
+    if (idx === currentTrackIndexRef.current) {
+      const nextIndex = (currentTrackIndexRef.current + 1) % HERO_PLAYLIST.length;
       switchToTrack(nextIndex);
     }
   };
 
   const handleManualUnlock = () => {
-    const activeVideo = videoRefs.current[currentTrackIndex] || videoRefs.current[0];
+    const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
     if (activeVideo) {
       activeVideo.muted = true;
       activeVideo.defaultMuted = true;
