@@ -94,7 +94,7 @@ export default function CheckoutPage() {
     lng: 28.834809,
   });
 
-  const { user, token, updateUser } = useAuth();
+  const { user, token, updateUser, login } = useAuth();
 
   // Pre-fill user data if available
   React.useEffect(() => {
@@ -116,10 +116,13 @@ export default function CheckoutPage() {
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [isDevMockOtp, setIsDevMockOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const [smsDispatchError, setSmsDispatchError] = useState("");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendCount, setResendCount] = useState(0);
 
   // Stare program magazin dinamic
   const [storeStatus, setStoreStatus] = useState<{
@@ -367,7 +370,9 @@ export default function CheckoutPage() {
   const setupRecaptcha = () => {
     try {
       if ((window as any).recaptchaVerifierCheckout) {
-        (window as any).recaptchaVerifierCheckout.clear();
+        try {
+          (window as any).recaptchaVerifierCheckout.clear();
+        } catch (_) {}
         (window as any).recaptchaVerifierCheckout = null;
       }
       (window as any).recaptchaVerifierCheckout = new RecaptchaVerifier(auth, "recaptcha-container-checkout", {
@@ -379,49 +384,84 @@ export default function CheckoutPage() {
   };
 
   const triggerOtpSms = async () => {
-    const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
-    if (!rawPhone || rawPhone.length < 6) {
-      alert(t('otpPhoneMissing'));
+    const cleanDigits = formData.phone.replace(/[^\d]/g, '').replace(/^0+/, '');
+    if (!cleanDigits || cleanDigits.length < 6) {
+      setSmsDispatchError(t('otpPhoneMissing') || "Te rugăm să introduci un număr de telefon valid.");
       return false;
     }
 
     setIsSendingOtp(true);
     setOtpError("");
+    setSmsDispatchError("");
+    setIsDevMockOtp(false);
     
     try {
       if (typeof window !== "undefined" && auth) {
         setupRecaptcha();
         const appVerifier = (window as any).recaptchaVerifierCheckout;
-        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
+        const phoneFormatted = formData.phone.trim().startsWith('+')
+          ? `+${formData.phone.replace(/[^\d]/g, '')}`
+          : `${selectedCountry.dialCode}${cleanDigits}`;
+
         const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
         setConfirmationResult(confirmation);
         setOtpCode("");
+        setIsDevMockOtp(false);
         setIsOtpModalOpen(true);
         setResendCooldown(60);
+        setResendCount(prev => prev + 1);
         return true;
       } else {
         throw new Error("Firebase Auth not initialized");
       }
     } catch (err: any) {
       console.error("SMS Trigger Error:", err);
-      setOtpError(err.message || "Eroare la trimiterea SMS-ului. Te rugăm să verifici numărul și să încerci din nou.");
+      if ((window as any).recaptchaVerifierCheckout) {
+        try { (window as any).recaptchaVerifierCheckout.clear(); } catch (_) {}
+        (window as any).recaptchaVerifierCheckout = null;
+      }
+
+      // Verificăm dacă eroarea este cauzată de restricțiile HTTP Referrer pe localhost
+      const isRefererBlocked = err.code?.includes('requests-from-referer') || 
+                               err.message?.includes('requests-from-referer') ||
+                               err.message?.includes('referer');
+      const isLocalhost = typeof window !== 'undefined' && 
+                          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+      if (isRefererBlocked && isLocalhost) {
+        console.warn("Google API Key blochează referer-ul de localhost. Se activează modul de testare locală OTP.");
+        setIsDevMockOtp(true);
+        setOtpCode("");
+        setIsOtpModalOpen(true);
+        setResendCooldown(60);
+        return true;
+      }
+
+      const userFriendlyMsg = err.code === 'auth/quota-exceeded'
+        ? "Limita de SMS-uri zilnice a fost atinsă. Poți plasa comanda cu confirmare prin apel telefonic sau alege plata online cu cardul."
+        : (err.message || "Eroare la trimiterea codului SMS. Verifică numărul și încearcă din nou.");
+      setSmsDispatchError(userFriendlyMsg);
+      setOtpError(userFriendlyMsg);
       return false;
     } finally {
       setIsSendingOtp(false);
     }
   };
 
-  const executePlaceOrder = async () => {
+  const executePlaceOrder = async (overrideToken?: string, unverifiedPhone: boolean = false) => {
     setIsSubmitting(true);
+    const activeAuthToken = overrideToken || token;
 
     try {
       const menuItems = items.filter(i => !String(i.cartItemId).startsWith('drink_'));
       const drinkItems = items.filter(i => String(i.cartItemId).startsWith('drink_'));
 
-      // Pregătește adresa completă (adăugând detalii bloc/scară)
-      let fullAddress = formData.street;
+      // Pregătește adresa completă (pentru preluare se folosește adresa boutique-ului)
+      let fullAddress = deliveryType === 'pickup'
+        ? "Preluare din Boutique (Nicolae Testemițanu 21/1)"
+        : formData.street;
       const extras = [];
-      if (formData.house) extras.push(`Bloc/Scară: ${formData.house}`);
+      if (deliveryType === 'delivery' && formData.house) extras.push(`Bloc/Scară: ${formData.house}`);
       if (extras.length > 0) {
         fullAddress += ` (${extras.join(', ')})`;
       }
@@ -431,6 +471,10 @@ export default function CheckoutPage() {
         ...items.filter(i => (i as any).customization).map(i => `Notă ${i.name}: ${(i as any).customization}`)
       ].filter(Boolean).join(" | ");
 
+      const orderCoordinates = deliveryType === 'pickup'
+        ? { lat: RESTAURANT_LOCATION.lat, lng: RESTAURANT_LOCATION.lng }
+        : { lat: formData.lat, lng: formData.lng };
+
       const orderPayload = {
         customer: {
           name: formData.name,
@@ -438,7 +482,7 @@ export default function CheckoutPage() {
           phone: formData.phone,
           address: fullAddress,
           notes: aggregatedNotes,
-          coordinates: { lat: formData.lat, lng: formData.lng }
+          coordinates: orderCoordinates
         },
         items: menuItems.map(i => ({
           menuItemId: i.id || i.cartItemId,
@@ -464,6 +508,7 @@ export default function CheckoutPage() {
         timing,
         scheduledTime: timing === "scheduled" ? scheduledTime : null,
         draftOrderId: draftOrderId || undefined,
+        unverifiedPhone,
       };
 
       const API_URL = "https://munchotella-api.onrender.com/api";
@@ -473,7 +518,7 @@ export default function CheckoutPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          ...(activeAuthToken ? { "Authorization": `Bearer ${activeAuthToken}` } : {})
         },
         body: JSON.stringify(orderPayload)
       });
@@ -484,11 +529,18 @@ export default function CheckoutPage() {
         throw new Error(data.message || "Eroare la plasarea comenzii");
       }
 
-      if (user) {
+      // Auto-autentificare dacă s-a creat cont la comanda cu cardul
+      if (data.autoAuth && data.autoAuth.user && data.autoAuth.token) {
+        try {
+          login(data.autoAuth.user, data.autoAuth.token);
+        } catch (authE) {
+          console.error("Auto login error:", authE);
+        }
+      } else if (user || activeAuthToken) {
          try {
            const profileRes = await fetch(`${API_URL}/auth/me`, {
              credentials: "include",
-             headers: { "Authorization": `Bearer ${token}` }
+             headers: { "Authorization": `Bearer ${activeAuthToken || token}` }
            });
            const profileData = await profileRes.json();
            if (profileData.success) {
@@ -498,7 +550,8 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/order-tracking/${data.data._id}`);
+      const trackingTarget = data.data?.trackingCode || data.data?._id;
+      router.push(`/order-tracking/${trackingTarget}`);
       
     } catch (err: any) {
       console.error(err);
@@ -506,6 +559,11 @@ export default function CheckoutPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePlaceOrderWithCallConfirmation = async () => {
+    setIsOtpModalOpen(false);
+    await executePlaceOrder(token || undefined, true);
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -531,17 +589,55 @@ export default function CheckoutPage() {
 
   const handleVerifyOtpAndPlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!confirmationResult || !otpCode || otpCode.length < 6) return;
+    if (!otpCode || otpCode.length < 6) return;
+    if (!confirmationResult && !isDevMockOtp) return;
     setIsVerifyingOtp(true);
     setOtpError("");
 
     try {
-      await confirmationResult.confirm(otpCode);
+      let authToken: string | undefined = undefined;
+
+      if (isDevMockOtp) {
+        if (otpCode !== "123456") {
+          throw new Error("Cod de testare invalid! Pentru test pe localhost introduceți codul: 123456");
+        }
+      } else if (confirmationResult) {
+        // 1. Confirmare Firebase Phone Auth
+        const userCredential = await confirmationResult.confirm(otpCode);
+        const firebaseUser = userCredential.user;
+        const idToken = await firebaseUser.getIdToken();
+
+        // 2. Creare / conectare cont pe Backend Munchotella
+        try {
+          const API_URL = "https://munchotella-api.onrender.com/api";
+          const authRes = await fetch(`${API_URL}/auth/social-login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              idToken,
+              provider: "phone",
+              name: formData.name,
+              email: formData.email,
+              address: formData.street,
+              coordinates: { lat: formData.lat, lng: formData.lng }
+            })
+          });
+          const authData = await authRes.json();
+          if (authData.success && authData.data && authData.token) {
+            authToken = authData.token;
+            login(authData.data, authData.token);
+          }
+        } catch (backendAuthErr) {
+          console.warn("Backend phone registration warn:", backendAuthErr);
+        }
+      }
+
       setIsOtpModalOpen(false);
-      await executePlaceOrder();
+      // 3. Plasare comandă având numărul validat (unverifiedPhone: false)
+      await executePlaceOrder(authToken, false);
     } catch (error: any) {
       console.error("OTP verification error:", error);
-      setOtpError(t("otpInvalid"));
+      setOtpError(error.message || t("otpInvalid") || "Codul de verificare introdus este incorect sau a expirat.");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -1269,21 +1365,41 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || !deliveryCalc.isDeliverable || activeStep < 4}
+                  disabled={isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable || activeStep < 4}
                   className={`w-full py-4.5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-xl min-h-[56px] flex items-center justify-center gap-2 cursor-pointer ${
-                    isSubmitting || !deliveryCalc.isDeliverable || activeStep < 4
+                    isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable || activeStep < 4
                       ? "bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed opacity-80"
                       : "bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] shadow-[#1A120B]/10 hover:shadow-[#D4A853]/20"
                   }`}
                 >
                   {isSubmitting ? (
                     <span>{t('sendingOrder')}</span>
+                  ) : isSendingOtp ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{t('otpSending') || "Se trimite codul SMS..."}</span>
+                    </>
                   ) : (
                     <>
                       {activeStep < 4 ? t('completeSteps') : t('placeOrderBtn')}
                     </>
                   )}
                 </button>
+                {smsDispatchError && (
+                  <div className="mt-3.5 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-col gap-2.5">
+                    <div className="flex items-start gap-2.5 font-medium leading-relaxed">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                      <span>{smsDispatchError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handlePlaceOrderWithCallConfirmation}
+                      className="self-start text-xs font-bold text-[#1A120B] underline hover:text-[#D4A853] transition-colors cursor-pointer"
+                    >
+                      📞 Trimite comanda cu confirmare prin apel telefonic
+                    </button>
+                  </div>
+                )}
                 {activeStep < 4 && deliveryCalc.isDeliverable && (
                   <p className="text-center text-[10px] text-[#736A60] font-medium mt-3 uppercase tracking-wider">
                     {t('missingInfo')}
@@ -1352,6 +1468,11 @@ export default function CheckoutPage() {
                     {selectedCountry.dialCode} {formData.phone}
                   </span>
                 </p>
+                {isDevMockOtp && (
+                  <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs text-center font-medium leading-relaxed">
+                    🔧 <strong>Mod Testare Localhost:</strong> Restricțiile Google API Key blochează SMS pe localhost. Introduceți codul de test: <strong>123456</strong>.
+                  </div>
+                )}
               </div>
 
               {/* Error Message */}
@@ -1396,7 +1517,7 @@ export default function CheckoutPage() {
                   )}
                 </button>
 
-                <div className="text-center pt-2">
+                <div className="text-center pt-2 flex flex-col items-center gap-3">
                   <button
                     type="button"
                     disabled={resendCooldown > 0 || isSendingOtp}
@@ -1404,6 +1525,14 @@ export default function CheckoutPage() {
                     className="text-xs text-[#736A60] hover:text-[#D4A853] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
                   >
                     {isSendingOtp ? t('otpSending') : resendCooldown > 0 ? t('otpResendIn', { seconds: resendCooldown }) : t('otpResend')}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handlePlaceOrderWithCallConfirmation}
+                    className="text-[11px] text-[#736A60] hover:text-[#1A120B] underline transition-colors cursor-pointer"
+                  >
+                    Nu primești SMS-ul? Confirmă comanda prin apel telefonic
                   </button>
                 </div>
               </form>

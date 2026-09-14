@@ -7,8 +7,6 @@ import { ChevronLeft, CheckCircle2, Clock, ChefHat, Truck, MapPin, PackageOpen }
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useTranslations } from 'next-intl';
-import { db } from "@/lib/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
 
 export default function OrderTrackingPage() {
   const t = useTranslations('OrderTracking');
@@ -28,30 +26,73 @@ export default function OrderTrackingPage() {
 
   const orderId = typeof params?.id === 'string' ? params.id : '...';
 
+  const getStepIndex = (status: string) => {
+    switch (status) {
+      case "pending":
+      case "confirmed":
+        return 0;
+      case "preparing":
+      case "ready":
+        return 1;
+      case "delivering":
+        return 2;
+      case "delivered":
+      case "completed":
+        return 3;
+      default:
+        return 0;
+    }
+  };
+
   useEffect(() => {
     if (!orderId || orderId === '...') return;
 
-    const docRef = doc(db, "orders", orderId);
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setOrderData(data);
-        const status = data.status || "pending";
-        const stepIndex = STEPS.findIndex(s => s.id === status);
-        setCurrentStepIndex(stepIndex !== -1 ? stepIndex : 0);
-        setError(null);
-        setLoading(false);
-      } else {
-        setError("Comanda nu a fost găsită.");
-        setLoading(false);
-      }
-    }, (err) => {
-      console.error("Eroare la ascultarea comenzii:", err);
-      setError("Eroare la încărcarea comenzii.");
-      setLoading(false);
-    });
+    let isMounted = true;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    return () => unsubscribe();
+    const fetchOrder = async (isFirstLoad: boolean = false) => {
+      try {
+        const API_URL = "https://munchotella-api.onrender.com/api";
+        const res = await fetch(`${API_URL}/orders/track/${orderId}`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        if (!isMounted) return;
+
+        if (data.success && data.data) {
+          setOrderData(data.data);
+          const status = data.data.status || "pending";
+          setCurrentStepIndex(getStepIndex(status));
+          setError(null);
+        } else {
+          if (isFirstLoad) {
+            setError(data.message || "Comanda nu a fost găsită.");
+          }
+        }
+      } catch (err: any) {
+        console.error("Eroare la preluarea comenzii:", err);
+        if (isFirstLoad && !orderData) {
+          setError("Eroare la încărcarea comenzii.");
+        }
+      } finally {
+        if (isMounted && isFirstLoad) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchOrder(true);
+
+    // Polling la fiecare 6 secunde cât timp comanda este în curs de preparare/livrare
+    pollInterval = setInterval(() => {
+      fetchOrder(false);
+    }, 6000);
+
+    return () => {
+      isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [orderId]);
 
   if (loading) {

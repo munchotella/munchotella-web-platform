@@ -8,8 +8,8 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 // O CSP strictă este prima linie de apărare împotriva XSS.
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  // script-src: 'unsafe-inline' și 'unsafe-eval' necesare pentru Next.js, Google Maps API, GTM și Google Analytics
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.googleapis.com https://apis.google.com https://identitytoolkit.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://va.vercel-scripts.com",
+  // script-src: 'unsafe-inline' și 'unsafe-eval' necesare pentru Next.js, Google Maps API, GTM, Google Analytics și reCAPTCHA (Firebase Phone Auth)
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.googleapis.com https://apis.google.com https://identitytoolkit.googleapis.com https://*.gstatic.com https://www.google.com https://*.google.com https://www.recaptcha.net https://recaptcha.google.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://va.vercel-scripts.com",
   // style-src: 'unsafe-inline' necesar pentru Tailwind/styled components și Google Maps styles
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://maps.googleapis.com",
   // font-src: Google Fonts
@@ -21,9 +21,9 @@ const ContentSecurityPolicy = [
   // worker-src: necesar pentru web workers (vector tiles Google Maps)
   "worker-src 'self' blob:",
   // child-src: iframe / web workers
-  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://auth.munchotella.md",
-  // frame-src: Firebase auth popup and Google Maps iframe
-  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md https://auth.munchotella.md",
+  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com",
+  // frame-src: Firebase auth popup, Google Maps iframe and reCAPTCHA
+  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com",
   // media-src: audio/video propriu
   "media-src 'self'",
   // object-src: blochează complet plugin-urile (Flash etc.)
