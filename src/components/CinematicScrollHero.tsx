@@ -97,15 +97,20 @@ export default function CinematicScrollHero() {
 
     const playPromise = nextVideo.play();
     if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        console.warn("Incoming track play warning:", err);
-        // Fallback swap if browser blocked play
-        setTimeout(triggerSwap, 300);
-      });
+      playPromise
+        .then(() => {
+          triggerSwap();
+        })
+        .catch((err) => {
+          console.warn("Incoming track play warning:", err);
+          triggerSwap();
+        });
+    } else {
+      triggerSwap();
     }
 
-    // Safety fallback: if timeupdate doesn't fire within 1.2s, swap anyway
-    setTimeout(triggerSwap, 1200);
+    // Safety fallback: if promise hangs, force swap within 800ms
+    setTimeout(triggerSwap, 800);
   };
 
   const handleVideoEnded = (idx: number) => {
