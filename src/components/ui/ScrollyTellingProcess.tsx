@@ -25,6 +25,22 @@ const steps = [
 export default function ScrollyTellingProcess() {
   const t = useTranslations("Process");
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isNearView, setIsNearView] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!containerRef.current || typeof window === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -62,33 +78,44 @@ export default function ScrollyTellingProcess() {
         
         {/* Background Video Layer 1 - Ciocolata */}
         <motion.div 
-          className="absolute inset-0 w-full h-full z-0"
+          className="absolute inset-0 w-full h-full z-0 pointer-events-none"
           style={{ opacity: vid1Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
-            {/* Fallback to process video if step1.mp4 is missing */}
-            <source src="/videos/proces/step1.mp4" type="video/mp4" />
-          </video>
+          {isNearView ? (
+            <video autoPlay loop muted defaultMuted playsInline preload="auto" className="w-full h-full object-cover object-center pointer-events-none">
+              <source src="/videos/proces/step1.mp4" type="video/mp4" />
+            </video>
+          ) : (
+            <div className="w-full h-full bg-[#1A120B]" />
+          )}
         </motion.div>
 
         {/* Background Video Layer 2 - Framantat */}
         <motion.div 
-          className="absolute inset-0 w-full h-full z-0"
+          className="absolute inset-0 w-full h-full z-0 pointer-events-none"
           style={{ opacity: vid2Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
-            <source src="/videos/proces/step2.mp4" type="video/mp4" />
-          </video>
+          {isNearView ? (
+            <video autoPlay loop muted defaultMuted playsInline preload="metadata" className="w-full h-full object-cover object-center pointer-events-none">
+              <source src="/videos/proces/step2.mp4" type="video/mp4" />
+            </video>
+          ) : (
+            <div className="w-full h-full bg-[#1A120B]" />
+          )}
         </motion.div>
 
         {/* Background Video Layer 3 - Cald */}
         <motion.div 
-          className="absolute inset-0 w-full h-full z-0"
+          className="absolute inset-0 w-full h-full z-0 pointer-events-none"
           style={{ opacity: vid3Opacity, scale: videoScale, filter: videoBlur }}
         >
-          <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center">
-            <source src="/videos/proces/step3.mp4" type="video/mp4" />
-          </video>
+          {isNearView ? (
+            <video autoPlay loop muted defaultMuted playsInline preload="none" className="w-full h-full object-cover object-center pointer-events-none">
+              <source src="/videos/proces/step3.mp4" type="video/mp4" />
+            </video>
+          ) : (
+            <div className="w-full h-full bg-[#1A120B]" />
+          )}
         </motion.div>
 
         {/* Dynamic Dark Overlay for text readability */}

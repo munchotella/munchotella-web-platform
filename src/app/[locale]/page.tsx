@@ -28,7 +28,7 @@ export default function MunchotellaBoutique() {
       name: "Delux Crepe",
       price: 165,
       desc: t('deluxCrepeDesc'),
-      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fc347c507e0f40eb6c49c_Delux%20crepe%20120%20lei.png",
+      img: "/images/products/delux-crepe.webp",
       badge: t('badgeTopSeller'),
       rawCategory: "crepes"
     },
@@ -37,7 +37,7 @@ export default function MunchotellaBoutique() {
       name: "Delux Mini Waffle",
       price: 160,
       desc: t('deluxWaffleDesc'),
-      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png",
+      img: "/images/products/delux-mini-waffle.webp",
       badge: t('badgeSpecialty'),
       rawCategory: "waffles"
     },
@@ -46,7 +46,7 @@ export default function MunchotellaBoutique() {
       name: "Lotus Mini Waffle",
       price: 200,
       desc: t('lotusMiniWaffleDesc'),
-      img: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a1dbf645960e17923_Lotus%20mini%20waffle%20105%20lei.png",
+      img: "/images/products/lotus-mini-waffle.webp",
       rawCategory: "waffles"
     }
   ]);

@@ -18,12 +18,17 @@ interface StoreStatusResponse {
   } | null;
 }
 
+let cachedStatus: StoreStatusResponse | null = null;
+let lastFetchTime = 0;
+
 export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBackground?: boolean }) {
   const t = useTranslations("LiveStore");
-  const [status, setStatus] = useState<StoreStatusResponse>({
-    isOpen: true,
-    badgeKey: 'openNow',
-    statusText: 'Deschis Acum',
+  const [status, setStatus] = useState<StoreStatusResponse>(() => {
+    return cachedStatus || {
+      isOpen: true,
+      badgeKey: 'openNow',
+      statusText: 'Deschis Acum',
+    };
   });
   const [mounted, setMounted] = useState(false);
 
@@ -31,6 +36,12 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
     setMounted(true);
 
     const fetchLiveStatus = async () => {
+      const nowTs = Date.now();
+      if (cachedStatus && (nowTs - lastFetchTime < 45000)) {
+        setStatus(cachedStatus);
+        return;
+      }
+
       try {
         const res = await fetch("https://munchotella-api.onrender.com/api/settings/store-status", {
           cache: "no-store",
@@ -38,6 +49,8 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
+            cachedStatus = data.data;
+            lastFetchTime = Date.now();
             setStatus(data.data);
             return;
           }

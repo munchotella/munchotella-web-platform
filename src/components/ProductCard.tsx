@@ -72,6 +72,8 @@ export default function ProductCard({ item, onSelect }: ProductCardProps) {
         <img
           src={item.img}
           alt={item.name}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
