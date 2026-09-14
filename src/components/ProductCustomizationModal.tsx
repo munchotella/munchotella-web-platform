@@ -184,6 +184,7 @@ export default function ProductCustomizationModal({
                       product.name.toLowerCase().includes("ceai") ||
                       product.name.toLowerCase().includes("coca") ||
                       product.name.toLowerCase().includes("fanta") ||
+                      product.name.toLowerCase().includes("sprite") ||
                       product.name.toLowerCase().includes("dorna")
                     ));
     

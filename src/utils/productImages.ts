@@ -33,5 +33,12 @@ export function getOptimizedProductImage(productName?: string, fallbackUrl?: str
     }
   }
 
-  return fallbackUrl || "";
+  if (fallbackUrl) {
+    if (fallbackUrl.startsWith("http://") || fallbackUrl.startsWith("https://") || fallbackUrl.startsWith("/")) {
+      return fallbackUrl;
+    }
+    return `/images/drinks/${fallbackUrl}`;
+  }
+
+  return "";
 }

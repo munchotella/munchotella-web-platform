@@ -90,6 +90,7 @@ export default function ProfilePage() {
       'Ceai': 'ceai',
       'Coca-Cola': 'cola',
       'Fanta': 'fanta',
+      'Sprite': 'sprite',
       'Apă Dorna': 'apa_dorna',
     };
 

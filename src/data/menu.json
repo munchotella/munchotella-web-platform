@@ -1678,5 +1678,45 @@
     "image": "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fd86124850039bdc396d9_Black%3AGreen%20Tea%2030%20lei.png",
     "available": true,
     "modifiers": []
+  },
+  {
+    "name": "Coca-Cola",
+    "price": 20,
+    "currency": "MDL",
+    "description": "",
+    "category": "drinks",
+    "image": "/images/drinks/cola.png",
+    "available": true,
+    "modifiers": []
+  },
+  {
+    "name": "Fanta",
+    "price": 20,
+    "currency": "MDL",
+    "description": "",
+    "category": "drinks",
+    "image": "/images/drinks/fanta.png",
+    "available": true,
+    "modifiers": []
+  },
+  {
+    "name": "Sprite",
+    "price": 20,
+    "currency": "MDL",
+    "description": "",
+    "category": "drinks",
+    "image": "/images/drinks/sprite.png",
+    "available": true,
+    "modifiers": []
+  },
+  {
+    "name": "Apă Dorna",
+    "price": 15,
+    "currency": "MDL",
+    "description": "",
+    "category": "drinks",
+    "image": "/images/drinks/dorna.png",
+    "available": true,
+    "modifiers": []
   }
 ]

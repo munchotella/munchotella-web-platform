@@ -82,7 +82,7 @@ export default function ScrollyTellingProcess() {
           style={{ opacity: vid1Opacity, scale: videoScale, filter: videoBlur }}
         >
           {isNearView ? (
-            <video autoPlay loop muted defaultMuted playsInline preload="auto" className="w-full h-full object-cover object-center pointer-events-none">
+            <video autoPlay loop muted playsInline preload="auto" className="w-full h-full object-cover object-center pointer-events-none">
               <source src="/videos/proces/step1.mp4" type="video/mp4" />
             </video>
           ) : (
@@ -96,7 +96,7 @@ export default function ScrollyTellingProcess() {
           style={{ opacity: vid2Opacity, scale: videoScale, filter: videoBlur }}
         >
           {isNearView ? (
-            <video autoPlay loop muted defaultMuted playsInline preload="metadata" className="w-full h-full object-cover object-center pointer-events-none">
+            <video autoPlay loop muted playsInline preload="metadata" className="w-full h-full object-cover object-center pointer-events-none">
               <source src="/videos/proces/step2.mp4" type="video/mp4" />
             </video>
           ) : (
@@ -110,7 +110,7 @@ export default function ScrollyTellingProcess() {
           style={{ opacity: vid3Opacity, scale: videoScale, filter: videoBlur }}
         >
           {isNearView ? (
-            <video autoPlay loop muted defaultMuted playsInline preload="none" className="w-full h-full object-cover object-center pointer-events-none">
+            <video autoPlay loop muted playsInline preload="none" className="w-full h-full object-cover object-center pointer-events-none">
               <source src="/videos/proces/step3.mp4" type="video/mp4" />
             </video>
           ) : (
