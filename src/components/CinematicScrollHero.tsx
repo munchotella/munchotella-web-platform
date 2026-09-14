@@ -10,19 +10,19 @@ import { Link } from "@/i18n/routing";
 const HERO_PLAYLIST = [
   {
     src: "/videos/hero_waffle_v2.mp4",
-    poster: "/delux_mini_waffle_official.png",
+    poster: "/images/posters/hero_waffle_poster.webp",
     titleKey: "video1Title",
     subtitleKey: "video1Subtitle"
   },
   {
     src: "/videos/hero_sushi_v2.mp4",
-    poster: "/royal_sushi_official.png",
+    poster: "/images/posters/hero_sushi_poster.webp",
     titleKey: "video2Title",
     subtitleKey: "video2Subtitle"
   },
   {
     src: "/videos/hero_biscoff_v2.mp4",
-    poster: "/lotus_biscoff_waffle_ref.png",
+    poster: "/images/posters/hero_biscoff_poster.webp",
     titleKey: "video3Title",
     subtitleKey: "video3Subtitle"
   }
@@ -119,11 +119,11 @@ export default function CinematicScrollHero() {
               ref={(el) => {
                 videoRefs.current[idx] = el;
               }}
-              autoPlay
+              autoPlay={isActive}
               muted
               defaultMuted
               playsInline
-              preload={idx === 0 ? "auto" : "none"}
+              preload={isActive ? "auto" : "none"}
               poster={track.poster}
               onEnded={() => handleVideoEnded(idx)}
               className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ${

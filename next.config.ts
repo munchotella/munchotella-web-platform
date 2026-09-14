@@ -37,6 +37,7 @@ const ContentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig: any = {
+  compress: true,
   serverExternalPackages: ['mongodb'],
   typescript: {
     ignoreBuildErrors: true,
@@ -153,6 +154,45 @@ const nextConfig: any = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
+          },
+        ],
+      },
+      {
+        source: '/(.*)\\.(ico|png|svg|jpg|jpeg|webp|avif|mp4|webm|woff2|woff)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Expires',
+            value: 'Sun, 15 Sep 2027 12:00:00 GMT',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Expires',
+            value: 'Sun, 15 Sep 2027 12:00:00 GMT',
+          },
+        ],
+      },
+      {
+        source: '/videos/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Expires',
+            value: 'Sun, 15 Sep 2027 12:00:00 GMT',
           },
         ],
       },

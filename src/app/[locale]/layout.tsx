@@ -133,7 +133,7 @@ export default async function RootLayout({
         <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
         <link rel="shortcut icon" href="/favicon-48x48.png" />
         {/* Critical LCP Hero Poster Preload */}
-        <link rel="preload" as="image" href="/delux_mini_waffle_official.png" fetchPriority="high" />
+        <link rel="preload" as="image" href="/images/posters/hero_waffle_poster.webp" type="image/webp" fetchPriority="high" />
         {/* LLM Knowledge Graph Discovery */}
         <link rel="alternate" type="text/markdown" title="LLM Knowledge Graph" href="/llms.txt" />
 
