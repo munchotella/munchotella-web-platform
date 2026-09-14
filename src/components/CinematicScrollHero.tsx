@@ -292,31 +292,6 @@ export default function CinematicScrollHero() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-transparent to-[#1A120B]/40 pointer-events-none z-10" />
       </div>
 
-      {/* Autoplay Cellular Fallback: Warm Luxury Tap to Play Pill */}
-      <AnimatePresence>
-        {isAutoplayBlocked && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bottom-20 sm:bottom-8 left-5 sm:left-12 z-30"
-          >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                unlockAndPlay();
-              }}
-              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#1A120B]/85 backdrop-blur-md border border-[#D4A853]/60 text-[#FAF7F2] text-xs uppercase tracking-wider font-semibold shadow-xl shadow-black/60 cursor-pointer hover:bg-[#1A120B] transition-all hover:scale-105 active:scale-95"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-ping" />
-              <Play className="w-3.5 h-3.5 text-[#D4A853] fill-[#D4A853]" />
-              <span>{t('tapToPlay')}</span>
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
       <div className="relative z-20 max-w-[1200px] w-full mx-auto px-5 sm:px-6 md:px-12 h-full flex flex-col justify-center text-left pt-16 sm:pt-20">
         <motion.div
@@ -379,9 +354,33 @@ export default function CinematicScrollHero() {
         </motion.div>
       </div>
 
-      {/* Playlist Indicator */}
+      {/* Playlist Indicator with Subtle Integrated Play Micro-Trigger */}
       {HERO_PLAYLIST.length > 1 && (
-        <div className="absolute bottom-8 right-8 z-20 flex items-center bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+        <div className="absolute bottom-8 right-6 sm:right-8 z-20 flex items-center bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
+          {/* Subtle Integrated Play Cue (Only visible if browser blocked initial autoplay) */}
+          <AnimatePresence>
+            {isAutoplayBlocked && (
+              <motion.button
+                initial={{ opacity: 0, width: 0, marginRight: 0 }}
+                animate={{ opacity: 1, width: "auto", marginRight: 8 }}
+                exit={{ opacity: 0, width: 0, marginRight: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  unlockAndPlay();
+                }}
+                className="flex items-center gap-1.5 pr-2.5 border-r border-white/20 text-[#D4A853] hover:text-[#FFFDF8] cursor-pointer overflow-hidden whitespace-nowrap"
+                aria-label={t('tapToPlay')}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A853] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4A853]" />
+                </span>
+                <Play className="w-3 h-3 fill-current" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+
           {HERO_PLAYLIST.map((track, idx) => {
             const isSelected = idx === (pendingTrackIndex !== null ? pendingTrackIndex : currentTrackIndex);
             return (
@@ -391,12 +390,12 @@ export default function CinematicScrollHero() {
                   e.stopPropagation();
                   switchToTrack(idx);
                 }}
-                className="p-2 min-h-[36px] flex items-center justify-center cursor-pointer"
+                className="p-1.5 min-h-[32px] flex items-center justify-center cursor-pointer"
                 aria-label={`Select shot ${idx + 1}`}
               >
                 <span
-                  className={`h-2 rounded-full transition-all duration-300 block ${
-                    isSelected ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
+                  className={`h-1.5 rounded-full transition-all duration-300 block ${
+                    isSelected ? "w-7 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
                   }`}
                 />
               </button>
