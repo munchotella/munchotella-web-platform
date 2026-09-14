@@ -31,10 +31,15 @@ const HERO_PLAYLIST = [
 export default function CinematicScrollHero() {
   const t = useTranslations("Hero");
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const currentTrackIndexRef = useRef(0);
   const [pendingTrackIndex, setPendingTrackIndex] = useState<number | null>(null);
   const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    currentTrackIndexRef.current = currentTrackIndex;
+  }, [currentTrackIndex]);
 
   // Double-Buffered Seamless Frame-Ready Swap
   const switchToTrack = (nextIndex: number) => {
@@ -69,13 +74,14 @@ export default function CinematicScrollHero() {
       setCurrentTrackIndex(nextIndex);
       setPendingTrackIndex(null);
 
-      // Gracefully pause previous video only AFTER crossfade completes (750ms)
+      // Gracefully pause previous videos only AFTER crossfade completes (750ms)
       if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
       switchTimeoutRef.current = setTimeout(() => {
-        const prevVideo = videoRefs.current[prevIndex];
-        if (prevVideo && prevIndex !== nextIndex) {
-          prevVideo.pause();
-        }
+        videoRefs.current.forEach((vid, idx) => {
+          if (vid && idx !== nextIndex) {
+            vid.pause();
+          }
+        });
       }, 750);
     };
 
@@ -153,7 +159,7 @@ export default function CinematicScrollHero() {
 
     // 3. Persistent User Activation listener (taps, clicks, pointerdown)
     const handleUserInteraction = () => {
-      const activeVideo = videoRefs.current[currentTrackIndex] || videoRefs.current[0];
+      const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
       if (activeVideo && activeVideo.paused) {
         activeVideo.muted = true;
         activeVideo.defaultMuted = true;
@@ -193,7 +199,7 @@ export default function CinematicScrollHero() {
       if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
       cleanupListeners();
     };
-  }, [currentTrackIndex]);
+  }, []);
 
   return (
     <section className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
