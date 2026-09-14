@@ -41,6 +41,8 @@
     "step3Desc": "Our thermal packaging protects the dessert on its way, so you can enjoy it exactly as we took it out of the waffle iron, fresh and steaming."
   },
   "About": {
+    "metaTitle": "Our Story & Artisan Taste Philosophy | Munchotella",
+    "metaDescription": "Discover the Munchotella universe: freshly baked waffles on the spot, 100% pure Sicilian pistachio, original Nutella®, and uncompromising desserts in Chișinău.",
     "subtitle": "Our Story",
     "title": "Passion for <br/> Authentic Taste",
     "desc1": "We set out to bring to Chișinău that taste you'll remember. We prepare every waffle and crepe from scratch, every morning, from a simple desire to offer you an honest, hot, and delicious dessert.",
@@ -54,6 +56,8 @@
     "quoteAuthor": "— The Munchotella Family"
   },
   "Menu": {
+    "metaTitle": "Artisan Menu & Prices — Waffles, Crepes | Munchotella",
+    "metaDescription": "Discover the complete Munchotella menu: Dubai Crepe, Delux Mini Waffles, French crepes, and signature milkshakes made with Nutella® and 100% pure pistachio.",
     "title1": "Our",
     "title2": "Menu",
     "title": "Our Menu",
@@ -233,6 +237,8 @@
     "Crepes": "Crepes"
   },
   "Contact": {
+    "metaTitle": "Contact & Boutique Location Chișinău | Munchotella",
+    "metaDescription": "Contact the Munchotella Boutique on 21/1 Nicolae Testemițanu St., Chișinău. Phone orders at +373 79 006 499, order support, and access map.",
     "weAreHere": "We are here",
     "letsTalk": "Let's Talk",
     "subtitle": "Have a question or want to know more? Leave us a message and we'll reply fast.",

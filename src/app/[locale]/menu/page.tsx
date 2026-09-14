@@ -13,8 +13,8 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'Menu' });
 
   return {
-    title: t('metaTitle', { default: 'Meniu Artizanal & Prețuri Waffles, Crepes | Munchotella' }),
-    description: t('metaDescription', { default: 'Descoperă meniul complet Munchotella: Crepe Dubai, Delux Mini Waffles, clătite franțuzești și milkshake-uri preparate cu Nutella® și fistic 100% pur.' }),
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: {
       canonical: locale === 'ro' ? 'https://www.munchotella.md/menu' : `https://www.munchotella.md/${locale}/menu`,
       languages: {

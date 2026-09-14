@@ -12,8 +12,8 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'About' });
 
   return {
-    title: t('metaTitle', { default: 'Povestea Noastră și Filosofia Gustului Artizanal | Munchotella' }),
-    description: t('metaDescription', { default: 'Descoperă universul Munchotella: waffles coapte pe loc, pastă pură de fistic sicilian 100%, Nutella® originală și deserturi fără compromisuri în Chișinău.' }),
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     alternates: {
       canonical: locale === 'ro' ? 'https://www.munchotella.md/about' : `https://www.munchotella.md/${locale}/about`,
       languages: {
@@ -23,8 +23,8 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: t('metaTitle', { default: 'Povestea Munchotella Boutique Chișinău' }),
-      description: t('metaDescription', { default: 'Deserturi artizanale autentice, fără premixuri industriale, preparate pe loc în Chișinău.' }),
+      title: t('metaTitle'),
+      description: t('metaDescription'),
       url: `https://www.munchotella.md/${locale}/about`,
       siteName: 'Munchotella Boutique',
       images: [
