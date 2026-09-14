@@ -15,6 +15,7 @@ import ProductCustomizationModal, { ProductItem } from "@/components/ProductCust
 import ProductCard from "@/components/ProductCard";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
 import { useTranslations } from "next-intl";
+import { getOptimizedProductImage } from "@/utils/productImages";
 
 export default function MunchotellaBoutique() {
   const t = useTranslations("Homepage");
@@ -62,14 +63,40 @@ export default function MunchotellaBoutique() {
           const liveLotusWaffle = data.data.find((i: any) => i.name.toLowerCase().includes("lotus mini waffle"));
           
           const newFeatured = [];
-          if (liveDeluxCrepe) newFeatured.push({ ...liveDeluxCrepe, id: liveDeluxCrepe._id, img: liveDeluxCrepe.imageUrl || liveDeluxCrepe.image, badge: t('badgeTopSeller'), rawCategory: liveDeluxCrepe.category });
-          else newFeatured.push(featuredItems[0]);
+          if (liveDeluxCrepe) {
+            newFeatured.push({
+              ...liveDeluxCrepe,
+              id: liveDeluxCrepe._id,
+              img: getOptimizedProductImage(liveDeluxCrepe.name, liveDeluxCrepe.imageUrl || liveDeluxCrepe.image),
+              badge: t('badgeTopSeller'),
+              rawCategory: liveDeluxCrepe.category
+            });
+          } else {
+            newFeatured.push(featuredItems[0]);
+          }
 
-          if (liveDeluxWaffle) newFeatured.push({ ...liveDeluxWaffle, id: liveDeluxWaffle._id, img: liveDeluxWaffle.imageUrl || liveDeluxWaffle.image, badge: t('badgeSpecialty'), rawCategory: liveDeluxWaffle.category });
-          else newFeatured.push(featuredItems[1]);
+          if (liveDeluxWaffle) {
+            newFeatured.push({
+              ...liveDeluxWaffle,
+              id: liveDeluxWaffle._id,
+              img: getOptimizedProductImage(liveDeluxWaffle.name, liveDeluxWaffle.imageUrl || liveDeluxWaffle.image),
+              badge: t('badgeSpecialty'),
+              rawCategory: liveDeluxWaffle.category
+            });
+          } else {
+            newFeatured.push(featuredItems[1]);
+          }
 
-          if (liveLotusWaffle) newFeatured.push({ ...liveLotusWaffle, id: liveLotusWaffle._id, img: liveLotusWaffle.imageUrl || liveLotusWaffle.image, rawCategory: liveLotusWaffle.category });
-          else newFeatured.push(featuredItems[2]);
+          if (liveLotusWaffle) {
+            newFeatured.push({
+              ...liveLotusWaffle,
+              id: liveLotusWaffle._id,
+              img: getOptimizedProductImage(liveLotusWaffle.name, liveLotusWaffle.imageUrl || liveLotusWaffle.image),
+              rawCategory: liveLotusWaffle.category
+            });
+          } else {
+            newFeatured.push(featuredItems[2]);
+          }
 
           setFeaturedItems(newFeatured);
         }

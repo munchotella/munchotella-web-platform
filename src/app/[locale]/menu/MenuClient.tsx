@@ -11,6 +11,7 @@ import { useCart } from "@/context/CartContext";
 import ProductCustomizationModal, { ProductItem } from "@/components/ProductCustomizationModal";
 import ProductCard from "@/components/ProductCard";
 import { useLocale, useTranslations } from "next-intl";
+import { getOptimizedProductImage } from "@/utils/productImages";
 
 export default function MenuClient() {
   const t = useTranslations("Menu");
@@ -77,7 +78,7 @@ export default function MenuClient() {
       category: categoryMap[item.category] || item.category,
       rawCategory: item.category?.toLowerCase() || "",
       desc,
-      img: item.image,
+      img: getOptimizedProductImage(name, item.image),
       modifiers: item.modifiers,
       badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
     };
@@ -120,7 +121,7 @@ export default function MenuClient() {
               category: categoryMap[item.category] || item.category,
               rawCategory: item.category?.toLowerCase() || "",
               desc,
-              img: item.imageUrl || item.image,
+              img: getOptimizedProductImage(name, item.imageUrl || item.image),
               modifiers: item.modifiers,
               badge: name.includes("Dubai") ? t('badgeHouseSpecial') : name.includes("Delux") ? t('badgeTopSeller') : undefined
             };
