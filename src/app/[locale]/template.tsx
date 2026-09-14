@@ -6,11 +6,11 @@ import React from "react";
 export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ 
         ease: [0.22, 1, 0.36, 1], // Liquid smooth easing (Custom cubic-bezier)
-        duration: 0.8 
+        duration: 0.5 
       }}
     >
       {children}

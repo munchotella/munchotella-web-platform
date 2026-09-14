@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import {
@@ -60,6 +61,11 @@ export default function CheckoutPage() {
   const locale = useLocale();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const [activeStep, setActiveStep] = useState<number>(1);
   const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
@@ -1425,121 +1431,127 @@ export default function CheckoutPage() {
       />
 
       {/* OTP Verification Modal for Guest Cash Orders */}
-      <AnimatePresence>
-        {isOtpModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
-            />
-
-            {/* Modal Dialog */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-md bg-[#FCF9F4] rounded-[24px] sm:rounded-[28px] border border-[#E8E2D9] p-5 sm:p-7 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl z-[101] flex flex-col my-auto overscroll-contain"
-            >
-              {/* Close Button */}
-              <button
-                type="button"
+      {isMounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isOtpModalOpen && (
+            <div className="fixed inset-0 z-[100] overflow-y-auto">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
-                aria-label="Închide verificarea SMS"
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer shadow-sm z-10"
-              >
-                <X className="w-4 h-4" />
-              </button>
+                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
+              />
 
-              {/* Icon & Title */}
-              <div className="flex flex-col items-center text-center mb-4 sm:mb-5">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center mb-2.5 sm:mb-3 text-[#D4A853]">
-                  <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" />
-                </div>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
-                  {t('otpTitle')}
-                </h3>
-                <p className="text-xs text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
-                  {t('otpSubtitle')}{" "}
-                  <span className="font-bold text-[#1A120B]">
-                    {selectedCountry.dialCode} {formData.phone}
-                  </span>
-                </p>
-                {isDevMockOtp && (
-                  <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] text-center font-medium leading-relaxed">
-                    🔧 <strong>Mod Testare Localhost:</strong> Restricțiile Google API Key blochează SMS pe localhost. Introduceți codul de test: <strong>123456</strong>.
-                  </div>
-                )}
-              </div>
-
-              {/* Error Message */}
-              {otpError && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200/80 text-red-600 text-xs text-center flex items-center justify-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{otpError}</span>
-                </div>
-              )}
-
-              {/* OTP Form */}
-              <form onSubmit={handleVerifyOtpAndPlaceOrder} className="space-y-3.5 sm:space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    autoFocus
-                    maxLength={6}
-                    placeholder={t('otpPlaceholder') || "000000"}
-                    value={otpCode}
-                    onChange={(e) => {
-                      setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6));
-                      if (otpError) setOtpError("");
-                    }}
-                    className="w-full bg-white border-2 border-[#E8E2D9] focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 rounded-xl sm:rounded-2xl py-3 sm:py-3.5 text-center text-xl sm:text-2xl font-mono font-bold tracking-[0.5em] text-[#1A120B] outline-none transition-all placeholder:tracking-widest placeholder:text-[#C5BCB1]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isVerifyingOtp || otpCode.length < 6}
-                  className="w-full py-3.5 rounded-full bg-[#1A120B] text-white font-bold text-sm hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              {/* Centering wrapper that never clips top on short laptop viewports */}
+              <div className="flex min-h-full items-center justify-center p-3 sm:p-4 py-6 sm:py-8 text-center relative z-[101]">
+                {/* Modal Dialog */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  className="relative w-full max-w-md bg-[#FCF9F4] rounded-[24px] sm:rounded-[28px] border border-[#E8E2D9] p-5 sm:p-7 shadow-2xl text-left"
                 >
-                  {isVerifyingOtp ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{t('otpVerifying')}</span>
-                    </>
-                  ) : (
-                    <span>{t('otpVerifyBtn')}</span>
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
+                    aria-label="Închide verificarea SMS"
+                    className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer shadow-sm z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  {/* Icon & Title */}
+                  <div className="flex flex-col items-center text-center mb-4 sm:mb-5">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center mb-2.5 sm:mb-3 text-[#D4A853]">
+                      <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B]">
+                      {t('otpTitle')}
+                    </h3>
+                    <p className="text-xs text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
+                      {t('otpSubtitle')}{" "}
+                      <span className="font-bold text-[#1A120B]">
+                        {selectedCountry.dialCode} {formData.phone}
+                      </span>
+                    </p>
+                    {isDevMockOtp && (
+                      <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] text-center font-medium leading-relaxed">
+                        🔧 <strong>Mod Testare Localhost:</strong> Restricțiile Google API Key blochează SMS pe localhost. Introduceți codul de test: <strong>123456</strong>.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Error Message */}
+                  {otpError && (
+                    <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200/80 text-red-600 text-xs text-center flex items-center justify-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{otpError}</span>
+                    </div>
                   )}
-                </button>
 
-                <div className="text-center pt-1 flex flex-col items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={resendCooldown > 0 || isSendingOtp}
-                    onClick={triggerOtpSms}
-                    className="text-xs text-[#736A60] hover:text-[#D4A853] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
-                  >
-                    {isSendingOtp ? t('otpSending') : resendCooldown > 0 ? t('otpResendIn', { seconds: resendCooldown }) : t('otpResend')}
-                  </button>
+                  {/* OTP Form */}
+                  <form onSubmit={handleVerifyOtpAndPlaceOrder} className="space-y-3.5 sm:space-y-4">
+                    <div>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        autoFocus
+                        maxLength={6}
+                        placeholder={t('otpPlaceholder') || "000000"}
+                        value={otpCode}
+                        onChange={(e) => {
+                          setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                          if (otpError) setOtpError("");
+                        }}
+                        className="w-full bg-white border-2 border-[#E8E2D9] focus:border-[#D4A853] focus:ring-2 focus:ring-[#D4A853]/20 rounded-xl sm:rounded-2xl py-3 sm:py-3.5 text-center text-xl sm:text-2xl font-mono font-bold tracking-[0.5em] text-[#1A120B] outline-none transition-all placeholder:tracking-widest placeholder:text-[#C5BCB1]"
+                      />
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={handlePlaceOrderWithCallConfirmation}
-                    className="text-[11px] text-[#736A60] hover:text-[#1A120B] underline transition-colors cursor-pointer"
-                  >
-                    Nu primești SMS-ul? Confirmă comanda prin apel telefonic
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    <button
+                      type="submit"
+                      disabled={isVerifyingOtp || otpCode.length < 6}
+                      className="w-full py-3.5 rounded-full bg-[#1A120B] text-white font-bold text-sm hover:bg-[#D4A853] hover:text-[#1A120B] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isVerifyingOtp ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t('otpVerifying')}</span>
+                        </>
+                      ) : (
+                        <span>{t('otpVerifyBtn')}</span>
+                      )}
+                    </button>
+
+                    <div className="text-center pt-1 flex flex-col items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={resendCooldown > 0 || isSendingOtp}
+                        onClick={triggerOtpSms}
+                        className="text-xs text-[#736A60] hover:text-[#D4A853] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium cursor-pointer"
+                      >
+                        {isSendingOtp ? t('otpSending') : resendCooldown > 0 ? t('otpResendIn', { seconds: resendCooldown }) : t('otpResend')}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handlePlaceOrderWithCallConfirmation}
+                        className="text-[11px] text-[#736A60] hover:text-[#1A120B] underline transition-colors cursor-pointer"
+                      >
+                        Nu primești SMS-ul? Confirmă comanda prin apel telefonic
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              </div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
       <div id="recaptcha-container-checkout"></div>
     </div>
   );
