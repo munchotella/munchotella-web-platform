@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -30,11 +30,14 @@ const HERO_PLAYLIST = [
 
 export default function CinematicScrollHero() {
   const t = useTranslations("Hero");
+  const sectionRef = useRef<HTMLElement>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const currentTrackIndexRef = useRef(0);
   const [pendingTrackIndex, setPendingTrackIndex] = useState<number | null>(null);
+  const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isIntersectingRef = useRef(true);
 
   useEffect(() => {
     currentTrackIndexRef.current = currentTrackIndex;
@@ -56,6 +59,10 @@ export default function CinematicScrollHero() {
     // Prepare incoming video in background (behind active video)
     nextVideo.muted = true;
     nextVideo.defaultMuted = true;
+    nextVideo.setAttribute("muted", "");
+    nextVideo.setAttribute("playsinline", "");
+    nextVideo.setAttribute("webkit-playsinline", "");
+
     if (nextVideo.preload !== "auto") {
       nextVideo.preload = "auto";
     }
@@ -69,7 +76,6 @@ export default function CinematicScrollHero() {
       nextVideo.removeEventListener("timeupdate", checkFrameReady);
       nextVideo.removeEventListener("playing", triggerSwap);
 
-      const prevIndex = currentTrackIndex;
       setCurrentTrackIndex(nextIndex);
       setPendingTrackIndex(null);
 
@@ -85,7 +91,6 @@ export default function CinematicScrollHero() {
     };
 
     const checkFrameReady = () => {
-      // Incoming video has actively rendered frames: safe to swap!
       if (nextVideo.currentTime > 0.05) {
         triggerSwap();
       }
@@ -98,6 +103,7 @@ export default function CinematicScrollHero() {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
+          setIsAutoplayBlocked(false);
           triggerSwap();
         })
         .catch((err) => {
@@ -113,53 +119,89 @@ export default function CinematicScrollHero() {
   };
 
   const handleVideoEnded = (idx: number) => {
-    if (idx === currentTrackIndexRef.current) {
+    // Only advance playlist if Hero is actively in the viewport
+    if (idx === currentTrackIndexRef.current && isIntersectingRef.current) {
       const nextIndex = (currentTrackIndexRef.current + 1) % HERO_PLAYLIST.length;
       switchToTrack(nextIndex);
     }
   };
 
+  // Explicit User Activation unlock handler (touch, click, tap anywhere)
+  const unlockAndPlay = useCallback(() => {
+    const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
+    if (activeVideo) {
+      activeVideo.muted = true;
+      activeVideo.defaultMuted = true;
+      activeVideo.setAttribute("muted", "");
+      activeVideo.setAttribute("playsinline", "");
+      activeVideo.setAttribute("webkit-playsinline", "");
+
+      activeVideo.play()
+        .then(() => {
+          setIsAutoplayBlocked(false);
+        })
+        .catch((err) => {
+          console.warn("Unlock attempt failed:", err);
+        });
+    }
+  }, []);
+
   useEffect(() => {
-    // 1. Initial attempt to play track 0
+    let unmounted = false;
     const firstVideo = videoRefs.current[0];
+
+    // Configure native properties on DOM element
     if (firstVideo) {
       firstVideo.muted = true;
       firstVideo.defaultMuted = true;
+      firstVideo.setAttribute("muted", "");
+      firstVideo.setAttribute("playsinline", "");
+      firstVideo.setAttribute("webkit-playsinline", "");
+    }
+
+    // Attempt autoplay as soon as the media buffer has valid frames
+    const attemptInitialPlay = () => {
+      if (!firstVideo || unmounted) return;
       const playPromise = firstVideo.play();
       if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn("Initial autoplay blocked by cellular policy:", err);
-        });
+        playPromise
+          .then(() => {
+            if (!unmounted) setIsAutoplayBlocked(false);
+          })
+          .catch((err) => {
+            console.warn("Initial autoplay restricted by browser cellular policy:", err);
+            if (!unmounted) setIsAutoplayBlocked(true);
+          });
+      }
+    };
+
+    if (firstVideo) {
+      if (firstVideo.readyState >= 2) {
+        attemptInitialPlay();
+      } else {
+        firstVideo.addEventListener("loadeddata", attemptInitialPlay, { once: true });
+        firstVideo.addEventListener("canplay", attemptInitialPlay, { once: true });
+        attemptInitialPlay();
       }
     }
 
-    // 2. Persistent silent User Activation listener (taps, clicks, pointerdown)
-    const handleUserInteraction = () => {
-      const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
-      if (activeVideo && activeVideo.paused) {
-        activeVideo.muted = true;
-        activeVideo.defaultMuted = true;
-        activeVideo.play().then(() => {
-          cleanupListeners();
-        }).catch(() => {
-          // Keep listener until user gesture satisfies policy
-        });
-      } else if (activeVideo && !activeVideo.paused) {
-        cleanupListeners();
+    // Check if autoplay was blocked after 1000ms
+    const policyCheckTimer = setTimeout(() => {
+      if (!unmounted && firstVideo && firstVideo.paused) {
+        setIsAutoplayBlocked(true);
       }
+    }, 1000);
+
+    // Global listener for first gesture anywhere on screen
+    const handleFirstGesture = () => {
+      unlockAndPlay();
     };
 
-    const cleanupListeners = () => {
-      window.removeEventListener("pointerdown", handleUserInteraction);
-      window.removeEventListener("touchend", handleUserInteraction);
-      window.removeEventListener("click", handleUserInteraction);
-    };
+    window.addEventListener("pointerdown", handleFirstGesture, { passive: true });
+    window.addEventListener("touchend", handleFirstGesture, { passive: true });
+    window.addEventListener("click", handleFirstGesture, { passive: true });
 
-    window.addEventListener("pointerdown", handleUserInteraction, { passive: true });
-    window.addEventListener("touchend", handleUserInteraction, { passive: true });
-    window.addEventListener("click", handleUserInteraction, { passive: true });
-
-    // 3. Predictive pre-buffering: 4s after mount, preload metadata for track 1
+    // Predictive pre-buffering for track 1
     const bufferTimer = setTimeout(() => {
       if (videoRefs.current[1] && videoRefs.current[1].preload !== "auto") {
         videoRefs.current[1].preload = "metadata";
@@ -167,30 +209,71 @@ export default function CinematicScrollHero() {
     }, 4000);
 
     return () => {
+      unmounted = true;
+      clearTimeout(policyCheckTimer);
       clearTimeout(bufferTimer);
       if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
-      cleanupListeners();
+      window.removeEventListener("pointerdown", handleFirstGesture);
+      window.removeEventListener("touchend", handleFirstGesture);
+      window.removeEventListener("click", handleFirstGesture);
     };
-  }, []);
+  }, [unlockAndPlay]);
+
+  // Viewport IntersectionObserver: Pause videos when scrolled away to avoid skipping clips off-screen
+  useEffect(() => {
+    if (!sectionRef.current || typeof window === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersectingRef.current = entry.isIntersecting;
+        const activeVideo = videoRefs.current[currentTrackIndexRef.current];
+        if (!activeVideo) return;
+
+        if (entry.isIntersecting) {
+          if (activeVideo.paused && !isAutoplayBlocked) {
+            activeVideo.play().catch(() => {});
+          }
+        } else {
+          // Pause when scrolled off-screen
+          if (!activeVideo.paused) {
+            activeVideo.pause();
+          }
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [isAutoplayBlocked]);
 
   return (
-    <section className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
+    <section
+      ref={sectionRef}
+      onClick={unlockAndPlay}
+      className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center cursor-default"
+    >
       {/* Background Video Layer with Double-Buffered Zero-Glitch Swap */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
         {HERO_PLAYLIST.map((track, idx) => {
           const isActive = idx === currentTrackIndex;
-          const isPending = idx === pendingTrackIndex;
 
           return (
             <video
               key={track.src}
               src={track.src}
               ref={(el) => {
-                videoRefs.current[idx] = el;
+                if (el) {
+                  videoRefs.current[idx] = el;
+                  el.muted = true;
+                  el.defaultMuted = true;
+                  el.setAttribute("muted", "");
+                  el.setAttribute("playsinline", "");
+                  el.setAttribute("webkit-playsinline", "");
+                }
               }}
               autoPlay={idx === 0}
               muted
-              defaultMuted
               playsInline
               preload={idx === 0 ? "auto" : "none"}
               poster={idx === 0 ? track.poster : undefined}
@@ -208,6 +291,31 @@ export default function CinematicScrollHero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1A120B]/95 via-[#1A120B]/55 to-transparent w-full md:w-3/5 pointer-events-none z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-transparent to-[#1A120B]/40 pointer-events-none z-10" />
       </div>
+
+      {/* Autoplay Cellular Fallback: Warm Luxury Tap to Play Pill */}
+      <AnimatePresence>
+        {isAutoplayBlocked && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-20 sm:bottom-8 left-5 sm:left-12 z-30"
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockAndPlay();
+              }}
+              className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#1A120B]/85 backdrop-blur-md border border-[#D4A853]/60 text-[#FAF7F2] text-xs uppercase tracking-wider font-semibold shadow-xl shadow-black/60 cursor-pointer hover:bg-[#1A120B] transition-all hover:scale-105 active:scale-95"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-ping" />
+              <Play className="w-3.5 h-3.5 text-[#D4A853] fill-[#D4A853]" />
+              <span>{t('tapToPlay')}</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
       <div className="relative z-20 max-w-[1200px] w-full mx-auto px-5 sm:px-6 md:px-12 h-full flex flex-col justify-center text-left pt-16 sm:pt-20">
@@ -279,7 +387,10 @@ export default function CinematicScrollHero() {
             return (
               <button
                 key={idx}
-                onClick={() => switchToTrack(idx)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  switchToTrack(idx);
+                }}
                 className="p-2 min-h-[36px] flex items-center justify-center cursor-pointer"
                 aria-label={`Select shot ${idx + 1}`}
               >
