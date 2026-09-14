@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -31,31 +31,75 @@ const HERO_PLAYLIST = [
 export default function CinematicScrollHero() {
   const t = useTranslations("Hero");
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [pendingTrackIndex, setPendingTrackIndex] = useState<number | null>(null);
+  const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Double-Buffered Seamless Frame-Ready Swap
   const switchToTrack = (nextIndex: number) => {
+    if (nextIndex === currentTrackIndex) return;
+
     const nextVideo = videoRefs.current[nextIndex];
-    if (nextVideo) {
-      nextVideo.muted = true;
-      nextVideo.defaultMuted = true;
-      if (nextVideo.preload !== "auto") {
-        nextVideo.preload = "auto";
-      }
-      nextVideo.currentTime = 0;
-      const playPromise = nextVideo.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn("Video playback autoplay blocked/ready:", err);
-        });
-      }
+    if (!nextVideo) {
+      setCurrentTrackIndex(nextIndex);
+      return;
     }
-    // Pause other videos to optimize GPU/CPU
-    videoRefs.current.forEach((vid, idx) => {
-      if (vid && idx !== nextIndex) {
-        vid.pause();
+
+    // Set pending state to update UI indicator immediately
+    setPendingTrackIndex(nextIndex);
+
+    // Prepare incoming video in background (behind active video)
+    nextVideo.muted = true;
+    nextVideo.defaultMuted = true;
+    if (nextVideo.preload !== "auto") {
+      nextVideo.preload = "auto";
+    }
+    nextVideo.currentTime = 0;
+
+    let swapped = false;
+    const triggerSwap = () => {
+      if (swapped) return;
+      swapped = true;
+
+      nextVideo.removeEventListener("timeupdate", checkFrameReady);
+      nextVideo.removeEventListener("playing", triggerSwap);
+
+      const prevIndex = currentTrackIndex;
+      setCurrentTrackIndex(nextIndex);
+      setPendingTrackIndex(null);
+
+      // Gracefully pause previous video only AFTER crossfade completes (750ms)
+      if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+      switchTimeoutRef.current = setTimeout(() => {
+        const prevVideo = videoRefs.current[prevIndex];
+        if (prevVideo && prevIndex !== nextIndex) {
+          prevVideo.pause();
+        }
+      }, 750);
+    };
+
+    const checkFrameReady = () => {
+      // Incoming video has actively rendered frames: safe to swap!
+      if (nextVideo.currentTime > 0.05) {
+        triggerSwap();
       }
-    });
-    setCurrentTrackIndex(nextIndex);
+    };
+
+    nextVideo.addEventListener("timeupdate", checkFrameReady);
+    nextVideo.addEventListener("playing", triggerSwap);
+
+    const playPromise = nextVideo.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        console.warn("Incoming track play warning:", err);
+        // Fallback swap if browser blocked play
+        setTimeout(triggerSwap, 300);
+      });
+    }
+
+    // Safety fallback: if timeupdate doesn't fire within 1.2s, swap anyway
+    setTimeout(triggerSwap, 1200);
   };
 
   const handleVideoEnded = (idx: number) => {
@@ -65,71 +109,119 @@ export default function CinematicScrollHero() {
     }
   };
 
+  const handleManualUnlock = () => {
+    const activeVideo = videoRefs.current[currentTrackIndex] || videoRefs.current[0];
+    if (activeVideo) {
+      activeVideo.muted = true;
+      activeVideo.defaultMuted = true;
+      activeVideo.play().then(() => {
+        setIsAutoplayBlocked(false);
+      }).catch((err) => {
+        console.warn("Manual unlock failed:", err);
+      });
+    }
+  };
+
   useEffect(() => {
-    // Initial start for first video with explicit mute assurance for iOS
+    let unmounted = false;
+
+    // 1. Initial attempt to play track 0
     const firstVideo = videoRefs.current[0];
     if (firstVideo) {
       firstVideo.muted = true;
       firstVideo.defaultMuted = true;
       const playPromise = firstVideo.play();
       if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn("Initial autoplay blocked/ready:", err);
-        });
+        playPromise
+          .then(() => {
+            if (!unmounted) setIsAutoplayBlocked(false);
+          })
+          .catch((err) => {
+            console.warn("Initial autoplay blocked by cellular policy:", err);
+            if (!unmounted) setIsAutoplayBlocked(true);
+          });
       }
     }
 
-    // Fallback for iOS Low Power Mode: unlock video on first user tap or scroll
-    const handleFirstInteraction = () => {
+    // 2. Health check: if after 1.5s video is still paused, show fallback pill
+    const healthCheckTimer = setTimeout(() => {
       const activeVideo = videoRefs.current[0];
+      if (activeVideo && activeVideo.paused && !unmounted) {
+        setIsAutoplayBlocked(true);
+      }
+    }, 1500);
+
+    // 3. Persistent User Activation listener (taps, clicks, pointerdown)
+    const handleUserInteraction = () => {
+      const activeVideo = videoRefs.current[currentTrackIndex] || videoRefs.current[0];
       if (activeVideo && activeVideo.paused) {
         activeVideo.muted = true;
-        activeVideo.play().catch(() => {});
+        activeVideo.defaultMuted = true;
+        activeVideo.play().then(() => {
+          if (!unmounted) setIsAutoplayBlocked(false);
+          cleanupListeners();
+        }).catch(() => {
+          // Keep listener until user gesture satisfies policy
+        });
+      } else if (activeVideo && !activeVideo.paused) {
+        if (!unmounted) setIsAutoplayBlocked(false);
+        cleanupListeners();
       }
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
     };
 
-    window.addEventListener("touchstart", handleFirstInteraction, { once: true, passive: true });
-    window.addEventListener("scroll", handleFirstInteraction, { once: true, passive: true });
+    const cleanupListeners = () => {
+      window.removeEventListener("pointerdown", handleUserInteraction);
+      window.removeEventListener("touchend", handleUserInteraction);
+      window.removeEventListener("click", handleUserInteraction);
+    };
 
-    // Lazily buffer the second video after the initial page has settled (4 seconds)
-    const timer = setTimeout(() => {
-      if (videoRefs.current[1]) {
+    window.addEventListener("pointerdown", handleUserInteraction, { passive: true });
+    window.addEventListener("touchend", handleUserInteraction, { passive: true });
+    window.addEventListener("click", handleUserInteraction, { passive: true });
+
+    // 4. Predictive pre-buffering: 4s after mount, preload metadata for track 1
+    const bufferTimer = setTimeout(() => {
+      if (videoRefs.current[1] && videoRefs.current[1].preload !== "auto") {
         videoRefs.current[1].preload = "metadata";
       }
     }, 4000);
 
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
+      unmounted = true;
+      clearTimeout(healthCheckTimer);
+      clearTimeout(bufferTimer);
+      if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+      cleanupListeners();
     };
-  }, []);
+  }, [currentTrackIndex]);
 
   return (
     <section className="relative bg-[#1A120B] min-h-[100dvh] h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center">
-      {/* Background Video Layer with Instant Multi-Buffer (Zero Black Millisecond) */}
+      {/* Background Video Layer with Double-Buffered Zero-Glitch Swap */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
         {HERO_PLAYLIST.map((track, idx) => {
           const isActive = idx === currentTrackIndex;
+          const isPending = idx === pendingTrackIndex;
+
           return (
             <video
               key={track.src}
               ref={(el) => {
                 videoRefs.current[idx] = el;
               }}
-              autoPlay={isActive}
+              autoPlay={idx === 0}
               muted
               defaultMuted
               playsInline
-              preload={isActive ? "auto" : "none"}
-              poster={track.poster}
+              preload={idx === 0 ? "auto" : "none"}
+              poster={idx === 0 ? track.poster : undefined}
               onEnded={() => handleVideoEnded(idx)}
               className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ${
                 isActive
-                  ? "opacity-90 z-10 block"
-                  : "opacity-0 z-0 pointer-events-none"
+                  ? "opacity-90 z-10"
+                  : isPending
+                  ? "opacity-0 z-0"
+                  : "opacity-0 -z-10 pointer-events-none"
               }`}
             >
               <source src={track.src} type="video/mp4" />
@@ -141,6 +233,28 @@ export default function CinematicScrollHero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1A120B]/95 via-[#1A120B]/55 to-transparent w-full md:w-3/5 pointer-events-none z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-transparent to-[#1A120B]/40 pointer-events-none z-10" />
       </div>
+
+      {/* Autoplay Cellular Fallback Badge */}
+      <AnimatePresence>
+        {isAutoplayBlocked && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 12 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-24 sm:bottom-12 left-6 sm:left-12 z-30"
+          >
+            <button
+              onClick={handleManualUnlock}
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-[#D4A853]/60 text-[#FAF7F2] text-xs uppercase tracking-wider font-semibold shadow-xl shadow-black/50 cursor-pointer hover:bg-black/90 transition-all hover:scale-105"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-ping" />
+              <Play className="w-3.5 h-3.5 text-[#D4A853] fill-[#D4A853]" />
+              <span>{t('tapToPlay')}</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
       <div className="relative z-20 max-w-[1200px] w-full mx-auto px-5 sm:px-6 md:px-12 h-full flex flex-col justify-center text-left pt-16 sm:pt-20">
@@ -207,20 +321,23 @@ export default function CinematicScrollHero() {
       {/* Playlist Indicator */}
       {HERO_PLAYLIST.length > 1 && (
         <div className="absolute bottom-8 right-8 z-20 flex items-center bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-          {HERO_PLAYLIST.map((track, idx) => (
-            <button
-              key={idx}
-              onClick={() => switchToTrack(idx)}
-              className="p-2 min-h-[36px] flex items-center justify-center cursor-pointer"
-              aria-label={`Select shot ${idx + 1}`}
-            >
-              <span
-                className={`h-2 rounded-full transition-all duration-300 block ${
-                  idx === currentTrackIndex ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
-                }`}
-              />
-            </button>
-          ))}
+          {HERO_PLAYLIST.map((track, idx) => {
+            const isSelected = idx === (pendingTrackIndex !== null ? pendingTrackIndex : currentTrackIndex);
+            return (
+              <button
+                key={idx}
+                onClick={() => switchToTrack(idx)}
+                className="p-2 min-h-[36px] flex items-center justify-center cursor-pointer"
+                aria-label={`Select shot ${idx + 1}`}
+              >
+                <span
+                  className={`h-2 rounded-full transition-all duration-300 block ${
+                    isSelected ? "w-8 bg-[#D4A853]" : "w-2 bg-white/40 hover:bg-white/70"
+                  }`}
+                />
+              </button>
+            );
+          })}
         </div>
       )}
 
