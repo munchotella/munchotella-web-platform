@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -33,7 +33,6 @@ export default function CinematicScrollHero() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const currentTrackIndexRef = useRef(0);
   const [pendingTrackIndex, setPendingTrackIndex] = useState<number | null>(null);
-  const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const switchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -120,22 +119,7 @@ export default function CinematicScrollHero() {
     }
   };
 
-  const handleManualUnlock = () => {
-    const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
-    if (activeVideo) {
-      activeVideo.muted = true;
-      activeVideo.defaultMuted = true;
-      activeVideo.play().then(() => {
-        setIsAutoplayBlocked(false);
-      }).catch((err) => {
-        console.warn("Manual unlock failed:", err);
-      });
-    }
-  };
-
   useEffect(() => {
-    let unmounted = false;
-
     // 1. Initial attempt to play track 0
     const firstVideo = videoRefs.current[0];
     if (firstVideo) {
@@ -143,39 +127,24 @@ export default function CinematicScrollHero() {
       firstVideo.defaultMuted = true;
       const playPromise = firstVideo.play();
       if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            if (!unmounted) setIsAutoplayBlocked(false);
-          })
-          .catch((err) => {
-            console.warn("Initial autoplay blocked by cellular policy:", err);
-            if (!unmounted) setIsAutoplayBlocked(true);
-          });
+        playPromise.catch((err) => {
+          console.warn("Initial autoplay blocked by cellular policy:", err);
+        });
       }
     }
 
-    // 2. Health check: if after 1.5s video is still paused, show fallback pill
-    const healthCheckTimer = setTimeout(() => {
-      const activeVideo = videoRefs.current[0];
-      if (activeVideo && activeVideo.paused && !unmounted) {
-        setIsAutoplayBlocked(true);
-      }
-    }, 1500);
-
-    // 3. Persistent User Activation listener (taps, clicks, pointerdown)
+    // 2. Persistent silent User Activation listener (taps, clicks, pointerdown)
     const handleUserInteraction = () => {
       const activeVideo = videoRefs.current[currentTrackIndexRef.current] || videoRefs.current[0];
       if (activeVideo && activeVideo.paused) {
         activeVideo.muted = true;
         activeVideo.defaultMuted = true;
         activeVideo.play().then(() => {
-          if (!unmounted) setIsAutoplayBlocked(false);
           cleanupListeners();
         }).catch(() => {
           // Keep listener until user gesture satisfies policy
         });
       } else if (activeVideo && !activeVideo.paused) {
-        if (!unmounted) setIsAutoplayBlocked(false);
         cleanupListeners();
       }
     };
@@ -190,7 +159,7 @@ export default function CinematicScrollHero() {
     window.addEventListener("touchend", handleUserInteraction, { passive: true });
     window.addEventListener("click", handleUserInteraction, { passive: true });
 
-    // 4. Predictive pre-buffering: 4s after mount, preload metadata for track 1
+    // 3. Predictive pre-buffering: 4s after mount, preload metadata for track 1
     const bufferTimer = setTimeout(() => {
       if (videoRefs.current[1] && videoRefs.current[1].preload !== "auto") {
         videoRefs.current[1].preload = "metadata";
@@ -198,8 +167,6 @@ export default function CinematicScrollHero() {
     }, 4000);
 
     return () => {
-      unmounted = true;
-      clearTimeout(healthCheckTimer);
       clearTimeout(bufferTimer);
       if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
       cleanupListeners();
@@ -241,28 +208,6 @@ export default function CinematicScrollHero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1A120B]/95 via-[#1A120B]/55 to-transparent w-full md:w-3/5 pointer-events-none z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A120B] via-transparent to-[#1A120B]/40 pointer-events-none z-10" />
       </div>
-
-      {/* Autoplay Cellular Fallback Badge */}
-      <AnimatePresence>
-        {isAutoplayBlocked && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 12 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bottom-24 sm:bottom-12 left-6 sm:left-12 z-30"
-          >
-            <button
-              onClick={handleManualUnlock}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-black/70 backdrop-blur-md border border-[#D4A853]/60 text-[#FAF7F2] text-xs uppercase tracking-wider font-semibold shadow-xl shadow-black/50 cursor-pointer hover:bg-black/90 transition-all hover:scale-105"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-ping" />
-              <Play className="w-3.5 h-3.5 text-[#D4A853] fill-[#D4A853]" />
-              <span>{t('tapToPlay')}</span>
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Hero UI Content (Left Aligned for Optimal UI Safe Zone) */}
       <div className="relative z-20 max-w-[1200px] w-full mx-auto px-5 sm:px-6 md:px-12 h-full flex flex-col justify-center text-left pt-16 sm:pt-20">
