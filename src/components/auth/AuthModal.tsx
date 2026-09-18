@@ -168,15 +168,20 @@ export default function AuthModal() {
     }
   };
 
-  const normalizePhoneNumber = (raw: string, country: Country) => {
-    let cleaned = raw.replace(/\s+/g, '');
-    if (cleaned.startsWith('+')) {
-      return cleaned;
+  const normalizePhoneNumber = (raw: string, _country?: Country) => {
+    const digitsOnly = raw.replace(/[^\d]/g, '');
+    let localDigits = digitsOnly;
+    if (localDigits.startsWith('373')) {
+      localDigits = localDigits.substring(3);
+    } else if (localDigits.startsWith('0')) {
+      localDigits = localDigits.substring(1);
     }
-    if (cleaned.startsWith('0')) {
-      return country.dialCode + cleaned.substring(1);
+
+    if (!/^[67]\d{7}$/.test(localDigits)) {
+      throw new Error("Acceptăm exclusiv numere din Republica Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).");
     }
-    return country.dialCode + cleaned;
+
+    return `+373${localDigits}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

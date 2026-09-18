@@ -101,6 +101,7 @@ export default function CheckoutPage() {
     isGeocoded: false,
   });
   const [addressError, setAddressError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const { user, token, updateUser, login } = useAuth();
 
@@ -395,12 +396,25 @@ export default function CheckoutPage() {
   };
 
   const triggerOtpSms = async () => {
-    const cleanDigits = formData.phone.replace(/[^\d]/g, '').replace(/^0+/, '');
-    if (!cleanDigits || cleanDigits.length < 6) {
-      setSmsDispatchError(t('otpPhoneMissing') || "Te rugăm să introduci un număr de telefon valid.");
+    // Validare strictă număr Republica Moldova (+373)
+    const rawPhone = formData.phone.trim();
+    const digitsOnly = rawPhone.replace(/[^\d]/g, '');
+    let localDigits = digitsOnly;
+    if (localDigits.startsWith('373')) {
+      localDigits = localDigits.substring(3);
+    } else if (localDigits.startsWith('0')) {
+      localDigits = localDigits.substring(1);
+    }
+
+    const isValidMoldovan = /^[67]\d{7}$/.test(localDigits);
+    if (!isValidMoldovan) {
+      const errMsg = "Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).";
+      setPhoneError(errMsg);
+      setSmsDispatchError(errMsg);
       return false;
     }
 
+    setPhoneError("");
     setIsSendingOtp(true);
     setOtpError("");
     setSmsDispatchError("");
@@ -410,9 +424,7 @@ export default function CheckoutPage() {
       if (typeof window !== "undefined" && auth) {
         setupRecaptcha();
         const appVerifier = (window as any).recaptchaVerifierCheckout;
-        const phoneFormatted = formData.phone.trim().startsWith('+')
-          ? `+${formData.phone.replace(/[^\d]/g, '')}`
-          : `${selectedCountry.dialCode}${cleanDigits}`;
+        const phoneFormatted = `+373${localDigits}`;
 
         const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
         setConfirmationResult(confirmation);
@@ -486,12 +498,16 @@ export default function CheckoutPage() {
         ? { lat: RESTAURANT_LOCATION.lat, lng: RESTAURANT_LOCATION.lng }
         : { lat: formData.lat || RESTAURANT_LOCATION.lat, lng: formData.lng || RESTAURANT_LOCATION.lng };
 
-      // Normalizare telefon cu prefixul de țară selectat
+      // Normalizare telefon exclusiv pe formatul canonic Republica Moldova (+373XXXXXXXX)
       const rawPhone = formData.phone.trim();
-      const cleanDigits = rawPhone.replace(/[^\d]/g, '').replace(/^0+/, '');
-      const fullPhone = rawPhone.startsWith('+')
-        ? `+${rawPhone.replace(/[^\d]/g, '')}`
-        : `${selectedCountry.dialCode}${cleanDigits}`;
+      const digitsOnly = rawPhone.replace(/[^\d]/g, '');
+      let localDigits = digitsOnly;
+      if (localDigits.startsWith('373')) {
+        localDigits = localDigits.substring(3);
+      } else if (localDigits.startsWith('0')) {
+        localDigits = localDigits.substring(1);
+      }
+      const fullPhone = `+373${localDigits}`;
 
       const orderPayload = {
         customer: {
@@ -665,63 +681,85 @@ export default function CheckoutPage() {
   };
 
   const handleNextStep = async (step: number) => {
-    if (step === 3 && deliveryType === 'delivery') {
-      if (!formData.name.trim() || !formData.phone.trim() || !formData.street.trim()) {
+    if (step === 3) {
+      // Validare obligatorie nume, telefon și adresă (pentru livrare)
+      if (!formData.name.trim() || !formData.phone.trim() || (deliveryType === 'delivery' && !formData.street.trim())) {
         setActiveStep(2);
         return;
       }
 
-      if (!formData.isGeocoded || formData.lat === null || formData.lng === null) {
-        if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
-          try {
-            const geocoder = new window.google.maps.Geocoder();
-            const queryAddress = formData.street.toLowerCase().includes("chișinău") || formData.street.toLowerCase().includes("chisinau")
-              ? formData.street
-              : `${formData.street}, Chișinău, Moldova`;
+      // Validare strictă număr Republica Moldova (+373)
+      const rawPhone = formData.phone.trim();
+      const digitsOnly = rawPhone.replace(/[^\d]/g, '');
+      let localDigits = digitsOnly;
+      if (localDigits.startsWith('373')) {
+        localDigits = localDigits.substring(3);
+      } else if (localDigits.startsWith('0')) {
+        localDigits = localDigits.substring(1);
+      }
 
-            const res = await new Promise<{ lat: number; lng: number; address: string } | null>((resolve) => {
-              geocoder.geocode({ address: queryAddress, componentRestrictions: { country: "md" } }, (results, status) => {
-                if (status === "OK" && results && results[0] && results[0].geometry?.location) {
-                  const loc = results[0].geometry.location;
-                  resolve({
-                    lat: loc.lat(),
-                    lng: loc.lng(),
-                    address: results[0].formatted_address || formData.street
-                  });
-                } else {
-                  resolve(null);
-                }
-              });
-            });
-
-            if (res) {
-              const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
-              const roadDist = straightDist * 1.3;
-              setFormData(prev => ({
-                ...prev,
-                street: res.address,
-                lat: res.lat,
-                lng: res.lng,
-                estimatedKm: roadDist,
-                isGeocoded: true
-              }));
-              setAddressError("");
-              setActiveStep(step);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              return;
-            }
-          } catch (e) {
-            console.warn("Geocoding step check failed:", e);
-          }
-        }
-
-        setAddressError("Te rugăm să selectezi adresa din lista de sugestii sau să folosești opțiunea 'Alege pe Hartă' pentru a plasa pinul.");
-        setIsMapModalOpen(true);
+      const isValidMoldovan = /^[67]\d{7}$/.test(localDigits);
+      if (!isValidMoldovan) {
+        setPhoneError("Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).");
+        setActiveStep(2);
         return;
+      }
+      setPhoneError("");
+
+      if (deliveryType === 'delivery') {
+        if (!formData.isGeocoded || formData.lat === null || formData.lng === null) {
+          if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
+            try {
+              const geocoder = new window.google.maps.Geocoder();
+              const queryAddress = formData.street.toLowerCase().includes("chișinău") || formData.street.toLowerCase().includes("chisinau")
+                ? formData.street
+                : `${formData.street}, Chișinău, Moldova`;
+
+              const res = await new Promise<{ lat: number; lng: number; address: string } | null>((resolve) => {
+                geocoder.geocode({ address: queryAddress, componentRestrictions: { country: "md" } }, (results, status) => {
+                  if (status === "OK" && results && results[0] && results[0].geometry?.location) {
+                    const loc = results[0].geometry.location;
+                    resolve({
+                      lat: loc.lat(),
+                      lng: loc.lng(),
+                      address: results[0].formatted_address || formData.street
+                    });
+                  } else {
+                    resolve(null);
+                  }
+                });
+              });
+
+              if (res) {
+                const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
+                const roadDist = straightDist * 1.3;
+                setFormData(prev => ({
+                  ...prev,
+                  street: res.address,
+                  lat: res.lat,
+                  lng: res.lng,
+                  estimatedKm: roadDist,
+                  isGeocoded: true
+                }));
+                setAddressError("");
+                setActiveStep(step);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+              }
+            } catch (e) {
+              console.warn("Geocoding step check failed:", e);
+            }
+          }
+
+          setAddressError("Te rugăm să selectezi adresa din lista de sugestii sau să folosești opțiunea 'Alege pe Hartă' pentru a plasa pinul.");
+          setIsMapModalOpen(true);
+          return;
+        }
       }
     }
 
     setAddressError("");
+    setPhoneError("");
     setActiveStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -911,7 +949,7 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
-                        <div className="relative flex items-center bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all">
+                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all ${phoneError ? 'border-red-500 ring-1 ring-red-500/20' : 'border-[#E8E2D9]'}`}>
                           <CountrySelector
                             selectedCountry={selectedCountry}
                             onSelect={(country) => setSelectedCountry(country)}
@@ -919,12 +957,20 @@ export default function CheckoutPage() {
                           <input
                             type="tel"
                             required
-                            placeholder={t('placeholderPhone') || "79 000 000"}
+                            placeholder="069 123 456"
                             className="w-full bg-transparent border-none px-4 py-3.5 outline-none text-[#1A120B] text-sm shadow-none"
                             value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => {
+                              setFormData({ ...formData, phone: e.target.value });
+                              if (phoneError) setPhoneError("");
+                            }}
                           />
                         </div>
+                        {phoneError && (
+                          <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                            <span>⚠️</span> {phoneError}
+                          </p>
+                        )}
                       </div>
                       <div className="sm:col-span-2">
                         <div className="flex items-center justify-between mb-2">

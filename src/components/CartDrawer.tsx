@@ -73,11 +73,25 @@ export default function CartDrawer() {
     setIsSubmitting(true);
     
     try {
+      const digitsOnly = formData.phone.replace(/[^\d]/g, '');
+      let localDigits = digitsOnly;
+      if (localDigits.startsWith('373')) {
+        localDigits = localDigits.substring(3);
+      } else if (localDigits.startsWith('0')) {
+        localDigits = localDigits.substring(1);
+      }
+
+      if (!/^[67]\d{7}$/.test(localDigits)) {
+        setErrorMsg("Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456).");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const phoneFormatted = `+373${localDigits}`;
+
       if (typeof window !== 'undefined' && auth) {
         initRecaptcha();
         const appVerifier = (window as any).recaptchaVerifier;
-        const rawPhone = formData.phone.replace(/^0+/, '').replace(/\s+/g, '');
-        const phoneFormatted = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`;
         const confirmation = await signInWithPhoneNumber(auth, phoneFormatted, appVerifier);
         setConfirmationResult(confirmation);
         setIsSubmitting(false);
