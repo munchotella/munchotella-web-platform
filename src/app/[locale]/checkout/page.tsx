@@ -96,9 +96,11 @@ export default function CheckoutPage() {
     intercom: "",
     notes: "",
     estimatedKm: 0,
-    lat: 46.996452,
-    lng: 28.834809,
+    lat: null as number | null,
+    lng: null as number | null,
+    isGeocoded: false,
   });
+  const [addressError, setAddressError] = useState("");
 
   const { user, token, updateUser, login } = useAuth();
 
@@ -184,7 +186,10 @@ export default function CheckoutPage() {
               phone: `${selectedCountry.dialCode}${cleanPhone.startsWith('+') ? cleanPhone.slice(selectedCountry.dialCode.length) : cleanPhone}`,
               address: formData.street,
               notes: formData.notes,
-              coordinates: { lat: formData.lat, lng: formData.lng },
+              coordinates: {
+                lat: formData.lat || RESTAURANT_LOCATION.lat,
+                lng: formData.lng || RESTAURANT_LOCATION.lng
+              },
             },
             items: items.map(i => ({
               menuItemId: i.id || i.cartItemId,
@@ -199,7 +204,7 @@ export default function CheckoutPage() {
               })),
             })),
             deliveryType,
-            doorDelivery,
+            doorDelivery: (formData.estimatedKm < 1.0 && formData.isGeocoded) ? doorDelivery : false,
           }),
         });
 
@@ -227,7 +232,7 @@ export default function CheckoutPage() {
 
 
   // Exact Munchotella Backend Delivery Calculation Engine
-  const hasAddress = !!formData.street.trim();
+  const hasAddress = !!formData.street.trim() && formData.isGeocoded && formData.lat !== null;
 
   const deliveryCalc = useMemo(() => {
     if (deliveryType === "pickup") {
@@ -241,14 +246,14 @@ export default function CheckoutPage() {
       };
     }
 
-    if (!formData.street.trim()) {
+    if (!formData.street.trim() || !formData.isGeocoded || formData.lat === null) {
       return {
         fee: 0,
         isDeliverable: true,
         isPedestrian: false,
         distanceKm: 0,
         hasAddress: false,
-        typeLabel: "Introduceți adresa de livrare",
+        typeLabel: formData.street.trim() ? "Se determină distanța..." : "Introduceți adresa de livrare",
       };
     }
 
@@ -293,7 +298,7 @@ export default function CheckoutPage() {
       hasAddress: true,
       typeLabel: "Livrare prin Taxi",
     };
-  }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm]);
+  }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm, formData.isGeocoded, formData.lat]);
 
   let discountAmount = 0;
   if (activePromo) {
@@ -333,10 +338,10 @@ export default function CheckoutPage() {
   const grandTotal = Math.max(0, totalPrice - discountAmount + deliveryFee);
 
   React.useEffect(() => {
-    if (!deliveryCalc.isPedestrian && doorDelivery) {
+    if ((!deliveryCalc.isPedestrian || formData.estimatedKm >= 1.0) && doorDelivery) {
       setDoorDelivery(false);
     }
-  }, [deliveryCalc.isPedestrian, doorDelivery]);
+  }, [deliveryCalc.isPedestrian, formData.estimatedKm, doorDelivery]);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -479,13 +484,20 @@ export default function CheckoutPage() {
 
       const orderCoordinates = deliveryType === 'pickup'
         ? { lat: RESTAURANT_LOCATION.lat, lng: RESTAURANT_LOCATION.lng }
-        : { lat: formData.lat, lng: formData.lng };
+        : { lat: formData.lat || RESTAURANT_LOCATION.lat, lng: formData.lng || RESTAURANT_LOCATION.lng };
+
+      // Normalizare telefon cu prefixul de țară selectat
+      const rawPhone = formData.phone.trim();
+      const cleanDigits = rawPhone.replace(/[^\d]/g, '').replace(/^0+/, '');
+      const fullPhone = rawPhone.startsWith('+')
+        ? `+${rawPhone.replace(/[^\d]/g, '')}`
+        : `${selectedCountry.dialCode}${cleanDigits}`;
 
       const orderPayload = {
         customer: {
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
+          phone: fullPhone,
           address: fullAddress,
           notes: aggregatedNotes,
           coordinates: orderCoordinates
@@ -507,7 +519,7 @@ export default function CheckoutPage() {
           quantity: i.quantity
         })),
         paymentMethod: paymentMethod === "online" ? "card" : paymentMethod,
-        doorDelivery,
+        doorDelivery: deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 ? doorDelivery : false,
         deliveryType,
         needsCutlery: false,
         promoCode: activePromo ? activePromo.code : undefined,
@@ -625,7 +637,10 @@ export default function CheckoutPage() {
               name: formData.name,
               email: formData.email,
               address: formData.street,
-              coordinates: { lat: formData.lat, lng: formData.lng }
+              coordinates: {
+                lat: formData.lat || RESTAURANT_LOCATION.lat,
+                lng: formData.lng || RESTAURANT_LOCATION.lng
+              }
             })
           });
           const authData = await authRes.json();
@@ -649,9 +664,65 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleNextStep = (step: number) => {
+  const handleNextStep = async (step: number) => {
+    if (step === 3 && deliveryType === 'delivery') {
+      if (!formData.name.trim() || !formData.phone.trim() || !formData.street.trim()) {
+        setActiveStep(2);
+        return;
+      }
+
+      if (!formData.isGeocoded || formData.lat === null || formData.lng === null) {
+        if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
+          try {
+            const geocoder = new window.google.maps.Geocoder();
+            const queryAddress = formData.street.toLowerCase().includes("chișinău") || formData.street.toLowerCase().includes("chisinau")
+              ? formData.street
+              : `${formData.street}, Chișinău, Moldova`;
+
+            const res = await new Promise<{ lat: number; lng: number; address: string } | null>((resolve) => {
+              geocoder.geocode({ address: queryAddress, componentRestrictions: { country: "md" } }, (results, status) => {
+                if (status === "OK" && results && results[0] && results[0].geometry?.location) {
+                  const loc = results[0].geometry.location;
+                  resolve({
+                    lat: loc.lat(),
+                    lng: loc.lng(),
+                    address: results[0].formatted_address || formData.street
+                  });
+                } else {
+                  resolve(null);
+                }
+              });
+            });
+
+            if (res) {
+              const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
+              const roadDist = straightDist * 1.3;
+              setFormData(prev => ({
+                ...prev,
+                street: res.address,
+                lat: res.lat,
+                lng: res.lng,
+                estimatedKm: roadDist,
+                isGeocoded: true
+              }));
+              setAddressError("");
+              setActiveStep(step);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              return;
+            }
+          } catch (e) {
+            console.warn("Geocoding step check failed:", e);
+          }
+        }
+
+        setAddressError("Te rugăm să selectezi adresa din lista de sugestii sau să folosești opțiunea 'Alege pe Hartă' pentru a plasa pinul.");
+        setIsMapModalOpen(true);
+        return;
+      }
+    }
+
+    setAddressError("");
     setActiveStep(step);
-    // Smooth scroll to step on mobile if needed
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -892,8 +963,9 @@ export default function CheckoutPage() {
                                     onClick={() => {
                                       const dist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, addr.lat, addr.lng);
                                       setFormData(prev => ({
-                                        ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.3
+                                        ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.3, isGeocoded: true
                                       }));
+                                      setAddressError("");
                                     }}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs transition-all shrink-0 ${
                                       isSelected 
@@ -926,16 +998,27 @@ export default function CheckoutPage() {
                           
                           <MapAutocomplete
                             value={formData.street}
-                            onChange={(val) => setFormData({ ...formData, street: val })}
+                            onChange={(val) => {
+                              setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
+                              setAddressError("");
+                            }}
                             onPlaceSelected={(lat, lng, address) => {
                               const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
                               const roadDist = straightDist * 1.3;
-                              setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
+                              setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
+                              setAddressError("");
                             }}
                             placeholder={t('placeholderAddress')}
                             className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl pl-12 pr-5 py-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
                             required={true}
                           />
+
+                          {addressError && (
+                            <div className="flex items-center gap-2 p-3 mt-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
+                              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                              <span>{addressError}</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Additional Address Info & Order Notes */}
@@ -962,8 +1045,8 @@ export default function CheckoutPage() {
                           </div>
                         </div>
 
-                        {/* Door Delivery Upsell (Only for Pedestrian) */}
-                        {deliveryCalc.isPedestrian && (
+                        {/* Door Delivery Upsell (Strictly Only for Pedestrian < 1km & Geocoded) */}
+                        {deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 && formData.isGeocoded && (
                           <label className="flex items-start gap-4 p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] cursor-pointer hover:border-[#D4A853]/50 transition-all mt-2 group">
                             <div className="pt-1">
                               <input
@@ -1420,13 +1503,14 @@ export default function CheckoutPage() {
       <MapPickerModal
         isOpen={isMapModalOpen}
         onClose={() => setIsMapModalOpen(false)}
-        initialLat={formData.lat}
-        initialLng={formData.lng}
+        initialLat={formData.lat || undefined}
+        initialLng={formData.lng || undefined}
         initialAddress={formData.street || undefined}
         onSelectLocation={({ address, lat, lng }) => {
           const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
           const roadDist = straightDist * 1.3;
-          setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng }));
+          setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
+          setAddressError("");
         }}
       />
 
