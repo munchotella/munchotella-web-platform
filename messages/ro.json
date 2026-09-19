@@ -163,7 +163,12 @@
     "otpResend": "Retrimite SMS",
     "otpResendIn": "Retrimite în {seconds}s",
     "otpInvalid": "Codul SMS este incorect sau a expirat. Te rugăm să încerci din nou.",
-    "otpPhoneMissing": "Te rugăm să introduci un număr de telefon valid."
+    "otpPhoneMissing": "Te rugăm să introduci un număr de telefon valid.",
+    "nameRequired": "Te rugăm să introduci numele tău complet.",
+    "phoneRequired": "Te rugăm să introduci numărul de telefon.",
+    "phoneInvalidFormat": "Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).",
+    "addressRequired": "Te rugăm să introduci adresa de livrare sau să o alegi pe hartă.",
+    "orderSubmitError": "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou."
   },
   "LiveStore": {
     "openNow": "Deschis Acum",

@@ -102,6 +102,11 @@ export default function CheckoutPage() {
   });
   const [addressError, setAddressError] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
+  const phoneInputRef = React.useRef<HTMLInputElement>(null);
 
   const { user, token, updateUser, login } = useAuth();
 
@@ -473,6 +478,7 @@ export default function CheckoutPage() {
 
   const executePlaceOrder = async (overrideToken?: string, unverifiedPhone: boolean = false) => {
     setIsSubmitting(true);
+    setServerError(null);
     const activeAuthToken = overrideToken || token;
 
     try {
@@ -589,7 +595,7 @@ export default function CheckoutPage() {
       
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.");
+      setServerError(err.message || t('orderSubmitError') || "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.");
     } finally {
       setIsSubmitting(false);
     }
@@ -682,13 +688,17 @@ export default function CheckoutPage() {
 
   const handleNextStep = async (step: number) => {
     if (step === 3) {
-      // Validare obligatorie nume, telefon și adresă (pentru livrare)
-      if (!formData.name.trim() || !formData.phone.trim() || (deliveryType === 'delivery' && !formData.street.trim())) {
-        setActiveStep(2);
-        return;
+      let hasError = false;
+
+      // 1. Validare obligatorie nume
+      if (!formData.name.trim()) {
+        setNameError(t('nameRequired'));
+        hasError = true;
+      } else {
+        setNameError("");
       }
 
-      // Validare strictă număr Republica Moldova (+373)
+      // 2. Validare obligatorie telefon și format
       const rawPhone = formData.phone.trim();
       const digitsOnly = rawPhone.replace(/[^\d]/g, '');
       let localDigits = digitsOnly;
@@ -698,13 +708,36 @@ export default function CheckoutPage() {
         localDigits = localDigits.substring(1);
       }
 
-      const isValidMoldovan = /^[67]\d{7}$/.test(localDigits);
-      if (!isValidMoldovan) {
-        setPhoneError("Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).");
+      if (!rawPhone) {
+        setPhoneError(t('phoneRequired'));
+        hasError = true;
+      } else if (!/^[67]\d{7}$/.test(localDigits)) {
+        setPhoneError(t('phoneInvalidFormat'));
+        hasError = true;
+      } else {
+        setPhoneError("");
+      }
+
+      // 3. Validare obligatorie adresă (pentru livrare)
+      if (deliveryType === 'delivery') {
+        if (!formData.street.trim()) {
+          setAddressError(t('addressRequired'));
+          hasError = true;
+        } else {
+          setAddressError("");
+        }
+      }
+
+      if (hasError) {
         setActiveStep(2);
+        // Focus lin pe primul câmp cu eroare
+        if (!formData.name.trim()) {
+          nameInputRef.current?.focus();
+        } else if (!formData.phone.trim() || !/^[67]\d{7}$/.test(localDigits)) {
+          phoneInputRef.current?.focus();
+        }
         return;
       }
-      setPhoneError("");
 
       if (deliveryType === 'delivery') {
         if (!formData.isGeocoded || formData.lat === null || formData.lng === null) {
@@ -751,13 +784,14 @@ export default function CheckoutPage() {
             }
           }
 
-          setAddressError("Te rugăm să selectezi adresa din lista de sugestii sau să folosești opțiunea 'Alege pe Hartă' pentru a plasa pinul.");
+          setAddressError(t('addressRequired'));
           setIsMapModalOpen(true);
           return;
         }
       }
     }
 
+    setNameError("");
     setAddressError("");
     setPhoneError("");
     setActiveStep(step);
@@ -939,22 +973,41 @@ export default function CheckoutPage() {
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('nameLabel')}</label>
                         <input
+                          ref={nameInputRef}
                           type="text"
                           required
                           placeholder={t('placeholderName')}
-                          className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                          className={`w-full bg-[#FFFCF6] border rounded-2xl px-5 py-3.5 text-sm outline-none transition-all ${
+                            nameError 
+                              ? 'border-red-500 ring-1 ring-red-500/20' 
+                              : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                          }`}
                           value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, name: e.target.value });
+                            if (nameError) setNameError("");
+                          }}
                         />
+                        {nameError && (
+                          <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{nameError}</span>
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
-                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853] transition-all ${phoneError ? 'border-red-500 ring-1 ring-red-500/20' : 'border-[#E8E2D9]'}`}>
+                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm transition-all ${
+                          phoneError 
+                            ? 'border-red-500 ring-1 ring-red-500/20' 
+                            : 'border-[#E8E2D9] focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853]'
+                        }`}>
                           <CountrySelector
                             selectedCountry={selectedCountry}
                             onSelect={(country) => setSelectedCountry(country)}
                           />
                           <input
+                            ref={phoneInputRef}
                             type="tel"
                             required
                             placeholder="069 123 456"
@@ -968,7 +1021,8 @@ export default function CheckoutPage() {
                         </div>
                         {phoneError && (
                           <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
-                            <span>⚠️</span> {phoneError}
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{phoneError}</span>
                           </p>
                         )}
                       </div>
@@ -1046,7 +1100,7 @@ export default function CheckoutPage() {
                             value={formData.street}
                             onChange={(val) => {
                               setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
-                              setAddressError("");
+                              if (addressError) setAddressError("");
                             }}
                             onPlaceSelected={(lat, lng, address) => {
                               const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
@@ -1055,40 +1109,32 @@ export default function CheckoutPage() {
                               setAddressError("");
                             }}
                             placeholder={t('placeholderAddress')}
-                            className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl pl-12 pr-5 py-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                            className={`w-full bg-[#FFFCF6] border rounded-2xl pl-12 pr-5 py-4 text-sm outline-none transition-all ${
+                              addressError 
+                                ? 'border-red-500 ring-1 ring-red-500/20' 
+                                : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                            }`}
                             required={true}
                           />
 
                           {addressError && (
-                            <div className="flex items-center gap-2 p-3 mt-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
-                              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                            <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                               <span>{addressError}</span>
-                            </div>
+                            </p>
                           )}
                         </div>
 
-                        {/* Additional Address Info & Order Notes */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="sm:col-span-1">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('buildingDetails')}</label>
-                            <input
-                              type="text"
-                              placeholder={t('placeholderBuilding')}
-                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                              value={formData.house}
-                              onChange={(e) => setFormData({ ...formData, house: e.target.value })}
-                            />
-                          </div>
-                          <div className="sm:col-span-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
-                            <input
-                              type="text"
-                              placeholder={t('placeholderNotes')}
-                              className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                              value={formData.notes}
-                              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            />
-                          </div>
+                        {/* Order Notes (Full Width - clădire/scară eliminat conform solicitării) */}
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
+                          <input
+                            type="text"
+                            placeholder={t('placeholderNotes')}
+                            className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                            value={formData.notes}
+                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                          />
                         </div>
 
                         {/* Door Delivery Upsell (Strictly Only for Pedestrian < 1km & Geocoded) */}
@@ -1497,6 +1543,23 @@ export default function CheckoutPage() {
                     </p>
                   )}
                 </div>
+
+                {serverError && (
+                  <div className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+                    <div className="flex-1 leading-relaxed">
+                      <p className="font-bold">Eroare la trimiterea comenzii</p>
+                      <p className="mt-0.5">{serverError}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setServerError(null)}
+                      className="text-red-400 hover:text-red-700 p-1 -mr-1 -mt-1 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 <button
                   type="submit"

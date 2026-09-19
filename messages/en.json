@@ -163,7 +163,12 @@
     "otpResend": "Resend SMS",
     "otpResendIn": "Resend in {seconds}s",
     "otpInvalid": "The SMS code is incorrect or has expired. Please try again.",
-    "otpPhoneMissing": "Please enter a valid phone number."
+    "otpPhoneMissing": "Please enter a valid phone number.",
+    "nameRequired": "Please enter your full name.",
+    "phoneRequired": "Please enter your phone number.",
+    "phoneInvalidFormat": "We only accept Moldovan numbers (+373) with 8 digits (e.g., 069 123 456 or 079 123 456).",
+    "addressRequired": "Please enter the delivery address or select it on the map.",
+    "orderSubmitError": "There was a problem submitting your order. Please try again."
   },
   "LiveStore": {
     "openNow": "Open Now",
