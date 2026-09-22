@@ -14,6 +14,7 @@ interface User {
   avatarUrl?: string;
   birthdayRewardSentAt?: string;
   mustChangePassword?: boolean;
+  isPhoneVerified?: boolean;
 }
 
 interface AuthContextType {

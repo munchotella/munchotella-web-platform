@@ -81,8 +81,12 @@ export default function CartDrawer() {
         localDigits = localDigits.substring(1);
       }
 
-      if (!/^[67]\d{7}$/.test(localDigits)) {
-        setErrorMsg("Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456).");
+// Regex oficial operatori mobili Republica Moldova (ANRCETI):
+// Orange (60, 61, 62, 68, 69), Moldcell (76, 78, 79, 71, 72), Moldtelecom Unite (67)
+const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/;
+
+      if (!MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
+        setErrorMsg("Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).");
         setIsSubmitting(false);
         return;
       }

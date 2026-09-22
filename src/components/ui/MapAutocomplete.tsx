@@ -5,13 +5,64 @@ import { MapPin, Loader2 } from "lucide-react";
 import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
 
+export interface PlaceSelectionMeta {
+  isGenericCity?: boolean;
+  types?: string[];
+  place?: google.maps.places.PlaceResult;
+}
+
 interface MapAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
-  onPlaceSelected: (lat: number, lng: number, address: string) => void;
+  onPlaceSelected: (lat: number, lng: number, address: string, meta?: PlaceSelectionMeta) => void;
   placeholder?: string;
   className?: string;
   required?: boolean;
+}
+
+/**
+ * Verifică dacă locul returnat de Google Maps este doar o localitate/oraș generic (ex: "Chișinău, Moldova")
+ * fără detalii de stradă sau stabiliment concret.
+ */
+function checkIfGenericCity(place: google.maps.places.PlaceResult | google.maps.GeocoderResult, formattedAddress: string): boolean {
+  const types = place.types || [];
+  
+  // Tipuri concrete de destinație precisă:
+  const concreteTypes = [
+    'street_address', 
+    'premise', 
+    'subpremise', 
+    'route', 
+    'establishment', 
+    'point_of_interest',
+    'hospital',
+    'hotel',
+    'school',
+    'university',
+    'shopping_mall'
+  ];
+  const hasConcreteType = types.some(t => concreteTypes.includes(t));
+
+  // Tipuri generice de nivel înalt (oraș, raion, țară):
+  const broadTypes = [
+    'locality', 
+    'political', 
+    'administrative_area_level_1', 
+    'administrative_area_level_2', 
+    'country'
+  ];
+  const hasOnlyBroadTypes = types.length > 0 && types.every(t => broadTypes.includes(t));
+
+  // Verificare textuală de siguranță: dacă textul adresei este exclusiv numele orașului
+  const clean = formattedAddress.trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
+  const knownCities = ['chișinău', 'chisinau', 'bălți', 'balti', 'orhei', 'strășeni', 'straseni', 'ialoveni', 'ungheni', 'cahul', 'soroca', 'tiraspol', 'bender'];
+  const isJustCityName = knownCities.includes(clean);
+
+  if ((hasOnlyBroadTypes && !hasConcreteType) || isJustCityName) {
+    return true;
+  }
+
+  return false;
 }
 
 export default function MapAutocomplete({
@@ -61,10 +112,12 @@ export default function MapAutocomplete({
           const lat = loc.lat();
           const lng = loc.lng();
           const resolvedAddress = results[0].formatted_address || rawAddress;
+          const isGenericCity = checkIfGenericCity(results[0], resolvedAddress);
+
           lastResolvedAddressRef.current = resolvedAddress;
           setInputValue(resolvedAddress);
           onChange(resolvedAddress);
-          onPlaceSelected(lat, lng, resolvedAddress);
+          onPlaceSelected(lat, lng, resolvedAddress, { isGenericCity, types: results[0].types });
         }
       }
     );
@@ -77,10 +130,12 @@ export default function MapAutocomplete({
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
         const address = place.formatted_address || place.name || "";
+        const isGenericCity = checkIfGenericCity(place, address);
+
         lastResolvedAddressRef.current = address;
         setInputValue(address);
         onChange(address);
-        onPlaceSelected(lat, lng, address);
+        onPlaceSelected(lat, lng, address, { isGenericCity, types: place.types, place });
       } else if (place && place.name) {
         // Caz când utilizatorul a tastat/lipit text și a apăsat Enter fără click pe dropdown
         geocodeFallback(place.name);
@@ -115,7 +170,8 @@ export default function MapAutocomplete({
             onLoad={onLoad}
             onPlaceChanged={onPlaceChanged}
             options={{
-              componentRestrictions: { country: "md" } // Restrict to Moldova
+              componentRestrictions: { country: "md" }, // Restrict to Moldova
+              fields: ["address_components", "formatted_address", "geometry", "name", "types"]
             }}
           >
             <input

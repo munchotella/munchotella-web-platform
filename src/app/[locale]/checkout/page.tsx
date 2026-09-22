@@ -44,6 +44,10 @@ const RESTAURANT_LOCATION = {
   lng: 28.834809,
 };
 
+// Regex oficial operatori mobili Republica Moldova (ANRCETI):
+// Orange (60, 61, 62, 68, 69), Moldcell (76, 78, 79, 71, 72), Moldtelecom Unite (67)
+const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/;
+
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -411,9 +415,9 @@ export default function CheckoutPage() {
       localDigits = localDigits.substring(1);
     }
 
-    const isValidMoldovan = /^[67]\d{7}$/.test(localDigits);
+    const isValidMoldovan = MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits);
     if (!isValidMoldovan) {
-      const errMsg = "Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).";
+      const errMsg = t('phoneInvalidFormat') || "Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).";
       setPhoneError(errMsg);
       setSmsDispatchError(errMsg);
       return false;
@@ -616,9 +620,10 @@ export default function CheckoutPage() {
     }
     setTermsError(false);
 
-    // Cerință: La comanda CASH a unui client GUEST (nelogat), validăm numărul prin SMS OTP
-    const isGuestCashOrder = !user && paymentMethod === "cash";
-    if (isGuestCashOrder) {
+    // Cerință de securitate: Orice client oaspete (GUEST / nelogat sau fără telefon verificat)
+    // este obligat să își confirme numărul prin SMS OTP atât la plata CASH, cât și la plata CARD
+    const isGuestOrder = !user || !user.isPhoneVerified;
+    if (isGuestOrder) {
       const sent = await triggerOtpSms();
       if (!sent) return;
       return;
@@ -711,7 +716,7 @@ export default function CheckoutPage() {
       if (!rawPhone) {
         setPhoneError(t('phoneRequired'));
         hasError = true;
-      } else if (!/^[67]\d{7}$/.test(localDigits)) {
+      } else if (!MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
         setPhoneError(t('phoneInvalidFormat'));
         hasError = true;
       } else {
@@ -719,9 +724,17 @@ export default function CheckoutPage() {
       }
 
       // 3. Validare obligatorie adresă (pentru livrare)
+      const rawAddr = formData.street.trim();
+      const cleanAddr = rawAddr.toLowerCase().replace(/,\s*moldova$/i, '').trim();
+      const knownCities = ['chișinău', 'chisinau', 'bălți', 'balti', 'orhei', 'strășeni', 'straseni', 'ialoveni', 'ungheni', 'cahul', 'soroca', 'tiraspol', 'bender'];
+      const isGenericCityText = knownCities.includes(cleanAddr) || cleanAddr === 'moldova';
+
       if (deliveryType === 'delivery') {
-        if (!formData.street.trim()) {
+        if (!rawAddr) {
           setAddressError(t('addressRequired'));
+          hasError = true;
+        } else if (isGenericCityText) {
+          setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
           hasError = true;
         } else {
           setAddressError("");
@@ -733,7 +746,7 @@ export default function CheckoutPage() {
         // Focus lin pe primul câmp cu eroare
         if (!formData.name.trim()) {
           nameInputRef.current?.focus();
-        } else if (!formData.phone.trim() || !/^[67]\d{7}$/.test(localDigits)) {
+        } else if (!formData.phone.trim() || !MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
           phoneInputRef.current?.focus();
         }
         return;
@@ -748,14 +761,20 @@ export default function CheckoutPage() {
                 ? formData.street
                 : `${formData.street}, Chișinău, Moldova`;
 
-              const res = await new Promise<{ lat: number; lng: number; address: string } | null>((resolve) => {
+              const res = await new Promise<{ lat: number; lng: number; address: string; isGenericCity: boolean } | null>((resolve) => {
                 geocoder.geocode({ address: queryAddress, componentRestrictions: { country: "md" } }, (results, status) => {
                   if (status === "OK" && results && results[0] && results[0].geometry?.location) {
                     const loc = results[0].geometry.location;
+                    const formatted = results[0].formatted_address || formData.street;
+                    const clean = formatted.trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
+                    const broadTypes = ['locality', 'political', 'administrative_area_level_1', 'administrative_area_level_2', 'country'];
+                    const isGeneric = (results[0].types.length > 0 && results[0].types.every(t => broadTypes.includes(t))) || knownCities.includes(clean);
+
                     resolve({
                       lat: loc.lat(),
                       lng: loc.lng(),
-                      address: results[0].formatted_address || formData.street
+                      address: formatted,
+                      isGenericCity: isGeneric
                     });
                   } else {
                     resolve(null);
@@ -764,6 +783,11 @@ export default function CheckoutPage() {
               });
 
               if (res) {
+                if (res.isGenericCity) {
+                  setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
+                  setActiveStep(2);
+                  return;
+                }
                 const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
                 const roadDist = straightDist * 1.3;
                 setFormData(prev => ({
@@ -1102,7 +1126,12 @@ export default function CheckoutPage() {
                               setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
                               if (addressError) setAddressError("");
                             }}
-                            onPlaceSelected={(lat, lng, address) => {
+                            onPlaceSelected={(lat, lng, address, meta) => {
+                              if (meta?.isGenericCity) {
+                                setFormData(prev => ({ ...prev, street: address, lat, lng, isGeocoded: false }));
+                                setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
+                                return;
+                              }
                               const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
                               const roadDist = straightDist * 1.3;
                               setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));

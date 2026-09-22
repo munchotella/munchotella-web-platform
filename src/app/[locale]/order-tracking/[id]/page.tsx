@@ -1,9 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ChevronLeft, CheckCircle2, Clock, ChefHat, Truck, MapPin, PackageOpen } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ChevronLeft, 
+  CheckCircle2, 
+  Clock, 
+  ChefHat, 
+  Truck, 
+  MapPin, 
+  PackageOpen, 
+  XCircle, 
+  Bell, 
+  Phone, 
+  RotateCcw, 
+  X, 
+  AlertCircle 
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useTranslations } from 'next-intl';
@@ -17,6 +31,7 @@ export default function OrderTrackingPage() {
     { id: "delivering", label: t('delivering'), icon: Truck },
     { id: "completed", label: t('delivered'), icon: PackageOpen }
   ];
+  
   const params = useParams();
   const router = useRouter();
   const [orderData, setOrderData] = useState<any>(null);
@@ -24,7 +39,49 @@ export default function OrderTrackingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Web Push Notification State
+  const [notifPermission, setNotifPermission] = useState<string>("default");
+  const [isDismissedBanner, setIsDismissedBanner] = useState<boolean>(false);
+  const prevStatusRef = useRef<string | null>(null);
+
   const orderId = typeof params?.id === 'string' ? params.id : '...';
+
+  // Verificare suport și permisiune nativă de notificări browser
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifPermission(window.Notification.permission);
+      const isDismissed = localStorage.getItem(`notif_dismissed_${orderId}`);
+      if (isDismissed) setIsDismissedBanner(true);
+    } else {
+      setNotifPermission("unsupported");
+    }
+  }, [orderId]);
+
+  const handleRequestNotificationPermission = async () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      try {
+        const permission = await window.Notification.requestPermission();
+        setNotifPermission(permission);
+        if (permission === "granted") {
+          new window.Notification(t('notifWelcomeTitle') || "Munchotella", {
+            body: t('notifWelcomeBody') || "Te vom anunța la fiecare pas al comenzii!",
+            icon: "/icon.png"
+          });
+        }
+      } catch (err) {
+        console.warn("Notification permission request error:", err);
+      }
+    }
+  };
+
+  const handleDismissBanner = () => {
+    setIsDismissedBanner(true);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`notif_dismissed_${orderId}`, "true");
+      } catch (_) {}
+    }
+  };
 
   const getStepIndex = (status: string) => {
     switch (status) {
@@ -39,8 +96,34 @@ export default function OrderTrackingPage() {
       case "delivered":
       case "completed":
         return 3;
+      case "cancelled":
+        return -1; // Status dedicat anulare
       default:
         return 0;
+    }
+  };
+
+  // Trimitere notificare browser la schimbarea de status
+  const triggerStatusChangeNotification = (newStatus: string) => {
+    if (typeof window === "undefined" || !("Notification" in window) || window.Notification.permission !== "granted") {
+      return;
+    }
+
+    let body = "";
+    if (newStatus === "preparing") body = t('notifPreparingBody');
+    else if (newStatus === "delivering") body = t('notifDeliveringBody');
+    else if (newStatus === "delivered" || newStatus === "completed") body = t('notifDeliveredBody');
+    else if (newStatus === "cancelled") body = t('notifCancelledBody');
+
+    if (body) {
+      try {
+        new window.Notification("Munchotella", {
+          body,
+          icon: "/icon.png"
+        });
+      } catch (e) {
+        console.warn("Could not dispatch browser notification:", e);
+      }
     }
   };
 
@@ -61,10 +144,25 @@ export default function OrderTrackingPage() {
         if (!isMounted) return;
 
         if (data.success && data.data) {
-          setOrderData(data.data);
-          const status = data.data.status || "pending";
-          setCurrentStepIndex(getStepIndex(status));
+          const freshOrder = data.data;
+          setOrderData(freshOrder);
+          const currentStatus = freshOrder.status || "pending";
+          setCurrentStepIndex(getStepIndex(currentStatus));
           setError(null);
+
+          // Declanșare notificare push la schimbarea statusului
+          if (prevStatusRef.current && prevStatusRef.current !== currentStatus) {
+            triggerStatusChangeNotification(currentStatus);
+          }
+          prevStatusRef.current = currentStatus;
+
+          // Dacă statusul a ajuns la stare finală (anulată sau livrată), oprim polling-ul inutil
+          if (currentStatus === "cancelled" || currentStatus === "delivered" || currentStatus === "completed") {
+            if (pollInterval) {
+              clearInterval(pollInterval);
+              pollInterval = null;
+            }
+          }
         } else {
           if (isFirstLoad) {
             setError(data.message || "Comanda nu a fost găsită.");
@@ -84,10 +182,10 @@ export default function OrderTrackingPage() {
 
     fetchOrder(true);
 
-    // Polling la fiecare 6 secunde cât timp comanda este în curs de preparare/livrare
+    // Polling la fiecare 5 secunde cât timp comanda este activă
     pollInterval = setInterval(() => {
       fetchOrder(false);
-    }, 6000);
+    }, 5000);
 
     return () => {
       isMounted = false;
@@ -110,7 +208,7 @@ export default function OrderTrackingPage() {
         <div className="flex-1 pt-32 pb-24 max-w-[800px] mx-auto px-6 w-full flex flex-col items-center justify-center text-center">
           <h1 className="text-3xl font-serif text-[#1A120B] mb-4">Ups!</h1>
           <p className="text-[#1A120B]/60 mb-8">{error || "Comanda nu a fost găsită"}</p>
-          <button onClick={() => router.push('/menu')} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
+          <button onClick={() => router.push('/menu')} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer">
             Mergi la Meniu
           </button>
         </div>
@@ -119,137 +217,259 @@ export default function OrderTrackingPage() {
     );
   }
 
+  const isCancelled = orderData.status === "cancelled";
+
   return (
-    <main className="min-h-screen bg-[#FFFCF6] flex flex-col">
+    <main className="min-h-screen bg-[#FFFCF6] flex flex-col selection:bg-[#D4A853] selection:text-white">
       <Navbar />
       
       <div className="flex-1 pt-32 pb-24 max-w-[800px] mx-auto px-6 w-full">
-        <button 
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-[#1A120B]/60 hover:text-[#D4A853] transition-colors mb-10"
-        >
-          <ChevronLeft size={20} />
-          <span className="font-medium">{t('back')}</span>
-        </button>
+        {/* Navigation & Header */}
+        <div className="flex items-center justify-between mb-8">
+          <button 
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-[#1A120B]/60 hover:text-[#D4A853] transition-colors cursor-pointer"
+          >
+            <ChevronLeft size={20} />
+            <span className="font-medium">{t('back')}</span>
+          </button>
 
-        <div className="text-center mb-12">
+          {/* Status Badge */}
+          {isCancelled ? (
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              {t('orderCancelledTitle')}
+            </span>
+          ) : notifPermission === "granted" ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              {t('notifBannerActive')}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-2">{t('orderTracking')}</h1>
-          <p className="text-[#1A120B]/60">#{orderId.toUpperCase()}</p>
+          <p className="text-[#1A120B]/60 font-mono text-sm tracking-wide">#{orderId.toUpperCase()}</p>
         </div>
 
-        {/* Status Tracker */}
-        <div className="bg-white p-8 md:p-12 rounded-[32px] border border-[#E8E2D9] shadow-sm mb-8">
-          
-          <div className="relative">
-            {/* Background Line */}
-            <div className="absolute top-8 left-[10%] right-[10%] h-1 bg-[#E8E2D9] rounded-full hidden md:block"></div>
-            
-            {/* Active Line */}
-            <div 
-              className="absolute top-8 left-[10%] h-1 bg-[#D4A853] rounded-full hidden md:block transition-all duration-1000 ease-in-out overflow-hidden"
-              style={{ width: `${(currentStepIndex / (STEPS.length - 1)) * 80}%` }}
+        {/* ═══ BANNER NOTIFICĂRI PUSH (WARM LUXURY & EDITORIAL) ═══ */}
+        <AnimatePresence>
+          {!isCancelled && notifPermission === "default" && !isDismissedBanner && (
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="bg-white rounded-3xl border border-[#E8E2D9] p-5 md:p-6 mb-8 shadow-[0_10px_30px_rgba(26,18,11,0.04)] relative overflow-hidden"
             >
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent w-full"
-                animate={{ x: ["-100%", "100%"] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-              />
-            </div>
+              <button 
+                onClick={handleDismissBanner}
+                aria-label="Închide banner notificări"
+                className="absolute top-4 right-4 text-[#736A60] hover:text-[#1A120B] p-1.5 rounded-full hover:bg-[#FAF7F2] transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
 
-            <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-0">
-              {STEPS.map((step, index) => {
-                const isCompleted = index <= currentStepIndex;
-                const isActive = index === currentStepIndex;
-                const Icon = step.icon;
-
-                return (
-                  <div key={step.id} className="flex md:flex-col items-center gap-4 md:gap-2 relative group">
-                    {/* Vertical Line for Mobile */}
-                    {index !== STEPS.length - 1 && (
-                      <div className={`absolute left-8 top-16 bottom-[-32px] w-0.5 md:hidden ${index < currentStepIndex ? 'bg-[#D4A853]' : 'bg-[#E8E2D9]'}`}></div>
-                    )}
-                    
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`w-16 h-16 rounded-full flex items-center justify-center border-4 transition-colors duration-500 z-10 relative bg-white ${
-                        isActive 
-                          ? "border-[#D4A853] text-[#D4A853]" 
-                          : isCompleted 
-                            ? "border-[#D4A853] bg-[#D4A853] text-white" 
-                            : "border-[#E8E2D9] text-[#1A120B]/30"
-                      }`}
-                    >
-                      {isCompleted && !isActive ? <CheckCircle2 size={28} /> : <Icon size={28} />}
-                      
-                      {isActive && (
-                        <div className="absolute inset-0 rounded-full border-4 border-[#D4A853] animate-ping opacity-20"></div>
-                      )}
-                    </motion.div>
-                    
-                    <div className="md:text-center">
-                      <p className={`font-bold transition-colors duration-500 ${isCompleted ? "text-[#1A120B]" : "text-[#1A120B]/40"}`}>
-                        {step.label}
-                      </p>
-                      {isActive && (
-                        <p className="text-[12px] text-[#D4A853] mt-1 hidden md:block">{t('inProgress')}</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Order Details & Delivery Map Mock */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[#1A120B] p-8 rounded-[32px] text-white">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin size={24} className="text-[#D4A853]" />
-              <h3 className="font-bold text-lg">{t('deliveryAddress')}</h3>
-            </div>
-            {orderData.deliveryType === "pickup" ? (
-              <>
-                <p className="text-white/80">Nicolae Testemițanu 21/1</p>
-                <p className="text-white/60 text-sm mt-1">Preluare din Boutique</p>
-              </>
-            ) : (
-              <>
-                <p className="text-white/80">{orderData.customer?.address || "Str. Nicolae Testemițanu 29"}</p>
-                {orderData.customer?.notes && (
-                  <p className="text-white/60 text-sm mt-1">Note: {orderData.customer.notes}</p>
-                )}
-              </>
-            )}
-            <div className="mt-8 pt-8 border-t border-white/10">
-              <p className="text-white/40 text-sm mb-2">{t('estimatedTime')}</p>
-              <p className="text-3xl font-serif text-[#FDF9F1]">
-                {orderData.deliveryType === "pickup" ? "15 - 20" : "30 - 45"} {t('min')}
-              </p>
-            </div>
-          </div>
-          
-          <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] flex flex-col justify-center items-center text-center">
-            <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="w-16 h-16 bg-[#1A120B]/5 rounded-full flex items-center justify-center text-[#1A120B] mb-4 shadow-[0_10px_30px_rgba(26,18,11,0.05)]"
-            >
-              <Truck size={28} />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-6">
+                <div className="w-12 h-12 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center text-[#D4A853] shrink-0">
+                  <Bell className="w-6 h-6 animate-bounce" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-serif text-base md:text-lg font-bold text-[#1A120B]">
+                    {t('notifBannerTitle')}
+                  </h4>
+                  <p className="text-xs md:text-sm text-[#736A60] mt-1 leading-relaxed">
+                    {t('notifBannerDesc')}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRequestNotificationPermission}
+                  className="w-full sm:w-auto bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white px-5 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer"
+                >
+                  {t('notifBannerBtn')}
+                </button>
+              </div>
             </motion.div>
-            <h3 className="font-bold text-[#1A120B] mb-2">
-              {orderData.deliveryType === "pickup" ? "Gata pentru Preluare" : t('ownCourier')}
-            </h3>
-            <p className="text-[#1A120B]/60 text-sm mb-6">
-              {orderData.deliveryType === "pickup" 
-                ? "Te așteptăm cu drag în boutique-ul nostru!" 
-                : t('courierAssigned')}
+          )}
+        </AnimatePresence>
+
+        {/* ═══ CAZUL 1: COMANDĂ ANULATĂ ═══ */}
+        {isCancelled ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="bg-white p-8 md:p-12 rounded-[32px] border border-red-200 shadow-sm mb-8 text-center"
+          >
+            <div className="w-20 h-20 bg-red-50 text-red-600 border border-red-200/80 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <XCircle className="w-10 h-10" />
+            </div>
+
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#1A120B] mb-3">
+              {t('orderCancelledTitle')}
+            </h2>
+
+            <p className="text-[#736A60] text-sm md:text-base max-w-lg mx-auto leading-relaxed mb-8">
+              {t('orderCancelledDesc')}
             </p>
-            <button className="px-6 py-3 border border-[#E8E2D9] rounded-full font-bold text-[#1A120B] hover:bg-[#1A120B]/5 transition-colors">
-              {t('contactSupport')}
-            </button>
+
+            {/* Butoane Acțiune Comandă Anulată */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => router.push('/menu')}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-md cursor-pointer"
+              >
+                <RotateCcw size={16} />
+                <span>{t('orderAgain')}</span>
+              </button>
+
+              <a 
+                href="tel:+37379006499" 
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B] px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm"
+              >
+                <Phone size={16} className="text-[#D4A853]" />
+                <span>{t('callRestaurant')} (+373 79 006 499)</span>
+              </a>
+            </div>
+          </motion.div>
+        ) : (
+          /* ═══ CAZUL 2: COMANDĂ ACTIVĂ (STATUS TRACKER) ═══ */
+          <div className="bg-white p-8 md:p-12 rounded-[32px] border border-[#E8E2D9] shadow-sm mb-8">
+            <div className="relative">
+              {/* Background Line */}
+              <div className="absolute top-8 left-[10%] right-[10%] h-1 bg-[#E8E2D9] rounded-full hidden md:block"></div>
+              
+              {/* Active Line */}
+              <div 
+                className="absolute top-8 left-[10%] h-1 bg-[#D4A853] rounded-full hidden md:block transition-all duration-1000 ease-in-out overflow-hidden"
+                style={{ width: `${(Math.max(0, currentStepIndex) / (STEPS.length - 1)) * 80}%` }}
+              >
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent w-full"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                />
+              </div>
+
+              <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-0">
+                {STEPS.map((step, index) => {
+                  const isCompleted = index <= currentStepIndex;
+                  const isActive = index === currentStepIndex;
+                  const Icon = step.icon;
+
+                  return (
+                    <div key={step.id} className="flex md:flex-col items-center gap-4 md:gap-2 relative group">
+                      {/* Vertical Line for Mobile */}
+                      {index !== STEPS.length - 1 && (
+                        <div className={`absolute left-8 top-16 bottom-[-32px] w-0.5 md:hidden ${index < currentStepIndex ? 'bg-[#D4A853]' : 'bg-[#E8E2D9]'}`}></div>
+                      )}
+                      
+                      <motion.div 
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={`w-16 h-16 rounded-full flex items-center justify-center border-4 transition-colors duration-500 z-10 relative bg-white ${
+                          isActive 
+                            ? "border-[#D4A853] text-[#D4A853]" 
+                            : isCompleted 
+                              ? "border-[#D4A853] bg-[#D4A853] text-white" 
+                              : "border-[#E8E2D9] text-[#1A120B]/30"
+                        }`}
+                      >
+                        {isCompleted && !isActive ? <CheckCircle2 size={28} /> : <Icon size={28} />}
+                        
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-full border-4 border-[#D4A853] animate-ping opacity-20"></div>
+                        )}
+                      </motion.div>
+                      
+                      <div className="md:text-center">
+                        <p className={`font-bold transition-colors duration-500 ${isCompleted ? "text-[#1A120B]" : "text-[#1A120B]/40"}`}>
+                          {step.label}
+                        </p>
+                        {isActive && (
+                          <p className="text-[12px] text-[#D4A853] mt-1 hidden md:block">{t('inProgress')}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ DETALII LIVRARE & SUPORT ═══ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Adresă Destinație */}
+          <div className="bg-[#1A120B] p-8 rounded-[32px] text-white shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <MapPin size={24} className="text-[#D4A853]" />
+                <h3 className="font-bold text-lg">{t('deliveryAddress')}</h3>
+              </div>
+              {orderData.deliveryType === "pickup" ? (
+                <>
+                  <p className="text-white/90 font-medium">Nicolae Testemițanu 21/1</p>
+                  <p className="text-[#D4A853] text-sm mt-1">Preluare Gratuită din Boutique</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-white/90 font-medium">{orderData.customer?.address || "Chișinău, Moldova"}</p>
+                  {orderData.customer?.notes && (
+                    <p className="text-white/60 text-sm mt-2 italic bg-white/5 p-3 rounded-xl border border-white/10">
+                      „{orderData.customer.notes}”
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {!isCancelled && (
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1.5">{t('estimatedTime')}</p>
+                <p className="text-3xl font-serif text-[#FDF9F1]">
+                  {orderData.deliveryType === "pickup" ? "15 - 20" : "30 - 45"} {t('min')}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          {/* Card Curier & Asistență Directă prin Telefon */}
+          <div className="bg-white p-8 rounded-[32px] border border-[#E8E2D9] flex flex-col justify-center items-center text-center shadow-sm">
+            <motion.div 
+              animate={!isCancelled ? { y: [0, -8, 0] } : undefined}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="w-16 h-16 bg-[#1A120B]/5 rounded-2xl flex items-center justify-center text-[#1A120B] mb-4 shadow-[0_10px_30px_rgba(26,18,11,0.04)]"
+            >
+              <Truck size={28} className="text-[#D4A853]" />
+            </motion.div>
+            
+            <h3 className="font-bold text-[#1A120B] mb-2 text-lg">
+              {isCancelled 
+                ? "Ai nevoie de ajutor cu această comandă?" 
+                : orderData.deliveryType === "pickup" 
+                  ? "Preluare din Boutique" 
+                  : t('ownCourier')}
+            </h3>
+
+            <p className="text-[#736A60] text-sm mb-6 leading-relaxed max-w-xs">
+              {isCancelled
+                ? "Dispeceratul nostru este la dispoziția ta pentru orice clarificare legată de comanda anulată."
+                : orderData.deliveryType === "pickup" 
+                  ? "Te așteptăm cu drag în boutique-ul nostru din Str. Nicolae Testemițanu 21/1!" 
+                  : t('courierAssigned')}
+            </p>
+
+            {/* BUTON DE APEL TELEFONIC DIRECT CĂTRE MUNCHOTELLA (+373 79 006 499) */}
+            <a 
+              href="tel:+37379006499" 
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 border-2 border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B] rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group"
+            >
+              <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
+              <span>{t('contactSupport')} (+373 79 006 499)</span>
+            </a>
           </div>
         </div>
       </div>

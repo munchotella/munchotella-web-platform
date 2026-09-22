@@ -155,7 +155,7 @@
     "placeOrderBtn": "Place Order",
     "missingInfo": "Please complete the required information in previous steps",
     "otpTitle": "Phone Number Verification",
-    "otpSubtitle": "To place your cash-on-delivery order, enter the 6-digit code sent via SMS to:",
+    "otpSubtitle": "To place your order and ensure delivery, enter the 6-digit code sent via SMS to:",
     "otpPlaceholder": "000000",
     "otpVerifyBtn": "Verify and Place Order",
     "otpVerifying": "Verifying code...",
@@ -168,6 +168,7 @@
     "phoneRequired": "Please enter your phone number.",
     "phoneInvalidFormat": "We only accept Moldovan numbers (+373) with 8 digits (e.g., 069 123 456 or 079 123 456).",
     "addressRequired": "Please enter the delivery address or select it on the map.",
+    "addressTooGeneric": "Please enter an exact address (street and house/building number, not just the city).",
     "orderSubmitError": "There was a problem submitting your order. Please try again."
   },
   "LiveStore": {
@@ -343,6 +344,10 @@
     "preparing": "Preparing",
     "delivering": "Delivering",
     "delivered": "Delivered",
+    "orderCancelledTitle": "Order Cancelled",
+    "orderCancelledDesc": "This order has been cancelled. If you wish to place a new order or have any questions, our team is gladly here to help.",
+    "orderAgain": "Order again",
+    "callRestaurant": "Call Restaurant",
     "back": "Back",
     "orderTracking": "Order Tracking",
     "inProgress": "In progress...",
@@ -351,7 +356,17 @@
     "ownCourier": "Delivery by our courier",
     "courierAssigned": "A courier will be assigned as soon as the order is ready.",
     "contactSupport": "Contact support",
-    "min": "min"
+    "min": "min",
+    "notifBannerTitle": "Stay updated on your order delivery!",
+    "notifBannerDesc": "Enable notifications to receive instant alerts when your order is preparing, ready, or on its way.",
+    "notifBannerBtn": "Enable Notifications",
+    "notifBannerActive": "Delivery notifications active",
+    "notifWelcomeTitle": "Munchotella Notifications Active",
+    "notifWelcomeBody": "We will notify you in real-time at every step of your order!",
+    "notifPreparingBody": "Your order is now being freshly prepared on the stove!",
+    "notifDeliveringBody": "Your order is on its way with our courier!",
+    "notifDeliveredBody": "Your order has been delivered! Enjoy your meal!",
+    "notifCancelledBody": "Your order has been cancelled."
   },
   "Legal": {
     "title": "Legal Information | Munchotella",
