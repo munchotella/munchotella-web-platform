@@ -366,7 +366,14 @@
     "notifPreparingBody": "Ваш заказ начали готовить на плите!",
     "notifDeliveringBody": "Ваш заказ уже в пути с нашим курьером!",
     "notifDeliveredBody": "Заказ доставлен! Приятного аппетита!",
-    "notifCancelledBody": "Ваш заказ был отменен."
+    "notifCancelledBody": "Ваш заказ был отменен.",
+    "supportModalTitle": "Диспетчерская и поддержка Munchotella",
+    "supportModalSubtitle": "Мы готовы помочь вам по любым вопросам, связанным с вашим заказом.",
+    "copyPhone": "Скопировать номер",
+    "phoneCopied": "Номер скопирован!",
+    "callNow": "Позвонить сейчас",
+    "boutiqueAddress": "ул. Николае Тестемицану 21/1, Кишинёв",
+    "boutiqueHours": "Понедельник – Воскресенье: 16:00 – 00:00 (Среда: Выходной)"
   },
   "Legal": {
     "title": "Юридическая информация | Munchotella",

@@ -16,7 +16,9 @@ import {
   Phone, 
   RotateCcw, 
   X, 
-  AlertCircle 
+  AlertCircle,
+  Copy,
+  Check
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -43,6 +45,32 @@ export default function OrderTrackingPage() {
   const [notifPermission, setNotifPermission] = useState<string>("default");
   const [isDismissedBanner, setIsDismissedBanner] = useState<boolean>(false);
   const prevStatusRef = useRef<string | null>(null);
+
+  // Desktop Support Modal & Copy Phone State
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  const handleSupportClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const isMobile = typeof window !== "undefined" && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth < 768
+    );
+
+    if (isMobile) {
+      window.location.href = "tel:+37379006499";
+    } else {
+      setIsSupportModalOpen(true);
+    }
+  };
+
+  const handleCopyPhone = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText("+37379006499");
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
 
   const orderId = typeof params?.id === 'string' ? params.id : '...';
 
@@ -324,13 +352,14 @@ export default function OrderTrackingPage() {
                 <span>{t('orderAgain')}</span>
               </button>
 
-              <a 
-                href="tel:+37379006499" 
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B] px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm"
+              <button 
+                type="button"
+                onClick={handleSupportClick}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B] px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer"
               >
                 <Phone size={16} className="text-[#D4A853]" />
-                <span>{t('callRestaurant')} (+373 79 006 499)</span>
-              </a>
+                <span>{t('callRestaurant')}</span>
+              </button>
             </div>
           </motion.div>
         ) : (
@@ -462,17 +491,107 @@ export default function OrderTrackingPage() {
                   : t('courierAssigned')}
             </p>
 
-            {/* BUTON DE APEL TELEFONIC DIRECT CĂTRE MUNCHOTELLA (+373 79 006 499) */}
-            <a 
-              href="tel:+37379006499" 
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 border-2 border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B] rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group"
+            {/* BUTON DE SUPORT (DESCHIDE POPUP PE DESKTOP / APEL DIRECT PE MOBIL) */}
+            <button 
+              type="button"
+              onClick={handleSupportClick}
+              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B] rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group"
             >
               <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
-              <span>{t('contactSupport')} (+373 79 006 499)</span>
-            </a>
+              <span>{t('contactSupport')}</span>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* ═══ MODAL LUXURY POPUP PENTRU DESKTOP (SUPORT & APEL TELEFONIC) ═══ */}
+      <AnimatePresence>
+        {isSupportModalOpen && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A120B]/60 backdrop-blur-md"
+            onClick={() => setIsSupportModalOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="bg-[#FFFCF6] rounded-[32px] border border-[#E8E2D9] p-7 md:p-9 max-w-md w-full shadow-[0_25px_60px_-15px_rgba(26,18,11,0.25)] relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Buton Închidere X */}
+              <button
+                onClick={() => setIsSupportModalOpen(false)}
+                className="absolute top-6 right-6 w-9 h-9 rounded-full bg-[#1A120B]/5 hover:bg-[#1A120B]/10 flex items-center justify-center text-[#1A120B] transition-colors cursor-pointer"
+                aria-label="Închide"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Header Modal */}
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center text-[#D4A853] mb-4 shadow-sm">
+                  <Phone className="w-7 h-7" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4A853] mb-1">
+                  Boutique & Dispecerat
+                </span>
+                <h3 className="font-serif text-2xl font-bold text-[#1A120B]">
+                  {t('supportModalTitle')}
+                </h3>
+                <p className="text-xs md:text-sm text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
+                  {t('supportModalSubtitle')}
+                </p>
+              </div>
+
+              {/* Box Număr de Telefon Formatat */}
+              <div className="bg-white rounded-2xl border border-[#E8E2D9] p-5 mb-5 shadow-sm text-center">
+                <p className="text-xs text-[#736A60] uppercase tracking-wider font-semibold mb-1">
+                  Linie Directă Comenzi
+                </p>
+                <p className="text-2xl md:text-3xl font-serif font-bold text-[#1A120B] tracking-wider mb-4">
+                  +373 79 006 499
+                </p>
+                
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleCopyPhone}
+                    className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                      isCopied 
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                        : "bg-[#1A120B]/5 hover:bg-[#1A120B]/10 text-[#1A120B] border-[#E8E2D9]"
+                    }`}
+                  >
+                    {isCopied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                    <span>{isCopied ? t('phoneCopied') : t('copyPhone')}</span>
+                  </button>
+
+                  <a
+                    href="tel:+37379006499"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white transition-all shadow-sm cursor-pointer"
+                  >
+                    <Phone size={14} />
+                    <span>{t('callNow')}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Detalii Boutique & Program */}
+              <div className="space-y-2 pt-3 border-t border-[#E8E2D9]/80 text-xs text-[#736A60]">
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-[#D4A853] shrink-0" />
+                  <span>{t('boutiqueAddress')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-[#D4A853] shrink-0" />
+                  <span>{t('boutiqueHours')}</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       
       <Footer />
     </main>

@@ -367,7 +367,14 @@
     "notifPreparingBody": "Comanda ta a început să fie preparată pe plită!",
     "notifDeliveringBody": "Comanda ta a plecat cu un curier spre tine!",
     "notifDeliveredBody": "Comanda a fost livrată! Poftă bună!",
-    "notifCancelledBody": "Comanda ta a fost anulată."
+    "notifCancelledBody": "Comanda ta a fost anulată.",
+    "supportModalTitle": "Dispecerat & Suport Munchotella",
+    "supportModalSubtitle": "Suntem aici pentru orice întrebare sau asistență legată de comanda ta.",
+    "copyPhone": "Copiază numărul",
+    "phoneCopied": "Număr copiat!",
+    "callNow": "Apelează acum",
+    "boutiqueAddress": "Str. Nicolae Testemițanu 21/1, Chișinău",
+    "boutiqueHours": "Luni – Duminică: 16:00 – 00:00 (Miercuri: Închis)"
   },
   "Legal": {
     "title": "Informații Juridice | Munchotella",

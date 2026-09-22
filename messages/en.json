@@ -366,7 +366,14 @@
     "notifPreparingBody": "Your order is now being freshly prepared on the stove!",
     "notifDeliveringBody": "Your order is on its way with our courier!",
     "notifDeliveredBody": "Your order has been delivered! Enjoy your meal!",
-    "notifCancelledBody": "Your order has been cancelled."
+    "notifCancelledBody": "Your order has been cancelled.",
+    "supportModalTitle": "Munchotella Support & Dispatch",
+    "supportModalSubtitle": "We are here to assist you with any questions regarding your order.",
+    "copyPhone": "Copy phone",
+    "phoneCopied": "Phone copied!",
+    "callNow": "Call now",
+    "boutiqueAddress": "21/1 Nicolae Testemițanu St., Chișinău",
+    "boutiqueHours": "Monday – Sunday: 16:00 – 00:00 (Wednesday: Closed)"
   },
   "Legal": {
     "title": "Legal Information | Munchotella",
