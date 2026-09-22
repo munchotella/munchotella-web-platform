@@ -46,49 +46,73 @@ export default function OrderTrackingPage() {
   const [isDismissedBanner, setIsDismissedBanner] = useState<boolean>(false);
   const prevStatusRef = useRef<string | null>(null);
 
-  // Desktop Support Modal & Copy Phone State
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
+  // Floating Support Toast & Copy State (Varianta 3 pentru toate dispozitivele)
+  const [showSupportToast, setShowSupportToast] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSupportClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const isMobile = typeof window !== "undefined" && (
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-      window.innerWidth < 768
-    );
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
-    if (isMobile) {
-      window.location.href = "tel:+37379006499";
-    } else {
-      setIsSupportModalOpen(true);
-    }
-  };
-
-  const handleCopyPhone = async () => {
+  const copyPhoneNumber = async () => {
     const phone = "+37379006499";
+    let copied = false;
     try {
       if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(phone);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-        return;
+        copied = true;
       }
     } catch (_) {}
 
-    try {
-      const textArea = document.createElement("textarea");
-      textArea.value = phone;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (e) {
-      console.warn("Could not copy phone:", e);
+    if (!copied && typeof document !== "undefined") {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = phone;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        copied = true;
+      } catch (e) {
+        console.warn("Could not copy phone fallback:", e);
+      }
+    }
+    return copied;
+  };
+
+  const handleSupportClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // 1. Copiere imediată în clipboard pe orice dispozitiv
+    await copyPhoneNumber();
+    setIsCopied(true);
+    setShowSupportToast(true);
+
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = setTimeout(() => {
+      setShowSupportToast(false);
+      setIsCopied(false);
+    }, 4500);
+
+    // 2. Pe dispozitive mobile / tactile se lansează direct apelul nativ
+    const isMobile = typeof window !== "undefined" && (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth < 768 ||
+      (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
+    );
+
+    if (isMobile) {
+      setTimeout(() => {
+        window.location.href = "tel:+37379006499";
+      }, 150);
     }
   };
 
@@ -381,10 +405,23 @@ export default function OrderTrackingPage() {
               <button 
                 type="button"
                 onClick={handleSupportClick}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B] px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 border px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer ${
+                  isCopied
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                    : "border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B]"
+                }`}
               >
-                <Phone size={16} className="text-[#D4A853]" />
-                <span>{t('callRestaurant')}</span>
+                {isCopied ? (
+                  <>
+                    <Check size={16} className="text-emerald-600" />
+                    <span>{t('phoneCopied')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Phone size={16} className="text-[#D4A853]" />
+                    <span>{t('callRestaurant')}</span>
+                  </>
+                )}
               </button>
             </div>
           </motion.div>
@@ -517,105 +554,82 @@ export default function OrderTrackingPage() {
                   : t('courierAssigned')}
             </p>
 
-            {/* BUTON DE SUPORT (DESCHIDE POPUP PE DESKTOP / APEL DIRECT PE MOBIL) */}
+            {/* BUTON DE SUPORT (ONE-CLICK COPY & TOAST DISCRET PENTRU TOATE DISPOZITIVELE) */}
             <button 
               type="button"
               onClick={handleSupportClick}
-              className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B] rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group"
+              className={`inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group ${
+                isCopied 
+                  ? "border-emerald-500 bg-emerald-50 text-emerald-800" 
+                  : "border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B]"
+              }`}
             >
-              <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
-              <span>{t('contactSupport')}</span>
+              {isCopied ? (
+                <>
+                  <Check size={15} className="text-emerald-600 animate-in fade-in" />
+                  <span>{t('phoneCopied')}</span>
+                </>
+              ) : (
+                <>
+                  <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
+                  <span>{t('contactSupport')}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* ═══ MODAL LUXURY POPUP PENTRU DESKTOP (SUPORT & APEL TELEFONIC) ═══ */}
+      {/* ═══ TOAST DISCRET LUXURY (VARIANTA 3 - PENTRU TOATE DISPOZITIVELE) ═══ */}
       <AnimatePresence>
-        {isSupportModalOpen && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A120B]/60 backdrop-blur-md"
-            onClick={() => setIsSupportModalOpen(false)}
+        {showSupportToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 450, damping: 32 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[94vw] sm:max-w-md w-full px-2 pointer-events-auto"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="bg-[#FFFCF6] rounded-[32px] border border-[#E8E2D9] p-7 md:p-9 max-w-md w-full shadow-[0_25px_60px_-15px_rgba(26,18,11,0.25)] relative overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Buton Închidere X */}
-              <button
-                onClick={() => setIsSupportModalOpen(false)}
-                className="absolute top-6 right-6 w-9 h-9 rounded-full bg-[#1A120B]/5 hover:bg-[#1A120B]/10 flex items-center justify-center text-[#1A120B] transition-colors cursor-pointer"
-                aria-label="Închide"
-              >
-                <X size={18} />
-              </button>
-
-              {/* Header Modal */}
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center text-[#D4A853] mb-4 shadow-sm">
-                  <Phone className="w-7 h-7" />
+            <div className="bg-[#1A120B]/95 backdrop-blur-xl border border-[#D4A853]/40 rounded-full px-4 sm:px-5 py-3 shadow-[0_20px_50px_rgba(26,18,11,0.5),0_0_30px_rgba(212,168,83,0.25)] flex items-center justify-between gap-3 text-white">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-[#D4A853]/20 border border-[#D4A853]/40 flex items-center justify-center shrink-0 text-[#D4A853] shadow-inner">
+                  <Check size={18} className="text-[#D4A853]" />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4A853] mb-1">
-                  Boutique & Dispecerat
-                </span>
-                <h3 className="font-serif text-2xl font-bold text-[#1A120B]">
-                  {t('supportModalTitle')}
-                </h3>
-                <p className="text-xs md:text-sm text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
-                  {t('supportModalSubtitle')}
-                </p>
-              </div>
-
-              {/* Box Număr de Telefon Formatat */}
-              <div className="bg-white rounded-2xl border border-[#E8E2D9] p-5 mb-5 shadow-sm text-center">
-                <p className="text-xs text-[#736A60] uppercase tracking-wider font-semibold mb-1">
-                  Linie Directă Comenzi
-                </p>
-                <p className="text-2xl md:text-3xl font-serif font-bold text-[#1A120B] tracking-wider mb-4">
-                  +373 79 006 499
-                </p>
-                
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={handleCopyPhone}
-                    className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
-                      isCopied 
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                        : "bg-[#1A120B]/5 hover:bg-[#1A120B]/10 text-[#1A120B] border-[#E8E2D9]"
-                    }`}
-                  >
-                    {isCopied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                    <span>{isCopied ? t('phoneCopied') : t('copyPhone')}</span>
-                  </button>
-
-                  <a
-                    href="tel:+37379006499"
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white transition-all shadow-sm cursor-pointer"
-                  >
-                    <Phone size={14} />
-                    <span>{t('callNow')}</span>
-                  </a>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853] truncate">
+                      {t('directLine')}
+                    </span>
+                    <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-[#D4A853]/60" />
+                    <span className="text-[10px] text-emerald-400 font-medium hidden sm:inline">
+                      {t('copiedToClipboard')}
+                    </span>
+                  </div>
+                  <p className="font-serif font-bold text-sm sm:text-base text-white tracking-wider truncate">
+                    +373 79 006 499
+                  </p>
                 </div>
               </div>
 
-              {/* Detalii Boutique & Program */}
-              <div className="space-y-2 pt-3 border-t border-[#E8E2D9]/80 text-xs text-[#736A60]">
-                <div className="flex items-center gap-2">
-                  <MapPin size={14} className="text-[#D4A853] shrink-0" />
-                  <span>{t('boutiqueAddress')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-[#D4A853] shrink-0" />
-                  <span>{t('boutiqueHours')}</span>
-                </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="tel:+37379006499"
+                  className="inline-flex items-center gap-1.5 bg-[#D4A853] hover:bg-[#c49843] text-[#1A120B] text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-full transition-all active:scale-95 shadow-sm"
+                >
+                  <Phone size={13} />
+                  <span>{t('callNow')}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowSupportToast(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Închide"
+                >
+                  <X size={15} />
+                </button>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
       
