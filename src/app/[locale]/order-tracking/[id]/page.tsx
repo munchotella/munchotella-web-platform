@@ -416,13 +416,13 @@ export default function OrderTrackingPage() {
                   onClick={(e) => handleSupportClick(e, 'restaurant')}
                   className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 border px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer active:scale-95 ${
                     activePopover === 'restaurant'
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      ? "border-[#D4A853] bg-[#D4A853]/15 text-[#1A120B]"
                       : "border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B]"
                   }`}
                 >
                   {activePopover === 'restaurant' ? (
                     <>
-                      <Check size={16} className="text-emerald-600" />
+                      <Check size={16} className="text-[#D4A853]" />
                       <span>{t('phoneCopied')}</span>
                     </>
                   ) : (
@@ -445,12 +445,12 @@ export default function OrderTrackingPage() {
                       role="status"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                      <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-[#D4A853]/30 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
+                        <div className="w-5 h-5 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center shrink-0 border border-[#D4A853]/30">
                           <Check size={12} className="stroke-[2.5]" />
                         </div>
                         <span className="text-white/80">{t('copiedToClipboard')}</span>
-                        <span className="font-semibold text-white font-mono tracking-wide">+373 79 006 499</span>
+                        <span className="font-semibold text-[#FDF9F1] font-mono tracking-wide">+373 79 006 499</span>
                         <div className="h-3 w-px bg-white/20 shrink-0" />
                         <a
                           href="tel:+37379006499"
@@ -468,7 +468,7 @@ export default function OrderTrackingPage() {
                         </button>
                       </div>
                       {/* Săgeată indicatoare către buton */}
-                      <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-white/10 rotate-45 mx-auto -mt-1 shadow-sm" />
+                      <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-[#D4A853]/30 rotate-45 mx-auto -mt-1 shadow-sm" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -611,13 +611,13 @@ export default function OrderTrackingPage() {
                 onClick={(e) => handleSupportClick(e, 'support')}
                 className={`inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group active:scale-95 ${
                   activePopover === 'support' 
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-800" 
+                    ? "border-[#D4A853] bg-[#D4A853]/15 text-[#1A120B]" 
                     : "border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B]"
                 }`}
               >
                 {activePopover === 'support' ? (
                   <>
-                    <Check size={15} className="text-emerald-600 animate-in fade-in" />
+                    <Check size={15} className="text-[#D4A853] animate-in fade-in" />
                     <span>{t('phoneCopied')}</span>
                   </>
                 ) : (
@@ -640,12 +640,12 @@ export default function OrderTrackingPage() {
                     role="status"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-[#D4A853]/30 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
+                      <div className="w-5 h-5 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center shrink-0 border border-[#D4A853]/30">
                         <Check size={12} className="stroke-[2.5]" />
                       </div>
                       <span className="text-white/80">{t('copiedToClipboard')}</span>
-                      <span className="font-semibold text-white font-mono tracking-wide">+373 79 006 499</span>
+                      <span className="font-semibold text-[#FDF9F1] font-mono tracking-wide">+373 79 006 499</span>
                       <div className="h-3 w-px bg-white/20 shrink-0" />
                       <a
                         href="tel:+37379006499"
@@ -663,7 +663,7 @@ export default function OrderTrackingPage() {
                       </button>
                     </div>
                     {/* Săgeată indicatoare către buton */}
-                    <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-white/10 rotate-45 mx-auto -mt-1 shadow-sm" />
+                    <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-[#D4A853]/30 rotate-45 mx-auto -mt-1 shadow-sm" />
                   </motion.div>
                 )}
               </AnimatePresence>
