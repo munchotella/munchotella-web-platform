@@ -64,11 +64,31 @@ export default function OrderTrackingPage() {
     }
   };
 
-  const handleCopyPhone = () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText("+37379006499");
+  const handleCopyPhone = async () => {
+    const phone = "+37379006499";
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(phone);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = phone;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+    } catch (e) {
+      console.warn("Could not copy phone:", e);
     }
   };
 
