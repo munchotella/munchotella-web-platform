@@ -46,16 +46,22 @@ export default function OrderTrackingPage() {
   const [isDismissedBanner, setIsDismissedBanner] = useState<boolean>(false);
   const prevStatusRef = useRef<string | null>(null);
 
-  // Floating Support Toast & Copy State (Varianta 3 pentru toate dispozitivele)
-  const [showSupportToast, setShowSupportToast] = useState<boolean>(false);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Anchored Contextual Support Popover & Copy State (izolare per buton)
+  const [activePopover, setActivePopover] = useState<'restaurant' | 'support' | null>(null);
+  const popoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     return () => {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (popoverTimerRef.current) clearTimeout(popoverTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!activePopover) return;
+    const handleClickOutside = () => setActivePopover(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [activePopover]);
 
   const copyPhoneNumber = async () => {
     const phone = "+37379006499";
@@ -86,23 +92,24 @@ export default function OrderTrackingPage() {
     return copied;
   };
 
-  const handleSupportClick = async (e: React.MouseEvent) => {
+  const handleSupportClick = async (e: React.MouseEvent, buttonId: 'restaurant' | 'support') => {
     e.preventDefault();
+    e.stopPropagation();
 
-    // 1. Copiere imediată în clipboard pe orice dispozitiv
+    // 1. Copiere imediată în clipboard
     await copyPhoneNumber();
-    setIsCopied(true);
-    setShowSupportToast(true);
+    
+    // 2. Activează exclusiv butonul pe care s-a dat click
+    setActivePopover(buttonId);
 
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
+    if (popoverTimerRef.current) {
+      clearTimeout(popoverTimerRef.current);
     }
-    toastTimerRef.current = setTimeout(() => {
-      setShowSupportToast(false);
-      setIsCopied(false);
+    popoverTimerRef.current = setTimeout(() => {
+      setActivePopover(null);
     }, 4500);
 
-    // 2. Pe dispozitive mobile / tactile se lansează direct apelul nativ
+    // 3. Pe dispozitive mobile / tactile se lansează direct apelul nativ
     const isMobile = typeof window !== "undefined" && (
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
       window.innerWidth < 768 ||
@@ -402,27 +409,70 @@ export default function OrderTrackingPage() {
                 <span>{t('orderAgain')}</span>
               </button>
 
-              <button 
-                type="button"
-                onClick={handleSupportClick}
-                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 border px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer ${
-                  isCopied
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-800"
-                    : "border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B]"
-                }`}
-              >
-                {isCopied ? (
-                  <>
-                    <Check size={16} className="text-emerald-600" />
-                    <span>{t('phoneCopied')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Phone size={16} className="text-[#D4A853]" />
-                    <span>{t('callRestaurant')}</span>
-                  </>
-                )}
-              </button>
+              {/* Buton Restaurant cu Popover Ancorat Deasupra */}
+              <div className="relative inline-flex flex-col items-center w-full sm:w-auto">
+                <button 
+                  type="button"
+                  onClick={(e) => handleSupportClick(e, 'restaurant')}
+                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 border px-8 py-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm cursor-pointer active:scale-95 ${
+                    activePopover === 'restaurant'
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      : "border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1A120B]"
+                  }`}
+                >
+                  {activePopover === 'restaurant' ? (
+                    <>
+                      <Check size={16} className="text-emerald-600" />
+                      <span>{t('phoneCopied')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Phone size={16} className="text-[#D4A853]" />
+                      <span>{t('callRestaurant')}</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Popover Ancorat Deasupra Butonului */}
+                <AnimatePresence>
+                  {activePopover === 'restaurant' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto"
+                      role="status"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                          <Check size={12} className="stroke-[2.5]" />
+                        </div>
+                        <span className="text-white/80">{t('copiedToClipboard')}</span>
+                        <span className="font-semibold text-white font-mono tracking-wide">+373 79 006 499</span>
+                        <div className="h-3 w-px bg-white/20 shrink-0" />
+                        <a
+                          href="tel:+37379006499"
+                          className="text-[11px] font-bold text-[#D4A853] hover:text-white uppercase tracking-wider px-1.5 py-0.5 rounded transition-colors whitespace-nowrap shrink-0 hover:underline cursor-pointer"
+                        >
+                          {t('callNow')}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setActivePopover(null); }}
+                          className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-white/10 shrink-0 cursor-pointer"
+                          aria-label="Închide"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                      {/* Săgeată indicatoare către buton */}
+                      <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-white/10 rotate-45 mx-auto -mt-1 shadow-sm" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
         ) : (
@@ -554,80 +604,73 @@ export default function OrderTrackingPage() {
                   : t('courierAssigned')}
             </p>
 
-            {/* BUTON DE SUPORT (ONE-CLICK COPY & TOAST DISCRET PENTRU TOATE DISPOZITIVELE) */}
-            <button 
-              type="button"
-              onClick={handleSupportClick}
-              className={`inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group ${
-                isCopied 
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-800" 
-                  : "border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B]"
-              }`}
-            >
-              {isCopied ? (
-                <>
-                  <Check size={15} className="text-emerald-600 animate-in fade-in" />
-                  <span>{t('phoneCopied')}</span>
-                </>
-              ) : (
-                <>
-                  <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
-                  <span>{t('contactSupport')}</span>
-                </>
-              )}
-            </button>
+            {/* BUTON DE SUPORT (ONE-CLICK COPY & POPOVER ANCORAT DEASUPRA BUTONULUI) */}
+            <div className="relative inline-flex flex-col items-center">
+              <button 
+                type="button"
+                onClick={(e) => handleSupportClick(e, 'support')}
+                className={`inline-flex items-center justify-center gap-2.5 px-7 py-3.5 border-2 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer group active:scale-95 ${
+                  activePopover === 'support' 
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-800" 
+                    : "border-[#E8E2D9] hover:border-[#1A120B] hover:bg-[#1A120B] hover:text-white text-[#1A120B]"
+                }`}
+              >
+                {activePopover === 'support' ? (
+                  <>
+                    <Check size={15} className="text-emerald-600 animate-in fade-in" />
+                    <span>{t('phoneCopied')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Phone size={15} className="text-[#D4A853] group-hover:scale-110 transition-transform" />
+                    <span>{t('contactSupport')}</span>
+                  </>
+                )}
+              </button>
+
+              {/* Popover Ancorat Deasupra Butonului */}
+              <AnimatePresence>
+                {activePopover === 'support' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto"
+                    role="status"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="bg-[#222222] text-white px-4 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-3 text-xs font-medium whitespace-nowrap">
+                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                        <Check size={12} className="stroke-[2.5]" />
+                      </div>
+                      <span className="text-white/80">{t('copiedToClipboard')}</span>
+                      <span className="font-semibold text-white font-mono tracking-wide">+373 79 006 499</span>
+                      <div className="h-3 w-px bg-white/20 shrink-0" />
+                      <a
+                        href="tel:+37379006499"
+                        className="text-[11px] font-bold text-[#D4A853] hover:text-white uppercase tracking-wider px-1.5 py-0.5 rounded transition-colors whitespace-nowrap shrink-0 hover:underline cursor-pointer"
+                      >
+                        {t('callNow')}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setActivePopover(null); }}
+                        className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-white/10 shrink-0 cursor-pointer"
+                        aria-label="Închide"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                    {/* Săgeată indicatoare către buton */}
+                    <div className="w-2.5 h-2.5 bg-[#222222] border-r border-b border-white/10 rotate-45 mx-auto -mt-1 shadow-sm" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* ═══ AIRBNB-STYLE DISCREET LUXURY TOAST (FIX ÎN FIX DLS) ═══ */}
-      <AnimatePresence>
-        {showSupportToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.96 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] max-w-[94vw] sm:max-w-max pointer-events-auto"
-            role="status"
-            aria-live="polite"
-          >
-            <div className="bg-[#222222] text-white px-4 sm:px-5 py-3 rounded-full shadow-[0_8px_28px_rgba(0,0,0,0.28)] border border-white/10 flex items-center gap-3 sm:gap-4 text-sm font-medium">
-              {/* Checkmark Icon Circle */}
-              <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <Check size={14} className="stroke-[2.5]" />
-              </div>
-
-              {/* Message & Phone Number */}
-              <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] whitespace-nowrap">
-                <span className="text-white/80">{t('copiedToClipboard')}</span>
-                <span className="font-semibold text-white font-mono tracking-wide">+373 79 006 499</span>
-              </div>
-
-              {/* Subtle Vertical Hairline Divider */}
-              <div className="h-4 w-px bg-white/20 hidden sm:block shrink-0" />
-
-              {/* Action Call Link */}
-              <a
-                href="tel:+37379006499"
-                className="text-xs font-bold text-[#D4A853] hover:text-white uppercase tracking-wider px-2 py-1 rounded transition-colors whitespace-nowrap shrink-0 hover:underline cursor-pointer"
-              >
-                {t('callNow')}
-              </a>
-
-              {/* Dismiss Button */}
-              <button
-                type="button"
-                onClick={() => setShowSupportToast(false)}
-                className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 shrink-0 cursor-pointer -mr-1"
-                aria-label="Închide"
-              >
-                <X size={15} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       
       <Footer />
     </main>
