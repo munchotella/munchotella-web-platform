@@ -588,24 +588,24 @@ export default function OrderTrackingPage() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 450, damping: 32 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[94vw] sm:max-w-md w-full px-2 pointer-events-auto"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[95vw] sm:max-w-fit w-auto px-2 pointer-events-auto"
           >
-            <div className="bg-[#1A120B]/95 backdrop-blur-xl border border-[#D4A853]/40 rounded-full px-4 sm:px-5 py-3 shadow-[0_20px_50px_rgba(26,18,11,0.5),0_0_30px_rgba(212,168,83,0.25)] flex items-center justify-between gap-3 text-white">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="bg-[#1A120B]/95 backdrop-blur-xl border border-[#D4A853]/40 rounded-full px-5 py-3 shadow-[0_20px_50px_rgba(26,18,11,0.5),0_0_30px_rgba(212,168,83,0.25)] flex items-center justify-between gap-4 text-white">
+              <div className="flex items-center gap-3 shrink-0">
                 <div className="w-9 h-9 rounded-full bg-[#D4A853]/20 border border-[#D4A853]/40 flex items-center justify-center shrink-0 text-[#D4A853] shadow-inner">
                   <Check size={18} className="text-[#D4A853]" />
                 </div>
-                <div className="min-w-0">
+                <div className="shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853] truncate">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#D4A853] whitespace-nowrap">
                       {t('directLine')}
                     </span>
                     <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-[#D4A853]/60" />
-                    <span className="text-[10px] text-emerald-400 font-medium hidden sm:inline">
+                    <span className="text-[11px] text-emerald-400 font-medium whitespace-nowrap hidden sm:inline">
                       {t('copiedToClipboard')}
                     </span>
                   </div>
-                  <p className="font-serif font-bold text-sm sm:text-base text-white tracking-wider truncate">
+                  <p className="font-serif font-bold text-sm sm:text-base text-white tracking-wider whitespace-nowrap">
                     +373 79 006 499
                   </p>
                 </div>
@@ -614,7 +614,7 @@ export default function OrderTrackingPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <a
                   href="tel:+37379006499"
-                  className="inline-flex items-center gap-1.5 bg-[#D4A853] hover:bg-[#c49843] text-[#1A120B] text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-full transition-all active:scale-95 shadow-sm"
+                  className="inline-flex items-center gap-1.5 bg-[#D4A853] hover:bg-[#c49843] text-[#1A120B] text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full transition-all active:scale-95 shadow-sm whitespace-nowrap"
                 >
                   <Phone size={13} />
                   <span>{t('callNow')}</span>
