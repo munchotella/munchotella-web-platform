@@ -350,6 +350,7 @@
     "callRestaurant": "Позвонить в ресторан",
     "back": "Назад",
     "orderTracking": "Отслеживание заказа",
+    "orderLabel": "Заказ",
     "inProgress": "В процессе...",
     "deliveryAddress": "Адрес доставки",
     "estimatedTime": "Примерное время доставки",

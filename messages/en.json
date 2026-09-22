@@ -350,6 +350,7 @@
     "callRestaurant": "Call Restaurant",
     "back": "Back",
     "orderTracking": "Order Tracking",
+    "orderLabel": "Order",
     "inProgress": "In progress...",
     "deliveryAddress": "Delivery Address",
     "estimatedTime": "Estimated delivery time",

@@ -351,6 +351,7 @@
     "callRestaurant": "Sună la Restaurant",
     "back": "Înapoi",
     "orderTracking": "Urmărire Comandă",
+    "orderLabel": "Comandă",
     "inProgress": "În progres...",
     "deliveryAddress": "Adresa de livrare",
     "estimatedTime": "Timp estimat de livrare",

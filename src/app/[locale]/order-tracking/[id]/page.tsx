@@ -266,6 +266,9 @@ export default function OrderTrackingPage() {
   }
 
   const isCancelled = orderData.status === "cancelled";
+  const displayOrderNumber = orderData?._id 
+    ? String(orderData._id).slice(-6).toUpperCase()
+    : String(orderId).replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
 
   return (
     <main className="min-h-screen bg-[#FFFCF6] flex flex-col selection:bg-[#D4A853] selection:text-white">
@@ -297,8 +300,11 @@ export default function OrderTrackingPage() {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-2">{t('orderTracking')}</h1>
-          <p className="text-[#1A120B]/60 font-mono text-sm tracking-wide">#{orderId.toUpperCase()}</p>
+          <h1 className="text-3xl md:text-4xl font-serif text-[#1A120B] mb-3">{t('orderTracking')}</h1>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#E8E2D9] shadow-[0_2px_10px_rgba(26,18,11,0.03)]">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#736A60]">{t('orderLabel')}</span>
+            <span className="font-mono font-bold text-sm text-[#1A120B] tracking-wider">#{displayOrderNumber}</span>
+          </div>
         </div>
 
         {/* ═══ BANNER NOTIFICĂRI PUSH (WARM LUXURY & EDITORIAL) ═══ */}
