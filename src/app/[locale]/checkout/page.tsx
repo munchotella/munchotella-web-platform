@@ -60,6 +60,33 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
   return R * c;
 }
 
+// Cheie de persistență profil checkout (Cookies & LocalStorage)
+const CHECKOUT_PROFILE_KEY = "munchotella_checkout_profile";
+
+function getStoredCheckoutProfile() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(CHECKOUT_PROFILE_KEY);
+    if (raw) return JSON.parse(raw);
+    const match = document.cookie.match(new RegExp('(^| )' + CHECKOUT_PROFILE_KEY + '=([^;]+)'));
+    if (match) return JSON.parse(decodeURIComponent(match[2]));
+  } catch (e) {
+    // silent
+  }
+  return null;
+}
+
+function saveCheckoutProfile(data: any) {
+  if (typeof window === "undefined") return;
+  try {
+    const jsonStr = JSON.stringify(data);
+    localStorage.setItem(CHECKOUT_PROFILE_KEY, jsonStr);
+    document.cookie = `${CHECKOUT_PROFILE_KEY}=${encodeURIComponent(jsonStr)}; path=/; max-age=31536000; SameSite=Lax`;
+  } catch (e) {
+    // silent
+  }
+}
+
 export default function CheckoutPage() {
   const t = useTranslations("Checkout");
   const locale = useLocale();
@@ -75,6 +102,8 @@ export default function CheckoutPage() {
   const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
   const [doorDelivery, setDoorDelivery] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [addressLabel, setAddressLabel] = useState("Acasă");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "pos" | "online">("cash");
   const [timing, setTiming] = useState<"asap" | "scheduled">("asap");
   const [scheduledTime, setScheduledTime] = useState("18:00");
@@ -97,6 +126,8 @@ export default function CheckoutPage() {
     street: "",
     house: "",
     apartment: "",
+    entrance: "",
+    floor: "",
     intercom: "",
     notes: "",
     estimatedKm: 0,
@@ -104,6 +135,14 @@ export default function CheckoutPage() {
     lng: null as number | null,
     isGeocoded: false,
   });
+
+  const [doorDeliveryErrors, setDoorDeliveryErrors] = useState({
+    apartment: false,
+    entrance: false,
+    floor: false,
+    intercom: false,
+  });
+
   const [addressError, setAddressError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [nameError, setNameError] = useState("");
@@ -111,20 +150,103 @@ export default function CheckoutPage() {
 
   const nameInputRef = React.useRef<HTMLInputElement>(null);
   const phoneInputRef = React.useRef<HTMLInputElement>(null);
+  const apartmentInputRef = React.useRef<HTMLInputElement>(null);
+  const entranceInputRef = React.useRef<HTMLInputElement>(null);
+  const floorInputRef = React.useRef<HTMLInputElement>(null);
+  const intercomInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { user, token, updateUser, login } = useAuth();
+  const { user, token, updateUser, login, refreshUser } = useAuth();
 
-  // Pre-fill user data if available
+  // 1. Încărcare profil din LocalStorage / Cookies la deschiderea paginii
   React.useEffect(() => {
-    if (user) {
+    const stored = getStoredCheckoutProfile();
+    if (stored) {
       setFormData(prev => ({
         ...prev,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-        phone: user.phone || prev.phone,
+        name: prev.name || stored.name || "",
+        email: prev.email || stored.email || "",
+        phone: prev.phone || stored.phone || "",
+        street: prev.street || stored.street || "",
+        apartment: prev.apartment || stored.apartment || "",
+        entrance: prev.entrance || stored.entrance || "",
+        floor: prev.floor || stored.floor || "",
+        intercom: prev.intercom || stored.intercom || "",
+        notes: prev.notes || stored.notes || "",
+        estimatedKm: prev.estimatedKm || stored.estimatedKm || 0,
+        lat: prev.lat || stored.lat || null,
+        lng: prev.lng || stored.lng || null,
+        isGeocoded: prev.isGeocoded || stored.isGeocoded || false,
       }));
+      if (stored.doorDelivery) setDoorDelivery(true);
+      if (stored.addressLabel) setAddressLabel(stored.addressLabel);
+    }
+  }, []);
+
+  // 2. Pre-fill date utilizator din AuthContext dacă este logat
+  React.useEffect(() => {
+    if (user) {
+      setFormData(prev => {
+        let updatedStreet = prev.street;
+        let updatedLat = prev.lat;
+        let updatedLng = prev.lng;
+        let updatedKm = prev.estimatedKm;
+        let updatedGeocoded = prev.isGeocoded;
+
+        // Dacă clientul are adrese salvate în cont și nu a tastat încă o stradă
+        if (!updatedStreet && user.addresses && user.addresses.length > 0) {
+          const defaultAddr = user.addresses.find((a: any) => a.label === 'Acasă') || user.addresses[0];
+          if (defaultAddr) {
+            updatedStreet = defaultAddr.street;
+            updatedLat = defaultAddr.lat;
+            updatedLng = defaultAddr.lng;
+            const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, defaultAddr.lat, defaultAddr.lng);
+            updatedKm = straightDist * 1.3;
+            updatedGeocoded = true;
+          }
+        }
+
+        return {
+          ...prev,
+          name: user.name || prev.name,
+          email: user.email || prev.email,
+          phone: user.phone || prev.phone,
+          street: updatedStreet,
+          lat: updatedLat,
+          lng: updatedLng,
+          estimatedKm: updatedKm,
+          isGeocoded: updatedGeocoded,
+        };
+      });
     }
   }, [user]);
+
+  // 3. Salvare automată în LocalStorage & Cookie la fiecare modificare
+  React.useEffect(() => {
+    if (!isMounted) return;
+    saveCheckoutProfile({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      street: formData.street,
+      apartment: formData.apartment,
+      entrance: formData.entrance,
+      floor: formData.floor,
+      intercom: formData.intercom,
+      notes: formData.notes,
+      lat: formData.lat,
+      lng: formData.lng,
+      estimatedKm: formData.estimatedKm,
+      isGeocoded: formData.isGeocoded,
+      doorDelivery,
+      addressLabel,
+    });
+  }, [formData, doorDelivery, addressLabel, isMounted]);
+
+  const isAddressAlreadySaved = () => {
+    if (!user || !user.addresses || !formData.street) return false;
+    const cleanCurrent = formData.street.trim().toLowerCase();
+    return user.addresses.some((a: any) => a.street && a.street.trim().toLowerCase() === cleanCurrent);
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -194,8 +316,12 @@ export default function CheckoutPage() {
             customer: {
               name: formData.name || "Oaspete",
               phone: `${selectedCountry.dialCode}${cleanPhone.startsWith('+') ? cleanPhone.slice(selectedCountry.dialCode.length) : cleanPhone}`,
-              address: formData.street,
-              notes: formData.notes,
+              address: (doorDelivery && formData.estimatedKm < 1.0)
+                ? `${formData.street}${formData.entrance ? ', Sc. ' + formData.entrance : ''}${formData.floor ? ', Et. ' + formData.floor : ''}${formData.apartment ? ', Ap. ' + formData.apartment : ''}${formData.intercom ? ', Interfon: ' + formData.intercom : ''}`
+                : formData.street,
+              notes: (doorDelivery && formData.estimatedKm < 1.0 && (formData.apartment || formData.entrance || formData.floor || formData.intercom))
+                ? `[LIVRARE LA UȘĂ: Sc. ${formData.entrance || '-'}, Et. ${formData.floor || '-'}, Ap. ${formData.apartment || '-'}, Interfon: ${formData.intercom || '-'}] ${formData.notes || ''}`
+                : formData.notes,
               coordinates: {
                 lat: formData.lat || RESTAURANT_LOCATION.lat,
                 lng: formData.lng || RESTAURANT_LOCATION.lng
@@ -228,7 +354,7 @@ export default function CheckoutPage() {
     }, 1800); // 1.8 secunde debounce după tastare
 
     return () => clearTimeout(timer);
-  }, [formData.phone, formData.name, formData.street, items, deliveryType, doorDelivery, selectedCountry.dialCode]);
+  }, [formData.phone, formData.name, formData.street, formData.apartment, formData.entrance, formData.floor, formData.intercom, items, deliveryType, doorDelivery, selectedCountry.dialCode]);
 
   React.useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -493,13 +619,27 @@ export default function CheckoutPage() {
       let fullAddress = deliveryType === 'pickup'
         ? "Preluare din Boutique (Nicolae Testemițanu 21/1)"
         : formData.street;
+
       const extras = [];
-      if (deliveryType === 'delivery' && formData.house) extras.push(`Bloc/Scară: ${formData.house}`);
+      if (deliveryType === 'delivery' && doorDelivery && formData.estimatedKm < 1.0) {
+        if (formData.entrance) extras.push(`Scara ${formData.entrance}`);
+        if (formData.floor) extras.push(`Etaj ${formData.floor}`);
+        if (formData.apartment) extras.push(`Ap. ${formData.apartment}`);
+        if (formData.intercom) extras.push(`Interfon: ${formData.intercom}`);
+      } else if (deliveryType === 'delivery' && formData.house) {
+        extras.push(`Bloc/Scară: ${formData.house}`);
+      }
+
       if (extras.length > 0) {
         fullAddress += ` (${extras.join(', ')})`;
       }
 
+      const doorNotes = (deliveryType === 'delivery' && doorDelivery && formData.estimatedKm < 1.0)
+        ? `[LIVRARE LA UȘĂ: Sc. ${formData.entrance || '-'}, Et. ${formData.floor || '-'}, Ap. ${formData.apartment || '-'}, Interfon: ${formData.intercom || '-'}]`
+        : '';
+
       const aggregatedNotes = [
+        doorNotes,
         formData.notes,
         ...items.filter(i => (i as any).customization).map(i => `Notă ${i.name}: ${(i as any).customization}`)
       ].filter(Boolean).join(" | ");
@@ -573,10 +713,35 @@ export default function CheckoutPage() {
         throw new Error(data.message || "Eroare la plasarea comenzii");
       }
 
-      // Auto-autentificare dacă s-a creat cont la comanda cu cardul
+      // Salvare automată a adresei în cont dacă s-a bifat sau la prima comandă
+      const finalAuthToken = data.autoAuth?.token || activeAuthToken || token;
+      const shouldSaveAddr = saveAddress || !user;
+      if (deliveryType === 'delivery' && shouldSaveAddr && finalAuthToken && formData.street && !isAddressAlreadySaved()) {
+        try {
+          await fetch(`${API_URL}/users/addresses`, {
+            credentials: "include",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${finalAuthToken}`
+            },
+            body: JSON.stringify({
+              street: formData.street,
+              lat: formData.lat || RESTAURANT_LOCATION.lat,
+              lng: formData.lng || RESTAURANT_LOCATION.lng,
+              label: addressLabel || 'Acasă',
+            })
+          });
+        } catch (addrErr) {
+          console.warn("Could not auto-save address to user profile:", addrErr);
+        }
+      }
+
+      // Auto-autentificare dacă s-a creat cont la comanda cu cardul / cash
       if (data.autoAuth && data.autoAuth.user && data.autoAuth.token) {
         try {
           login(data.autoAuth.user, data.autoAuth.token);
+          await refreshUser();
         } catch (authE) {
           console.error("Auto login error:", authE);
         }
@@ -619,6 +784,30 @@ export default function CheckoutPage() {
       return;
     }
     setTermsError(false);
+
+    if (deliveryType === 'delivery' && doorDelivery && deliveryCalc.isPedestrian && formData.estimatedKm < 1.0) {
+      const isAptMissing = !formData.apartment.trim();
+      const isEntranceMissing = !formData.entrance.trim();
+      const isFloorMissing = !formData.floor.trim();
+      const isIntercomMissing = !formData.intercom.trim();
+
+      if (isAptMissing || isEntranceMissing || isFloorMissing || isIntercomMissing) {
+        setDoorDeliveryErrors({
+          apartment: isAptMissing,
+          entrance: isEntranceMissing,
+          floor: isFloorMissing,
+          intercom: isIntercomMissing,
+        });
+        setActiveStep(2);
+        setTimeout(() => {
+          if (isAptMissing) apartmentInputRef.current?.focus();
+          else if (isEntranceMissing) entranceInputRef.current?.focus();
+          else if (isFloorMissing) floorInputRef.current?.focus();
+          else if (isIntercomMissing) intercomInputRef.current?.focus();
+        }, 60);
+        return;
+      }
+    }
 
     // Cerință de securitate: Orice client oaspete (GUEST / nelogat sau fără telefon verificat)
     // este obligat să își confirme numărul prin SMS OTP atât la plata CASH, cât și la plata CARD
@@ -738,6 +927,31 @@ export default function CheckoutPage() {
           hasError = true;
         } else {
           setAddressError("");
+        }
+
+        // 4. Validare obligatorie detalii livrare la ușă dacă opțiunea este bifată
+        if (doorDelivery && deliveryCalc.isPedestrian && formData.estimatedKm < 1.0) {
+          const isAptMissing = !formData.apartment.trim();
+          const isEntranceMissing = !formData.entrance.trim();
+          const isFloorMissing = !formData.floor.trim();
+          const isIntercomMissing = !formData.intercom.trim();
+
+          if (isAptMissing || isEntranceMissing || isFloorMissing || isIntercomMissing) {
+            setDoorDeliveryErrors({
+              apartment: isAptMissing,
+              entrance: isEntranceMissing,
+              floor: isFloorMissing,
+              intercom: isIntercomMissing,
+            });
+            hasError = true;
+            setActiveStep(2);
+            setTimeout(() => {
+              if (isAptMissing) apartmentInputRef.current?.focus();
+              else if (isEntranceMissing) entranceInputRef.current?.focus();
+              else if (isFloorMissing) floorInputRef.current?.focus();
+              else if (isIntercomMissing) intercomInputRef.current?.focus();
+            }, 60);
+          }
         }
       }
 
@@ -1090,8 +1304,9 @@ export default function CheckoutPage() {
                                         ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.3, isGeocoded: true
                                       }));
                                       setAddressError("");
+                                      setSaveAddress(false);
                                     }}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs transition-all shrink-0 ${
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs transition-all shrink-0 cursor-pointer ${
                                       isSelected 
                                         ? 'bg-[#1A120B] border-[#1A120B] text-white font-bold shadow-md' 
                                         : 'bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
@@ -1154,7 +1369,59 @@ export default function CheckoutPage() {
                           )}
                         </div>
 
-                        {/* Order Notes (Full Width - clădire/scară eliminat conform solicitării) */}
+                        {/* Salvează adresa în cont — 1:1 ca în aplicația mobilă Munchotella */}
+                        {deliveryType === "delivery" && formData.street && formData.isGeocoded && !isAddressAlreadySaved() && (
+                          <div className="p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] shadow-sm space-y-3">
+                            <label className="flex items-center gap-3 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={saveAddress}
+                                onChange={(e) => setSaveAddress(e.target.checked)}
+                                className="w-4 h-4 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
+                              />
+                              <span className="text-xs font-bold text-[#1A120B]">
+                                {t('saveAddressInAccount')}
+                              </span>
+                            </label>
+
+                            <AnimatePresence>
+                              {saveAddress && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="pt-3 border-t border-[#E8E2D9]/60 flex flex-wrap gap-2 items-center"
+                                >
+                                  {[
+                                    { key: 'Acasă', labelKey: 'addressLabelHome', emoji: '🏠' },
+                                    { key: 'Birou', labelKey: 'addressLabelOffice', emoji: '💼' },
+                                    { key: 'Prieten', labelKey: 'addressLabelFriend', emoji: '👥' },
+                                    { key: 'Altul', labelKey: 'addressLabelOther', emoji: '📌' },
+                                  ].map(opt => {
+                                    const isSelected = addressLabel === opt.key;
+                                    return (
+                                      <button
+                                        key={opt.key}
+                                        type="button"
+                                        onClick={() => setAddressLabel(opt.key)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
+                                          isSelected
+                                            ? 'bg-[#1A120B] text-white font-bold shadow-sm'
+                                            : 'bg-white border border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
+                                        }`}
+                                      >
+                                        <span>{opt.emoji}</span>
+                                        <span>{t(opt.labelKey as any) || opt.key}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )}
+
+                        {/* Order Notes (Full Width) */}
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
                           <input
@@ -1166,22 +1433,178 @@ export default function CheckoutPage() {
                           />
                         </div>
 
-                        {/* Door Delivery Upsell (Strictly Only for Pedestrian < 1km & Geocoded) */}
+                        {/* Livrare până la ușă (+20 MDL) — strict pietonal < 1km & Geocoded */}
                         {deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 && formData.isGeocoded && (
-                          <label className="flex items-start gap-4 p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] cursor-pointer hover:border-[#D4A853]/50 transition-all mt-2 group">
-                            <div className="pt-1">
-                              <input
-                                type="checkbox"
-                                checked={doorDelivery}
-                                onChange={(e) => setDoorDelivery(e.target.checked)}
-                                className="w-5 h-5 accent-[#D4A853] cursor-pointer"
-                              />
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-[#1A120B] text-sm group-hover:text-[#D4A853] transition-colors">{t('doorDeliveryTitle')}</h4>
-                              <p className="text-xs text-[#736A60] mt-1 leading-relaxed">{t('doorDeliveryDesc')}</p>
-                            </div>
-                          </label>
+                          <div className="space-y-3">
+                            <label className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer group ${
+                              doorDelivery ? 'border-[#D4A853] bg-[#D4A853]/5 shadow-sm' : 'border-[#E8E2D9] bg-[#FFFCF6] hover:border-[#D4A853]/50'
+                            }`}>
+                              <div className="pt-1">
+                                <input
+                                  type="checkbox"
+                                  checked={doorDelivery}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setDoorDelivery(checked);
+                                    if (!checked) {
+                                      setDoorDeliveryErrors({
+                                        apartment: false,
+                                        entrance: false,
+                                        floor: false,
+                                        intercom: false,
+                                      });
+                                    }
+                                  }}
+                                  className="w-5 h-5 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
+                                />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-[#1A120B] text-sm group-hover:text-[#D4A853] transition-colors">{t('doorDeliveryTitle')}</h4>
+                                <p className="text-xs text-[#736A60] mt-1 leading-relaxed">{t('doorDeliveryDesc')}</p>
+                              </div>
+                            </label>
+
+                            <AnimatePresence>
+                              {doorDelivery && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="p-5 rounded-2xl border border-[#D4A853]/40 bg-[#FFFDF9] space-y-4 shadow-sm"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-base">🚪</span>
+                                    <div>
+                                      <h5 className="font-bold text-xs text-[#1A120B] uppercase tracking-wider">{t('doorDeliveryDetailsTitle')}</h5>
+                                      <p className="text-[11px] text-[#736A60]">{t('doorDeliveryDetailsDesc')}</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                    {/* Apartament */}
+                                    <div>
+                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                        {t('apartmentLabel')}
+                                      </label>
+                                      <input
+                                        ref={apartmentInputRef}
+                                        type="text"
+                                        placeholder={t('placeholderApartment')}
+                                        value={formData.apartment}
+                                        onChange={(e) => {
+                                          setFormData(prev => ({ ...prev, apartment: e.target.value }));
+                                          if (doorDeliveryErrors.apartment) {
+                                            setDoorDeliveryErrors(prev => ({ ...prev, apartment: false }));
+                                          }
+                                        }}
+                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                          doorDeliveryErrors.apartment
+                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                        }`}
+                                      />
+                                      {doorDeliveryErrors.apartment && (
+                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                          <AlertCircle className="w-3 h-3 shrink-0" />
+                                          <span>{t('doorFieldRequired')}</span>
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/* Scară */}
+                                    <div>
+                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                        {t('entranceLabel')}
+                                      </label>
+                                      <input
+                                        ref={entranceInputRef}
+                                        type="text"
+                                        placeholder={t('placeholderEntrance')}
+                                        value={formData.entrance}
+                                        onChange={(e) => {
+                                          setFormData(prev => ({ ...prev, entrance: e.target.value }));
+                                          if (doorDeliveryErrors.entrance) {
+                                            setDoorDeliveryErrors(prev => ({ ...prev, entrance: false }));
+                                          }
+                                        }}
+                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                          doorDeliveryErrors.entrance
+                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                        }`}
+                                      />
+                                      {doorDeliveryErrors.entrance && (
+                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                          <AlertCircle className="w-3 h-3 shrink-0" />
+                                          <span>{t('doorFieldRequired')}</span>
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/* Etaj */}
+                                    <div>
+                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                        {t('floorLabel')}
+                                      </label>
+                                      <input
+                                        ref={floorInputRef}
+                                        type="text"
+                                        placeholder={t('placeholderFloor')}
+                                        value={formData.floor}
+                                        onChange={(e) => {
+                                          setFormData(prev => ({ ...prev, floor: e.target.value }));
+                                          if (doorDeliveryErrors.floor) {
+                                            setDoorDeliveryErrors(prev => ({ ...prev, floor: false }));
+                                          }
+                                        }}
+                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                          doorDeliveryErrors.floor
+                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                        }`}
+                                      />
+                                      {doorDeliveryErrors.floor && (
+                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                          <AlertCircle className="w-3 h-3 shrink-0" />
+                                          <span>{t('doorFieldRequired')}</span>
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    {/* Interfon / Domofon */}
+                                    <div>
+                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                        {t('intercomLabel')}
+                                      </label>
+                                      <input
+                                        ref={intercomInputRef}
+                                        type="text"
+                                        placeholder={t('placeholderIntercom')}
+                                        value={formData.intercom}
+                                        onChange={(e) => {
+                                          setFormData(prev => ({ ...prev, intercom: e.target.value }));
+                                          if (doorDeliveryErrors.intercom) {
+                                            setDoorDeliveryErrors(prev => ({ ...prev, intercom: false }));
+                                          }
+                                        }}
+                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                          doorDeliveryErrors.intercom
+                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                        }`}
+                                      />
+                                      {doorDeliveryErrors.intercom && (
+                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                          <AlertCircle className="w-3 h-3 shrink-0" />
+                                          <span>{t('doorFieldRequired')}</span>
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         )}
                       </div>
                     )}
