@@ -1948,17 +1948,20 @@ export async function POST(request: Request) {
       const debugResult = await processMessage(senderId, messageText, channel);
       await logAIActivity(senderId, channel, messageText, debugResult.status || 'gemini_response');
       
-      const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
-      await notifyAgencyDashboard({
-        platform: channel,
-        asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
-        sender_id: senderId,
-        customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
-        customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
-        message_text: messageText,
-        reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
-        status: debugResult.status || 'gemini_response'
-      });
+      const isTestSender = String(senderId).startsWith('9999') || String(senderId) === 'test' || String(senderId) === 'sim_user';
+      if (!isTestSender) {
+        const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
+        await notifyAgencyDashboard({
+          platform: channel,
+          asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
+          sender_id: senderId,
+          customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
+          customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
+          message_text: messageText,
+          reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
+          status: debugResult.status || 'gemini_response'
+        });
+      }
 
       return NextResponse.json({ success: true, status: 'procesat', channel, senderId, messageText, debug: debugResult });
     } else {
