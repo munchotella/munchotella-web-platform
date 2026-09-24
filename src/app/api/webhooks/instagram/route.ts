@@ -431,7 +431,7 @@ async function notifyAgencyDashboard(payload: {
   const tasks = endpoints.map(async (url) => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -440,7 +440,8 @@ async function notifyAgencyDashboard(payload: {
       });
       clearTimeout(timeoutId);
       return res.status;
-    } catch (_) {
+    } catch (err: any) {
+      console.warn(`[notifyAgencyDashboard] Eroare la ${url}:`, err?.message || err);
       return null;
     }
   });
