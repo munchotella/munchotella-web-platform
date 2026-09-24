@@ -551,16 +551,36 @@ function detectLanguage(text: string): 'ro' | 'ru' | 'en' {
   }
   const lower = text.toLowerCase().trim();
   
+  // English words and phrases
   const enPhrases = [
     'i want to order', 'can i order', 'how much is', 'what is the price', 
-    'do you deliver', 'where are you located', 'open menu', 'english please', 
-    'good afternoon', 'good evening', 'hello there', 'hi there'
+    'do you deliver', 'where are you located', 'where are you', 'open menu', 
+    'english please', 'good afternoon', 'good evening', 'good morning', 
+    'hello there', 'hi there', 'how are you', 'what time', 'opening hours', 
+    'open today', 'are you open', 'thank you', 'thanks a lot', 'place an order', 
+    'see the menu', 'i would like'
+  ];
+
+  const enKeywords = [
+    'hello', 'hi', 'hey', 'menu', 'order', 'price', 'address', 'location', 
+    'delivery', 'deliver', 'open', 'closed', 'hours', 'schedule', 'thanks', 
+    'please', 'waffle', 'pancakes', 'drinks', 'coffee', 'halal', 'vegan', 'vegetarian'
   ];
   
   const hasEnPhrase = enPhrases.some(p => lower.includes(p));
-  const hasRoIndicators = /(\b(vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi)\b)/i.test(text);
+  const hasEnKeyword = enKeywords.some(w => {
+    const rx = new RegExp(`\\b${w}\\b`, 'i');
+    return rx.test(lower);
+  });
 
-  if (hasEnPhrase && !hasRoIndicators) {
+  const hasRoIndicators = /(\b(vreau|sa|să|comand|comanda|comandă|salut|buna|bună|ziua|ce|cu|de|la|pe|si|și|nu|un|o|am|ai|au|este|sunt|unde|cat|cât|fara|fără|atat|atât|multumesc|mulțumesc|mersi|rog|poftim|deschis|inchis|închis|program|orar)\b)/i.test(text);
+
+  if ((hasEnPhrase || hasEnKeyword) && !hasRoIndicators) {
+    return 'en';
+  }
+
+  // Pure English greeting check
+  if (/^(\s*(hello|hi|hey|good morning|good afternoon|good evening)\s*[!.,?]*\s*)$/i.test(lower)) {
     return 'en';
   }
 
@@ -774,11 +794,15 @@ function handleCartAdjustment(text: string, session: any, lang: string): { handl
   if (session.cart.length === 0) {
     replyText = lang === 'ru'
       ? `Убрал ${removedNames.join(', ')} из заказа. Сейчас ваша корзина пуста! 🧇 Что бы вы хотели заказать? ✨`
+      : lang === 'en'
+      ? `Removed ${removedNames.join(', ')} from your cart. Your cart is now empty! 🧇 What would you like to order? ✨`
       : `Am scos ${removedNames.join(', ')} din coș. Acum coșul dvs. este gol! 🧇 Ce bunătăți ați dori să adăugăm? ✨`;
   } else {
     const remainingSummary = session.cart.map((it: any) => `${it.quantity > 1 ? it.quantity + 'x ' : ''}${it.name}`).join(' + ');
     replyText = lang === 'ru'
       ? `Готово! Обновил заказ: сейчас в корзине ${remainingSummary} (Итого: ${totalSum} MDL). 🧇 Хотите добавить напиток или оформляем доставку? ✨`
+      : lang === 'en'
+      ? `Done! Updated your cart: now you have ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Would you like to add a drink or proceed to checkout? ✨`
       : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Mai doriți ceva delicios sau finalizăm comanda? ✨`;
   }
 
@@ -807,16 +831,16 @@ function isGlobalOrderCancellation(text: string): boolean {
 function handlePreorderAndScheduling(text: string, session: any, lang: string): { handled: boolean, replyText?: string } {
   const lower = text.toLowerCase().trim();
 
-  const isDineIn = /(\b(pe loc|la mese|la masa|la masă|in cafenea|în cafenea|in local|în local|venim la voi|servim acolo|mancam acolo|mâncăm acolo|посидеть|в кафе|на месте)\b)/i.test(lower);
-  const isWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('среду');
+  const isDineIn = /(\b(pe loc|la mese|la masa|la masă|in cafenea|în cafenea|in local|în local|venim la voi|servim acolo|mancam acolo|mâncăm acolo|посидеть|в кафе|на месте|dine in|dine-in|at the cafe|inside)\b)/i.test(lower);
+  const isWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('среду') || lower.includes('wednesday');
   
-  const hasPreorderKeyword = /(\b(precomanda|precomandă|precomenzi|pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|[iî]n avans|programat[aă]?|pe cand|pe când|pe diseara|pe diseară|diseara|diseară|pe maine|pe mâine|pe mîine|pe miine|pentru maine|pentru mâine|pentru mîine|pentru miine|предзаказ|на потом|попозже|на вечер|на завтра)\b)/i.test(lower);
-  const timeMatch = lower.match(/\b(?:la\s*ora|pentru\s*ora|ora|la)\s*(\d{1,2}(?::\d{2})?)\b/i);
-  const dayMatch = lower.match(/\b(m[aâîi]{1,2}ne|disear[aă]|azi|ast[aă]zi|miercuri|joi|vineri|s[aă]mb[aă]t[aă]|duminic[aă]|luni|mar[tț]i|завтра|сегодня|вечером)\b/i);
+  const hasPreorderKeyword = /(\b(precomanda|precomandă|precomenzi|pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|[iî]n avans|programat[aă]?|pe cand|pe când|pe diseara|pe diseară|diseara|diseară|pe maine|pe mâine|pe mîine|pe miine|pentru maine|pentru mâine|pentru mîine|pentru miine|предзаказ|на потом|попозже|на вечер|на завтра|preorder|pre-order|later|for tomorrow|tonight)\b)/i.test(lower);
+  const timeMatch = lower.match(/\b(?:la\s*ora|pentru\s*ora|ora|la|at)\s*(\d{1,2}(?::\d{2})?)\b/i);
+  const dayMatch = lower.match(/\b(m[aâîi]{1,2}ne|disear[aă]|azi|ast[aă]zi|miercuri|joi|vineri|s[aă]mb[aă]t[aă]|duminic[aă]|luni|mar[tț]i|завтра|сегодня|вечером|tomorrow|tonight|today)\b/i);
 
   // Dacă utilizatorul răspunde la întrebarea anterioară a robotului precizând doar ora
   const lastBotMsg = (session.history || []).filter((m: any) => m.role === 'assistant').slice(-1)[0];
-  const botJustAskedTime = lastBotMsg && (lastBotMsg.text.includes('ce oră') || lastBotMsg.text.includes('ce ora') || lastBotMsg.text.includes('какое время'));
+  const botJustAskedTime = lastBotMsg && (lastBotMsg.text.includes('ce oră') || lastBotMsg.text.includes('ce ora') || lastBotMsg.text.includes('какое время') || lastBotMsg.text.includes('what time'));
 
   if (!hasPreorderKeyword && !timeMatch && !isDineIn && !botJustAskedTime) {
     return { handled: false };
@@ -826,6 +850,8 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
   if (isWednesday) {
     const wedReply = lang === 'ru'
       ? "Обратите внимание: по средам у нас выходной день! 🧇 Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
+      : lang === 'en'
+      ? "Please note: we are closed on Wednesdays! 🧇 We'd love to prepare your order on any other day of the week from 16:00 to 00:00!"
       : "Vă informăm cu drag că Miercuri este singura noastră zi liberă săptămânală (închis)! 🧇 Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
     return { handled: true, replyText: wedReply };
   }
@@ -842,11 +868,15 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
       
       const reply = lang === 'ru'
         ? `Отлично! 🥰 Зафиксировал ${isDineIn ? 'визит в кафе' : 'предзаказ'} на ${targetDay} к ${detectedHour}! В вашем заказе: ${summary} (Итого: ${total} MDL). Оформляем или добавим что-нибудь еще? 🧇✨`
+        : lang === 'en'
+        ? `Great! 🥰 Noted your ${isDineIn ? 'table reservation' : 'scheduled order'} for ${targetDay} at ${detectedHour}! In your cart: ${summary} (Total: ${total} MDL). Would you like to complete the order or add more? 🧇✨`
         : `Excelent! 🥰 Am notat cu mare drag ${isDineIn ? 'că vă așteptăm pe loc la cafenea' : 'comanda programată'} pentru ${targetDay} la ora ${detectedHour}! În coș aveți: ${summary} (Total: ${total} MDL). Doriți să finalizăm comanda sau mai adăugăm ceva delicios? 🧇✨`;
       return { handled: true, replyText: reply };
     } else {
       const reply = lang === 'ru'
         ? `Отлично! 🥰 С удовольствием записал ${isDineIn ? 'бронь на месте' : 'предзаказ'} на ${targetDay} к ${detectedHour}! Какие десерты из меню Munchotella приготовить для вас к этому времени? 🧇✨`
+        : lang === 'en'
+        ? `Great! 🥰 Noted your ${isDineIn ? 'visit to our cafe' : 'preorder'} for ${targetDay} at ${detectedHour}! What delicious treats from Munchotella shall we prepare for you? 🧇✨`
         : `Excelent! 🥰 Am notat cu drag ${isDineIn ? 'că vă așteptăm pe loc în cafenea' : 'programarea'} pentru ${targetDay} la ora ${detectedHour}! Ce bunătăți din meniul Munchotella ați dori să vă pregătim pentru această oră? 🧇✨`;
       return { handled: true, replyText: reply };
     }
@@ -856,6 +886,8 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
   if (hasPreorderKeyword || isDineIn) {
     const reply = lang === 'ru'
       ? `С огромным удовольствием! 🥰 Принимаем предзаказы на ${targetDay} ${isDineIn ? 'на месте в кафе' : 'с доставкой'} в часы нашей работы (16:00 - 00:00). Подскажите, пожалуйста, к какому точно времени приготовить заказ и какие десерты вы выбрали? 🧇✨`
+      : lang === 'en'
+      ? `With pleasure! 🥰 We accept preorders for ${targetDay} ${isDineIn ? 'for dine-in' : 'with delivery'} during opening hours (16:00 - 00:00). Could you please let us know what time you'd like it ready and which desserts you chose? 🧇✨`
       : `Cu cel mai mare drag! 🥰 Preluăm cu bucurie comenzi programate pentru ${targetDay} ${isDineIn ? 'pe loc în cafenea' : 'cu livrare rapidă'} (intervalul nostru de lucru este 16:00 - 00:00). La ce oră ați dori să fie gata comanda și ce bunătăți doriți să vă pregătim? 🧇✨`;
     return { handled: true, replyText: reply };
   }
@@ -1003,14 +1035,16 @@ function handleIngredientsInquiry(text: string, lang: string): { handled: boolea
 
   const ing = matchedProduct.ingredients;
   const allergenNote = matchedProduct.hasFistic 
-    ? (lang === 'ru' ? " (содержит фисташку)" : " (conține fistic)")
+    ? (lang === 'ru' ? " (содержит фисташку)" : lang === 'en' ? " (contains pistachio)" : " (conține fistic)")
     : matchedProduct.hasArahide 
-    ? (lang === 'ru' ? " (содержит арахис)" : " (conține arahide)")
-    : (lang === 'ru' ? " (без фисташек и без арахиса)" : " (nu conține fistic sau arahide)");
+    ? (lang === 'ru' ? " (содержит арахис)" : lang === 'en' ? " (contains peanuts)" : " (conține arahide)")
+    : (lang === 'ru' ? " (без фисташек и без арахиса)" : lang === 'en' ? " (free of pistachios and peanuts)" : " (nu conține fistic sau arahide)");
 
   let replyText = "";
   if (lang === 'ru') {
     replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) содержит: ${ing}${allergenNote}. 🧇 Если у вас есть аллергия или особые пожелания, мы с радостью приготовим индивидуально! Добавить в заказ? ✨`;
+  } else if (lang === 'en') {
+    replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) contains: ${ing}${allergenNote}. 🧇 If you have any allergies or special requests, we can gladly customize it for you! Would you like to add one to your cart? ✨`;
   } else {
     replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) conține: ${ing}${allergenNote}. 🧇 Dacă aveți vreo preferință sau alergie, bucătarul nostru o poate personaliza cu drag! Doriți să adăugăm o porție în coș? ✨`;
   }
@@ -1023,7 +1057,7 @@ function handleIngredientsInquiry(text: string, lang: string): { handled: boolea
 // ═══════════════════════════════════════════════════════════════════════════════
 function handleClarificationOrConfusion(text: string, session: any, lang: string): { handled: boolean, replyText?: string } {
   const t = text.trim();
-  const isConfusion = /^([?？!！.,\s]+|cum adica\??|cum adică\??|nu inteleg|nu înțeleg|de ce\??|adica\??|adică\??|что\??|почему\??|в смысле\??)$/i.test(t);
+  const isConfusion = /^([?？!！.,\s]+|cum adica\??|cum adică\??|nu inteleg|nu înțeleg|de ce\??|adica\??|adică\??|что\??|почему\??|в смысле\??|what\??|why\??)$/i.test(t);
   if (!isConfusion) return { handled: false };
 
   const lastBotMsg = (session.history || []).filter((m: any) => m.role === 'assistant').slice(-1)[0];
@@ -1031,12 +1065,16 @@ function handleClarificationOrConfusion(text: string, session: any, lang: string
   if (lastBotMsg && lastBotMsg.text) {
     if (lang === 'ru') {
       replyText = "Прошу прощения, если выразился непонятно! 🥰 Я готов ответить на любые ваши вопросы по меню или заказу. Подскажите, пожалуйста, чем я могу вам помочь прямо сейчас? 🧇";
+    } else if (lang === 'en') {
+      replyText = "Apologies if I wasn't clear earlier! 🥰 I'm here to help with any details regarding our menu, prices, or orders. How can I help you right now? 🧇";
     } else {
       replyText = "Mă scuzați dacă am fost neclar mai devreme! 🥰 Vă stau la dispoziție cu orice detalii despre meniul nostru, prețuri sau comenzi. Spuneți-mi vă rog, cu ce vă pot ajuta mai exact? 🧇";
     }
   } else {
     if (lang === 'ru') {
       replyText = "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Подскажите, что вас интересует? 🧇";
+    } else if (lang === 'en') {
+      replyText = "Hello! 🥰 I'd be delighted to assist you with any questions about our menu or orders. How can I help you? 🧇";
     } else {
       replyText = "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Spuneți-mi vă rog, ce ați dori să aflați sau să comandați? 🧇";
     }
@@ -1051,31 +1089,35 @@ function handleClarificationOrConfusion(text: string, session: any, lang: string
 function handleCustomerInquiries(text: string, lang: string): { handled: boolean, replyText?: string } {
   const lower = text.toLowerCase().trim();
 
-  const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер)\s*[!.,?]*\s*)$/i.test(lower);
-  const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня)\b)/i.test(lower);
-  const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес)\b)/i.test(lower);
-  const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород)\b)/i.test(lower);
-  const isPaymentQ = /(\b(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными)\b)/i.test(lower);
-  const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина)\b)/i.test(lower);
-  const isFreshnessQ = /(\b(ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые)\b)/i.test(lower);
-  const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса)/i.test(lower);
+  const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер|good morning|good afternoon|good evening)\s*[!.,?]*\s*)$/i.test(lower);
+  const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня|hours|opening hours|open today|what time|are you open|closed)\b)/i.test(lower);
+  const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес|address|location|where are you|where is|where located)\b)/i.test(lower);
+  const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород|deliver|delivery|shipping|courier)\b)/i.test(lower);
+  const isPaymentQ = /(\b(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными|payment|pay|how to pay|credit card)\b)/i.test(lower);
+  const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина|pork|gelatin)\b)/i.test(lower);
+  const isFreshnessQ = /(\b(ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые|fresh|warm|hot|crispy)\b)/i.test(lower);
+  const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса|tables?|seats?|seating|dine in|dine-in|terrace)/i.test(lower);
 
   if (isGreetingOnly) {
     return {
       handled: true,
       replyText: lang === 'ru'
         ? "Здравствуйте! 🥰 Чем мы можем вас порадовать сегодня? 🧇"
+        : lang === 'en'
+        ? "Hello! 🥰 How can we sweeten your day today? 🧇 Check our menu at https://www.munchotella.md/en/menu or let us know what you'd like to order! ✨"
         : "Bună! 🥰 Cu ce bunătăți vă putem îndulci astăzi? 🧇"
     };
   }
 
   if (isHoursQ) {
-    const mentionsWednesday = lower.includes('miercuri') || lower.includes('среда');
+    const mentionsWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('wednesday');
     if (mentionsWednesday) {
       return {
         handled: true,
         replyText: lang === 'ru'
           ? "По средам у нас выходной день! 🧇 В остальные дни ждем вас с 16:00 до 00:00! ✨"
+          : lang === 'en'
+          ? "We are closed on Wednesdays! 🧇 On all other days, we warmly welcome you from 16:00 to 00:00! ✨"
           : "Miercuri este singura noastră zi liberă (închis)! 🧇 În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
       };
     }
@@ -1083,6 +1125,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной). Ждем вас с радостью! 🧇✨"
+        : lang === 'en'
+        ? "We are open daily from 16:00 to 00:00 (Wednesdays: Closed). We look forward to seeing you! 🧇✨"
         : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis). Vă așteptăm cu drag! 🧇✨"
     };
   }
@@ -1092,17 +1136,21 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițanu 21/1. Ждем вас в гости! 🧇✨"
+        : lang === 'en'
+        ? "Our address is: Chișinău, 21/1 Nicolae Testemițanu St. We can't wait to welcome you! 🧇✨"
         : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițanu 21/1. Vă așteptăm cu drag! 🧇✨"
     };
   }
 
   if (isDeliveryQ) {
-    const isSuburb = lower.includes('durlesti') || lower.includes('durlești') || lower.includes('ialoveni') || lower.includes('truseni') || lower.includes('trușeni') || lower.includes('colonita') || lower.includes('colonița') || lower.includes('cricova') || lower.includes('stauceni') || lower.includes('stăuceni') || lower.includes('suburbi');
+    const isSuburb = lower.includes('durlesti') || lower.includes('durlești') || lower.includes('ialoveni') || lower.includes('truseni') || lower.includes('trușeni') || lower.includes('colonita') || lower.includes('colonița') || lower.includes('cricova') || lower.includes('stauceni') || lower.includes('stăuceni') || lower.includes('suburbi') || lower.includes('suburb');
     if (isSuburb) {
       return {
         handled: true,
         replyText: lang === 'ru'
           ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițanu 21/1 или на вынос! 🧇"
+          : lang === 'en'
+          ? "We do not deliver to suburbs yet, but we warmly welcome you at our boutique on 21/1 Nicolae Testemițanu St. or for takeout! 🧇"
           : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițanu 21/1 sau la pachet! 🧇"
       };
     }
@@ -1110,6 +1158,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Да, доставляем по Кишиневу в термобоксах за 35-45 минут (тариф 50-70 MDL). 🛵✨"
+        : lang === 'en'
+        ? "Yes, we deliver across Chișinău in insulated thermal boxes within 35-45 minutes (fee 50-70 MDL). 🛵✨"
         : "Livrăm rapid în tot Chișinăul în 35-45 min, în cutii termice (taxa 50-70 lei). 🛵✨"
     };
   }
@@ -1119,6 +1169,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Можно оплатить картой онлайн, картой курьеру через POS-терминал или наличными при получении. 💳💵"
+        : lang === 'en'
+        ? "You can pay online by card, with card via POS terminal on delivery, or cash upon receipt. 💳💵"
         : "Puteți achita online cu cardul, cu cardul la curier (POS) sau cash la primire. 💳💵"
     };
   }
@@ -1128,6 +1180,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Все десерты 100% вегетарианские, из отборных ингредиентов, без животного желатина. 🍓✨"
+        : lang === 'en'
+        ? "All our desserts are 100% vegetarian, made from fresh ingredients, and without animal gelatin. 🍓✨"
         : "Toate deserturile sunt 100% vegetariene, din ingrediente proaspete și fără gelatină animală. 🍓✨"
     };
   }
@@ -1137,6 +1191,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Десерты выпекаются на месте под заказ и пакуются в термобоксы, приезжают хрустящими и горячими! 🧇🔥"
+        : lang === 'en'
+        ? "Desserts are freshly baked to order and packed in thermal boxes, arriving hot and crispy! 🧇🔥"
         : "Deserturile se prepară proaspăt la comandă și ajung fierbinți și crocante în cutii termice! 🧇🔥"
     };
   }
@@ -1146,6 +1202,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       handled: true,
       replyText: lang === 'ru'
         ? "Да, у нас есть уютный зал на ул. Testemițanu 21/1, где можно насладиться горячими десертами! Ждем вас! 🧇✨"
+        : lang === 'en'
+        ? "Yes, we have a cozy hall at 21/1 Nicolae Testemițanu St. where you can enjoy warm desserts! Welcome! 🧇✨"
         : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițanu 21/1! 🧇✨"
     };
   }
@@ -1192,6 +1250,10 @@ export async function processMessage(
         ? (isComplaintOrIssue 
             ? "Приносим извинения за неудобства! 🤝 Я передал ваш запрос администратору, сотрудник свяжется с вами здесь в самое ближайшее время!"
             : "Конечно! 🤝 Я передал диалог нашему сотруднику. Оператор ответит вам здесь в ближайшее время!")
+        : lang === 'en'
+        ? (isComplaintOrIssue
+            ? "We sincerely apologize for any inconvenience! 🤝 I have notified our management, and a team member will reply to you here shortly!"
+            : "Certainly! 🤝 I've connected you with a Munchotella team member. An operator will reply to you here in a moment!")
         : (isComplaintOrIssue
             ? "Ne cerem scuze pentru neplăceri! 🤝 Am trimis imediat o alertă echipei noastre și un coleg verifică situația pentru a vă răspunde aici în câteva momente!"
             : "Desigur! 🤝 V-am pus în legătură cu un coleg din echipa Munchotella. Un operator vă va răspunde aici în câteva momente!");
@@ -1247,11 +1309,13 @@ export async function processMessage(
       session.scheduledTime = null;
       const cancelReply = lang === 'ru'
         ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
+        : lang === 'en'
+        ? "Your order has been cancelled and your cart is empty! 🧇 Feel free to reach out anytime when you're ready to order!"
         : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
 
       appendToHistory(session, 'assistant', cancelReply);
       await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, "🧇 Deschide Meniul");
+      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul");
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
 
@@ -1305,6 +1369,8 @@ export async function processMessage(
       const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
       let checkoutText = lang === 'ru'
         ? `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`
+        : lang === 'en'
+        ? `Your order is ready (${totalSum} MDL)! 🧇 Click below to enter your delivery address and finalize! ✨`
         : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
 
       session.state = 'IDLE';
@@ -1347,6 +1413,10 @@ export async function processMessage(
         addReply = compoundMatches.length > 1
           ? `С удовольствием добавил в заказ: ${addedItemsSummary}! 🧇 Итого в корзине: ${totalSum} MDL. ${hasDrinks ? 'Оформляем заказ или добавить еще что-нибудь сладкое?' : 'Хотите добавить прохладительный напиток или оформляем? ✨'}`
           : `С удовольствием добавил ${addedItemsSummary} (${compoundMatches[0].product.price * compoundMatches[0].quantity} MDL) в ваш заказ! 🧇 ${hasDrinks ? 'Хотите оформить заказ или добавить еще что-нибудь?' : 'Хотите добавить еще что-нибудь сладкое или напиток?'}`;
+      } else if (lang === 'en') {
+        addReply = compoundMatches.length > 1
+          ? `Delighted to add to your cart: ${addedItemsSummary}! 🧇 Cart total: ${totalSum} MDL. ${hasDrinks ? 'Shall we complete your order or add more sweets?' : 'Would you like to add a refreshing drink or finalize? ✨'}`
+          : `Delighted to add ${addedItemsSummary} (${compoundMatches[0].product.price * compoundMatches[0].quantity} MDL) to your cart! 🧇 ${hasDrinks ? 'Shall we complete your order or add anything else?' : 'Would you like to add another sweet treat or a drink?'}`;
       } else {
         addReply = compoundMatches.length > 1
           ? `Am adăugat cu drag în coș: ${addedItemsSummary}! 🧇 Total coș: ${totalSum} MDL. ${hasDrinks ? 'Doriți să finalizăm comanda sau mai adăugăm ceva dulce?' : 'Doriți să adăugăm și o băutură răcoritoare sau finalizăm comanda? ✨'}`
@@ -1385,25 +1455,26 @@ export async function processMessage(
 
       const schedInfo = session.scheduledTime ? `Programare/Oră menționată: ${session.scheduledTime}` : 'Comandă imediată';
 
-      const dynamicPrompt = `Ești asistentul virtual oficial al cafenelei artizanale Munchotella Waffle Boutique din Chișinău (Str. Nicolae Testemițanu 21/1).
-Program: 16:00 - 00:00 (Miercuri: Închis).
-Produse principale: Crepe Dubai cu fistic și cataif (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), băuturi răcoritoare.
-Reguli esențiale:
-1. Răspunde ULTRA-SCURT, cald și natural (1 singură propoziție, maxim 2 foarte scurte, exact ca un ospătar amabil pe chat, NU ca un robot corporatist).
-2. Fără texte lungi sau introduceri pompoase. Treci direct la răspunsul dorit de client.
-3. Dacă clientul vrea o precomandă, confirmă scurt și întreabă doar ora dorită (interval 16:00 - 00:00).
-4. La întrebări generale (orar, adresă, livrare), răspunde scurt și direct la obiect, fără texte de umplutură.
-5. NU include linkuri în text (linkurile se transmit separat doar dacă este cazul).
-6. NU inventa produse. NU folosi cuvintele 'americane' sau 'nuci'. Folosește exclusiv denumirile oficiale.
+      const dynamicPrompt = `You are the friendly virtual assistant of the artisanal dessert boutique Munchotella Waffle Boutique in Chișinău (21/1 Nicolae Testemițanu St.).
+Opening hours: 16:00 - 00:00 (Wednesdays: Closed).
+Key products: Crepe Dubai with pistachio and kataifi (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), drinks.
+Essential Rules:
+1. Answer in 1 short, warm, and natural sentence (maximum 2 very short sentences, exactly like a helpful cafe server).
+2. STRICT LANGUAGE RULE:
+   - If [Language: EN], you MUST reply ONLY in fluent English.
+   - If [Language: RU], you MUST reply ONLY in Russian.
+   - If [Language: RO], you MUST reply ONLY in Romanian.
+3. No long introductions or robotic text. No markdown links in the response text.
+4. Do NOT invent products or use prohibited words ('americane', 'nuci'). Use pistachio instead of nuts.
 
-[Istoric recent conversație]:
+[Recent Conversation History]:
 ${historySnippets}
 
-[Coșul curent al clientului]: ${currentCartSummary}
+[Current Cart]: ${currentCartSummary}
 [${schedInfo}]
-[Limbă: ${lang.toUpperCase()}]
-[Mesaj primit acum]: "${messageText}"
-[Răspunsul tău scurt și profesionist]:`;
+[Language: ${lang.toUpperCase()}]
+[Customer Message]: "${messageText}"
+[Your Friendly Reply]:`;
 
       const candidateModels = ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-2.5-flash'];
       for (const modelName of candidateModels) {
@@ -1438,6 +1509,8 @@ ${historySnippets}
     if (!replyText) {
       replyText = lang === 'ru'
         ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? 🧇"
+        : lang === 'en'
+        ? "Hello! 🥰 I'd be delighted to help you with any questions about our menu or placing an order. What treats would you like today? 🧇"
         : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? 🧇";
     }
 
