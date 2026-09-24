@@ -1529,7 +1529,8 @@ ${historySnippets}
 
     const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
     const sendResult = await sendDispatchResponse(senderId, channel, replyText, cartUrl, cartButtonTitle);
-    return { success: true, sendResult, replyText, cartUrl, cartButtonTitle, status: 'gemini_response' };
+    const finalDeliveredText = (sendResult as any)?.deliveredText || replyText;
+    return { success: true, sendResult, replyText: finalDeliveredText, cartUrl, cartButtonTitle, status: 'gemini_response' };
 
   } catch (err: any) {
     console.error("Eroare la procesarea mesajului cu Gemini/Meta:", err);
@@ -1720,21 +1721,25 @@ async function sendDispatchResponse(
 ) {
   // Dacă nu este specificat URL sau buton, trimitem doar textul curat conversațional
   if (!url || !buttonTitle || url.trim().length === 0 || buttonTitle.trim().length === 0) {
-    return await sendMetaTextMessage(senderId, text.trim());
+    const res = await sendMetaTextMessage(senderId, text.trim());
+    return { ...res, deliveredText: text.trim() };
   }
 
   // Pe Facebook Messenger, folosim template_type "button" nativ
   if (channel === 'messenger') {
-    return await sendMetaButtonResponse(senderId, text, url, buttonTitle);
+    const res = await sendMetaButtonResponse(senderId, text, url, buttonTitle);
+    return { ...res, deliveredText: text.trim() };
   } else {
     // Pe Instagram Direct, atașăm linkul doar dacă reprezintă o acțiune explicită de comandă / coș activ
-    const isGenericMenu = buttonTitle.toLowerCase().includes('meniu') || buttonTitle.toLowerCase().includes('меню');
+    const isGenericMenu = buttonTitle.toLowerCase().includes('meniu') || buttonTitle.toLowerCase().includes('меню') || buttonTitle.toLowerCase().includes('menu');
     if (isGenericMenu) {
       // Evităm linkurile redundante la meniu pe mesaje conversaționale obositoare
-      return await sendMetaTextMessage(senderId, text.trim());
+      const res = await sendMetaTextMessage(senderId, text.trim());
+      return { ...res, deliveredText: text.trim() };
     }
     const fullText = `${text.trim()}\n\n📲 ${buttonTitle}: ${url}`;
-    return await sendMetaTextMessage(senderId, fullText);
+    const res = await sendMetaTextMessage(senderId, fullText);
+    return { ...res, deliveredText: fullText };
   }
 }
 
