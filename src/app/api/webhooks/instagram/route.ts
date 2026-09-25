@@ -379,7 +379,7 @@ export async function GET(request: Request) {
   }
 }
 
-async function logAIActivity(senderId: string, channel: string, messageText: string, status: string) {
+export async function logAIActivity(senderId: string, channel: string, messageText: string, status: string) {
   const actionMap: Record<string, string> = {
     'human_assisted_pause_active': 'Pauză (Asistență Umană)',
     'human_handoff_triggered': 'Escalat la Om',
@@ -413,7 +413,7 @@ async function logAIActivity(senderId: string, channel: string, messageText: str
   } catch (_) {}
 }
 
-async function notifyAgencyDashboard(payload: {
+export async function notifyAgencyDashboard(payload: {
   platform: 'instagram' | 'messenger';
   asset_id: string;
   sender_id: string;
@@ -1997,15 +1997,9 @@ async function sendTelegramKitchenOrderNotification(data: {
   }
 }
 
-// ─── DEBOUNCE IN-MEMORY BUFFER (6.0 SECONDS SILENCE WINDOW) ───
-interface DebounceSession {
-  messages: string[];
-  lastTimestamp: number;
-  channel: 'instagram' | 'messenger';
-  isWaiting: boolean;
-}
-
-const senderDebounceMap = new Map<string, DebounceSession>();
+// ─── UPSTASH REDIS + QSTASH DEBOUNCE (SERVERLESS SAFE) ───────────────────────
+// Nu mai există in-memory Map. Pattern industry-standard:
+// Redis stochează mesajele, QStash programează procesarea după 6s silențiu.
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENTRY POINT POST WEBHOOK META
@@ -2120,92 +2114,74 @@ export async function POST(request: Request) {
     if (senderId && messageText) {
       console.log(`[Webhook Meta] Mesaj recepționat de la ${senderId} pe [${channel.toUpperCase()}]: "${messageText}"`);
 
-      // ─── BUFFER DEBOUNCE 6.0 SECUNDE DE LINIȘTE (SILENCE WINDOW) ───
-      const existingEntry = senderDebounceMap.get(senderId);
-      if (existingEntry && existingEntry.isWaiting) {
-        // Un alt fir de execuție așteaptă deja perioada de silențiu pentru acest client!
-        // Adăugăm mesajul curent în bufferul comun și resetăm timerul la momentul actual
-        existingEntry.messages.push(messageText);
-        existingEntry.lastTimestamp = Date.now();
-        console.log(`[Debounce] Mesaj suplimentar adăugat în buffer pentru ${senderId} (total: ${existingEntry.messages.length}). Resetat timer la 6.0s silențiu.`);
-        
-        // Returnăm IMEDIAT HTTP 200 către Meta pentru a respecta politica de webhook (<20s)
-        return NextResponse.json({ 
-          success: true, 
-          status: 'buffered_debounced', 
-          senderId, 
-          messageCount: existingEntry.messages.length 
-        });
-      }
-
-      // Inițializăm bufferul de silențiu pentru acest client
-      const currentEntry: DebounceSession = {
-        messages: [messageText],
-        lastTimestamp: Date.now(),
-        channel,
-        isWaiting: true
-      };
-      senderDebounceMap.set(senderId, currentEntry);
-
-      const SILENCE_WINDOW_MS = 6000; // 6.0 secunde de liniște fără mesaje noi cerute de utilizator
-      const MAX_SAFETY_WAIT_MS = 14000; // Plafon de siguranță max 14s (Meta timeout este 20s)
-      const waitStartTime = Date.now();
-
-      console.log(`[Debounce] Începe numărătoarea inversă de 6.0s silențiu pentru clientul ${senderId}...`);
-
-      while (true) {
-        const now = Date.now();
-        if (now - waitStartTime >= MAX_SAFETY_WAIT_MS) {
-          console.log(`[Debounce] Plafonul de siguranță (14s) atins pentru ${senderId}. Se procesează mesajele.`);
-          break;
-        }
-
-        const silenceElapsed = now - currentEntry.lastTimestamp;
-        const silenceRemaining = SILENCE_WINDOW_MS - silenceElapsed;
-
-        if (silenceRemaining <= 0) {
-          console.log(`[Debounce] Silențiu complet de 6.0s atins pentru ${senderId}! Mesaje totale: ${currentEntry.messages.length}`);
-          break;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, Math.min(250, silenceRemaining)));
-      }
-
-      // Silențiul s-a atins! Preluăm toate mesajele acumulate și eliberăm bufferul
-      const combinedMessages = [...currentEntry.messages];
-      const aggregatedText = combinedMessages.join('\n').trim();
-      currentEntry.isWaiting = false;
-      senderDebounceMap.delete(senderId);
-
-      console.log(`[Debounce] Trimitere pachet agregat la AI pentru ${senderId} (${combinedMessages.length} mesaje):\n"${aggregatedText}"`);
-
-      const debugResult = await processMessage(senderId, aggregatedText, channel);
-      await logAIActivity(senderId, channel, aggregatedText, debugResult.status || 'gemini_response');
+      // ─── REDIS + QSTASH DEBOUNCE (6 SECUNDE SILENȚIU — SERVERLESS SAFE) ────
+      // Pattern industry-standard pentru debounce pe serverless (Twilio, Intercom, etc.)
+      // Funcționează corect chiar dacă fiecare request rulează pe un container diferit.
       
-      const isTestSender = String(senderId).startsWith('9999') || String(senderId) === 'test' || String(senderId) === 'sim_user';
-      if (!isTestSender) {
-        const isCrupa = String(senderId) === '1003637612636530' || String(senderId) === '27899196186417959' || String(senderId).toLowerCase().includes('crupa');
-        await notifyAgencyDashboard({
-          platform: channel,
-          asset_id: channel === 'instagram' ? INSTAGRAM_ACCOUNT_ID : FACEBOOK_PAGE_ID,
-          sender_id: senderId,
-          customer_name: isCrupa ? 'Crupa Grigore' : 'Client Munchotella',
-          customer_handle: isCrupa ? '@crupa_grigore' : `@user_${senderId.slice(-4)}`,
-          message_text: aggregatedText,
-          reply_text: debugResult.replyText || 'Răspuns trimis automat pe chat',
-          status: debugResult.status || 'gemini_response'
+      const { Redis } = await import('@upstash/redis');
+      const { Client: QStashClient } = await import('@upstash/qstash');
+
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL || 'https://trusty-stingray-298895.upstash.io',
+        token: process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAABI-PAAIgcDFhZTMyZGE5NjBiZGU0Y2QxOTI3NGRlNmEzZWJhZmQ3NQ',
+      });
+
+      const qstash = new QStashClient({
+        baseUrl: process.env.QSTASH_URL || 'https://qstash-eu-central-1.upstash.io',
+        token: process.env.QSTASH_TOKEN || 'eyJVc2VySUQiOiI0ZGU3MTM5My1kNTczLTQyN2ItYTc1MS0xOWFjZTAzZjk1MjkiLCJQYXNzd29yZCI6IjMzY2VkNWQ0N2E5YjQ5ZDQ5MzM0OTU2ZDMzMjljNDkxIn0=',
+      });
+
+      const redisKey = `debounce:msgs:${senderId}`;
+      const tsKey = `debounce:ts:${senderId}`;
+      const channelKey = `debounce:channel:${senderId}`;
+      const SILENCE_WINDOW_SECONDS = 6;
+      const KEY_TTL_SECONDS = 30;
+
+      // PASUL 1: Adaugăm mesajul curent la lista Redis pentru acest client
+      await redis.rpush(redisKey, messageText);
+      // PASUL 2: Actualizăm timestamp-ul ultimului mesaj primit
+      await redis.set(tsKey, Date.now(), { ex: KEY_TTL_SECONDS });
+      await redis.set(channelKey, channel, { ex: KEY_TTL_SECONDS });
+      await redis.expire(redisKey, KEY_TTL_SECONDS);
+
+      // PASUL 3: Programăm un job QStash cu delay de 6 secunde
+      // Dacă vine un alt mesaj înainte de 6s → Redis actualizat cu noul timestamp
+      // → job-ul QStash mai vechi va detecta că silențiul nu s-a atins (stale check în /process)
+      // → doar job-ul programat DUPĂ ultimul mesaj va procesa efectiv
+      const processUrl = `https://www.munchotella.md/api/webhooks/instagram/process`;
+      
+      try {
+        const qstashResult = await qstash.publish({
+          url: processUrl,
+          delay: `${SILENCE_WINDOW_SECONDS}s`,
+          body: JSON.stringify({ senderId, channel }),
+          headers: { 'Content-Type': 'application/json' },
+          retries: 2,
         });
+        console.log(`[Redis+QStash] Job QStash programat pentru ${senderId} cu delay ${SILENCE_WINDOW_SECONDS}s | messageId: ${qstashResult?.messageId}`);
+      } catch (qstashErr) {
+        console.error('[Redis+QStash] Eroare la publish QStash — activez fallback direct:', qstashErr);
+        // Fallback robust: procesăm direct dacă QStash are probleme
+        const messages = await redis.lrange<string>(redisKey, 0, -1);
+        await redis.del(redisKey, tsKey, channelKey);
+        if (messages && messages.length > 0) {
+          const aggregatedText = messages.join('\n').trim();
+          const debugResult = await processMessage(senderId, aggregatedText, channel);
+          await logAIActivity(senderId, channel, aggregatedText, debugResult.status || 'gemini_response');
+          return NextResponse.json({ success: true, status: 'processed_direct_fallback', debug: debugResult });
+        }
       }
 
+      // PASUL 4: Returnăm IMEDIAT HTTP 200 către Meta (obligatoriu < 20s)
+      // Procesarea reală va fi efectuată de QStash după 6s de la ultimul mesaj
       return NextResponse.json({ 
         success: true, 
-        status: 'procesat_debounced', 
-        channel, 
-        senderId, 
-        aggregatedText, 
-        messagesCount: combinedMessages.length, 
-        debug: debugResult 
+        status: 'buffered_redis_qstash', 
+        senderId,
+        channel,
+        qstashScheduledDelay: `${SILENCE_WINDOW_SECONDS}s`,
       });
+
     } else {
       return NextResponse.json({ 
         success: true, 
@@ -2222,3 +2198,4 @@ export async function POST(request: Request) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
