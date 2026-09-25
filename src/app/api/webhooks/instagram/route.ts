@@ -1805,6 +1805,74 @@ async function sendDispatchGenericCard(
   return await sendMetaGenericCard(senderId, product, cartUrl, cartButtonTitle, menuUrl, channel, lang);
 }
 
+async function sendMetaGenericLinkCard(
+  senderId: string,
+  title: string,
+  subtitle: string,
+  imageUrl: string,
+  url: string,
+  buttonTitle: string
+) {
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  if (!metaAccessToken) return { error: "Missing token" };
+
+  const safeTitle = title.length > 80 ? title.substring(0, 77) + "..." : title;
+  const safeSubtitle = subtitle.length > 80 ? subtitle.substring(0, 77) + "..." : subtitle;
+  const safeButtonTitle = buttonTitle.length > 20 ? buttonTitle.substring(0, 20) : buttonTitle;
+
+  const payload = {
+    recipient: { id: senderId },
+    message: {
+      attachment: {
+        type: "template",
+        payload: {
+          template_type: "generic",
+          elements: [
+            {
+              title: safeTitle,
+              subtitle: safeSubtitle,
+              image_url: imageUrl,
+              default_action: {
+                type: "web_url",
+                url: url
+              },
+              buttons: [
+                {
+                  type: "web_url",
+                  url: url,
+                  title: safeButtonTitle
+                },
+                {
+                  type: "web_url",
+                  url: "https://www.munchotella.md/ro/menu",
+                  title: "🧇 Meniu Complet"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  };
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data?.error) {
+      console.warn("Meta generic link card warning, falling back to text:", data.error);
+      return await sendMetaTextMessage(senderId, `📲 ${buttonTitle}: ${url}`);
+    }
+    return data;
+  } catch (err) {
+    console.error("Eroare sendMetaGenericLinkCard:", err);
+    return await sendMetaTextMessage(senderId, `📲 ${buttonTitle}: ${url}`);
+  }
+}
+
 async function sendDispatchResponse(
   senderId: string,
   channel: 'instagram' | 'messenger',
@@ -1818,22 +1886,29 @@ async function sendDispatchResponse(
     return { ...res, deliveredText: text.trim() };
   }
 
-  // Pe Facebook Messenger, folosim template_type "button" nativ
-  if (channel === 'messenger') {
-    const res = await sendMetaButtonResponse(senderId, text, url, buttonTitle);
-    return { ...res, deliveredText: text.trim() };
-  } else {
-    // Pe Instagram Direct, atașăm linkul doar dacă reprezintă o acțiune explicită de comandă / coș activ
-    const isGenericMenu = buttonTitle.toLowerCase().includes('meniu') || buttonTitle.toLowerCase().includes('меню') || buttonTitle.toLowerCase().includes('menu');
-    if (isGenericMenu) {
-      // Evităm linkurile redundante la meniu pe mesaje conversaționale obositoare
-      const res = await sendMetaTextMessage(senderId, text.trim());
-      return { ...res, deliveredText: text.trim() };
-    }
-    const fullText = `${text.trim()}\n\n📲 ${buttonTitle}: ${url}`;
-    const res = await sendMetaTextMessage(senderId, fullText);
-    return { ...res, deliveredText: fullText };
+  // Pasul 1: Trimitem întâi mesajul conversațional cald
+  if (text && text.trim().length > 0) {
+    await sendMetaTextMessage(senderId, text.trim());
   }
+
+  // Pasul 2: Trimitem cartonașul vizual elegant cu imaginea oficială a desertului și butoane clicabile
+  const isMenu = buttonTitle.toLowerCase().includes('meniu') || buttonTitle.toLowerCase().includes('menu') || buttonTitle.toLowerCase().includes('меню');
+  const cardTitle = isMenu ? "Munchotella Waffle Boutique" : "Coșul Tău Munchotella";
+  const cardSubtitle = isMenu 
+    ? "Waffles artizanale, clătite și deserturi de lux" 
+    : "Finalizează comanda online cu livrare rapidă în Chișinău";
+  const cardImage = "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a95a6d8f14054865f_Delux%20mini%20waffle%20110%20lei.png";
+
+  const cardRes = await sendMetaGenericLinkCard(
+    senderId,
+    cardTitle,
+    cardSubtitle,
+    cardImage,
+    url,
+    buttonTitle
+  );
+
+  return { ...cardRes, deliveredText: `${text.trim()}\n[Card: ${buttonTitle}]` };
 }
 
 async function sendMetaButtonResponse(senderId: string, text: string, url: string, buttonTitle: string) {
