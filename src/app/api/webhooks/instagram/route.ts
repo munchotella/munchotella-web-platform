@@ -1145,7 +1145,7 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
 
   const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер|good morning|good afternoon|good evening)\s*[!.,?]*\s*)$/i.test(lower);
   const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня|hours|opening hours|open today|what time|are you open|closed)\b)/i.test(lower);
-  const isAddressQ = /(\b(unde|adresa|adresă|locatie|locație|unde sunteti|unde sunteți|unde va aflati|unde vă aflați|strada|testemiteanu|testemițeanu|где находитесь|адрес|address|location|where are you|where is|where located)\b)/i.test(lower);
+  const isAddressQ = /(\b(unde va aflati|unde vă aflați|unde sunteti|unde sunteți|care e adresa|care este adresa|unde va gasim|unde vă găsim|adresa voastra|adresa voastră|adresa localului|unde este localul|unde va situati|unde vă situați|unde va gaseste|где находитесь|где вы находитесь|какой адрес|где находится кафе|where are you located|where is the cafe|what is your address)\b)/i.test(lower) || (/(\b(adresa|locatie|locație|где находитесь|адрес)\b)/i.test(lower) && /(\b(care|unde|cum ajung|cum găsesc|как найти|where)\b)/i.test(lower));
   const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород|deliver|delivery|shipping|courier)\b)/i.test(lower);
   const isPaymentQ = /(\b(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными|payment|pay|how to pay|credit card)\b)/i.test(lower);
   const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина|pork|gelatin)\b)/i.test(lower);
@@ -1407,37 +1407,8 @@ export async function processMessage(
       return { success: true, status: 'clarification_sent', replyText: clarifyResult.replyText };
     }
 
-    // ─── PAS 5: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
-    const faqResult = handleCustomerInquiries(messageText, lang);
-    if (faqResult.handled && faqResult.replyText) {
-      appendToHistory(session, 'assistant', faqResult.replyText);
-      await saveSession(senderId, session);
-      // Răspuns direct, uman și curat FĂRĂ linkuri sau carduri atașate deranjant în Instagram Direct
-      await sendDispatchResponse(senderId, channel, faqResult.replyText, "", "");
-      return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
-    }
-
-    // ─── PAS 6: CHECKOUT INTENT ───
-    const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
-    if ((session.cart && session.cart.length > 0) && isCheckoutIntent) {
-      const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
-      let checkoutText = lang === 'ru'
-        ? `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`
-        : lang === 'en'
-        ? `Your order is ready (${totalSum} MDL)! 🧇 Click below to enter your delivery address and finalize! ✨`
-        : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
-
-      session.state = 'IDLE';
-      appendToHistory(session, 'assistant', checkoutText);
-      await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, checkoutText, finalCartUrl, finalButtonTitle);
-      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText: checkoutText };
-    }
-
-    // ─── PAS 7: DETECTARE ADRESĂ, TELEFON ȘI DETALII DE LIVRARE ───
+    // ─── PAS 6: DETECTARE COMANDĂ CU LIVRARE SAU ADĂUGARE PRODUSE ÎN COȘ ───
     const orderDetails = extractOrderDetails(messageText);
-
-    // ─── PAS 8: DETECTARE PRODUSE (COMENZI MULTIPLE SAU INDIVIDUALE) ───
     const compoundMatches = matchCompoundProductsInText(messageText);
 
     if (compoundMatches.length > 0) {
@@ -1534,6 +1505,33 @@ export async function processMessage(
         cartUrl, 
         cartButtonTitle 
       };
+    }
+
+    // ─── PAS 7: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
+    const faqResult = handleCustomerInquiries(messageText, lang);
+    if (faqResult.handled && faqResult.replyText) {
+      appendToHistory(session, 'assistant', faqResult.replyText);
+      await saveSession(senderId, session);
+      // Răspuns direct, uman și curat FĂRĂ linkuri sau carduri atașate deranjant în Instagram Direct
+      await sendDispatchResponse(senderId, channel, faqResult.replyText, "", "");
+      return { success: true, status: 'customer_inquiry_answered', replyText: faqResult.replyText };
+    }
+
+    // ─── PAS 8: CHECKOUT INTENT ───
+    const isCheckoutIntent = lowerMsg.includes('gata') || lowerMsg.includes('final') || lowerMsg.includes('trimite') || lowerMsg.includes('checkout') || lowerMsg.includes('link') || lowerMsg.includes('vreau doar') || lowerMsg.includes('doar atat') || lowerMsg.includes('doar atât') || lowerMsg.includes('готово') || lowerMsg.includes('отправь');
+    if ((session.cart && session.cart.length > 0) && isCheckoutIntent) {
+      const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
+      let checkoutText = lang === 'ru'
+        ? `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`
+        : lang === 'en'
+        ? `Your order is ready (${totalSum} MDL)! 🧇 Click below to enter your delivery address and finalize! ✨`
+        : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
+
+      session.state = 'IDLE';
+      appendToHistory(session, 'assistant', checkoutText);
+      await saveSession(senderId, session);
+      await sendDispatchResponse(senderId, channel, checkoutText, finalCartUrl, finalButtonTitle);
+      return { success: true, status: 'order_completed_link_generated', cart: session.cart, totalSum, replyText: checkoutText };
     }
 
 
