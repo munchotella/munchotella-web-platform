@@ -1505,7 +1505,7 @@ export function getCartUrlAndButton(currentSession: any, currentLang: string) {
 
   const totalSum = currentCart.reduce((sum: number, item: any) => sum + (item.price * (item.quantity || 1)), 0);
   const cartJsonString = JSON.stringify(currentCart);
-  const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
+  const encodedCart = Buffer.from(cartJsonString, 'utf-8').toString('base64');
   
   const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
   const schedParam = currentSession.scheduledTime ? `&scheduled=${encodeURIComponent(currentSession.scheduledTime)}` : '';
