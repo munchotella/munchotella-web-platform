@@ -363,6 +363,220 @@ const MENU_CATALOG = [
     aliases: ["cafea", "espresso", "espreso", "cappuccino", "capucino", "latte", "americano", "cafea neagra", "cafea cu lapte", "кофе", "капучино", "латте", "эспрессо", "американо"]
   }
 ];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CATALOG TOPPINGURI & PERSONALIZĂRI OFICIALE WEBSITE (CU PREȚURI & GRUPURI)
+// ═══════════════════════════════════════════════════════════════════════════════
+export const AVAILABLE_TOPPINGS = [
+  // Grupul "Toppinguri" (fructe, crocănțele, biscuiți)
+  { 
+    name: "Alune", 
+    price: 25, 
+    groupTitle: "Toppinguri", 
+    aliases: ["alune", "alună", "aluna", "hazelnuts", "hazelnut", "фундук", "орехи"] 
+  },
+  { 
+    name: "Fistic", 
+    price: 50, 
+    groupTitle: "Toppinguri", 
+    aliases: ["fistic", "fistic mărunțit", "fistic maruntit", "pistachio", "pistachios", "фисташки", "фисташка", "фисташек"] 
+  },
+  { 
+    name: "Oreo", 
+    price: 25, 
+    groupTitle: "Toppinguri", 
+    aliases: ["oreo", "biscuiți oreo", "biscuiti oreo", "орео"] 
+  },
+  { 
+    name: "Banană", 
+    price: 25, 
+    groupTitle: "Toppinguri", 
+    aliases: ["banana", "banană", "banane", "bananas", "банан", "бананы"] 
+  },
+  { 
+    name: "Căpșune", 
+    price: 30, 
+    groupTitle: "Toppinguri", 
+    aliases: ["capsune", "căpșune", "capsuni", "căpșuni", "strawberries", "strawberry", "клубника", "клубнику"] 
+  },
+  { 
+    name: "Kiwi", 
+    price: 30, 
+    groupTitle: "Toppinguri", 
+    aliases: ["kiwi", "kivi", "киви"] 
+  },
+
+  // Grupul "Personalizare" (creme, ciocolate belgiene, înghețată)
+  { 
+    name: "Nutella®", 
+    price: 55, 
+    groupTitle: "Personalizare", 
+    aliases: ["nutella", "nutela", "nutella®", "нутелла", "нутеллу"] 
+  },
+  { 
+    name: "Ciocolată Albă", 
+    price: 45, 
+    groupTitle: "Personalizare", 
+    aliases: ["ciocolata alba", "ciocolată albă", "ciocolata belgiana", "white chocolate", "белый шоколад"] 
+  },
+  { 
+    name: "Cremă de Lotus", 
+    price: 55, 
+    groupTitle: "Personalizare", 
+    aliases: ["crema de lotus", "cremă de lotus", "lotus", "lotus biscoff", "pasta lotus", "лотус", "крем лотус"] 
+  },
+  { 
+    name: "Pastă de fistic", 
+    price: 65, 
+    groupTitle: "Personalizare", 
+    aliases: ["pasta de fistic", "pastă de fistic", "crema de fistic", "cremă de fistic", "pistachio paste", "pistachio cream", "фисташковая паста", "фисташковый крем"] 
+  },
+  { 
+    name: "Kinder", 
+    price: 25, 
+    groupTitle: "Personalizare", 
+    aliases: ["kinder", "ciocolata kinder", "киндер"] 
+  },
+  { 
+    name: "Kinder Bueno", 
+    price: 35, 
+    groupTitle: "Personalizare", 
+    aliases: ["kinder bueno", "bueno", "киндер буэно"] 
+  },
+  { 
+    name: "Mix de fructe", 
+    price: 55, 
+    groupTitle: "Personalizare", 
+    aliases: ["mix de fructe", "mix fructe", "fructe proaspete", "fruit mix", "фруктовый микс", "микс фруктов"] 
+  },
+  { 
+    name: "Bilă de înghețată", 
+    price: 30, 
+    groupTitle: "Personalizare", 
+    aliases: ["bila de inghetata", "bilă de înghețată", "inghetata", "înghețată", "ice cream", "мороженое", "шарик мороженого"] 
+  }
+];
+
+// Mapare directă la ID-uri MongoDB ObjectId reale pentru produsele din catalog
+const PRODUCT_NAME_TO_MONGO_ID: Record<string, string> = {
+  "waffle sticks": "69f25596d2fb9408904d1f32",
+  "delux mini waffle": "69f25596d2fb9408904d1f3b",
+  "nutella mini waffles": "69f25596d2fb9408904d1f46",
+  "lotus mini waffles": "69f25596d2fb9408904d1f4f",
+  "fruits waffle": "69f25596d2fb9408904d1f56",
+  "classic waffle": "69f25596d2fb9408904d1f5f",
+  "belgian panda waffle": "69f25596d2fb9408904d1f68",
+  "biscoff waffle": "69f25596d2fb9408904d1f72",
+  "crepe dubai": "69f25596d2fb9408904d1f79",
+  "delux crepe": "69f25596d2fb9408904d1f7b",
+  "biscoff crepe": "69f25596d2fb9408904d1f82",
+  "fruits crepe": "69f25596d2fb9408904d1f89",
+  "oreo crepe": "69f25596d2fb9408904d1f90",
+  "kinder crepe": "69f25596d2fb9408904d1f97",
+  "chocolate bites": "69f25596d2fb9408904d1fc4",
+  "royal sushi": "69f25596d2fb9408904d1fd1",
+  "classic pancakes": "69f25596d2fb9408904d1fa4",
+  "fruits pancakes": "69f25596d2fb9408904d1fb2",
+  "mini pancakes": "69f25596d2fb9408904d1fb9",
+  "royal pancakes": "69f25596d2fb9408904d1fc1"
+};
+
+async function getMongoIdForProduct(name: string, fallbackId: string): Promise<string> {
+  const norm = name.toLowerCase().trim();
+  if (PRODUCT_NAME_TO_MONGO_ID[norm]) {
+    return PRODUCT_NAME_TO_MONGO_ID[norm];
+  }
+  try {
+    const { db: mongoDb } = await connectToDatabase();
+    const doc = await mongoDb.collection('menuitems').findOne(
+      { name: { $regex: new RegExp(`^${escapeRegex(name)}$`, 'i') } },
+      { projection: { _id: 1 } }
+    );
+    if (doc && doc._id) {
+      const stringId = doc._id.toString();
+      PRODUCT_NAME_TO_MONGO_ID[norm] = stringId;
+      return stringId;
+    }
+  } catch (_) {}
+  return fallbackId;
+}
+
+export function extractCustomizationAndToppings(text: string): {
+  toppings: Array<{ name: string; price: number; groupTitle: string }>;
+  exclusions: string[];
+  exclusionsSummary: string;
+} {
+  const lower = text.toLowerCase();
+  const matchedToppings: Array<{ name: string; price: number; groupTitle: string }> = [];
+  const exclusions: string[] = [];
+
+  // 1. Detecție Excluderi („Fără ingredient”) - acestea merg EXCLUSIV în rubrica comentarii
+  if (/\b(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)|no\s+pistachio)\b/i.test(lower)) {
+    exclusions.push("Fără fistic");
+  }
+  if (/\b(f[aă]r[aă]\s+(?:arahide|alune|nuci)|без\s+(?:арахиса|орехов)|no\s+(?:peanuts?|nuts?))\b/i.test(lower)) {
+    exclusions.push("Fără arahide");
+  }
+  if (/\b(f[aă]r[aă]\s+zah[aă]r|без\s+сахара|no\s+sugar)\b/i.test(lower)) {
+    exclusions.push("Fără zahăr adăugat");
+  }
+  if (/\b(f[aă]r[aă]\s+kiwi|без\s+киви|no\s+kiwi)\b/i.test(lower)) {
+    exclusions.push("Fără kiwi");
+  }
+  if (/\b(f[aă]r[aă]\s+c[aă]p[sș]un[ie]|без\s+клубники|no\s+strawberries?)\b/i.test(lower)) {
+    exclusions.push("Fără căpșuni");
+  }
+  if (/\b(f[aă]r[aă]\s+banan[eă]|без\s+бананов?|no\s+bananas?)\b/i.test(lower)) {
+    exclusions.push("Fără banane");
+  }
+  if (/\b(f[aă]r[aă]\s+gluten|без\s+глютена|gluten\s*free)\b/i.test(lower)) {
+    exclusions.push("Fără gluten");
+  }
+  if (/\b(f[aă]r[aă]\s+lactoz[aă]|без\s+лактозы|lactose\s*free)\b/i.test(lower)) {
+    exclusions.push("Fără lactoză");
+  }
+
+  // Detecție generică pentru alte ingrediente menționate după „fără” / „без”
+  const genericMatches = lower.matchAll(/\b(?:f[aă]r[aă]|без|without|no)\s+([a-zăâîșțа-яё]{3,20})/gi);
+  for (const m of genericMatches) {
+    const rawWord = m[1].toLowerCase().trim();
+    if (['probleme', 'graba', 'griji', 'ezitare', 'intarziere', 'сомнений', 'проблем', 'сомнения'].includes(rawWord)) {
+      continue;
+    }
+    const formatted = `Fără ${rawWord.charAt(0).toUpperCase() + rawWord.slice(1)}`;
+    if (!exclusions.some(e => e.toLowerCase() === formatted.toLowerCase())) {
+      exclusions.push(formatted);
+    }
+  }
+
+  // 2. Detecție Topping-uri și Personalizări plătite de pe site (NU le confundăm cu ce e la „fără”!)
+  let textForToppings = lower.replace(/\b(?:f[aă]r[aă]|без|without|no)\s+[a-zăâîșțа-яё]+/gi, ' ');
+
+  const seenToppingNames = new Set<string>();
+  for (const top of AVAILABLE_TOPPINGS) {
+    for (const alias of top.aliases) {
+      const regex = new RegExp(`(?:\\b(?:cu|plus|extra|topping(?:\\s+de)?|[sș]i|с|со|добавь|плюс|with|add)\\s+)?\\b${escapeRegex(alias)}\\b`, 'i');
+      if (regex.test(textForToppings)) {
+        if (!seenToppingNames.has(top.name)) {
+          seenToppingNames.add(top.name);
+          matchedToppings.push({
+            name: top.name,
+            price: top.price,
+            groupTitle: top.groupTitle
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  return {
+    toppings: matchedToppings,
+    exclusions,
+    exclusionsSummary: exclusions.join(', ')
+  };
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("hub.mode");
@@ -514,7 +728,8 @@ async function saveSession(senderId: string, sessionData: any) {
   // 1. Salvare în Firebase Firestore
   try {
     const sessionRef = doc(db, 'instagram_order_sessions', senderId);
-    await setDoc(sessionRef, updatedData, { merge: true });
+    const firestoreData = JSON.parse(JSON.stringify(updatedData));
+    await setDoc(sessionRef, firestoreData, { merge: true });
   } catch (firestoreErr) {
     console.warn("Atenționare salvare sesiune Firestore:", firestoreErr);
   }
@@ -667,7 +882,8 @@ function cleanTextForMatching(text: string): string {
   let t = text.toLowerCase().trim();
   const stopwords = [
     /\b(vreau|sa|să|comand|comanda|comandă|as|aș|dori|te|rog|va|vă|un|o|doua|două|trei|patru|portii|porții|portie|porție|de|la|pe|si|și|salut|buna|bună|ziua|hey|adaugati|adăugați|adaugă|adauga|pune|da-mi|trimite|хочу|заказать|мне|пожалуйста|один|два|три|порции|порция)\b/gi,
-    /\b(fara|fără|без)\s+[a-zăâîșțа-яё]+/gi
+    /\b(fara|fără|без|without|no)\s+[a-zăâîșțа-яё]+/gi,
+    /\b(cu|topping(?:\s+de)?|plus|extra|с|со|with)\s+[a-zăâîșțа-яё®]+/gi
   ];
   for (const sw of stopwords) {
     t = t.replace(sw, ' ');
@@ -678,12 +894,18 @@ function cleanTextForMatching(text: string): string {
 // ═══════════════════════════════════════════════════════════════════════════════
 // HANDLER 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ (ROBUST ALIAS EXPANSION)
 // ═══════════════════════════════════════════════════════════════════════════════
-function handleCartAdjustment(text: string, session: any, lang: string): { handled: boolean, replyText?: string, status?: string } {
+export function handleCartAdjustment(text: string, session: any, lang: string): { handled: boolean, replyText?: string, status?: string } {
   const lower = text.toLowerCase().trim();
   const currentCart = session.cart || [];
   if (currentCart.length === 0) return { handled: false };
 
-  const isAdjustmentVerb = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2|fara|fără|nu mai vreau|nu vreau|убери|уберите|удали|удалите|не хочу|не надо|без)\b)/i.test(lower);
+  // Dacă mesajul conține „fără ingredient” (ex: „fără fistic”), acesta este o personalizare/mențiune, NU o eliminare de produs din coș!
+  const hasExclusionPattern = /\b(f[aă]r[aă]|без|without|no)\s+[a-zăâîșțа-яё]+/i.test(lower);
+  if (hasExclusionPattern && !lower.includes('scoate') && !lower.includes('șterge') && !lower.includes('sterge') && !lower.includes('убери')) {
+    return { handled: false };
+  }
+
+  const isAdjustmentVerb = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|scade|lasa|lasă|pune doar|sa fie doar|să fie doar|doar unu|doar una|doar 1|doar 2|nu mai vreau|nu vreau|убери|уберите|удали|удалите|не хочу|не надо)\b)/i.test(lower);
   if (!isAdjustmentVerb) return { handled: false };
 
   const matchedCartIndices: number[] = [];
@@ -903,6 +1125,7 @@ interface ExtractedProductMatch {
   product: typeof MENU_CATALOG[0];
   quantity: number;
   customization?: string;
+  toppings?: Array<{ name: string; price: number; groupTitle: string }>;
   score: number;
 }
 
@@ -924,14 +1147,10 @@ function matchSingleProductInSegment(segment: string): ExtractedProductMatch | n
     quantity = 3;
   }
 
-  let customization: string | undefined = undefined;
-  if (lower.includes('fără fistic') || lower.includes('fara fistic') || lower.includes('без фисташек')) {
-    customization = "Fără fistic";
-  } else if (lower.includes('fără arahide') || lower.includes('fara arahide') || lower.includes('fără alune') || lower.includes('без арахиса')) {
-    customization = "Fără arahide";
-  } else if (lower.includes('fără zahăr') || lower.includes('fara zahar')) {
-    customization = "Fără zahăr adăugat";
-  }
+  // Extragem toppingurile plătite și excluderile („fără ceva”) pentru acest segment
+  const custData = extractCustomizationAndToppings(segment);
+  const customization = custData.exclusionsSummary || undefined;
+  const toppings = custData.toppings.length > 0 ? custData.toppings : undefined;
 
   const cleaned = cleanTextForMatching(segment);
   let bestMatch: typeof MENU_CATALOG[0] | null = null;
@@ -943,7 +1162,7 @@ function matchSingleProductInSegment(segment: string): ExtractedProductMatch | n
 
     for (const alias of aliases) {
       if (cleaned === alias) {
-        return { product: item, quantity, customization, score: 1.0 };
+        return { product: item, quantity, customization, toppings, score: 1.0 };
       }
 
       const score = calculateSimilarity(cleaned, alias);
@@ -970,17 +1189,18 @@ function matchSingleProductInSegment(segment: string): ExtractedProductMatch | n
 
   const threshold = bestMatch?.category === 'drinks' ? 0.76 : 0.72;
   if (bestMatch && bestScore >= threshold) {
-    return { product: bestMatch, quantity, customization, score: bestScore };
+    return { product: bestMatch, quantity, customization, toppings, score: bestScore };
   }
 
   return null;
 }
 
-function matchCompoundProductsInText(text: string): ExtractedProductMatch[] {
+export function matchCompoundProductsInText(text: string): ExtractedProductMatch[] {
   const lower = text.toLowerCase().trim();
 
-  // Protecție: dacă mesajul conține verbe de scoatere / ștergere, NU adăugăm produse!
-  const hasNegativeIntent = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|nu mai vreau|nu vreau|fara|fără|убери|удали|не хочу|не надо|без)\b)/i.test(lower);
+  // Protecție: dacă mesajul conține verbe de scoatere / ștergere a comenzii, NU adăugăm produse!
+  // ATENȚIE: Nu includem „fără” aici, deoarece „fără fistic” este o excludere pe produs, nu o anulare!
+  const hasNegativeIntent = /(\b(scoate|scoateti|scoateți|sterge|șterge|elimina|elimină|nu mai vreau|nu vreau|убери|удали|не хочу|не надо)\b)/i.test(lower);
   if (hasNegativeIntent) {
     return [];
   }
@@ -1050,6 +1270,14 @@ function extractOrderDetails(text: string): { phone: string | null; address: str
 // ═══════════════════════════════════════════════════════════════════════════════
 function handleIngredientsInquiry(text: string, lang: string): { handled: boolean, replyText?: string, product?: any } {
   const lower = text.toLowerCase().trim();
+
+  // Dacă utilizatorul comandă explicit sau solicită o excludere / topping („fără X”, „vreau X”), NU este o simplă întrebare despre ingrediente!
+  const isOrderOrExclusion = /(\b(vreau|sa|să|comand|comanda|comandă|as dori|aș dori|adaug[aă]|pune|da-mi|хочу|добавь|order|i want)\b)/i.test(lower) ||
+    /(\b(f[aă]r[aă]|без|without|no)\s+[a-zăâîșțа-яё]+)/i.test(lower);
+  if (isOrderOrExclusion) {
+    return { handled: false };
+  }
+
   const isIngQ = /(\b(ingrediente|ce ingrediente|ce contine|ce conține|din ce e|din ce este|compozitie|compoziție|reteta|rețeta|ce puneti|ce puneți|ce e pus|ce are|alergeni|alergie|alun[eă]|fistic|arahide|nuci|zahar|zahăr|состав|что входит|из чего|аллерген|орехи?|фисташк|арахис)\b)/i.test(lower);
   if (!isIngQ) return { handled: false };
 
@@ -1265,6 +1493,34 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
   return { handled: false };
 }
 
+export function getCartUrlAndButton(currentSession: any, currentLang: string) {
+  const currentCart = currentSession.cart || [];
+  if (!currentCart || currentCart.length === 0) {
+    return {
+      url: `https://www.munchotella.md/${currentLang}/menu`,
+      buttonTitle: currentLang === 'ru' ? "🧇 Меню" : currentLang === 'en' ? "🧇 Menu" : "🧇 Meniu",
+      totalSum: 0
+    };
+  }
+
+  const totalSum = currentCart.reduce((sum: number, item: any) => sum + (item.price * (item.quantity || 1)), 0);
+  const cartJsonString = JSON.stringify(currentCart);
+  const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
+  
+  const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
+  const schedParam = currentSession.scheduledTime ? `&scheduled=${encodeURIComponent(currentSession.scheduledTime)}` : '';
+  const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
+
+  const url = `https://www.munchotella.md/${currentLang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}${schedParam}`;
+  const buttonTitle = currentLang === 'ru' 
+    ? `🛍️ Корзина (${totalSum} MDL)` 
+    : currentLang === 'en' 
+    ? `🛍️ Cart (${totalSum} MDL)` 
+    : `🛍️ Coș (${totalSum} MDL)`;
+
+  return { url, buttonTitle, totalSum };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // MOTORUL PRINCIPAL COGNITIV: processMessage
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1318,33 +1574,109 @@ export async function processMessage(
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
-    const getCartUrlAndButton = (currentSession: any, currentLang: string) => {
-      const currentCart = currentSession.cart || [];
-      if (!currentCart || currentCart.length === 0) {
-        return {
-          url: `https://www.munchotella.md/${currentLang}/menu`,
-          buttonTitle: currentLang === 'ru' ? "🧇 Меню" : currentLang === 'en' ? "🧇 Menu" : "🧇 Meniu",
-          totalSum: 0
-        };
+    // ─── PAS 0.5: RĂSPUNS LA CONFIRMARE PERSONALIZARE / TOPPINGURI / EXCLUDERI ÎN AȘTEPTARE ───
+    if (session.pendingCustomization && session.pendingCustomization.items?.length > 0) {
+      const isAffirmative = /(\b(da|confirm|confirma|confirmă|sigur|bine|ok|okay|da te rog|da adauga|da adaugă|adauga|adaugă|pune|perfect|super|corect|asa|așa|yes|yep|sure|y|да|подтверждаю|подтвердить|хорошо|давай|добавь|добавляй|согласен|ок)\b)/i.test(lowerMsg);
+      const isNegative = /(\b(nu|nu vreau|anuleaza|anulează|renunt|renunț|nu mai vreau|stop|no|nope|cancel|нет|не надо|отмена|не хочу)\b)/i.test(lowerMsg);
+
+      if (isAffirmative) {
+        const pending = session.pendingCustomization;
+        for (const p of pending.items) {
+          const resolvedId = await getMongoIdForProduct(p.product.name, p.product.id);
+          const itemToAdd = {
+            id: resolvedId,
+            name: p.product.name,
+            price: p.unitPrice,
+            basePrice: p.product.price,
+            image: p.product.image,
+            quantity: p.quantity,
+            selectedToppings: (p.toppings || []).map((t: any) => ({
+              name: t.name,
+              price: t.price,
+              groupName: t.groupTitle
+            })),
+            customization: p.customization || undefined
+          };
+
+          const existingIndex = (session.cart || []).findIndex((i: any) => 
+            i.id === itemToAdd.id && 
+            i.customization === itemToAdd.customization &&
+            JSON.stringify(i.selectedToppings || []) === JSON.stringify(itemToAdd.selectedToppings || [])
+          );
+
+          if (existingIndex > -1) {
+            session.cart[existingIndex].quantity += itemToAdd.quantity;
+          } else {
+            session.cart = [...(session.cart || []), itemToAdd];
+          }
+        }
+
+        const savedOrderDetails = pending.orderDetails;
+        session.pendingCustomization = null;
+        session.state = 'IDLE';
+
+        if (savedOrderDetails && savedOrderDetails.address && savedOrderDetails.phone) {
+          const productsTotal = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
+          const itemsOrdered = [...session.cart];
+
+          await sendTelegramKitchenOrderNotification({
+            channel,
+            senderId,
+            phone: savedOrderDetails.phone,
+            address: savedOrderDetails.address,
+            items: itemsOrdered,
+            productsTotal,
+            originalMessage: messageText
+          });
+
+          let confirmReply = "";
+          if (lang === 'ru') {
+            confirmReply = `Заказ успешно подтвержден с учетом ваших пожеланий! 🎉 Мы передали его напрямую на кухню через Telegram. Курьер прибудет по адресу ${savedOrderDetails.address} через ~35-45 мин. Сумма за десерты: ${productsTotal} MDL (оплата наличными курьеру). Оператор свяжется с вами для подтверждения заказа. Приятного аппетита! 🧇✨`;
+          } else if (lang === 'en') {
+            confirmReply = `Order successfully confirmed with your custom preferences! 🎉 We've sent your order directly to the kitchen via Telegram. Courier will arrive at ${savedOrderDetails.address} in ~35-45 min. Desserts total: ${productsTotal} MDL (cash on delivery). An operator will contact you shortly to confirm the order. Enjoy your treats! 🧇✨`;
+          } else {
+            confirmReply = `Comandă confirmată cu succes cu personalizarea dvs.! 🎉 Am transmis comanda direct la bucătărie prin Telegram. Curierul va porni spre ${savedOrderDetails.address} în ~35-45 min. Total produse: ${productsTotal} MDL (achitare cash la curier). În scurt timp veți fi contactat de un operator pentru confirmarea comenzii. Poftă mare! 🧇✨`;
+          }
+
+          session.cart = [];
+          appendToHistory(session, 'assistant', confirmReply);
+          await saveSession(senderId, session);
+          await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+          return { success: true, status: 'order_dispatched_kitchen_telegram', productsTotal, address: savedOrderDetails.address, phone: savedOrderDetails.phone, replyText: confirmReply };
+        }
+
+        await saveSession(senderId, session);
+        const { url: cartUrl, buttonTitle: cartButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
+
+        let successReply = "";
+        if (lang === 'ru') {
+          successReply = `Отлично! 🎉 Персональная настройка подтверждена и добавлена в корзину (Всего: ${totalSum} MDL)!\n\nВы можете оформить заказ по кнопке ниже или отправьте нам сюда адрес и номер телефона для быстрой доставки! ✨`;
+        } else if (lang === 'en') {
+          successReply = `Great! 🎉 Your custom preference has been confirmed and added to your cart (Total: ${totalSum} MDL)!\n\nYou can finalize via the button below or send your delivery address and phone number right here! ✨`;
+        } else {
+          successReply = `Super! 🎉 Personalizarea a fost confirmată și adăugată în coș (Total: ${totalSum} MDL)!\n\nPuteți finaliza comanda direct pe butonul de mai jos sau trimiteți-ne aici adresa și numărul de telefon pentru livrare rapidă! ✨`;
+        }
+
+        appendToHistory(session, 'assistant', successReply);
+        await saveSession(senderId, session);
+        await sendDispatchResponse(senderId, channel, successReply, cartUrl, cartButtonTitle);
+        return { success: true, status: 'customization_confirmed_and_added', replyText: successReply, cartUrl, cartButtonTitle };
+      } else if (isNegative) {
+        session.pendingCustomization = null;
+        session.state = 'IDLE';
+        let cancelText = lang === 'ru'
+          ? "Изменение отменено. Корзина осталась прежней! Чем еще могу помочь? 🧇"
+          : lang === 'en'
+          ? "Modification cancelled. Your cart remains unchanged! How else can I help? 🧇"
+          : "Am anulat modificarea. Coșul a rămas neschimbat! Cu ce altceva vă pot ajuta? 🧇";
+
+        appendToHistory(session, 'assistant', cancelText);
+        await saveSession(senderId, session);
+        const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+        await sendDispatchResponse(senderId, channel, cancelText, cartUrl, cartButtonTitle);
+        return { success: true, status: 'customization_cancelled', replyText: cancelText };
       }
-
-      const totalSum = currentCart.reduce((sum: number, item: any) => sum + (item.price * (item.quantity || 1)), 0);
-      const cartJsonString = JSON.stringify(currentCart);
-      const encodedCart = Buffer.from(unescape(encodeURIComponent(cartJsonString))).toString('base64');
-      
-      const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
-      const schedParam = currentSession.scheduledTime ? `&scheduled=${encodeURIComponent(currentSession.scheduledTime)}` : '';
-      const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
-
-      const url = `https://www.munchotella.md/${currentLang}/menu?preloadedCart=${encodeURIComponent(encodedCart)}&openCart=true${notesParam}${schedParam}`;
-      const buttonTitle = currentLang === 'ru' 
-        ? `🛍️ Корзина (${totalSum} MDL)` 
-        : currentLang === 'en' 
-        ? `🛍️ Cart (${totalSum} MDL)` 
-        : `🛍️ Coș (${totalSum} MDL)`;
-
-      return { url, buttonTitle, totalSum };
-    };
+    }
 
     // ─── PAS 1: AJUSTARE CANTITĂȚI ȘI SCOATERE DIN COȘ (RULAT ÎNAINTE DE CANCEL!) ───
     const cartAdjustResult = handleCartAdjustment(messageText, session, lang);
@@ -1411,14 +1743,145 @@ export async function processMessage(
     const orderDetails = extractOrderDetails(messageText);
     const compoundMatches = matchCompoundProductsInText(messageText);
 
+    // Verificăm dacă mesajul conține toppinguri plătite sau excluderi („fără ceva”)
+    const hasCustomizationOrToppings = compoundMatches.some(m => (m.toppings && m.toppings.length > 0) || m.customization);
+
+    if (hasCustomizationOrToppings) {
+      const pendingItems = compoundMatches.map(m => {
+        const toppingsTotal = (m.toppings || []).reduce((sum, t) => sum + t.price, 0);
+        const unitPrice = m.product.price + toppingsTotal;
+        return {
+          product: m.product,
+          quantity: m.quantity,
+          toppings: m.toppings || [],
+          toppingsTotal,
+          unitPrice,
+          totalPrice: unitPrice * m.quantity,
+          customization: m.customization || undefined
+        };
+      });
+
+      session.pendingCustomization = {
+        items: pendingItems,
+        orderDetails: (orderDetails.address && orderDetails.phone) ? orderDetails : null,
+        timestamp: Date.now()
+      };
+      session.state = 'AWAITING_CUSTOMIZATION_CONFIRM';
+
+      let summaryLines: string[] = [];
+      let grandTotal = 0;
+
+      for (const p of pendingItems) {
+        grandTotal += p.totalPrice;
+        let line = `• <b>${p.quantity}x ${p.product.name}</b> (${p.product.price} MDL)`;
+        if (p.toppings.length > 0) {
+          const topStr = p.toppings.map((t: any) => `${t.name} (+${t.price} MDL)`).join(', ');
+          line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
+        }
+        if (p.customization) {
+          line += `\n  📝 <b>Mențiune bucătărie: ${p.customization}</b> (notat la comentarii)`;
+        }
+        line += `\n  💰 <i>Total: ${p.totalPrice} MDL</i>`;
+        summaryLines.push(line);
+      }
+
+      const summaryText = summaryLines.join('\n\n');
+
+      let confirmQuestion = "";
+      if (lang === 'ru') {
+        confirmQuestion = `Я подготовил персональную настройку для вас! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Итого:</b> <b>${grandTotal} MDL</b>\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
+      } else if (lang === 'en') {
+        confirmQuestion = `I've prepared your custom dessert preferences! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
+      } else {
+        confirmQuestion = `Am pregătit personalizarea pentru dvs.! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
+      }
+
+      appendToHistory(session, 'assistant', confirmQuestion);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, confirmQuestion, cartUrl, cartButtonTitle);
+      return {
+        success: true,
+        status: 'customization_confirmation_requested',
+        replyText: confirmQuestion,
+        pending: pendingItems
+      };
+    }
+
+    // De asemenea, dacă clientul are deja un produs în coș și zice „fără fistic” sau „cu Nutella” fără numele produsului
+    if (compoundMatches.length === 0 && (session.cart || []).length > 0) {
+      const custCheck = extractCustomizationAndToppings(messageText);
+      if (custCheck.toppings.length > 0 || custCheck.exclusions.length > 0) {
+        const lastItem = session.cart[session.cart.length - 1];
+        const catalogItem = MENU_CATALOG.find(c => c.id === lastItem.id || c.name.toLowerCase() === lastItem.name.toLowerCase()) || {
+          id: lastItem.id,
+          name: lastItem.name,
+          price: lastItem.basePrice || lastItem.price,
+          category: 'waffles',
+          image: lastItem.image
+        };
+
+        const toppingsTotal = custCheck.toppings.reduce((sum, t) => sum + t.price, 0);
+        const unitPrice = (catalogItem.price || lastItem.price) + toppingsTotal;
+        const pendingItem = {
+          product: catalogItem as any,
+          quantity: lastItem.quantity || 1,
+          toppings: custCheck.toppings,
+          toppingsTotal,
+          unitPrice,
+          totalPrice: unitPrice * (lastItem.quantity || 1),
+          customization: custCheck.exclusionsSummary || undefined
+        };
+
+        session.pendingCustomization = {
+          items: [pendingItem],
+          orderDetails: (orderDetails.address && orderDetails.phone) ? orderDetails : null,
+          timestamp: Date.now()
+        };
+        session.state = 'AWAITING_CUSTOMIZATION_CONFIRM';
+
+        let line = `• <b>${lastItem.quantity || 1}x ${lastItem.name}</b>`;
+        if (custCheck.toppings.length > 0) {
+          const topStr = custCheck.toppings.map(t => `${t.name} (+${t.price} MDL)`).join(', ');
+          line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
+        }
+        if (custCheck.exclusionsSummary) {
+          line += `\n  📝 <b>Mențiune bucătărie: ${custCheck.exclusionsSummary}</b> (notat la comentarii)`;
+        }
+        line += `\n  💰 <i>Noul preț: ${pendingItem.totalPrice} MDL</i>`;
+
+        let confirmQuestion = "";
+        if (lang === 'ru') {
+          confirmQuestion = `Хотите применить эту персональную настройку к товару в корзине? 🧇\n\n${line}\n\nПодтверждаете? (Напишите «Да» или «Подтверждаю») ✨`;
+        } else if (lang === 'en') {
+          confirmQuestion = `Would you like to apply this custom preference to the item in your cart? 🧇\n\n${line}\n\nConfirm? (Reply 'Yes' or 'Confirm') ✨`;
+        } else {
+          confirmQuestion = `Doriți să aplicăm această personalizare la produsul din coș? 🧇\n\n${line}\n\nConfirmați? (Răspundeți cu «Da» sau «Confirm») ✨`;
+        }
+
+        appendToHistory(session, 'assistant', confirmQuestion);
+        await saveSession(senderId, session);
+        const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+        await sendDispatchResponse(senderId, channel, confirmQuestion, cartUrl, cartButtonTitle);
+        return {
+          success: true,
+          status: 'customization_confirmation_requested',
+          replyText: confirmQuestion,
+          pending: [pendingItem]
+        };
+      }
+    }
+
     if (compoundMatches.length > 0) {
       for (const m of compoundMatches) {
+        const resolvedId = await getMongoIdForProduct(m.product.name, m.product.id);
         const itemToAdd = {
-          id: m.product.id,
+          id: resolvedId,
           name: m.product.name,
           price: m.product.price,
           image: m.product.image,
           quantity: m.quantity,
+          selectedToppings: [],
           customization: m.customization
         };
 
@@ -2012,7 +2475,13 @@ async function sendTelegramKitchenOrderNotification(data: {
   senderId: string;
   phone: string;
   address: string;
-  items: Array<{ name: string; quantity: number; price: number; customization?: string }>;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    customization?: string;
+    selectedToppings?: Array<{ name: string; price: number; groupTitle?: string; groupName?: string }>;
+  }>;
   productsTotal: number;
   originalMessage: string;
 }) {
@@ -2020,7 +2489,25 @@ async function sendTelegramKitchenOrderNotification(data: {
   const chatId = process.env.TELEGRAM_STAFF_CHAT_ID || "-4164368978";
 
   const now = new Date().toLocaleString('ro-RO', { timeZone: 'Europe/Chisinau' });
-  const itemsText = data.items.map(it => `  • <b>${it.quantity || 1}x</b> ${it.name} (${it.price * (it.quantity || 1)} MDL)${it.customization ? ` <i>(${it.customization})</i>` : ''}`).join('\n');
+  const itemsText = data.items.map(it => {
+    let line = `  • <b>${it.quantity || 1}x</b> ${it.name} (${it.price * (it.quantity || 1)} MDL)`;
+    if (it.selectedToppings && it.selectedToppings.length > 0) {
+      line += `\n    ➕ <i>Toppinguri:</i> ${it.selectedToppings.map(t => `${t.name} (+${t.price} MDL)`).join(', ')}`;
+    }
+    if (it.customization) {
+      line += `\n    📝 <i>Mențiune/Excludere:</i> <b>${it.customization}</b>`;
+    }
+    return line;
+  }).join('\n');
+
+  const kitchenNotes = data.items
+    .filter(it => it.customization)
+    .map(it => `  ⚠️ <b>${it.name}:</b> ${it.customization}`);
+
+  const kitchenNotesBlock = kitchenNotes.length > 0 
+    ? `\n\n🧑‍🍳 <b>MENȚIUNI / EXCLUDERI BUCĂTĂRIE (CRITIC):</b>\n${kitchenNotes.join('\n')}`
+    : '';
+
   const cleanPhone = data.phone.replace(/[^\d+]/g, '');
 
   const htmlMsg = (
@@ -2033,7 +2520,8 @@ async function sendTelegramKitchenOrderNotification(data: {
     `🕐 <b>Ora:</b> ${now}\n` +
     `⚡ <b>Timp estimat:</b> Livrare imediată (~35-45 min)\n\n` +
     `🛒 <b>PRODUSE COMANDATE:</b>\n` +
-    `${itemsText || '  • Fără produse specificate'}\n\n` +
+    `${itemsText || '  • Fără produse specificate'}` +
+    kitchenNotesBlock + `\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `💰 <b>TOTAL PRODUSE:</b> <b>${data.productsTotal} MDL</b>\n` +
     `🛵 <b>Taxă livrare:</b> ⚠️ <b>DE CALCULAT & CONFIRMAT DE OPERATOR!</b>\n` +
