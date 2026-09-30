@@ -182,6 +182,35 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  // 1.1 Pre-fill automat al rubricii Comentarii / Indicații din personalizările coșului (ex: din robotul de Instagram)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlNotes = urlParams.get('notes');
+      const storedNotes = localStorage.getItem("munchotella_order_notes");
+
+      // Extragem toate mențiunile/excluderile specifice produselor din coș (ex: "Delux mini waffle: Fără fistic")
+      const itemsNotes = items
+        .filter((it: any) => it.customization && typeof it.customization === 'string' && it.customization.trim() !== '')
+        .map((it: any) => `${it.name}: ${it.customization}`)
+        .join(', ');
+
+      const relevantNotes = urlNotes || storedNotes || itemsNotes;
+      if (relevantNotes && relevantNotes.trim()) {
+        setFormData(prev => {
+          if (!prev.notes || prev.notes.trim() === '') {
+            return { ...prev, notes: relevantNotes };
+          }
+          if (!prev.notes.includes(relevantNotes)) {
+            return { ...prev, notes: `${prev.notes}, ${relevantNotes}` };
+          }
+          return prev;
+        });
+      }
+    } catch (_) {}
+  }, [items]);
+
   // 2. Pre-fill date utilizator din AuthContext dacă este logat
   React.useEffect(() => {
     if (user) {
@@ -1421,17 +1450,6 @@ export default function CheckoutPage() {
                           </div>
                         )}
 
-                        {/* Order Notes (Full Width) */}
-                        <div>
-                          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
-                          <input
-                            type="text"
-                            placeholder={t('placeholderNotes')}
-                            className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                            value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                          />
-                        </div>
 
                         {/* Livrare până la ușă (+20 MDL) — strict pietonal < 1km & Geocoded */}
                         {deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 && formData.isGeocoded && (
@@ -1609,6 +1627,18 @@ export default function CheckoutPage() {
                       </div>
                     )}
                     
+                    {/* Order Notes (Valabil atât pentru livrare, cât și pentru ridicare din boutique) */}
+                    <div className="pt-4 border-t border-[#E8E2D9]">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
+                      <input
+                        type="text"
+                        placeholder={t('placeholderNotes')}
+                        className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      />
+                    </div>
+
                     <div className="mt-6 flex justify-end pt-4 border-t border-[#E8E2D9]">
                       <button type="button" onClick={() => handleNextStep(3)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
                         {t('continueBtn')}
@@ -1838,7 +1868,12 @@ export default function CheckoutPage() {
                         <h4 className="font-bold text-sm text-[#1A120B] leading-tight">{item.name}</h4>
                         {item.selectedToppings && item.selectedToppings.length > 0 && (
                           <p className="text-[11px] text-[#736A60] mt-1 leading-relaxed">
-                            {item.selectedToppings.map((t) => translateTopping(t.name, locale)).join(" • ")}
+                            {item.selectedToppings.map((t) => `${translateTopping(t.name, locale)}${t.price ? ` (+${t.price} MDL)` : ''}`).join(" • ")}
+                          </p>
+                        )}
+                        {item.customization && (
+                          <p className="text-[11px] text-[#C47E2B] mt-1 font-medium bg-[#FDF6EC] px-2 py-0.5 rounded border border-[#E8D5B0] inline-block">
+                            📝 {item.customization}
                           </p>
                         )}
                       </div>

@@ -78,12 +78,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const openCartParam = urlParams.get('openCart');
         const notesParam = urlParams.get('notes');
 
+        if (notesParam) {
+          localStorage.setItem("munchotella_order_notes", notesParam);
+        }
+
         if (preloadedParam) {
           let decodedJson = "";
           try {
-            decodedJson = decodeURIComponent(escape(atob(preloadedParam)));
+            const binaryStr = atob(preloadedParam);
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+              bytes[i] = binaryStr.charCodeAt(i);
+            }
+            decodedJson = new TextDecoder('utf-8').decode(bytes);
           } catch (_) {
-            decodedJson = decodeURIComponent(preloadedParam);
+            try {
+              decodedJson = decodeURIComponent(escape(atob(preloadedParam)));
+            } catch {
+              decodedJson = decodeURIComponent(preloadedParam);
+            }
           }
           const preloadedList = JSON.parse(decodedJson);
           if (Array.isArray(preloadedList) && preloadedList.length > 0) {
@@ -166,6 +179,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem("munchotella_order_notes");
+      } catch (_) {}
+    }
   };
 
   const replaceCart = (newItems: CartItem[]) => {

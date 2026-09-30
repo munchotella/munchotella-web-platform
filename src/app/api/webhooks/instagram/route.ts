@@ -511,14 +511,12 @@ export function extractCustomizationAndToppings(text: string): {
   const exclusions: string[] = [];
 
   // 1. Detecție Excluderi („Fără ingredient”) - acestea merg EXCLUSIV în rubrica comentarii
+  // NOTĂ STRICTĂ: „Fără zahăr” și „Fără gluten” sunt excluse deoarece nu există deserturi fără zahăr/gluten la Munchotella
   if (/\b(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)|no\s+pistachio)\b/i.test(lower)) {
     exclusions.push("Fără fistic");
   }
   if (/\b(f[aă]r[aă]\s+(?:arahide|alune|nuci)|без\s+(?:арахиса|орехов)|no\s+(?:peanuts?|nuts?))\b/i.test(lower)) {
     exclusions.push("Fără arahide");
-  }
-  if (/\b(f[aă]r[aă]\s+zah[aă]r|без\s+сахара|no\s+sugar)\b/i.test(lower)) {
-    exclusions.push("Fără zahăr adăugat");
   }
   if (/\b(f[aă]r[aă]\s+kiwi|без\s+киви|no\s+kiwi)\b/i.test(lower)) {
     exclusions.push("Fără kiwi");
@@ -529,18 +527,29 @@ export function extractCustomizationAndToppings(text: string): {
   if (/\b(f[aă]r[aă]\s+banan[eă]|без\s+бананов?|no\s+bananas?)\b/i.test(lower)) {
     exclusions.push("Fără banane");
   }
-  if (/\b(f[aă]r[aă]\s+gluten|без\s+глютена|gluten\s*free)\b/i.test(lower)) {
-    exclusions.push("Fără gluten");
+  if (/\b(f[aă]r[aă]\s+oreo|без\s+орео|no\s+oreo)\b/i.test(lower)) {
+    exclusions.push("Fără biscuiți Oreo");
   }
-  if (/\b(f[aă]r[aă]\s+lactoz[aă]|без\s+лактозы|lactose\s*free)\b/i.test(lower)) {
-    exclusions.push("Fără lactoză");
+  if (/\b(f[aă]r[aă]\s+lotus|без\s+лотус|no\s+lotus)\b/i.test(lower)) {
+    exclusions.push("Fără biscuiți Lotus");
+  }
+  if (/\b(f[aă]r[aă]\s+ciocolat[aă]\s+alb[aă]|без\s+белого\s+шоколада|no\s+white\s+chocolate)\b/i.test(lower)) {
+    exclusions.push("Fără ciocolată albă");
+  }
+  if (/\b(f[aă]r[aă]\s+nutella|без\s+нутелл[ыа]|no\s+nutella)\b/i.test(lower)) {
+    exclusions.push("Fără Nutella");
   }
 
   // Detecție generică pentru alte ingrediente menționate după „fără” / „без”
   const genericMatches = lower.matchAll(/\b(?:f[aă]r[aă]|без|without|no)\s+([a-zăâîșțа-яё]{3,20})/gi);
   for (const m of genericMatches) {
     const rawWord = m[1].toLowerCase().trim();
-    if (['probleme', 'graba', 'griji', 'ezitare', 'intarziere', 'сомнений', 'проблем', 'сомнения'].includes(rawWord)) {
+    if ([
+      'probleme', 'graba', 'griji', 'ezitare', 'intarziere', 'сомнений', 'проблем', 'сомнения',
+      'zahar', 'zahăr', 'dulce', 'sugar', 'сахар', 'сахара',
+      'gluten', 'глютен', 'глютена',
+      'lactoza', 'lactoză', 'лактоза', 'лактозы'
+    ].includes(rawWord)) {
       continue;
     }
     const formatted = `Fără ${rawWord.charAt(0).toUpperCase() + rawWord.slice(1)}`;
@@ -575,6 +584,211 @@ export function extractCustomizationAndToppings(text: string): {
     exclusions,
     exclusionsSummary: exclusions.join(', ')
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VALIDARE PERSONALIZĂRI ȘI EXCLUDERI («FĂRĂ CEVA»)
+// Reguli stricte Munchotella:
+// 1. FĂRĂ ZAHĂR NU EXISTĂ: Deserturile conțin zahăr nativ în aluat și ciocolată.
+// 2. BLOCAJ LOGIC: Sushi Banana NU se poate fără banană (e baza ruladei).
+// 3. BLOCAJ LOGIC: Crepe Dubai NU se poate fără fistic / kataif (e specificul desertului).
+// 4. Verificare ingrediente reale: Doar ingrediente din rețetă pot fi excluse;
+//    dacă produsul nu conține oricum acel ingredient (ex: Royal Pancakes fără fistic),
+//    asigurăm clientul că produsul e sigur și nu conține fistic în rețeta sa.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface CustomizationValidationResult {
+  validExclusions: string[];
+  reassuranceNote?: string;
+  blockedReason?: string;
+  isBlocked: boolean;
+}
+
+export function validateProductCustomization(
+  product: typeof MENU_CATALOG[0],
+  rawText: string,
+  rawExclusions: string[],
+  lang: string
+): CustomizationValidationResult {
+  const lower = rawText.toLowerCase();
+
+  // 1. BLOCAJ ZAHĂR: Munchotella este boutique de deserturi artizanale, aluatul și ciocolata au zahăr
+  if (/\b(f[aă]r[aă]\s+zah[aă]r|fara\s+zahar|fără\s+zahăr|без\s+сахара|sugar\s*free|no\s+sugar|diabetic|diabetici)\b/i.test(lower)) {
+    let blockedReason = "";
+    if (lang === 'ru') {
+      blockedReason = `«${product.name}» содержит сахар в самом тесте и в начинках (бельгийский шоколад / Nutella®), поэтому этот десерт невозможно приготовить без сахара. 🧇 Приготовить его по нашему оригинальному рецепту? ✨`;
+    } else if (lang === 'en') {
+      blockedReason = `«${product.name}» naturally contains sugar in the freshly baked batter and chocolates (Nutella®), so it cannot be prepared sugar-free. 🧇 Would you like it prepared with our classic delicious recipe? ✨`;
+    } else {
+      blockedReason = `«${product.name}» conține zahăr în mod natural în aluatul proaspăt copt și în ciocolata belgiană / Nutella®, așadar nu poate fi preparat fără zahăr. 🧇 Îl doriți pregătit după rețeta noastră clasică delicioasă? ✨`;
+    }
+    return { validExclusions: [], isBlocked: true, blockedReason };
+  }
+
+  // 2. BLOCAJ GLUTEN
+  if (/\b(f[aă]r[aă]\s+gluten|fara\s+gluten|без\s+глютена|gluten\s*free)\b/i.test(lower)) {
+    let blockedReason = "";
+    if (lang === 'ru') {
+      blockedReason = `«${product.name}» выпекается из классической пшеничной муки, поэтому не может быть приготовлен без глютена. 🧇 Хотите выбрать напиток без глютена (кофе, чай)? ✨`;
+    } else if (lang === 'en') {
+      blockedReason = `«${product.name}» is baked with premium wheat flour, so it cannot be made gluten-free. 🧇 Would you like an espresso or fresh tea instead? ✨`;
+    } else {
+      blockedReason = `«${product.name}» este copt din făină superioară de grâu, așadar nu poate fi preparat fără gluten. 🧇 Vă putem recomanda un espresso, o cafea neagră sau un ceai aromat! ✨`;
+    }
+    return { validExclusions: [], isBlocked: true, blockedReason };
+  }
+
+  // 3. BLOCAJ LOGIC: Sushi Banana NU se poate fără banană
+  if (product.id === 'sushi_banana' && /\b(f[aă]r[aă]\s+banan[eă]|без\s+бананов?|no\s+bananas?)\b/i.test(lower)) {
+    let blockedReason = "";
+    if (lang === 'ru') {
+      blockedReason = "Десерт «Sushi banana» заворачивается вокруг цельного свежего банана, который является основой блюда, поэтому его нельзя приготовить без банана. 🍌 Вместо этого мы с радостью рекомендуем «Chocolate bites» (нежные кусочки блинчика с Nutella и печеньем) или классический блинчик! 🧇✨";
+    } else if (lang === 'en') {
+      blockedReason = "Our 'Sushi banana' dessert is rolled around a whole fresh banana as its core structure, so it cannot be made without banana. 🍌 We warmly recommend 'Chocolate bites' (crepe bites with Nutella and biscuits) or a classic crepe instead! 🧇✨";
+    } else {
+      blockedReason = "Desertul «Sushi banana» este rulat în jurul unei banane proaspete întregi și reprezintă însăși structura acestui preparat, de aceea nu poate fi pregătit fără banană. 🍌 În schimb, vă recomandăm cu drag «Chocolate bites» (bucățele delicioase de clătită cu Nutella și biscuiți) sau o clătită clasică din meniu! 🧇✨";
+    }
+    return { validExclusions: [], isBlocked: true, blockedReason };
+  }
+
+  // 4. BLOCAJ LOGIC: Crepe Dubai NU se poate fără fistic / kataif
+  if (product.id === 'crepe_dubai' && (/\b(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)|no\s+pistachio)\b/i.test(lower) || /\b(f[aă]r[aă]\s+kataif|без\s+катаифа)\b/i.test(lower))) {
+    let blockedReason = "";
+    if (lang === 'ru') {
+      blockedReason = "Фирменный «Crepe Dubai» основан на фисташковом креме и хрустящем катаифе. Если вы хотите блинчик без фисташек, с удовольствием рекомендуем «Kinder crepe», «Oreo crepe» или «Delux crepe»! 🧇🍫";
+    } else if (lang === 'en') {
+      blockedReason = "Our 'Crepe Dubai' is specifically made with pistachio cream and crispy kataif. If you prefer a crepe without pistachio, we warmly recommend 'Kinder crepe', 'Oreo crepe', or 'Delux crepe'! 🧇🍫";
+    } else {
+      blockedReason = "Clătita «Crepe Dubai» este preparată special cu cremă bogată de fistic și kataif crocant. Dacă preferați o clătită fără fistic, vă recomandăm cu drag «Kinder crepe», «Oreo crepe» sau «Delux crepe» fără adaos de alune! 🧇🍫";
+    }
+    return { validExclusions: [], isBlocked: true, blockedReason };
+  }
+
+  // 5. VALIDARE INGREDIENTE EXISTENTE ÎN REȚETĂ
+  const validExclusions: string[] = [];
+  const reassuranceNotes: string[] = [];
+
+  for (const excl of rawExclusions) {
+    const exclLower = excl.toLowerCase();
+
+    if (exclLower.includes('fistic')) {
+      validExclusions.push("Fără fistic");
+      if (!product.hasFistic) {
+        reassuranceNotes.push(
+          lang === 'ru'
+            ? `«${product.name}» и так не содержит фисташек в рецепте`
+            : lang === 'en'
+            ? `«${product.name}» does not contain pistachios in its recipe anyway`
+            : `«${product.name}» nu conține fistic în rețeta originală`
+        );
+      }
+    } else if (exclLower.includes('arahide') || exclLower.includes('alune') || exclLower.includes('nuci')) {
+      validExclusions.push("Fără arahide");
+      if (!product.hasArahide && !product.ingredients.toLowerCase().includes('arahide') && !product.ingredients.toLowerCase().includes('alune')) {
+        reassuranceNotes.push(
+          lang === 'ru'
+            ? `«${product.name}» и так не содержит арахиса/орехов в рецепте`
+            : lang === 'en'
+            ? `«${product.name}» does not contain peanuts anyway`
+            : `«${product.name}» nu conține arahide în rețeta originală`
+        );
+      }
+    } else if (exclLower.includes('banan')) {
+      validExclusions.push("Fără banane");
+      if (!product.ingredients.toLowerCase().includes('banan')) {
+        reassuranceNotes.push(
+          lang === 'ru'
+            ? `«${product.name}» не содержит бананов в рецепте`
+            : `«${product.name}» nu conține banane în rețetă`
+        );
+      }
+    } else if (exclLower.includes('căpșun') || exclLower.includes('capsun')) {
+      validExclusions.push("Fără căpșuni");
+      if (!product.ingredients.toLowerCase().includes('căpșun') && !product.ingredients.toLowerCase().includes('capsun')) {
+        reassuranceNotes.push(
+          lang === 'ru'
+            ? `«${product.name}» не содержит клубники в рецепте`
+            : `«${product.name}» nu conține căpșuni în rețetă`
+        );
+      }
+    } else if (exclLower.includes('kiwi')) {
+      validExclusions.push("Fără kiwi");
+      if (!product.ingredients.toLowerCase().includes('kiwi')) {
+        reassuranceNotes.push(
+          lang === 'ru'
+            ? `«${product.name}» не содержит киви в рецепте`
+            : `«${product.name}» nu conține kiwi în rețetă`
+        );
+      }
+    } else if (exclLower.includes('oreo')) {
+      validExclusions.push("Fără biscuiți Oreo");
+    } else if (exclLower.includes('lotus')) {
+      validExclusions.push("Fără biscuiți Lotus");
+    } else if (exclLower.includes('ciocolat') && exclLower.includes('alb')) {
+      validExclusions.push("Fără ciocolată albă");
+    } else if (exclLower.includes('nutella')) {
+      validExclusions.push("Fără Nutella");
+    } else {
+      validExclusions.push(excl);
+    }
+  }
+
+  const reassuranceNote = reassuranceNotes.length > 0
+    ? (lang === 'ru'
+        ? `(Примечание: ${reassuranceNotes.join(', ')}, но мы передали отметку на кухню)`
+        : `(Notă: ${reassuranceNotes.join(', ')}, dar am notat preferința pentru bucătărie)`)
+    : undefined;
+
+  return {
+    validExclusions,
+    reassuranceNote,
+    isBlocked: false
+  };
+}
+
+export function handleSugarOrDietaryInquiry(text: string, lang: string): { handled: boolean; replyText?: string } {
+  const lower = text.toLowerCase().trim();
+  const isSugarFreeInquiry = /(\b(f[aă]r[aă]\s+zah[aă]r|fara\s+zahar|fără\s+zahăr|fara\s+dulce|fără\s+dulce|без\s+сахара|sugar\s*free|no\s+sugar|diabetic|diabetici|diabet)\b)/i.test(lower);
+  const isGlutenFreeInquiry = /(\b(f[aă]r[aă]\s+gluten|fara\s+gluten|без\s+глютена|gluten\s*free)\b)/i.test(lower);
+  const isLactoseFreeInquiry = /(\b(f[aă]r[aă]\s+lactoz[aă]|fara\s+lactoza|fără\s+lactoză|без\s+лактозы|lactose\s*free)\b)/i.test(lower);
+
+  if (isSugarFreeInquiry) {
+    let replyText = "";
+    if (lang === 'ru') {
+      replyText = "Все наши авторские десерты (вафли, блинчики, панкейки) содержат сахар в самом тесте и в начинках (бельгийский шоколад / Nutella), поэтому их невозможно приготовить без сахара. 🧇 В качестве напитка мы можем предложить вам ароматный кофе без сахара (Espresso, Americano) или чай. Посмотреть все меню можно на https://www.munchotella.md/ru/menu ✨";
+    } else if (lang === 'en') {
+      replyText = "All our artisanal desserts (waffles, crepes, pancakes) naturally contain sugar in the batter and premium chocolates / Nutella, so they cannot be prepared sugar-free. 🧇 We can gladly offer you an unsweetened espresso, black coffee, or tea. You can explore our full menu at https://www.munchotella.md/en/menu ✨";
+    } else {
+      replyText = "Toate deserturile noastre artizanale (waffles, clătite, pancakes) conțin zahăr în mod natural în aluat și în compoziția cremelor belgiene / Nutella, așadar nu pot fi preparate fără zahăr. 🧇 Vă putem recomanda o cafea neagră, un espresso sau un ceai fără adaos de zahăr, sau puteți explora meniul nostru complet la https://www.munchotella.md/ro/menu ✨";
+    }
+    return { handled: true, replyText };
+  }
+
+  if (isGlutenFreeInquiry) {
+    let replyText = "";
+    if (lang === 'ru') {
+      replyText = "К сожалению, тесто для наших вафель и блинчиков готовится из пшеничной муки высшего сорта, поэтому у нас нет безглютеновых десертов. Ждем вас на ароматный кофе или чай! 🧇☕";
+    } else if (lang === 'en') {
+      replyText = "Unfortunately, our waffles and crepes are made with premium wheat flour, so we do not currently offer gluten-free options. We warmly welcome you for a fresh coffee or tea! 🧇☕";
+    } else {
+      replyText = "Din păcate, aluatul nostru proaspăt pentru waffles și clătite este preparat din făină albă superioară de grâu, așadar nu avem opțiuni fără gluten. Vă așteptăm cu drag la o cafea bună sau un ceai aromat! 🧇☕";
+    }
+    return { handled: true, replyText };
+  }
+
+  if (isLactoseFreeInquiry) {
+    let replyText = "";
+    if (lang === 'ru') {
+      replyText = "Большинство наших десертов содержат молочные продукты (молоко в тесте, сливочный шоколад, Nutella). Если вам требуется десерт без лактозы, к сожалению, мы не можем гарантировать полное ее отсутствие. 🧇";
+    } else if (lang === 'en') {
+      replyText = "Most of our desserts contain dairy ingredients (milk in the batter, Belgian chocolate, Nutella). If you require lactose-free options, unfortunately we cannot guarantee a 100% lactose-free dessert. 🧇";
+    } else {
+      replyText = "Majoritatea deserturilor noastre conțin lactate (lapte în aluat, ciocolată belgiană, Nutella). Dacă aveți intoleranță severă la lactoză, din păcate nu vă putem garanta un desert 100% fără lactoză. 🧇";
+    }
+    return { handled: true, replyText };
+  }
+
+  return { handled: false };
 }
 
 export async function GET(request: Request) {
@@ -1715,6 +1929,16 @@ export async function processMessage(
       return { success: true, status: 'preorder_inquiry_answered', replyText: preorderResult.replyText };
     }
 
+    // ─── PAS 3.8: ÎNTREBĂRI DIETARE STRICTE (FĂRĂ ZAHĂR, FĂRĂ GLUTEN, FĂRĂ LACTOZĂ) ───
+    const dietaryCheck = handleSugarOrDietaryInquiry(messageText, lang);
+    if (dietaryCheck.handled && dietaryCheck.replyText) {
+      appendToHistory(session, 'assistant', dietaryCheck.replyText);
+      await saveSession(senderId, session);
+      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+      await sendDispatchResponse(senderId, channel, dietaryCheck.replyText, cartUrl, cartButtonTitle);
+      return { success: true, status: 'dietary_inquiry_answered', replyText: dietaryCheck.replyText };
+    }
+
     // ─── PAS 4: ÎNTREBĂRI DESPRE INGREDIENTE & ALERGENI ───
     const ingResult = handleIngredientsInquiry(messageText, lang);
     if (ingResult.handled && ingResult.replyText) {
@@ -1743,6 +1967,27 @@ export async function processMessage(
     const orderDetails = extractOrderDetails(messageText);
     const compoundMatches = matchCompoundProductsInText(messageText);
 
+    // Validare personalizări și excluderi pentru fiecare produs detectat
+    for (const m of compoundMatches) {
+      if (m.customization || (m.toppings && m.toppings.length > 0)) {
+        const valRes = validateProductCustomization(
+          m.product, 
+          messageText, 
+          m.customization ? m.customization.split(', ') : [], 
+          lang
+        );
+        if (valRes.isBlocked && valRes.blockedReason) {
+          appendToHistory(session, 'assistant', valRes.blockedReason);
+          await saveSession(senderId, session);
+          const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+          await sendDispatchResponse(senderId, channel, valRes.blockedReason, cartUrl, cartButtonTitle);
+          return { success: true, status: 'customization_blocked', replyText: valRes.blockedReason };
+        }
+        m.customization = valRes.validExclusions.length > 0 ? valRes.validExclusions.join(', ') : undefined;
+        (m as any).reassuranceNote = valRes.reassuranceNote;
+      }
+    }
+
     // Verificăm dacă mesajul conține toppinguri plătite sau excluderi („fără ceva”)
     const hasCustomizationOrToppings = compoundMatches.some(m => (m.toppings && m.toppings.length > 0) || m.customization);
 
@@ -1757,7 +2002,8 @@ export async function processMessage(
           toppingsTotal,
           unitPrice,
           totalPrice: unitPrice * m.quantity,
-          customization: m.customization || undefined
+          customization: m.customization || undefined,
+          reassuranceNote: (m as any).reassuranceNote
         };
       });
 
@@ -1774,6 +2020,9 @@ export async function processMessage(
       for (const p of pendingItems) {
         grandTotal += p.totalPrice;
         let line = `• <b>${p.quantity}x ${p.product.name}</b> (${p.product.price} MDL)`;
+        if (p.reassuranceNote) {
+          line += `\n  ℹ️ <i>${p.reassuranceNote}</i>`;
+        }
         if (p.toppings.length > 0) {
           const topStr = p.toppings.map((t: any) => `${t.name} (+${t.price} MDL)`).join(', ');
           line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
@@ -1818,9 +2067,22 @@ export async function processMessage(
           name: lastItem.name,
           price: lastItem.basePrice || lastItem.price,
           category: 'waffles',
-          image: lastItem.image
+          image: lastItem.image,
+          ingredients: "",
+          hasFistic: false,
+          hasArahide: false
         };
 
+        const valRes = validateProductCustomization(catalogItem as any, messageText, custCheck.exclusions, lang);
+        if (valRes.isBlocked && valRes.blockedReason) {
+          appendToHistory(session, 'assistant', valRes.blockedReason);
+          await saveSession(senderId, session);
+          const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
+          await sendDispatchResponse(senderId, channel, valRes.blockedReason, cartUrl, cartButtonTitle);
+          return { success: true, status: 'customization_blocked', replyText: valRes.blockedReason };
+        }
+
+        const validExclusionsSummary = valRes.validExclusions.join(', ');
         const toppingsTotal = custCheck.toppings.reduce((sum, t) => sum + t.price, 0);
         const unitPrice = (catalogItem.price || lastItem.price) + toppingsTotal;
         const pendingItem = {
@@ -1830,7 +2092,8 @@ export async function processMessage(
           toppingsTotal,
           unitPrice,
           totalPrice: unitPrice * (lastItem.quantity || 1),
-          customization: custCheck.exclusionsSummary || undefined
+          customization: validExclusionsSummary || undefined,
+          reassuranceNote: valRes.reassuranceNote
         };
 
         session.pendingCustomization = {
@@ -1841,12 +2104,15 @@ export async function processMessage(
         session.state = 'AWAITING_CUSTOMIZATION_CONFIRM';
 
         let line = `• <b>${lastItem.quantity || 1}x ${lastItem.name}</b>`;
+        if (valRes.reassuranceNote) {
+          line += `\n  ℹ️ <i>${valRes.reassuranceNote}</i>`;
+        }
         if (custCheck.toppings.length > 0) {
           const topStr = custCheck.toppings.map(t => `${t.name} (+${t.price} MDL)`).join(', ');
           line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
         }
-        if (custCheck.exclusionsSummary) {
-          line += `\n  📝 <b>Mențiune bucătărie: ${custCheck.exclusionsSummary}</b> (notat la comentarii)`;
+        if (validExclusionsSummary) {
+          line += `\n  📝 <b>Mențiune bucătărie: ${validExclusionsSummary}</b> (notat la comentarii)`;
         }
         line += `\n  💰 <i>Noul preț: ${pendingItem.totalPrice} MDL</i>`;
 
