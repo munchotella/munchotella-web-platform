@@ -512,36 +512,36 @@ export function extractCustomizationAndToppings(text: string): {
 
   // 1. Detecție Excluderi („Fără ingredient”) - acestea merg EXCLUSIV în rubrica comentarii
   // NOTĂ STRICTĂ: „Fără zahăr” și „Fără gluten” sunt excluse deoarece nu există deserturi fără zahăr/gluten la Munchotella
-  if (/\b(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)|no\s+pistachio)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)?|no\s+pistachio)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără fistic");
   }
-  if (/\b(f[aă]r[aă]\s+(?:arahide|alune|nuci)|без\s+(?:арахиса|орехов)|no\s+(?:peanuts?|nuts?))\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+(?:arahide|alune|nuci)|без\s+(?:арахиса|орехов)|no\s+(?:peanuts?|nuts?))(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără arahide");
   }
-  if (/\b(f[aă]r[aă]\s+kiwi|без\s+киви|no\s+kiwi)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+kiwi|без\s+киви|no\s+kiwi)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără kiwi");
   }
-  if (/\b(f[aă]r[aă]\s+c[aă]p[sș]un[ie]|без\s+клубники|no\s+strawberries?)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+c[aă]p[sș]un[ieaă]?|без\s+клубники|no\s+strawberries?)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără căpșuni");
   }
-  if (/\b(f[aă]r[aă]\s+banan[eă]|без\s+бананов?|no\s+bananas?)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+banan[aăe]?|без\s+бананов?|no\s+bananas?)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără banane");
   }
-  if (/\b(f[aă]r[aă]\s+oreo|без\s+орео|no\s+oreo)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+oreo|без\s+орео|no\s+oreo)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără biscuiți Oreo");
   }
-  if (/\b(f[aă]r[aă]\s+lotus|без\s+лотус|no\s+lotus)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+lotus|без\s+лотус|no\s+lotus)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără biscuiți Lotus");
   }
-  if (/\b(f[aă]r[aă]\s+ciocolat[aă]\s+alb[aă]|без\s+белого\s+шоколада|no\s+white\s+chocolate)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+ciocolat[aă]\s+alb[aă]|без\s+белого\s+шоколада|no\s+white\s+chocolate)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără ciocolată albă");
   }
-  if (/\b(f[aă]r[aă]\s+nutella|без\s+нутелл[ыа]|no\s+nutella)\b/i.test(lower)) {
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+nutella|без\s+нутелл[ыа]|no\s+nutella)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără Nutella");
   }
 
   // Detecție generică pentru alte ingrediente menționate după „fără” / „без”
-  const genericMatches = lower.matchAll(/\b(?:f[aă]r[aă]|без|without|no)\s+([a-zăâîșțа-яё]{3,20})/gi);
+  const genericMatches = lower.matchAll(/(?:^|[^a-zăâîșțа-яё])(?:f[aă]r[aă]|без|without|no)\s+([a-zăâîșțа-яё]{3,20})/gi);
   for (const m of genericMatches) {
     const rawWord = m[1].toLowerCase().trim();
     if ([
@@ -559,12 +559,14 @@ export function extractCustomizationAndToppings(text: string): {
   }
 
   // 2. Detecție Topping-uri și Personalizări plătite de pe site (NU le confundăm cu ce e la „fără”!)
-  let textForToppings = lower.replace(/\b(?:f[aă]r[aă]|без|without|no)\s+[a-zăâîșțа-яё]+/gi, ' ');
+  let textForToppings = lower.replace(/(?:^|[^a-zăâîșțа-яё])(?:f[aă]r[aă]|без|without|no)\s+[a-zăâîșțа-яё]+/gi, ' ');
 
   const seenToppingNames = new Set<string>();
   for (const top of AVAILABLE_TOPPINGS) {
     for (const alias of top.aliases) {
-      const regex = new RegExp(`(?:\\b(?:cu|plus|extra|topping(?:\\s+de)?|[sș]i|с|со|добавь|плюс|with|add)\\s+)?\\b${escapeRegex(alias)}\\b`, 'i');
+      // Necesită prefix explicit de adăugare („cu fistic”, „plus Oreo”, „extra Nutella”, „topping de căpșuni”)
+      // pentru a evita confundarea cu denumirea produsului (ex: „Sushi banana” nu trebuie să adauge topping plătit de banană!)
+      const regex = new RegExp(`(?:^|[^a-zăâîșțа-яё])(?:cu|plus|extra|topping(?:\\s+de)?|[sș]i|adaug[aă]|с|со|добавь|плюс|with|add|\\+)\\s+${escapeRegex(alias)}(?:$|[^a-zăâîșțа-яё])`, 'i');
       if (regex.test(textForToppings)) {
         if (!seenToppingNames.has(top.name)) {
           seenToppingNames.add(top.name);
@@ -613,7 +615,8 @@ export function validateProductCustomization(
   const lower = rawText.toLowerCase();
 
   // 1. BLOCAJ ZAHĂR: Munchotella este boutique de deserturi artizanale, aluatul și ciocolata au zahăr
-  if (/\b(f[aă]r[aă]\s+zah[aă]r|fara\s+zahar|fără\s+zahăr|без\s+сахара|sugar\s*free|no\s+sugar|diabetic|diabetici)\b/i.test(lower)) {
+  const hasSugarExclusion = rawExclusions.some(e => e.toLowerCase().includes('zahar') || e.toLowerCase().includes('zahăr')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+zah[aă]r|fara\s+zahar|fără\s+zahăr|без\s+сахара|sugar\s*free|no\s+sugar|diabetic|diabetici)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+  if (hasSugarExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
       blockedReason = `«${product.name}» содержит сахар в самом тесте и в начинках (бельгийский шоколад / Nutella®), поэтому этот десерт невозможно приготовить без сахара. 🧇 Приготовить его по нашему оригинальному рецепту? ✨`;
@@ -626,7 +629,8 @@ export function validateProductCustomization(
   }
 
   // 2. BLOCAJ GLUTEN
-  if (/\b(f[aă]r[aă]\s+gluten|fara\s+gluten|без\s+глютена|gluten\s*free)\b/i.test(lower)) {
+  const hasGlutenExclusion = rawExclusions.some(e => e.toLowerCase().includes('gluten')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+gluten|fara\s+gluten|без\s+глютена|gluten\s*free)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+  if (hasGlutenExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
       blockedReason = `«${product.name}» выпекается из классической пшеничной муки, поэтому не может быть приготовлен без глютена. 🧇 Хотите выбрать напиток без глютена (кофе, чай)? ✨`;
@@ -639,7 +643,8 @@ export function validateProductCustomization(
   }
 
   // 3. BLOCAJ LOGIC: Sushi Banana NU se poate fără banană
-  if (product.id === 'sushi_banana' && /\b(f[aă]r[aă]\s+banan[eă]|без\s+бананов?|no\s+bananas?)\b/i.test(lower)) {
+  const hasBananaExclusion = rawExclusions.some(e => e.toLowerCase().includes('banan')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+banan[aăe]?|без\s+бананов?|no\s+bananas?)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+  if (product.id === 'sushi_banana' && hasBananaExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
       blockedReason = "Десерт «Sushi banana» заворачивается вокруг цельного свежего банана, который является основой блюда, поэтому его нельзя приготовить без банана. 🍌 Вместо этого мы с радостью рекомендуем «Chocolate bites» (нежные кусочки блинчика с Nutella и печеньем) или классический блинчик! 🧇✨";
@@ -652,7 +657,9 @@ export function validateProductCustomization(
   }
 
   // 4. BLOCAJ LOGIC: Crepe Dubai NU se poate fără fistic / kataif
-  if (product.id === 'crepe_dubai' && (/\b(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)|no\s+pistachio)\b/i.test(lower) || /\b(f[aă]r[aă]\s+kataif|без\s+катаифа)\b/i.test(lower))) {
+  const hasPistachioExclusion = rawExclusions.some(e => e.toLowerCase().includes('fistic')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)?|no\s+pistachio)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+  const hasKataifExclusion = rawExclusions.some(e => e.toLowerCase().includes('kataif')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+kataif|без\s+катаифа)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+  if (product.id === 'crepe_dubai' && (hasPistachioExclusion || hasKataifExclusion)) {
     let blockedReason = "";
     if (lang === 'ru') {
       blockedReason = "Фирменный «Crepe Dubai» основан на фисташковом креме и хрустящем катаифе. Если вы хотите блинчик без фисташек, с удовольствием рекомендуем «Kinder crepe», «Oreo crepe» или «Delux crepe»! 🧇🍫";
