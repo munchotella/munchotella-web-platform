@@ -188,20 +188,20 @@ const MENU_CATALOG = [
     price: 155, 
     category: "crepes", 
     image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd48bbfc389f658b22d0_Royal%20sushi%20115%20lei.png", 
-    ingredients: "Sushi clătită, Nutella®, căpșuni proaspete, banane", 
-    hasFistic: false, 
-    hasArahide: false,
-    aliases: ["royal sushi", "sushi royal", "sushi clatita", "sushi clatite", "clatita sushi", "роял суши"]
+    ingredients: "Sushi clătită cu banană întreagă proaspătă, Nutella®, ciocolată albă Belgiană, căpșuni proaspete, fistic, arahide", 
+    hasFistic: true, 
+    hasArahide: true,
+    aliases: ["royal sushi", "sushi royal", "sushi banana", "sushi cu banana", "banana sushi", "clatita sushi", "clatite sushi", "clatita cu banana sushi", "sushi", "суши", "роял суши", "банановые суши", "суши банан", "суши с бананом"]
   },
   { 
     id: "sushi_banana", 
-    name: "Sushi banana", 
-    price: 140, 
+    name: "Royal sushi", 
+    price: 155, 
     category: "crepes", 
-    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd46a906d1517839379a_Sushi%20banana%2085%20lei.png", 
-    ingredients: "Sushi clătită cu banană întreagă, Nutella®, ciocolată albă Belgiană", 
-    hasFistic: false, 
-    hasArahide: false,
+    image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd48bbfc389f658b22d0_Royal%20sushi%20115%20lei.png", 
+    ingredients: "Sushi clătită cu banană întreagă proaspătă, Nutella®, ciocolată albă Belgiană, căpșuni proaspete, fistic, arahide", 
+    hasFistic: true, 
+    hasArahide: true,
     aliases: ["sushi banana", "banana sushi", "sushi cu banana", "clatita cu banana sushi", "банановые суши"]
   },
 
@@ -475,6 +475,10 @@ const PRODUCT_NAME_TO_MONGO_ID: Record<string, string> = {
   "kinder crepe": "69f25596d2fb9408904d1f97",
   "chocolate bites": "69f25596d2fb9408904d1fc4",
   "royal sushi": "69f25596d2fb9408904d1fd1",
+  "sushi banana": "69f25596d2fb9408904d1fd1",
+  "sushi cu banana": "69f25596d2fb9408904d1fd1",
+  "banana sushi": "69f25596d2fb9408904d1fd1",
+  "sushi": "69f25596d2fb9408904d1fd1",
   "classic pancakes": "69f25596d2fb9408904d1fa4",
   "fruits pancakes": "69f25596d2fb9408904d1fb2",
   "mini pancakes": "69f25596d2fb9408904d1fb9",
@@ -642,16 +646,16 @@ export function validateProductCustomization(
     return { validExclusions: [], isBlocked: true, blockedReason };
   }
 
-  // 3. BLOCAJ LOGIC: Sushi Banana NU se poate fără banană
+  // 3. BLOCAJ LOGIC: Royal Sushi / Sushi Banana NU se poate fără banană
   const hasBananaExclusion = rawExclusions.some(e => e.toLowerCase().includes('banan')) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+banan[aăe]?|без\s+бананов?|no\s+bananas?)(?:$|[^a-zăâîșțа-яё])/i.test(lower);
-  if (product.id === 'sushi_banana' && hasBananaExclusion) {
+  if ((product.id === 'royal_sushi' || product.id === 'sushi_banana') && hasBananaExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
-      blockedReason = "Десерт «Sushi banana» заворачивается вокруг цельного свежего банана, который является основой блюда, поэтому его нельзя приготовить без банана. 🍌 Вместо этого мы с радостью рекомендуем «Chocolate bites» (нежные кусочки блинчика с Nutella и печеньем) или классический блинчик! 🧇✨";
+      blockedReason = "Десерт «Royal sushi» заворачивается вокруг цельного свежего банана, который является основой рулета, поэтому его нельзя приготовить без банана. 🍌 Вместо этого мы с радостью рекомендуем «Chocolate bites» (нежные кусочки блинчика с Nutella и печеньем) или классический блинчик! 🥞✨";
     } else if (lang === 'en') {
-      blockedReason = "Our 'Sushi banana' dessert is rolled around a whole fresh banana as its core structure, so it cannot be made without banana. 🍌 We warmly recommend 'Chocolate bites' (crepe bites with Nutella and biscuits) or a classic crepe instead! 🧇✨";
+      blockedReason = "Our 'Royal sushi' dessert is rolled around a whole fresh banana as its core structure, so it cannot be made without banana. 🍌 We warmly recommend 'Chocolate bites' (crepe bites with Nutella and biscuits) or a classic crepe instead! 🥞✨";
     } else {
-      blockedReason = "Desertul «Sushi banana» este rulat în jurul unei banane proaspete întregi și reprezintă însăși structura acestui preparat, de aceea nu poate fi pregătit fără banană. 🍌 În schimb, vă recomandăm cu drag «Chocolate bites» (bucățele delicioase de clătită cu Nutella și biscuiți) sau o clătită clasică din meniu! 🧇✨";
+      blockedReason = "Desertul «Royal sushi» este rulat în jurul unei banane proaspete întregi și reprezintă însăși structura acestui preparat, de aceea nu poate fi pregătit fără banană. 🍌 În schimb, vă recomandăm cu drag «Chocolate bites» (bucățele delicioase de clătită cu Nutella și biscuiți) sau o clătită clasică din meniu! 🥞✨";
     }
     return { validExclusions: [], isBlocked: true, blockedReason };
   }
@@ -2287,7 +2291,8 @@ export async function processMessage(
 
       const dynamicPrompt = `You are the friendly virtual assistant of the artisanal dessert boutique Munchotella Waffle Boutique in Chișinău (21/1 Nicolae Testemițanu St.).
 Opening hours: 16:00 - 00:00 (Wednesdays: Closed).
-Key products: Crepe Dubai with pistachio and kataifi (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), drinks.
+Key products: Royal sushi (crepe sushi roll around a whole fresh banana with Nutella, Belgian white chocolate, strawberries, pistachio, peanuts - 155 MDL), Crepe Dubai with pistachio and kataifi (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), drinks.
+Note on Sushi: In our menu, sushi crepe is named "Royal sushi". If customers write "sushi banana", "sushi cu banana" or "sushi", it refers to Royal sushi. It cannot be prepared without banana.
 Essential Rules:
 1. Answer in 1 short, warm, and natural sentence (maximum 2 very short sentences, exactly like a helpful cafe server).
 2. STRICT LANGUAGE RULE:
@@ -2296,6 +2301,10 @@ Essential Rules:
    - If [Language: RO], you MUST reply ONLY in Romanian.
 3. No long introductions or robotic text. No markdown links in the response text.
 4. Do NOT invent products or use prohibited words ('americane', 'nuci'). Use pistachio instead of nuts.
+5. STRICT UNCERTAINTY & LACK OF INSTRUCTIONS RULE:
+   - If the customer asks something you do NOT understand, or you do NOT have clear instructions or exact facts for (e.g. custom catering, job openings, partnership requests, complaints, off-menu requests, delivery prices to distant villages, or any ambiguous question):
+   - NEVER GUESS! NEVER HALLUCINATE OR MAKE UP ANSWERS!
+   - You MUST output: "[HANDOFF_TO_AGENT] " followed by a brief warm notification in their language informing them that you are transferring the conversation to a team member who will reply right away.
 
 [Recent Conversation History]:
 ${historySnippets}
@@ -2335,13 +2344,64 @@ ${historySnippets}
       }
     }
 
-    // ─── PAS 10: FALLBACK FINAL PRIETENOS ───
+    // ─── VERIFICARE TRANSFER LA AGENT UMAN (DACĂ AI-UL NU ARE INSTRUCȚIUNE SAU NU A ÎNȚELES) ───
+    if (replyText.includes('[HANDOFF_TO_AGENT]')) {
+      let cleanHandoffReply = replyText.replace(/\[HANDOFF_TO_AGENT\]/gi, '').trim();
+      if (!cleanHandoffReply) {
+        cleanHandoffReply = lang === 'ru'
+          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в самое ближайшее время! 💬👩‍🍳"
+          : lang === 'en'
+          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬👩‍🍳"
+          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬👩‍🍳";
+      }
+
+      session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
+      await saveSession(senderId, session);
+      await notifyStaffViaTelegram({
+        channel,
+        senderId,
+        messageText,
+        reason: 'uncertain_query',
+        additionalInfo: 'Întrebare fără instrucțiuni specifice / nesigură — transfer la operator'
+      });
+
+      appendToHistory(session, 'assistant', cleanHandoffReply);
+      await saveSession(senderId, session);
+      const sendResult = await sendDispatchResponse(senderId, channel, cleanHandoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      return { success: true, sendResult, replyText: cleanHandoffReply, status: 'human_handoff_triggered' };
+    }
+
+    // ─── PAS 10: FALLBACK FINAL PRIETENOS SAU ESCALADARE DACĂ E ÎNTREBARE NECONOCUTĂ ───
     if (!replyText) {
-      replyText = lang === 'ru'
-        ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? 🧇"
-        : lang === 'en'
-        ? "Hello! 🥰 I'd be delighted to help you with any questions about our menu or placing an order. What treats would you like today? 🧇"
-        : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? 🧇";
+      const isQuestionOrComplex = messageText.includes('?') || messageText.length > 25;
+      if (isQuestionOrComplex) {
+        replyText = lang === 'ru'
+          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в ближайшие минуты! 💬👩‍🍳"
+          : lang === 'en'
+          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬👩‍🍳"
+          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬👩‍🍳";
+
+        session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
+        await saveSession(senderId, session);
+        await notifyStaffViaTelegram({
+          channel,
+          senderId,
+          messageText,
+          reason: 'uncertain_query',
+          additionalInfo: 'Fallback: Întrebare nespecificată în instrucțiuni — transfer la operator'
+        });
+
+        appendToHistory(session, 'assistant', replyText);
+        await saveSession(senderId, session);
+        const sendResult = await sendDispatchResponse(senderId, channel, replyText, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+        return { success: true, sendResult, replyText, status: 'human_handoff_triggered' };
+      } else {
+        replyText = lang === 'ru'
+          ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? 🧇"
+          : lang === 'en'
+          ? "Hello! 🥰 I'd be delighted to help you with any questions about our menu or placing an order. What treats would you like today? 🧇"
+          : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? 🧇";
+      }
     }
 
     replyText = replyText
@@ -2969,37 +3029,40 @@ export async function POST(request: Request) {
 
       const redisKey = `debounce:msgs:${senderId}`;
       const tsKey = `debounce:ts:${senderId}`;
+      const versionKey = `debounce:ver:${senderId}`;
       const channelKey = `debounce:channel:${senderId}`;
       const SILENCE_WINDOW_SECONDS = 6;
-      const KEY_TTL_SECONDS = 30;
+      const KEY_TTL_SECONDS = 60;
 
-      // PASUL 1: Adaugăm mesajul curent la lista Redis pentru acest client
+      // PASUL 1: Incrementăm numărul versiunii atomic pentru acest client
+      const version = await redis.incr(versionKey);
+      await redis.expire(versionKey, KEY_TTL_SECONDS);
+
+      // PASUL 2: Adăugăm mesajul curent la lista Redis pentru acest client
       await redis.rpush(redisKey, messageText);
-      // PASUL 2: Actualizăm timestamp-ul ultimului mesaj primit
       await redis.set(tsKey, Date.now(), { ex: KEY_TTL_SECONDS });
       await redis.set(channelKey, channel, { ex: KEY_TTL_SECONDS });
       await redis.expire(redisKey, KEY_TTL_SECONDS);
 
       // PASUL 3: Programăm un job QStash cu delay de 6 secunde
-      // Dacă vine un alt mesaj înainte de 6s → Redis actualizat cu noul timestamp
-      // → job-ul QStash mai vechi va detecta că silențiul nu s-a atins (stale check în /process)
-      // → doar job-ul programat DUPĂ ultimul mesaj va procesa efectiv
+      // Jobul transportă numărul versiunii curente. Dacă utilizatorul mai trimite un mesaj
+      // în următoarele 6 secunde, versionKey va crește, iar acest job va fi considerat stale.
       const processUrl = `https://www.munchotella.md/api/webhooks/instagram/process`;
       
       try {
         const qstashResult = await qstash.publish({
           url: processUrl,
           delay: `${SILENCE_WINDOW_SECONDS}s`,
-          body: JSON.stringify({ senderId, channel }),
+          body: JSON.stringify({ senderId, channel, version }),
           headers: { 'Content-Type': 'application/json' },
           retries: 2,
         });
-        console.log(`[Redis+QStash] Job QStash programat pentru ${senderId} cu delay ${SILENCE_WINDOW_SECONDS}s | messageId: ${qstashResult?.messageId}`);
+        console.log(`[Redis+QStash] Job v${version} programat pentru ${senderId} cu delay ${SILENCE_WINDOW_SECONDS}s | messageId: ${qstashResult?.messageId}`);
       } catch (qstashErr) {
         console.error('[Redis+QStash] Eroare la publish QStash — activez fallback direct:', qstashErr);
         // Fallback robust: procesăm direct dacă QStash are probleme
         const messages = await redis.lrange<string>(redisKey, 0, -1);
-        await redis.del(redisKey, tsKey, channelKey);
+        await redis.del(redisKey, tsKey, versionKey, channelKey);
         if (messages && messages.length > 0) {
           const aggregatedText = messages.join('\n').trim();
           const debugResult = await processMessage(senderId, aggregatedText, channel);

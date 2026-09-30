@@ -36,14 +36,14 @@ export async function POST(request: Request) {
       }
     }
 
-    let body: { senderId: string; channel: 'instagram' | 'messenger' };
+    let body: { senderId: string; channel: 'instagram' | 'messenger'; version?: number };
     try {
       body = JSON.parse(rawBody);
     } catch {
       return NextResponse.json({ error: 'invalid_json' }, { status: 400 });
     }
 
-    const { senderId, channel } = body;
+    const { senderId, channel, version } = body;
     if (!senderId || !channel) {
       return NextResponse.json({ error: 'missing_params' }, { status: 400 });
     }
@@ -55,18 +55,28 @@ export async function POST(request: Request) {
 
     const redisKey = `debounce:msgs:${senderId}`;
     const tsKey = `debounce:ts:${senderId}`;
+    const versionKey = `debounce:ver:${senderId}`;
     const channelKey = `debounce:channel:${senderId}`;
 
-    const now = Date.now();
-    const lastTsRaw = await redis.get<number>(tsKey);
-    const lastTs = lastTsRaw ? Number(lastTsRaw) : 0;
-    const silenceElapsed = now - lastTs;
-
-    // Stale Job Detection: Dacă utilizatorul a trimis un mesaj mai recent (< 5.5s silențiu),
-    // renunțăm silențios pentru că un job QStash mai recent va procesa pachetul complet
-    if (silenceElapsed < 5500 && lastTs > 0) {
-      console.log(`[Process] Job QStash stale pentru ${senderId} — silențiu: ${silenceElapsed}ms < 5.5s.`);
-      return NextResponse.json({ status: 'stale_job_skipped', silenceElapsed, senderId });
+    // Debounce Atomic Version Check:
+    // Dacă utilizatorul a trimis un mesaj mai recent, versionKey a fost incrementat în Redis!
+    // Dacă version-ul din payload este mai mic decât cel din Redis, jobul acesta este stale.
+    if (version !== undefined && version !== null) {
+      const currentVerRaw = await redis.get<number>(versionKey);
+      const currentVer = currentVerRaw ? Number(currentVerRaw) : 0;
+      if (currentVer > Number(version)) {
+        console.log(`[Process] Job QStash v${version} pentru ${senderId} este STALE (versiune curentă: v${currentVer}). Se ignoră.`);
+        return NextResponse.json({ status: 'stale_job_skipped', version, currentVer, senderId });
+      }
+    } else {
+      const now = Date.now();
+      const lastTsRaw = await redis.get<number>(tsKey);
+      const lastTs = lastTsRaw ? Number(lastTsRaw) : 0;
+      const silenceElapsed = now - lastTs;
+      if (silenceElapsed < 4000 && lastTs > 0) {
+        console.log(`[Process] Job QStash stale pentru ${senderId} — silențiu: ${silenceElapsed}ms < 4s.`);
+        return NextResponse.json({ status: 'stale_job_skipped', silenceElapsed, senderId });
+      }
     }
 
     // Preluăm toate mesajele acumulate în Redis
@@ -76,7 +86,7 @@ export async function POST(request: Request) {
     }
 
     // Ștergem cheile Redis atomic
-    await redis.del(redisKey, tsKey, channelKey);
+    await redis.del(redisKey, tsKey, versionKey, channelKey);
 
     const aggregatedText = messages.join('\n').trim();
     console.log(`[Process] QStash execută ${messages.length} mesaje pentru ${senderId} [${channel.toUpperCase()}]:\n"${aggregatedText}"`);
@@ -111,7 +121,7 @@ export async function POST(request: Request) {
       channel,
       messagesCount: messages.length,
       aggregatedText,
-      silenceElapsed,
+      version,
       debug: debugResult,
     });
   } catch (error: any) {
