@@ -2030,18 +2030,18 @@ export async function processMessage(
 
       for (const p of pendingItems) {
         grandTotal += p.totalPrice;
-        let line = `• <b>${p.quantity}x ${p.product.name}</b> (${p.product.price} MDL)`;
+        let line = `• ${p.quantity}x ${p.product.name} (${p.product.price} MDL)`;
         if (p.reassuranceNote) {
-          line += `\n  ℹ️ <i>${p.reassuranceNote}</i>`;
+          line += `\n  ℹ️ ${p.reassuranceNote}`;
         }
         if (p.toppings.length > 0) {
           const topStr = p.toppings.map((t: any) => `${t.name} (+${t.price} MDL)`).join(', ');
-          line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
+          line += `\n  ➕ Topping: ${topStr}`;
         }
         if (p.customization) {
-          line += `\n  📝 <b>Mențiune bucătărie: ${p.customization}</b> (notat la comentarii)`;
+          line += `\n  📝 Mențiune bucătărie: ${p.customization} (notat la comentarii)`;
         }
-        line += `\n  💰 <i>Total: ${p.totalPrice} MDL</i>`;
+        line += `\n  💰 Total: ${p.totalPrice} MDL`;
         summaryLines.push(line);
       }
 
@@ -2049,17 +2049,17 @@ export async function processMessage(
 
       let confirmQuestion = "";
       if (lang === 'ru') {
-        confirmQuestion = `Я подготовил персональную настройку для вас! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Итого:</b> <b>${grandTotal} MDL</b>\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
+        confirmQuestion = `Я подготовил персональную настройку для вас! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Итого: ${grandTotal} MDL\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
       } else if (lang === 'en') {
-        confirmQuestion = `I've prepared your custom dessert preferences! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
+        confirmQuestion = `I've prepared your custom dessert preferences! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Total: ${grandTotal} MDL\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
       } else {
-        confirmQuestion = `Am pregătit personalizarea pentru dvs.! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
+        confirmQuestion = `Am pregătit personalizarea pentru dvs.! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Total: ${grandTotal} MDL\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
       }
 
       appendToHistory(session, 'assistant', confirmQuestion);
       await saveSession(senderId, session);
-      const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-      await sendDispatchResponse(senderId, channel, confirmQuestion, cartUrl, cartButtonTitle);
+      // Trimitere strict text conversațional fără cartonaș sau link în faza de confirmare
+      await sendDispatchResponse(senderId, channel, confirmQuestion, "", "");
       return {
         success: true,
         status: 'customization_confirmation_requested',
@@ -2114,18 +2114,18 @@ export async function processMessage(
         };
         session.state = 'AWAITING_CUSTOMIZATION_CONFIRM';
 
-        let line = `• <b>${lastItem.quantity || 1}x ${lastItem.name}</b>`;
+        let line = `• ${lastItem.quantity || 1}x ${lastItem.name}`;
         if (valRes.reassuranceNote) {
-          line += `\n  ℹ️ <i>${valRes.reassuranceNote}</i>`;
+          line += `\n  ℹ️ ${valRes.reassuranceNote}`;
         }
         if (custCheck.toppings.length > 0) {
           const topStr = custCheck.toppings.map(t => `${t.name} (+${t.price} MDL)`).join(', ');
-          line += `\n  ➕ <i>Topping / Personalizare: ${topStr}</i>`;
+          line += `\n  ➕ Topping: ${topStr}`;
         }
         if (validExclusionsSummary) {
-          line += `\n  📝 <b>Mențiune bucătărie: ${validExclusionsSummary}</b> (notat la comentarii)`;
+          line += `\n  📝 Mențiune bucătărie: ${validExclusionsSummary} (notat la comentarii)`;
         }
-        line += `\n  💰 <i>Noul preț: ${pendingItem.totalPrice} MDL</i>`;
+        line += `\n  💰 Noul preț: ${pendingItem.totalPrice} MDL`;
 
         let confirmQuestion = "";
         if (lang === 'ru') {
@@ -2138,8 +2138,8 @@ export async function processMessage(
 
         appendToHistory(session, 'assistant', confirmQuestion);
         await saveSession(senderId, session);
-        const { url: cartUrl, buttonTitle: cartButtonTitle } = getCartUrlAndButton(session, lang);
-        await sendDispatchResponse(senderId, channel, confirmQuestion, cartUrl, cartButtonTitle);
+        // Trimitere strict text conversațional fără cartonaș sau link în faza de confirmare
+        await sendDispatchResponse(senderId, channel, confirmQuestion, "", "");
         return {
           success: true,
           status: 'customization_confirmation_requested',
