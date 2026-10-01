@@ -1795,7 +1795,7 @@ export async function processMessage(
 
       appendToHistory(session, 'assistant', handoffReply);
       await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
@@ -1866,7 +1866,7 @@ export async function processMessage(
           session.cart = [];
           appendToHistory(session, 'assistant', confirmReply);
           await saveSession(senderId, session);
-          await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
+          await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
           return { success: true, status: 'order_dispatched_kitchen_telegram', productsTotal, address: savedOrderDetails.address, phone: savedOrderDetails.phone, replyText: confirmReply };
         }
 
@@ -2202,7 +2202,7 @@ export async function processMessage(
       appendToHistory(session, 'assistant', confirmReply);
       await saveSession(senderId, session);
 
-      await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
       return { 
         success: true, 
         status: 'order_dispatched_kitchen_telegram', 
@@ -2367,7 +2367,7 @@ ${historySnippets}
 
       appendToHistory(session, 'assistant', cleanHandoffReply);
       await saveSession(senderId, session);
-      const sendResult = await sendDispatchResponse(senderId, channel, cleanHandoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
+      const sendResult = await sendDispatchResponse(senderId, channel, cleanHandoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
       return { success: true, sendResult, replyText: cleanHandoffReply, status: 'human_handoff_triggered' };
     }
 
@@ -2393,7 +2393,7 @@ ${historySnippets}
 
         appendToHistory(session, 'assistant', replyText);
         await saveSession(senderId, session);
-        const sendResult = await sendDispatchResponse(senderId, channel, replyText, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
+        const sendResult = await sendDispatchResponse(senderId, channel, replyText, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
         return { success: true, sendResult, replyText, status: 'human_handoff_triggered' };
       } else {
         replyText = lang === 'ru'
