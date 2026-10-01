@@ -1801,8 +1801,8 @@ export async function processMessage(
 
     // ─── PAS 0.5: RĂSPUNS LA CONFIRMARE PERSONALIZARE / TOPPINGURI / EXCLUDERI ÎN AȘTEPTARE ───
     if (session.pendingCustomization && session.pendingCustomization.items?.length > 0) {
-      const isAffirmative = /(\b(da|confirm|confirma|confirmă|sigur|bine|ok|okay|da te rog|da adauga|da adaugă|adauga|adaugă|pune|perfect|super|corect|asa|așa|yes|yep|sure|y|да|подтверждаю|подтвердить|хорошо|давай|добавь|добавляй|согласен|ок)\b)/i.test(lowerMsg);
-      const isNegative = /(\b(nu|nu vreau|anuleaza|anulează|renunt|renunț|nu mai vreau|stop|no|nope|cancel|нет|не надо|отмена|не хочу)\b)/i.test(lowerMsg);
+      const isAffirmative = /(\b(da|confirm|confirma|confirmă|sigur|bine|ok|okay|da te rog|da adauga|da adaugă|adauga|adaugă|pune|perfect|super|corect|asa|așa|yes|yep|sure|y|да|подтверждаю|подтвердить|хорошо|давай|добавь|добавляй|согласен|ок)\b)|confirm_customization/i.test(lowerMsg);
+      const isNegative = /(\b(nu|nu vreau|anuleaza|anulează|renunt|renunț|nu mai vreau|stop|no|nope|cancel|нет|не надо|отмена|не хочу)\b)|cancel_customization/i.test(lowerMsg);
 
       if (isAffirmative) {
         const pending = session.pendingCustomization;
@@ -2041,25 +2041,45 @@ export async function processMessage(
         if (p.customization) {
           line += `\n  📝 Mențiune bucătărie: ${p.customization} (notat la comentarii)`;
         }
-        line += `\n  💰 Total: ${p.totalPrice} MDL`;
+        // Dacă avem mai multe produse, afișăm subtotalul pe produs; dacă e doar 1 produs, nu repetăm totalul
+        if (pendingItems.length > 1) {
+          line += `\n  💰 Subtotal: ${p.totalPrice} MDL`;
+        }
         summaryLines.push(line);
       }
 
       const summaryText = summaryLines.join('\n\n');
 
       let confirmQuestion = "";
+      let quickReplies: Array<{ title: string; payload: string }> = [];
+
       if (lang === 'ru') {
-        confirmQuestion = `Я подготовил персональную настройку для вас! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Итого: ${grandTotal} MDL\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
+        const totalLabel = pendingItems.length > 1 ? "Общий итог" : "Итого";
+        confirmQuestion = `Я подготовил персональную настройку для вас! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 ${totalLabel}: ${grandTotal} MDL\n\nПодтверждаете добавление в корзину? (Нажмите «Да» ниже или напишите «Да») ✨`;
+        quickReplies = [
+          { title: "✅ Да, подтверждаю", payload: "CONFIRM_CUSTOMIZATION" },
+          { title: "❌ Отмена", payload: "CANCEL_CUSTOMIZATION" }
+        ];
       } else if (lang === 'en') {
-        confirmQuestion = `I've prepared your custom dessert preferences! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Total: ${grandTotal} MDL\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
+        const totalLabel = pendingItems.length > 1 ? "Grand Total" : "Total";
+        confirmQuestion = `I've prepared your custom dessert preferences! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 ${totalLabel}: ${grandTotal} MDL\n\nWould you like to confirm and add this to your cart? (Tap 'Yes' below or reply 'Yes') ✨`;
+        quickReplies = [
+          { title: "✅ Yes, confirm", payload: "CONFIRM_CUSTOMIZATION" },
+          { title: "❌ Cancel", payload: "CANCEL_CUSTOMIZATION" }
+        ];
       } else {
-        confirmQuestion = `Am pregătit personalizarea pentru dvs.! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 Total: ${grandTotal} MDL\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
+        const totalLabel = pendingItems.length > 1 ? "Total general" : "Total";
+        confirmQuestion = `Am pregătit personalizarea pentru dvs.! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 ${totalLabel}: ${grandTotal} MDL\n\nConfirmați pentru a adăuga această personalizare în coș? (Apăsați «Da» mai jos sau scrieți «Da») ✨`;
+        quickReplies = [
+          { title: "✅ Da, confirm", payload: "CONFIRM_CUSTOMIZATION" },
+          { title: "❌ Nu, anulează", payload: "CANCEL_CUSTOMIZATION" }
+        ];
       }
 
       appendToHistory(session, 'assistant', confirmQuestion);
       await saveSession(senderId, session);
-      // Trimitere strict text conversațional fără cartonaș sau link în faza de confirmare
-      await sendDispatchResponse(senderId, channel, confirmQuestion, "", "");
+      // Trimitere strict text conversațional cu butoane interactive Quick Replies, fără cartonaș sau link în faza de confirmare
+      await sendDispatchResponse(senderId, channel, confirmQuestion, "", "", quickReplies);
       return {
         success: true,
         status: 'customization_confirmation_requested',
@@ -2128,18 +2148,32 @@ export async function processMessage(
         line += `\n  💰 Noul preț: ${pendingItem.totalPrice} MDL`;
 
         let confirmQuestion = "";
+        let quickReplies: Array<{ title: string; payload: string }> = [];
+
         if (lang === 'ru') {
-          confirmQuestion = `Хотите применить эту персональную настройку к товару в корзине? ✨\n\n${line}\n\nПодтверждаете? (Напишите «Да» или «Подтверждаю») ✨`;
+          confirmQuestion = `Хотите применить эту персональную настройку к товару в корзине? ✨\n\n${line}\n\nПодтверждаете? (Нажмите «Да» ниже или напишите «Да») ✨`;
+          quickReplies = [
+            { title: "✅ Да, подтверждаю", payload: "CONFIRM_CUSTOMIZATION" },
+            { title: "❌ Отмена", payload: "CANCEL_CUSTOMIZATION" }
+          ];
         } else if (lang === 'en') {
-          confirmQuestion = `Would you like to apply this custom preference to the item in your cart? ✨\n\n${line}\n\nConfirm? (Reply 'Yes' or 'Confirm') ✨`;
+          confirmQuestion = `Would you like to apply this custom preference to the item in your cart? ✨\n\n${line}\n\nConfirm? (Tap 'Yes' below or reply 'Yes') ✨`;
+          quickReplies = [
+            { title: "✅ Yes, confirm", payload: "CONFIRM_CUSTOMIZATION" },
+            { title: "❌ Cancel", payload: "CANCEL_CUSTOMIZATION" }
+          ];
         } else {
-          confirmQuestion = `Doriți să aplicăm această personalizare la produsul din coș? ✨\n\n${line}\n\nConfirmați? (Răspundeți cu «Da» sau «Confirm») ✨`;
+          confirmQuestion = `Doriți să aplicăm această personalizare la produsul din coș? ✨\n\n${line}\n\nConfirmați? (Apăsați «Da» mai jos sau scrieți «Da») ✨`;
+          quickReplies = [
+            { title: "✅ Da, confirm", payload: "CONFIRM_CUSTOMIZATION" },
+            { title: "❌ Nu, anulează", payload: "CANCEL_CUSTOMIZATION" }
+          ];
         }
 
         appendToHistory(session, 'assistant', confirmQuestion);
         await saveSession(senderId, session);
-        // Trimitere strict text conversațional fără cartonaș sau link în faza de confirmare
-        await sendDispatchResponse(senderId, channel, confirmQuestion, "", "");
+        // Trimitere strict text conversațional cu butoane interactive Quick Replies, fără cartonaș sau link în faza de confirmare
+        await sendDispatchResponse(senderId, channel, confirmQuestion, "", "", quickReplies);
         return {
           success: true,
           status: 'customization_confirmation_requested',
@@ -2431,7 +2465,11 @@ ${historySnippets}
 // DISPATCH & META GRAPH API TRANSPORT (ROBUST INSTAGRAM DIRECT & MESSENGER)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-async function sendMetaTextMessage(senderId: string, text: string) {
+async function sendMetaTextMessage(
+  senderId: string, 
+  text: string, 
+  quickReplies?: Array<{ title: string; payload: string }>
+) {
   const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
@@ -2442,9 +2480,18 @@ async function sendMetaTextMessage(senderId: string, text: string) {
   const safeText = text.length > 1000 ? text.substring(0, 997) + "..." : text;
 
   try {
+    const messageObj: any = { text: safeText };
+    if (quickReplies && quickReplies.length > 0) {
+      messageObj.quick_replies = quickReplies.map(qr => ({
+        content_type: "text",
+        title: qr.title.substring(0, 20),
+        payload: qr.payload || qr.title
+      }));
+    }
+
     const payload = {
       recipient: { id: senderId },
-      message: { text: safeText }
+      message: messageObj
     };
 
     const res = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${metaAccessToken}`, {
@@ -2674,17 +2721,18 @@ async function sendDispatchResponse(
   channel: 'instagram' | 'messenger',
   text: string,
   url: string,
-  buttonTitle: string
+  buttonTitle: string,
+  quickReplies?: Array<{ title: string; payload: string }>
 ) {
-  // Dacă nu este specificat URL sau buton, trimitem doar textul curat conversațional
+  // Dacă nu este specificat URL sau buton, trimitem doar textul curat conversațional (cu eventuale quick replies)
   if (!url || !buttonTitle || url.trim().length === 0 || buttonTitle.trim().length === 0) {
-    const res = await sendMetaTextMessage(senderId, text.trim());
+    const res = await sendMetaTextMessage(senderId, text.trim(), quickReplies);
     return { ...res, deliveredText: text.trim() };
   }
 
   // Pasul 1: Trimitem întâi mesajul conversațional cald
   if (text && text.trim().length > 0) {
-    await sendMetaTextMessage(senderId, text.trim());
+    await sendMetaTextMessage(senderId, text.trim(), quickReplies);
   }
 
   // Pasul 2: Trimitem cartonașul vizual elegant cu imaginea oficială a desertului și butoane clicabile
@@ -2961,7 +3009,7 @@ export async function POST(request: Request) {
                 continue;
               }
               const sId = item?.sender?.id || item?.sender_id || (typeof item?.sender === 'string' ? item.sender : null);
-              const text = item?.message?.text || item?.text || (typeof item?.message === 'string' ? item.message : null);
+              const text = item?.message?.text || item?.message?.quick_reply?.payload || item?.postback?.payload || item?.text || (typeof item?.message === 'string' ? item.message : null);
               
               if (sId === INSTAGRAM_ACCOUNT_ID || sId === FACEBOOK_PAGE_ID) {
                 isEcho = true;
