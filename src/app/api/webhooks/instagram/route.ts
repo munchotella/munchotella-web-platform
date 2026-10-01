@@ -520,8 +520,8 @@ export function extractCustomizationAndToppings(text: string): {
   if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+fistic|без\s+фисташ(?:ек|ки)?|no\s+pistachio)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără fistic");
   }
-  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+(?:arahide|alune|nuci)|без\s+(?:арахиса|орехов)|no\s+(?:peanuts?|nuts?))(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
-    exclusions.push("Fără arahide");
+  if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+(?:arahide|alune|nuci|nucu[sș]oar[eaă]?|nuci[sș]oar[eaă]?)|без\s+(?:арахиса|орехов|орешков)|no\s+(?:peanuts?|nuts?))(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
+    exclusions.push("Fără nucușoare / arahide");
   }
   if (/(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+kiwi|без\s+киви|no\s+kiwi)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
     exclusions.push("Fără kiwi");
@@ -554,7 +554,8 @@ export function extractCustomizationAndToppings(text: string): {
       'zahar', 'zahăr', 'dulce', 'sugar', 'сахар', 'сахара',
       'gluten', 'глютен', 'глютена',
       'lactoza', 'lactoză', 'лактоза', 'лактозы'
-    ].includes(rawWord)) {
+    ].includes(rawWord) ||
+    /^(fistic|arahid|alun|nuc|kiwi|c[aă]p[sș]un|banan|oreo|lotus|nutell|ciocolat|шоколад|орех|клубник|банан|фисташ)/i.test(rawWord)) {
       continue;
     }
     const formatted = `Fără ${rawWord.charAt(0).toUpperCase() + rawWord.slice(1)}`;
@@ -694,15 +695,15 @@ export function validateProductCustomization(
             : `«${product.name}» nu conține fistic în rețeta originală`
         );
       }
-    } else if (exclLower.includes('arahide') || exclLower.includes('alune') || exclLower.includes('nuci')) {
-      validExclusions.push("Fără arahide");
-      if (!product.hasArahide && !product.ingredients.toLowerCase().includes('arahide') && !product.ingredients.toLowerCase().includes('alune')) {
+    } else if (exclLower.includes('arahide') || exclLower.includes('alune') || exclLower.includes('nuci') || exclLower.includes('nuc') || exclLower.includes('орех') || exclLower.includes('peanut') || exclLower.includes('nut')) {
+      validExclusions.push("Fără nucușoare / arahide");
+      if (!product.hasArahide && !product.ingredients.toLowerCase().includes('arahide') && !product.ingredients.toLowerCase().includes('alune') && !product.ingredients.toLowerCase().includes('nuci')) {
         reassuranceNotes.push(
           lang === 'ru'
             ? `«${product.name}» и так не содержит арахиса/орехов в рецепте`
             : lang === 'en'
             ? `«${product.name}» does not contain peanuts anyway`
-            : `«${product.name}» nu conține arahide în rețeta originală`
+            : `«${product.name}» nu conține arahide/nuci în rețeta originală`
         );
       }
     } else if (exclLower.includes('banan')) {
@@ -1457,7 +1458,8 @@ export function matchCompoundProductsInText(text: string): ExtractedProductMatch
   }
 
   // Împărțire în segmente după conjuncții: „și”, „si”, „+”, „,”, „iar”, „plus”, „и”, „а также”
-  const delimiterRegex = /(?:\b(?:[sș]i\s+o|[sș]i\s+un|si\s+o|si\s+un|[sș]i|plus|iar|и|а\s+также)\b|[,+&])/gi;
+  // ATENȚIE: Nu tăiem dacă „și” / „,” este urmat de „fără”, „cu”, „topping”, „no”, „without”, „без”, „с” deoarece e o personalizare pe același produs!
+  const delimiterRegex = /(?:\b(?:[sș]i\s+o|[sș]i\s+un|si\s+o|si\s+un|[sș]i(?!\s+(?:f[aă]r[aă]|cu\b|topping\b|без\b|without\b|no\b))|plus|iar(?!\s+(?:f[aă]r[aă]|cu\b|без\b))|и(?!\s+(?:без\b|с\b|со\b))|а\s+также)\b|[,+&](?!\s*(?:f[aă]r[aă]|cu\b|topping\b|без\b|without\b|no\b)))/gi;
   const segments = lower.split(delimiterRegex).map(s => s.trim()).filter(s => s.length >= 3);
 
   const matchedItems: ExtractedProductMatch[] = [];
@@ -1469,6 +1471,19 @@ export function matchCompoundProductsInText(text: string): ExtractedProductMatch
       if (match && !seenProductIds.has(match.product.id)) {
         seenProductIds.add(match.product.id);
         matchedItems.push(match);
+      } else if (matchedItems.length > 0) {
+        // Dacă segmentul nu reprezintă un produs nou, dar conține topping-uri sau excluderi,
+        // le atașăm produsului precedent!
+        const extraCust = extractCustomizationAndToppings(seg);
+        const lastMatched = matchedItems[matchedItems.length - 1];
+        if (extraCust.exclusionsSummary) {
+          lastMatched.customization = lastMatched.customization 
+            ? `${lastMatched.customization}, ${extraCust.exclusionsSummary}` 
+            : extraCust.exclusionsSummary;
+        }
+        if (extraCust.toppings.length > 0) {
+          lastMatched.toppings = [...(lastMatched.toppings || []), ...extraCust.toppings];
+        }
       }
     }
   }
@@ -1477,6 +1492,18 @@ export function matchCompoundProductsInText(text: string): ExtractedProductMatch
     const singleMatch = matchSingleProductInSegment(text);
     if (singleMatch) {
       matchedItems.push(singleMatch);
+    }
+  }
+
+  // Verificare de siguranță: dacă avem exact 1 produs găsit și mesajul conținea excluderi sau topping-uri globale
+  // care nu s-au atașat la produs, le sincronizăm
+  if (matchedItems.length === 1) {
+    const globalCust = extractCustomizationAndToppings(text);
+    if (globalCust.exclusionsSummary && !matchedItems[0].customization) {
+      matchedItems[0].customization = globalCust.exclusionsSummary;
+    }
+    if (globalCust.toppings.length > 0 && (!matchedItems[0].toppings || matchedItems[0].toppings.length === 0)) {
+      matchedItems[0].toppings = globalCust.toppings;
     }
   }
 
