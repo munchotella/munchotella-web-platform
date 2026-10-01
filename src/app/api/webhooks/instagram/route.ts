@@ -623,11 +623,11 @@ export function validateProductCustomization(
   if (hasSugarExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
-      blockedReason = `«${product.name}» содержит сахар в самом тесте и в начинках (бельгийский шоколад / Nutella®), поэтому этот десерт невозможно приготовить без сахара. 🧇 Приготовить его по нашему оригинальному рецепту? ✨`;
+      blockedReason = `«${product.name}» содержит сахар в самом тесте и в начинках (бельгийский шоколад / Nutella®), поэтому этот десерт невозможно приготовить без сахара. Приготовить его по нашему оригинальному рецепту? ✨`;
     } else if (lang === 'en') {
-      blockedReason = `«${product.name}» naturally contains sugar in the freshly baked batter and chocolates (Nutella®), so it cannot be prepared sugar-free. 🧇 Would you like it prepared with our classic delicious recipe? ✨`;
+      blockedReason = `«${product.name}» naturally contains sugar in the freshly baked batter and chocolates (Nutella®), so it cannot be prepared sugar-free. Would you like it prepared with our classic delicious recipe? ✨`;
     } else {
-      blockedReason = `«${product.name}» conține zahăr în mod natural în aluatul proaspăt copt și în ciocolata belgiană / Nutella®, așadar nu poate fi preparat fără zahăr. 🧇 Îl doriți pregătit după rețeta noastră clasică delicioasă? ✨`;
+      blockedReason = `«${product.name}» conține zahăr în mod natural în aluatul proaspăt copt și în ciocolata belgiană / Nutella®, așadar nu poate fi preparat fără zahăr. Îl doriți pregătit după rețeta noastră clasică delicioasă? ✨`;
     }
     return { validExclusions: [], isBlocked: true, blockedReason };
   }
@@ -637,11 +637,11 @@ export function validateProductCustomization(
   if (hasGlutenExclusion) {
     let blockedReason = "";
     if (lang === 'ru') {
-      blockedReason = `«${product.name}» выпекается из классической пшеничной муки, поэтому не может быть приготовлен без глютена. 🧇 Хотите выбрать напиток без глютена (кофе, чай)? ✨`;
+      blockedReason = `«${product.name}» выпекается из классической пшеничной муки, поэтому не может быть приготовлен без глютена. Хотите выбрать напиток без глютена (кофе, чай)? ✨`;
     } else if (lang === 'en') {
-      blockedReason = `«${product.name}» is baked with premium wheat flour, so it cannot be made gluten-free. 🧇 Would you like an espresso or fresh tea instead? ✨`;
+      blockedReason = `«${product.name}» is baked with premium wheat flour, so it cannot be made gluten-free. Would you like an espresso or fresh tea instead? ✨`;
     } else {
-      blockedReason = `«${product.name}» este copt din făină superioară de grâu, așadar nu poate fi preparat fără gluten. 🧇 Vă putem recomanda un espresso, o cafea neagră sau un ceai aromat! ✨`;
+      blockedReason = `«${product.name}» este copt din făină superioară de grâu, așadar nu poate fi preparat fără gluten. Vă putem recomanda un espresso, o cafea neagră sau un ceai aromat! ✨`;
     }
     return { validExclusions: [], isBlocked: true, blockedReason };
   }
@@ -666,11 +666,11 @@ export function validateProductCustomization(
   if (product.id === 'crepe_dubai' && (hasPistachioExclusion || hasKataifExclusion)) {
     let blockedReason = "";
     if (lang === 'ru') {
-      blockedReason = "Фирменный «Crepe Dubai» основан на фисташковом креме и хрустящем катаифе. Если вы хотите блинчик без фисташек, с удовольствием рекомендуем «Kinder crepe», «Oreo crepe» или «Delux crepe»! 🧇🍫";
+      blockedReason = "Фирменный «Crepe Dubai» основан на фисташковом креме и хрустящем катаифе. Если вы хотите блинчик без фисташек, с удовольствием рекомендуем «Kinder crepe», «Oreo crepe» или «Delux crepe»! 🥞🍫✨";
     } else if (lang === 'en') {
-      blockedReason = "Our 'Crepe Dubai' is specifically made with pistachio cream and crispy kataif. If you prefer a crepe without pistachio, we warmly recommend 'Kinder crepe', 'Oreo crepe', or 'Delux crepe'! 🧇🍫";
+      blockedReason = "Our 'Crepe Dubai' is specifically made with pistachio cream and crispy kataif. If you prefer a crepe without pistachio, we warmly recommend 'Kinder crepe', 'Oreo crepe', or 'Delux crepe'! 🥞🍫✨";
     } else {
-      blockedReason = "Clătita «Crepe Dubai» este preparată special cu cremă bogată de fistic și kataif crocant. Dacă preferați o clătită fără fistic, vă recomandăm cu drag «Kinder crepe», «Oreo crepe» sau «Delux crepe» fără adaos de alune! 🧇🍫";
+      blockedReason = "Clătita «Crepe Dubai» este preparată special cu cremă bogată de fistic și kataif crocant. Dacă preferați o clătită fără fistic, vă recomandăm cu drag «Kinder crepe», «Oreo crepe» sau «Delux crepe» fără adaos de alune! 🥞🍫✨";
     }
     return { validExclusions: [], isBlocked: true, blockedReason };
   }
@@ -766,11 +766,11 @@ export function handleSugarOrDietaryInquiry(text: string, lang: string): { handl
   if (isSugarFreeInquiry) {
     let replyText = "";
     if (lang === 'ru') {
-      replyText = "Все наши авторские десерты (вафли, блинчики, панкейки) содержат сахар в самом тесте и в начинках (бельгийский шоколад / Nutella), поэтому их невозможно приготовить без сахара. 🧇 В качестве напитка мы можем предложить вам ароматный кофе без сахара (Espresso, Americano) или чай. Посмотреть все меню можно на https://www.munchotella.md/ru/menu ✨";
+      replyText = "Все наши авторские десерты (вафли, блинчики, панкейки) содержат сахар в самом тесте и в начинках (бельгийский шоколад / Nutella), поэтому их невозможно приготовить без сахара. В качестве напитка мы можем предложить вам ароматный кофе без сахара (Espresso, Americano) или чай. Посмотреть все меню можно на https://www.munchotella.md/ru/menu ✨";
     } else if (lang === 'en') {
-      replyText = "All our artisanal desserts (waffles, crepes, pancakes) naturally contain sugar in the batter and premium chocolates / Nutella, so they cannot be prepared sugar-free. 🧇 We can gladly offer you an unsweetened espresso, black coffee, or tea. You can explore our full menu at https://www.munchotella.md/en/menu ✨";
+      replyText = "All our artisanal desserts (waffles, crepes, pancakes) naturally contain sugar in the batter and premium chocolates / Nutella, so they cannot be prepared sugar-free. We can gladly offer you an unsweetened espresso, black coffee, or tea. You can explore our full menu at https://www.munchotella.md/en/menu ✨";
     } else {
-      replyText = "Toate deserturile noastre artizanale (waffles, clătite, pancakes) conțin zahăr în mod natural în aluat și în compoziția cremelor belgiene / Nutella, așadar nu pot fi preparate fără zahăr. 🧇 Vă putem recomanda o cafea neagră, un espresso sau un ceai fără adaos de zahăr, sau puteți explora meniul nostru complet la https://www.munchotella.md/ro/menu ✨";
+      replyText = "Toate deserturile noastre artizanale (waffles, clătite, pancakes) conțin zahăr în mod natural în aluat și în compoziția cremelor belgiene / Nutella, așadar nu pot fi preparate fără zahăr. Vă putem recomanda o cafea neagră, un espresso sau un ceai fără adaos de zahăr, sau puteți explora meniul nostru complet la https://www.munchotella.md/ro/menu ✨";
     }
     return { handled: true, replyText };
   }
@@ -778,11 +778,11 @@ export function handleSugarOrDietaryInquiry(text: string, lang: string): { handl
   if (isGlutenFreeInquiry) {
     let replyText = "";
     if (lang === 'ru') {
-      replyText = "К сожалению, тесто для наших вафель и блинчиков готовится из пшеничной муки высшего сорта, поэтому у нас нет безглютеновых десертов. Ждем вас на ароматный кофе или чай! 🧇☕";
+      replyText = "К сожалению, тесто для наших десертов готовится из пшеничной муки высшего сорта, поэтому у нас нет безглютеновых десертов. Ждем вас на ароматный кофе или чай! ☕✨";
     } else if (lang === 'en') {
-      replyText = "Unfortunately, our waffles and crepes are made with premium wheat flour, so we do not currently offer gluten-free options. We warmly welcome you for a fresh coffee or tea! 🧇☕";
+      replyText = "Unfortunately, our desserts are made with premium wheat flour, so we do not currently offer gluten-free options. We warmly welcome you for a fresh coffee or tea! ☕✨";
     } else {
-      replyText = "Din păcate, aluatul nostru proaspăt pentru waffles și clătite este preparat din făină albă superioară de grâu, așadar nu avem opțiuni fără gluten. Vă așteptăm cu drag la o cafea bună sau un ceai aromat! 🧇☕";
+      replyText = "Din păcate, aluatul nostru proaspăt pentru deserturi este preparat din făină albă superioară de grâu, așadar nu avem opțiuni fără gluten. Vă așteptăm cu drag la o cafea bună sau un ceai aromat! ☕✨";
     }
     return { handled: true, replyText };
   }
@@ -790,11 +790,11 @@ export function handleSugarOrDietaryInquiry(text: string, lang: string): { handl
   if (isLactoseFreeInquiry) {
     let replyText = "";
     if (lang === 'ru') {
-      replyText = "Большинство наших десертов содержат молочные продукты (молоко в тесте, сливочный шоколад, Nutella). Если вам требуется десерт без лактозы, к сожалению, мы не можем гарантировать полное ее отсутствие. 🧇";
+      replyText = "Большинство наших десертов содержат молочные продукты (молоко в тесте, сливочный шоколад, Nutella). Если вам требуется десерт без лактозы, к сожалению, мы не можем гарантировать полное ее отсутствие. ✨";
     } else if (lang === 'en') {
-      replyText = "Most of our desserts contain dairy ingredients (milk in the batter, Belgian chocolate, Nutella). If you require lactose-free options, unfortunately we cannot guarantee a 100% lactose-free dessert. 🧇";
+      replyText = "Most of our desserts contain dairy ingredients (milk in the batter, Belgian chocolate, Nutella). If you require lactose-free options, unfortunately we cannot guarantee a 100% lactose-free dessert. ✨";
     } else {
-      replyText = "Majoritatea deserturilor noastre conțin lactate (lapte în aluat, ciocolată belgiană, Nutella). Dacă aveți intoleranță severă la lactoză, din păcate nu vă putem garanta un desert 100% fără lactoză. 🧇";
+      replyText = "Majoritatea deserturilor noastre conțin lactate (lapte în aluat, ciocolată belgiană, Nutella). Dacă aveți intoleranță severă la lactoză, din păcate nu vă putem garanta un desert 100% fără lactoză. ✨";
     }
     return { handled: true, replyText };
   }
@@ -1241,17 +1241,17 @@ export function handleCartAdjustment(text: string, session: any, lang: string): 
   let replyText = "";
   if (session.cart.length === 0) {
     replyText = lang === 'ru'
-      ? `Убрал ${removedNames.join(', ')} из заказа. Сейчас ваша корзина пуста! 🧇 Что бы вы хотели заказать? ✨`
+      ? `Убрал ${removedNames.join(', ')} из заказа. Сейчас ваша корзина пуста! ✨ Что бы вы хотели заказать? ✨`
       : lang === 'en'
-      ? `Removed ${removedNames.join(', ')} from your cart. Your cart is now empty! 🧇 What would you like to order? ✨`
-      : `Am scos ${removedNames.join(', ')} din coș. Acum coșul dvs. este gol! 🧇 Ce bunătăți ați dori să adăugăm? ✨`;
+      ? `Removed ${removedNames.join(', ')} from your cart. Your cart is now empty! ✨ What would you like to order? ✨`
+      : `Am scos ${removedNames.join(', ')} din coș. Acum coșul dvs. este gol! ✨ Ce bunătăți ați dori să adăugăm? ✨`;
   } else {
     const remainingSummary = session.cart.map((it: any) => `${it.quantity > 1 ? it.quantity + 'x ' : ''}${it.name}`).join(' + ');
     replyText = lang === 'ru'
-      ? `Готово! Обновил заказ: сейчас в корзине ${remainingSummary} (Итого: ${totalSum} MDL). 🧇 Хотите добавить напиток или оформляем доставку? ✨`
+      ? `Готово! Обновил заказ: сейчас в корзине ${remainingSummary} (Итого: ${totalSum} MDL). ✨ Хотите добавить напиток или оформляем доставку? ✨`
       : lang === 'en'
-      ? `Done! Updated your cart: now you have ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Would you like to add a drink or proceed to checkout? ✨`
-      : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). 🧇 Mai doriți ceva delicios sau finalizăm comanda? ✨`;
+      ? `Done! Updated your cart: now you have ${remainingSummary} (Total: ${totalSum} MDL). ✨ Would you like to add a drink or proceed to checkout? ✨`
+      : `Am actualizat imediat! În coș a rămas: ${remainingSummary} (Total: ${totalSum} MDL). ✨ Mai doriți ceva delicios sau finalizăm comanda? ✨`;
   }
 
   return { handled: true, replyText, status: 'cart_quantity_adjusted' };
@@ -1297,10 +1297,10 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
   // Avertisment explicit: Miercuri este închis
   if (isWednesday) {
     const wedReply = lang === 'ru'
-      ? "Обратите внимание: по средам у нас выходной день! 🧇 Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
+      ? "Обратите внимание: по средам у нас выходной день! ✨ Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
       : lang === 'en'
-      ? "Please note: we are closed on Wednesdays! 🧇 We'd love to prepare your order on any other day of the week from 16:00 to 00:00!"
-      : "Vă informăm cu drag că Miercuri este singura noastră zi liberă săptămânală (închis)! 🧇 Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
+      ? "Please note: we are closed on Wednesdays! ✨ We'd love to prepare your order on any other day of the week from 16:00 to 00:00!"
+      : "Vă informăm cu drag că Miercuri este singura noastră zi liberă săptămânală (închis)! ✨ Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
     return { handled: true, replyText: wedReply };
   }
 
@@ -1315,17 +1315,17 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
       const total = session.cart.reduce((s: number, it: any) => s + (it.price * (it.quantity || 1)), 0);
       
       const reply = lang === 'ru'
-        ? `Отлично! 🥰 Зафиксировал ${isDineIn ? 'визит в кафе' : 'предзаказ'} на ${targetDay} к ${detectedHour}! В вашем заказе: ${summary} (Итого: ${total} MDL). Оформляем или добавим что-нибудь еще? 🧇✨`
+        ? `Отлично! 🥰 Зафиксировал ${isDineIn ? 'визит в кафе' : 'предзаказ'} на ${targetDay} к ${detectedHour}! В вашем заказе: ${summary} (Итого: ${total} MDL). Оформляем или добавим что-нибудь еще? ✨`
         : lang === 'en'
-        ? `Great! 🥰 Noted your ${isDineIn ? 'table reservation' : 'scheduled order'} for ${targetDay} at ${detectedHour}! In your cart: ${summary} (Total: ${total} MDL). Would you like to complete the order or add more? 🧇✨`
-        : `Excelent! 🥰 Am notat cu mare drag ${isDineIn ? 'că vă așteptăm pe loc la cafenea' : 'comanda programată'} pentru ${targetDay} la ora ${detectedHour}! În coș aveți: ${summary} (Total: ${total} MDL). Doriți să finalizăm comanda sau mai adăugăm ceva delicios? 🧇✨`;
+        ? `Great! 🥰 Noted your ${isDineIn ? 'table reservation' : 'scheduled order'} for ${targetDay} at ${detectedHour}! In your cart: ${summary} (Total: ${total} MDL). Would you like to complete the order or add more? ✨`
+        : `Excelent! 🥰 Am notat cu mare drag ${isDineIn ? 'că vă așteptăm pe loc la cafenea' : 'comanda programată'} pentru ${targetDay} la ora ${detectedHour}! În coș aveți: ${summary} (Total: ${total} MDL). Doriți să finalizăm comanda sau mai adăugăm ceva delicios? ✨`;
       return { handled: true, replyText: reply };
     } else {
       const reply = lang === 'ru'
-        ? `Отлично! 🥰 С удовольствием записал ${isDineIn ? 'бронь на месте' : 'предзаказ'} на ${targetDay} к ${detectedHour}! Какие десерты из меню Munchotella приготовить для вас к этому времени? 🧇✨`
+        ? `Отлично! 🥰 С удовольствием записал ${isDineIn ? 'бронь на месте' : 'предзаказ'} на ${targetDay} к ${detectedHour}! Какие десерты из меню Munchotella приготовить для вас к этому времени? ✨`
         : lang === 'en'
-        ? `Great! 🥰 Noted your ${isDineIn ? 'visit to our cafe' : 'preorder'} for ${targetDay} at ${detectedHour}! What delicious treats from Munchotella shall we prepare for you? 🧇✨`
-        : `Excelent! 🥰 Am notat cu drag ${isDineIn ? 'că vă așteptăm pe loc în cafenea' : 'programarea'} pentru ${targetDay} la ora ${detectedHour}! Ce bunătăți din meniul Munchotella ați dori să vă pregătim pentru această oră? 🧇✨`;
+        ? `Great! 🥰 Noted your ${isDineIn ? 'visit to our cafe' : 'preorder'} for ${targetDay} at ${detectedHour}! What delicious treats from Munchotella shall we prepare for you? ✨`
+        : `Excelent! 🥰 Am notat cu drag ${isDineIn ? 'că vă așteptăm pe loc în cafenea' : 'programarea'} pentru ${targetDay} la ora ${detectedHour}! Ce bunătăți din meniul Munchotella ați dori să vă pregătim pentru această oră? ✨`;
       return { handled: true, replyText: reply };
     }
   }
@@ -1333,10 +1333,10 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
   // Dacă a cerut precomandă pentru mâine sau mai târziu, dar FĂRĂ să specifice ora exactă
   if (hasPreorderKeyword || isDineIn) {
     const reply = lang === 'ru'
-      ? `С огромным удовольствием! 🥰 Принимаем предзаказы на ${targetDay} ${isDineIn ? 'на месте в кафе' : 'с доставкой'} в часы нашей работы (16:00 - 00:00). Подскажите, пожалуйста, к какому точно времени приготовить заказ и какие десерты вы выбрали? 🧇✨`
+      ? `С огромным удовольствием! 🥰 Принимаем предзаказы на ${targetDay} ${isDineIn ? 'на месте в кафе' : 'с доставкой'} в часы нашей работы (16:00 - 00:00). Подскажите, пожалуйста, к какому точно времени приготовить заказ и какие десерты вы выбрали? ✨`
       : lang === 'en'
-      ? `With pleasure! 🥰 We accept preorders for ${targetDay} ${isDineIn ? 'for dine-in' : 'with delivery'} during opening hours (16:00 - 00:00). Could you please let us know what time you'd like it ready and which desserts you chose? 🧇✨`
-      : `Cu cel mai mare drag! 🥰 Preluăm cu bucurie comenzi programate pentru ${targetDay} ${isDineIn ? 'pe loc în cafenea' : 'cu livrare rapidă'} (intervalul nostru de lucru este 16:00 - 00:00). La ce oră ați dori să fie gata comanda și ce bunătăți doriți să vă pregătim? 🧇✨`;
+      ? `With pleasure! 🥰 We accept preorders for ${targetDay} ${isDineIn ? 'for dine-in' : 'with delivery'} during opening hours (16:00 - 00:00). Could you please let us know what time you'd like it ready and which desserts you chose? ✨`
+      : `Cu cel mai mare drag! 🥰 Preluăm cu bucurie comenzi programate pentru ${targetDay} ${isDineIn ? 'pe loc în cafenea' : 'cu livrare rapidă'} (intervalul nostru de lucru este 16:00 - 00:00). La ce oră ați dori să fie gata comanda și ce bunătăți doriți să vă pregătim? ✨`;
     return { handled: true, replyText: reply };
   }
 
@@ -1526,11 +1526,11 @@ function handleIngredientsInquiry(text: string, lang: string): { handled: boolea
   if (isAllergyCheck) {
     if (!matchedProduct.hasFistic && !matchedProduct.hasArahide) {
       if (lang === 'ru') {
-        replyText = `Не содержит ни фисташек, ни арахиса! 🧇 В ${matchedProduct.name} только Nutella (лесной орех), белый шоколад и отборное печенье. Добавить в заказ? ✨`;
+        replyText = `Не содержит ни фисташек, ни арахиса! В ${matchedProduct.name} только Nutella (лесной орех), белый шоколад и отборное печенье. Добавить в заказ? ✨`;
       } else if (lang === 'en') {
-        replyText = `It contains no pistachios and no peanuts! 🧇 ${matchedProduct.name} only has Nutella (hazelnuts), white chocolate, and biscuits. Would you like to add one to your cart? ✨`;
+        replyText = `It contains no pistachios and no peanuts! ${matchedProduct.name} only has Nutella (hazelnuts), white chocolate, and biscuits. Would you like to add one to your cart? ✨`;
       } else {
-        replyText = `Nu conține fistic și nici arahide! 🧇 ${matchedProduct.name} are doar Nutella (alune de pădure), ciocolată albă și biscuiți fini. Doriți să adăugăm o porție în coș? ✨`;
+        replyText = `Nu conține fistic și nici arahide! ${matchedProduct.name} are doar Nutella (alune de pădure), ciocolată albă și biscuiți fini. Doriți să adăugăm o porție în coș? ✨`;
       }
     } else {
       const allergens = [];
@@ -1539,20 +1539,20 @@ function handleIngredientsInquiry(text: string, lang: string): { handled: boolea
       const allergenStr = allergens.join(lang === 'ru' ? ' и ' : lang === 'en' ? ' and ' : ' și ');
 
       if (lang === 'ru') {
-        replyText = `Внимание: ${matchedProduct.name} содержит ${allergenStr}! 🧇 Если у вас аллергия, мы можем приготовить порцию без них. Добавить в заказ? ✨`;
+        replyText = `Внимание: ${matchedProduct.name} содержит ${allergenStr}! Если у вас аллергия, мы можем приготовить порцию без них. Добавить в заказ? ✨`;
       } else if (lang === 'en') {
-        replyText = `Attention: ${matchedProduct.name} contains ${allergenStr}! 🧇 If you have an allergy, our chef can gladly prepare a custom portion without them. Would you like to add one? ✨`;
+        replyText = `Attention: ${matchedProduct.name} contains ${allergenStr}! If you have an allergy, our chef can gladly prepare a custom portion without them. Would you like to add one? ✨`;
       } else {
-        replyText = `Atenție: ${matchedProduct.name} conține ${allergenStr}! 🧇 Dacă aveți vreo alergie, bucătarul nostru vă poate pregăti o porție specială fără acești alergeni. Doriți să adăugăm o porție în coș? ✨`;
+        replyText = `Atenție: ${matchedProduct.name} conține ${allergenStr}! Dacă aveți vreo alergie, bucătarul nostru vă poate pregăti o porție specială fără acești alergeni. Doriți să adăugăm o porție în coș? ✨`;
       }
     }
   } else {
     if (lang === 'ru') {
-      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) содержит: ${matchedProduct.ingredients}. 🧇 Добавить в заказ? ✨`;
+      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) содержит: ${matchedProduct.ingredients}. Добавить в заказ? ✨`;
     } else if (lang === 'en') {
-      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) contains: ${matchedProduct.ingredients}. 🧇 Shall we add one to your cart? ✨`;
+      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) contains: ${matchedProduct.ingredients}. Shall we add one to your cart? ✨`;
     } else {
-      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) conține: ${matchedProduct.ingredients}. 🧇 Doriți să adăugăm o porție în coș? ✨`;
+      replyText = `${matchedProduct.name} (${matchedProduct.price} MDL) conține: ${matchedProduct.ingredients}. Doriți să adăugăm o porție în coș? ✨`;
     }
   }
 
@@ -1571,19 +1571,19 @@ function handleClarificationOrConfusion(text: string, session: any, lang: string
   let replyText = "";
   if (lastBotMsg && lastBotMsg.text) {
     if (lang === 'ru') {
-      replyText = "Прошу прощения, если выразился непонятно! 🥰 Я готов ответить на любые ваши вопросы по меню или заказу. Подскажите, пожалуйста, чем я могу вам помочь прямо сейчас? 🧇";
+      replyText = "Прошу прощения, если выразился непонятно! 🥰 Я готов ответить на любые ваши вопросы по меню или заказу. Подскажите, пожалуйста, чем я могу вам помочь прямо сейчас? ✨";
     } else if (lang === 'en') {
-      replyText = "Apologies if I wasn't clear earlier! 🥰 I'm here to help with any details regarding our menu, prices, or orders. How can I help you right now? 🧇";
+      replyText = "Apologies if I wasn't clear earlier! 🥰 I'm here to help with any details regarding our menu, prices, or orders. How can I help you right now? ✨";
     } else {
-      replyText = "Mă scuzați dacă am fost neclar mai devreme! 🥰 Vă stau la dispoziție cu orice detalii despre meniul nostru, prețuri sau comenzi. Spuneți-mi vă rog, cu ce vă pot ajuta mai exact? 🧇";
+      replyText = "Mă scuzați dacă am fost neclar mai devreme! 🥰 Vă stau la dispoziție cu orice detalii despre meniul nostru, prețuri sau comenzi. Spuneți-mi vă rog, cu ce vă pot ajuta mai exact? ✨";
     }
   } else {
     if (lang === 'ru') {
-      replyText = "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Подскажите, что вас интересует? 🧇";
+      replyText = "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Подскажите, что вас интересует? ✨";
     } else if (lang === 'en') {
-      replyText = "Hello! 🥰 I'd be delighted to assist you with any questions about our menu or orders. How can I help you? 🧇";
+      replyText = "Hello! 🥰 I'd be delighted to assist you with any questions about our menu or orders. How can I help you? ✨";
     } else {
-      replyText = "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Spuneți-mi vă rog, ce ați dori să aflați sau să comandați? 🧇";
+      replyText = "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Spuneți-mi vă rog, ce ați dori să aflați sau să comandați? ✨";
     }
   }
 
@@ -1609,10 +1609,10 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Здравствуйте! 🥰 Чем мы можем вас порадовать сегодня? 🧇"
+        ? "Здравствуйте! 🥰 Чем мы можем вас порадовать сегодня? ✨"
         : lang === 'en'
-        ? "Hello! 🥰 How can we sweeten your day today? 🧇 Check our menu at https://www.munchotella.md/en/menu or let us know what you'd like to order! ✨"
-        : "Bună! 🥰 Cu ce bunătăți vă putem îndulci astăzi? 🧇"
+        ? "Hello! 🥰 How can we sweeten your day today? Check our menu at https://www.munchotella.md/en/menu or let us know what you'd like to order! ✨"
+        : "Bună! 🥰 Cu ce bunătăți vă putem îndulci astăzi? ✨"
     };
   }
 
@@ -1622,19 +1622,19 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "По средам у нас выходной день! 🧇 В остальные дни ждем вас с 16:00 до 00:00! ✨"
+          ? "По средам у нас выходной день! ✨ В остальные дни ждем вас с 16:00 до 00:00! ✨"
           : lang === 'en'
-          ? "We are closed on Wednesdays! 🧇 On all other days, we warmly welcome you from 16:00 to 00:00! ✨"
-          : "Miercuri este singura noastră zi liberă (închis)! 🧇 În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
+          ? "We are closed on Wednesdays! ✨ On all other days, we warmly welcome you from 16:00 to 00:00! ✨"
+          : "Miercuri este singura noastră zi liberă (închis)! ✨ În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
       };
     }
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной). Ждем вас с радостью! 🧇✨"
+        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной). Ждем вас с радостью! ✨"
         : lang === 'en'
-        ? "We are open daily from 16:00 to 00:00 (Wednesdays: Closed). We look forward to seeing you! 🧇✨"
-        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis). Vă așteptăm cu drag! 🧇✨"
+        ? "We are open daily from 16:00 to 00:00 (Wednesdays: Closed). We look forward to seeing you! ✨"
+        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis). Vă așteptăm cu drag! ✨"
     };
   }
 
@@ -1642,10 +1642,10 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițanu 21/1. Ждем вас в гости! 🧇✨"
+        ? "Наш адрес: г. Кишинев, ул. Nicolae Testemițanu 21/1. Ждем вас в гости! ✨"
         : lang === 'en'
-        ? "Our address is: Chișinău, 21/1 Nicolae Testemițanu St. We can't wait to welcome you! 🧇✨"
-        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițanu 21/1. Vă așteptăm cu drag! 🧇✨"
+        ? "Our address is: Chișinău, 21/1 Nicolae Testemițanu St. We can't wait to welcome you! ✨"
+        : "Ne găsiți în Chișinău, pe Str. Nicolae Testemițanu 21/1. Vă așteptăm cu drag! ✨"
     };
   }
 
@@ -1655,10 +1655,10 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițanu 21/1 или на вынос! 🧇"
+          ? "В пригороды доставки пока нет, но с радостью ждем вас в кафе на ул. Testemițanu 21/1 или на вынос! ✨"
           : lang === 'en'
-          ? "We do not deliver to suburbs yet, but we warmly welcome you at our boutique on 21/1 Nicolae Testemițanu St. or for takeout! 🧇"
-          : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițanu 21/1 sau la pachet! 🧇"
+          ? "We do not deliver to suburbs yet, but we warmly welcome you at our boutique on 21/1 Nicolae Testemițanu St. or for takeout! ✨"
+          : "În suburbii momentan nu livrăm, dar vă așteptăm cu drag la cafenea pe Str. Nicolae Testemițanu 21/1 sau la pachet! ✨"
       };
     }
     return {
@@ -1697,10 +1697,10 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Десерты выпекаются на месте под заказ и пакуются в термобоксы, приезжают хрустящими и горячими! 🧇🔥"
+        ? "Десерты выпекаются на месте под заказ и пакуются в термобоксы, приезжают хрустящими и горячими! 🔥✨"
         : lang === 'en'
-        ? "Desserts are freshly baked to order and packed in thermal boxes, arriving hot and crispy! 🧇🔥"
-        : "Deserturile se prepară proaspăt la comandă și ajung fierbinți și crocante în cutii termice! 🧇🔥"
+        ? "Desserts are freshly baked to order and packed in thermal boxes, arriving hot and crispy! 🔥✨"
+        : "Deserturile se prepară proaspăt la comandă și ajung fierbinți și crocante în cutii termice! 🔥✨"
     };
   }
 
@@ -1708,10 +1708,10 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Да, у нас есть уютный зал на ул. Testemițanu 21/1, где можно насладиться горячими десертами! Ждем вас! 🧇✨"
+        ? "Да, у нас есть уютный зал на ул. Testemițanu 21/1, где можно насладиться горячими десертами! Ждем вас! ✨"
         : lang === 'en'
-        ? "Yes, we have a cozy hall at 21/1 Nicolae Testemițanu St. where you can enjoy warm desserts! Welcome! 🧇✨"
-        : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițanu 21/1! 🧇✨"
+        ? "Yes, we have a cozy hall at 21/1 Nicolae Testemițanu St. where you can enjoy warm desserts! Welcome! ✨"
+        : "Da, vă așteptăm cu drag în sala noastră caldă și primitoare pe Str. Nicolae Testemițanu 21/1! ✨"
     };
   }
 
@@ -1723,7 +1723,7 @@ export function getCartUrlAndButton(currentSession: any, currentLang: string) {
   if (!currentCart || currentCart.length === 0) {
     return {
       url: `https://www.munchotella.md/${currentLang}/menu`,
-      buttonTitle: currentLang === 'ru' ? "🧇 Меню" : currentLang === 'en' ? "🧇 Menu" : "🧇 Meniu",
+      buttonTitle: currentLang === 'ru' ? "🍽️ Меню" : currentLang === 'en' ? "🍽️ Menu" : "🍽️ Meniu",
       totalSum: 0
     };
   }
@@ -1795,7 +1795,7 @@ export async function processMessage(
 
       appendToHistory(session, 'assistant', handoffReply);
       await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
     }
 
@@ -1856,17 +1856,17 @@ export async function processMessage(
 
           let confirmReply = "";
           if (lang === 'ru') {
-            confirmReply = `Заказ успешно подтвержден с учетом ваших пожеланий! 🎉 Мы передали его напрямую на кухню через Telegram. Курьер прибудет по адресу ${savedOrderDetails.address} через ~35-45 мин. Сумма за десерты: ${productsTotal} MDL (оплата наличными курьеру). Оператор свяжется с вами для подтверждения заказа. Приятного аппетита! 🧇✨`;
+            confirmReply = `Заказ успешно подтвержден с учетом ваших пожеланий! 🎉 Мы передали его напрямую на кухню через Telegram. Курьер прибудет по адресу ${savedOrderDetails.address} через ~35-45 мин. Сумма за десерты: ${productsTotal} MDL (оплата наличными курьеру). Оператор свяжется с вами для подтверждения заказа. Приятного аппетита! ✨`;
           } else if (lang === 'en') {
-            confirmReply = `Order successfully confirmed with your custom preferences! 🎉 We've sent your order directly to the kitchen via Telegram. Courier will arrive at ${savedOrderDetails.address} in ~35-45 min. Desserts total: ${productsTotal} MDL (cash on delivery). An operator will contact you shortly to confirm the order. Enjoy your treats! 🧇✨`;
+            confirmReply = `Order successfully confirmed with your custom preferences! 🎉 We've sent your order directly to the kitchen via Telegram. Courier will arrive at ${savedOrderDetails.address} in ~35-45 min. Desserts total: ${productsTotal} MDL (cash on delivery). An operator will contact you shortly to confirm the order. Enjoy your treats! ✨`;
           } else {
-            confirmReply = `Comandă confirmată cu succes cu personalizarea dvs.! 🎉 Am transmis comanda direct la bucătărie prin Telegram. Curierul va porni spre ${savedOrderDetails.address} în ~35-45 min. Total produse: ${productsTotal} MDL (achitare cash la curier). În scurt timp veți fi contactat de un operator pentru confirmarea comenzii. Poftă mare! 🧇✨`;
+            confirmReply = `Comandă confirmată cu succes cu personalizarea dvs.! 🎉 Am transmis comanda direct la bucătărie prin Telegram. Curierul va porni spre ${savedOrderDetails.address} în ~35-45 min. Total produse: ${productsTotal} MDL (achitare cash la curier). În scurt timp veți fi contactat de un operator pentru confirmarea comenzii. Poftă mare! ✨`;
           }
 
           session.cart = [];
           appendToHistory(session, 'assistant', confirmReply);
           await saveSession(senderId, session);
-          await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+          await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
           return { success: true, status: 'order_dispatched_kitchen_telegram', productsTotal, address: savedOrderDetails.address, phone: savedOrderDetails.phone, replyText: confirmReply };
         }
 
@@ -1890,10 +1890,10 @@ export async function processMessage(
         session.pendingCustomization = null;
         session.state = 'IDLE';
         let cancelText = lang === 'ru'
-          ? "Изменение отменено. Корзина осталась прежней! Чем еще могу помочь? 🧇"
+          ? "Изменение отменено. Корзина осталась прежней! Чем еще могу помочь? ✨"
           : lang === 'en'
-          ? "Modification cancelled. Your cart remains unchanged! How else can I help? 🧇"
-          : "Am anulat modificarea. Coșul a rămas neschimbat! Cu ce altceva vă pot ajuta? 🧇";
+          ? "Modification cancelled. Your cart remains unchanged! How else can I help? ✨"
+          : "Am anulat modificarea. Coșul a rămas neschimbat! Cu ce altceva vă pot ajuta? ✨";
 
         appendToHistory(session, 'assistant', cancelText);
         await saveSession(senderId, session);
@@ -1919,14 +1919,14 @@ export async function processMessage(
       session.state = 'IDLE';
       session.scheduledTime = null;
       const cancelReply = lang === 'ru'
-        ? "Заказ отменен, а корзина очищена! 🧇 Обращайтесь, когда будете готовы сделать заказ!"
+        ? "Заказ отменен, а корзина очищена! ✨ Обращайтесь, когда будете готовы сделать заказ!"
         : lang === 'en'
-        ? "Your order has been cancelled and your cart is empty! 🧇 Feel free to reach out anytime when you're ready to order!"
-        : "Am anulat comanda și am golit coșul! 🧇 Vă stau la dispoziție oricând doriți să reluăm!";
+        ? "Your order has been cancelled and your cart is empty! ✨ Feel free to reach out anytime when you're ready to order!"
+        : "Am anulat comanda și am golit coșul! ✨ Vă stau la dispoziție oricând doriți să reluăm!";
 
       appendToHistory(session, 'assistant', cancelReply);
       await saveSession(senderId, session);
-      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, lang === 'en' ? "🧇 Open Menu" : "🧇 Deschide Meniul");
+      await sendDispatchResponse(senderId, channel, cancelReply, `https://www.munchotella.md/${lang}/menu`, lang === 'en' ? "🍽️ Open Menu" : "🍽️ Deschide Meniul");
       return { success: true, status: 'order_cancelled', replyText: cancelReply };
     }
 
@@ -2049,11 +2049,11 @@ export async function processMessage(
 
       let confirmQuestion = "";
       if (lang === 'ru') {
-        confirmQuestion = `Я подготовил персональную настройку для вас! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Итого:</b> <b>${grandTotal} MDL</b>\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
+        confirmQuestion = `Я подготовил персональную настройку для вас! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Итого:</b> <b>${grandTotal} MDL</b>\n\nПодтверждаете добавление в корзину? (Напишите «Да» или «Подтверждаю») ✨`;
       } else if (lang === 'en') {
-        confirmQuestion = `I've prepared your custom dessert preferences! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
+        confirmQuestion = `I've prepared your custom dessert preferences! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nWould you like to confirm and add this to your cart? (Reply 'Yes' or 'Confirm') ✨`;
       } else {
-        confirmQuestion = `Am pregătit personalizarea pentru dvs.! 🧇\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
+        confirmQuestion = `Am pregătit personalizarea pentru dvs.! ✨\n\n${summaryText}\n\n━━━━━━━━━━━━━━━━━━━━━\n💳 <b>Total:</b> <b>${grandTotal} MDL</b>\n\nConfirmați pentru a adăuga această personalizare în coș? (Răspundeți cu «Da» sau «Confirm») ✨`;
       }
 
       appendToHistory(session, 'assistant', confirmQuestion);
@@ -2129,11 +2129,11 @@ export async function processMessage(
 
         let confirmQuestion = "";
         if (lang === 'ru') {
-          confirmQuestion = `Хотите применить эту персональную настройку к товару в корзине? 🧇\n\n${line}\n\nПодтверждаете? (Напишите «Да» или «Подтверждаю») ✨`;
+          confirmQuestion = `Хотите применить эту персональную настройку к товару в корзине? ✨\n\n${line}\n\nПодтверждаете? (Напишите «Да» или «Подтверждаю») ✨`;
         } else if (lang === 'en') {
-          confirmQuestion = `Would you like to apply this custom preference to the item in your cart? 🧇\n\n${line}\n\nConfirm? (Reply 'Yes' or 'Confirm') ✨`;
+          confirmQuestion = `Would you like to apply this custom preference to the item in your cart? ✨\n\n${line}\n\nConfirm? (Reply 'Yes' or 'Confirm') ✨`;
         } else {
-          confirmQuestion = `Doriți să aplicăm această personalizare la produsul din coș? 🧇\n\n${line}\n\nConfirmați? (Răspundeți cu «Da» sau «Confirm») ✨`;
+          confirmQuestion = `Doriți să aplicăm această personalizare la produsul din coș? ✨\n\n${line}\n\nConfirmați? (Răspundeți cu «Da» sau «Confirm») ✨`;
         }
 
         appendToHistory(session, 'assistant', confirmQuestion);
@@ -2189,11 +2189,11 @@ export async function processMessage(
 
       let confirmReply = "";
       if (lang === 'ru') {
-        confirmReply = `Заказ успешно подтвержден! 🎉 Мы передали его напрямую на кухню через Telegram. Курьер прибудет по адресу ${orderDetails.address} через ~35-45 мин. Сумма за десерты: ${productsTotal} MDL (оплата наличными курьеру). В самое ближайшее время оператор свяжется с вами для подтверждения заказа и стоимости доставки. Приятного аппетита! 🧇✨`;
+        confirmReply = `Заказ успешно подтвержден! 🎉 Мы передали его напрямую на кухню через Telegram. Курьер прибудет по адресу ${orderDetails.address} через ~35-45 мин. Сумма за десерты: ${productsTotal} MDL (оплата наличными курьеру). В самое ближайшее время оператор свяжется с вами для подтверждения заказа и стоимости доставки. Приятного аппетита! ✨`;
       } else if (lang === 'en') {
-        confirmReply = `Order successfully confirmed! 🎉 We've sent your order directly to the kitchen via Telegram. Courier will arrive at ${orderDetails.address} in ~35-45 min. Desserts total: ${productsTotal} MDL (cash on delivery). An operator will contact you shortly to confirm the order and delivery fee. Enjoy your treats! 🧇✨`;
+        confirmReply = `Order successfully confirmed! 🎉 We've sent your order directly to the kitchen via Telegram. Courier will arrive at ${orderDetails.address} in ~35-45 min. Desserts total: ${productsTotal} MDL (cash on delivery). An operator will contact you shortly to confirm the order and delivery fee. Enjoy your treats! ✨`;
       } else {
-        confirmReply = `Comandă confirmată cu succes! 🎉 Am transmis comanda direct la bucătărie prin Telegram. Curierul va porni spre ${orderDetails.address} în ~35-45 min. Total produse: ${productsTotal} MDL (achitare cash la curier). În scurt timp veți fi contactat de un operator pentru confirmarea comenzii și detaliile despre prețul total cu livrarea. Vă dorim o zi dulce și poftă bună! 🧇✨`;
+        confirmReply = `Comandă confirmată cu succes! 🎉 Am transmis comanda direct la bucătărie prin Telegram. Curierul va porni spre ${orderDetails.address} în ~35-45 min. Total produse: ${productsTotal} MDL (achitare cash la curier). În scurt timp veți fi contactat de un operator pentru confirmarea comenzii și detaliile despre prețul total cu livrarea. Vă dorim o zi dulce și poftă bună! ✨`;
       }
 
       // Resetăm coșul și starea după trimiterea cu succes a comenzii
@@ -2202,7 +2202,7 @@ export async function processMessage(
       appendToHistory(session, 'assistant', confirmReply);
       await saveSession(senderId, session);
 
-      await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      await sendDispatchResponse(senderId, channel, confirmReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
       return { 
         success: true, 
         status: 'order_dispatched_kitchen_telegram', 
@@ -2223,11 +2223,11 @@ export async function processMessage(
 
       let addReply = "";
       if (lang === 'ru') {
-        addReply = `С удовольствием добавил в заказ: ${addedItemsSummary}! 🧇 Итого за десерты: ${totalSum} MDL.\n\nВы можете оформить заказ по кнопке ниже или отправьте нам сюда адрес и номер телефона для доставки! ✨`;
+        addReply = `С удовольствием добавил в заказ: ${addedItemsSummary}! ✨ Итого за десерты: ${totalSum} MDL.\n\nВы можете оформить заказ по кнопке ниже или отправьте нам сюда адрес и номер телефона для доставки! ✨`;
       } else if (lang === 'en') {
-        addReply = `Delighted to add to your cart: ${addedItemsSummary}! 🧇 Desserts total: ${totalSum} MDL.\n\nYou can finalize via the button below or send us your delivery address and phone number right here! ✨`;
+        addReply = `Delighted to add to your cart: ${addedItemsSummary}! ✨ Desserts total: ${totalSum} MDL.\n\nYou can finalize via the button below or send us your delivery address and phone number right here! ✨`;
       } else {
-        addReply = `Am adăugat cu drag în coș: ${addedItemsSummary}! 🧇 Total produse: ${totalSum} MDL.\n\nPuteți finaliza comanda direct pe linkul de mai jos sau trimiteți-ne aici adresa și numărul de telefon pentru livrare rapidă! ✨`;
+        addReply = `Am adăugat cu drag în coș: ${addedItemsSummary}! ✨ Total produse: ${totalSum} MDL.\n\nPuteți finaliza comanda direct pe linkul de mai jos sau trimiteți-ne aici adresa și numărul de telefon pentru livrare rapidă! ✨`;
       }
 
       appendToHistory(session, 'assistant', addReply);
@@ -2262,10 +2262,10 @@ export async function processMessage(
     if ((session.cart && session.cart.length > 0) && isCheckoutIntent) {
       const { url: finalCartUrl, buttonTitle: finalButtonTitle, totalSum } = getCartUrlAndButton(session, lang);
       let checkoutText = lang === 'ru'
-        ? `Ваш заказ готов (${totalSum} MDL)! 🧇 Нажмите ниже, чтобы заполнить адрес доставки! ✨`
+        ? `Ваш заказ готов (${totalSum} MDL)! ✨ Нажмите ниже, чтобы заполнить адрес доставки! ✨`
         : lang === 'en'
-        ? `Your order is ready (${totalSum} MDL)! 🧇 Click below to enter your delivery address and finalize! ✨`
-        : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! 🧇 Completați adresa și finalizați comanda mai jos! ✨`;
+        ? `Your order is ready (${totalSum} MDL)! ✨ Click below to enter your delivery address and finalize! ✨`
+        : `Am pus în coș produsele dvs. (Total: ${totalSum} MDL)! ✨ Completați adresa și finalizați comanda mai jos! ✨`;
 
       session.state = 'IDLE';
       appendToHistory(session, 'assistant', checkoutText);
@@ -2349,10 +2349,10 @@ ${historySnippets}
       let cleanHandoffReply = replyText.replace(/\[HANDOFF_TO_AGENT\]/gi, '').trim();
       if (!cleanHandoffReply) {
         cleanHandoffReply = lang === 'ru'
-          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в самое ближайшее время! 💬👩‍🍳"
+          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в самое ближайшее время! 💬✨"
           : lang === 'en'
-          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬👩‍🍳"
-          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬👩‍🍳";
+          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬✨"
+          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬✨";
       }
 
       session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
@@ -2367,7 +2367,7 @@ ${historySnippets}
 
       appendToHistory(session, 'assistant', cleanHandoffReply);
       await saveSession(senderId, session);
-      const sendResult = await sendDispatchResponse(senderId, channel, cleanHandoffReply, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+      const sendResult = await sendDispatchResponse(senderId, channel, cleanHandoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
       return { success: true, sendResult, replyText: cleanHandoffReply, status: 'human_handoff_triggered' };
     }
 
@@ -2376,10 +2376,10 @@ ${historySnippets}
       const isQuestionOrComplex = messageText.includes('?') || messageText.length > 25;
       if (isQuestionOrComplex) {
         replyText = lang === 'ru'
-          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в ближайшие минуты! 💬👩‍🍳"
+          ? "Я перевел наш диалог на оператора команды Munchotella, который ответит вам в ближайшие минуты! 💬✨"
           : lang === 'en'
-          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬👩‍🍳"
-          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬👩‍🍳";
+          ? "I have transferred our conversation to a member of our team who will assist you shortly! 💬✨"
+          : "V-am pus în legătură cu un coleg din echipa Munchotella pentru a vă ajuta cu drag în câteva momente! 💬✨";
 
         session.isHumanAssistedUntil = Date.now() + 30 * 60 * 1000;
         await saveSession(senderId, session);
@@ -2393,14 +2393,14 @@ ${historySnippets}
 
         appendToHistory(session, 'assistant', replyText);
         await saveSession(senderId, session);
-        const sendResult = await sendDispatchResponse(senderId, channel, replyText, "https://www.munchotella.md/ro/menu", "🧇 Meniu Munchotella");
+        const sendResult = await sendDispatchResponse(senderId, channel, replyText, "https://www.munchotella.md/ro/menu", "🍽️ Meniu Munchotella");
         return { success: true, sendResult, replyText, status: 'human_handoff_triggered' };
       } else {
         replyText = lang === 'ru'
-          ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? 🧇"
+          ? "Здравствуйте! 🥰 С удовольствием помогу вам с любым вопросом о меню или заказе. Что бы вы хотели заказать сегодня? ✨"
           : lang === 'en'
-          ? "Hello! 🥰 I'd be delighted to help you with any questions about our menu or placing an order. What treats would you like today? 🧇"
-          : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? 🧇";
+          ? "Hello! 🥰 I'd be delighted to help you with any questions about our menu or placing an order. What treats would you like today? ✨"
+          : "Bună! 🥰 Vă ajut cu cel mai mare drag cu orice detaliu despre meniu sau comenzi. Cu ce bunătăți vă putem încânta astăzi? ✨";
       }
     }
 
@@ -2494,7 +2494,7 @@ async function sendMetaGenericCard(
 
   // 4. Configurare Butoane (Meta permite maxim 3 butoane pe generic card, strict <= 20 caractere per titlu):
   // Buton 1: Deschide direct fișa produsului (toppings & detalii)
-  const detailsTitle = lang === 'ru' ? "🧇 О товаре" : lang === 'en' ? "🧇 View item" : "🧇 Vezi produsul";
+  const detailsTitle = lang === 'ru' ? "🍽️ О товаре" : lang === 'en' ? "🍽️ View item" : "🍽️ Vezi produsul";
   
   // Buton 2: Comandă / Adaugă în coș
   let actionTitle = "";
@@ -2641,7 +2641,7 @@ async function sendMetaGenericLinkCard(
                 {
                   type: "web_url",
                   url: "https://www.munchotella.md/ro/menu",
-                  title: "🧇 Meniu Complet"
+                  title: "🍽️ Meniu Complet"
                 }
               ]
             }
