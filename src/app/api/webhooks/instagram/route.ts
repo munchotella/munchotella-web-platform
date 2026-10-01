@@ -4,6 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { connectToDatabase } from '@/lib/mongodb';
+import { Redis } from '@upstash/redis';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -889,9 +890,14 @@ export async function notifyAgencyDashboard(payload: {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PERSISTENȚĂ SESIUNI CONVERSAȚIONALE: DUAL STORAGE (FIRESTORE + MONGODB)
+// PERSISTENȚĂ SESIUNI CONVERSAȚIONALE: MULTI-LAYER (IN-MEMORY + UPSTASH REDIS + MONGO/FIRESTORE)
 // ═══════════════════════════════════════════════════════════════════════════════
 const inMemorySessions = new Map<string, any>();
+
+const redisSessionClient = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || 'https://trusty-stingray-298895.upstash.io',
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || 'gQAAAAAABI-PAAIgcDFhZTMyZGE5NjBiZGU0Y2QxOTI3NGRlNmEzZWJhZmQ3NQ',
+});
 
 async function getSession(senderId: string) {
   const cached = inMemorySessions.get(senderId);
@@ -901,7 +907,20 @@ async function getSession(senderId: string) {
     return cached;
   }
 
-  // 1. Firebase Firestore (Persistent pe Vercel Serverless)
+  // 1. Upstash Redis (Ultra-rapid, cross-container garantat pe Vercel Serverless)
+  try {
+    const redisData = await redisSessionClient.get<any>(`session:ig:${senderId}`);
+    if (redisData && (Date.now() - (redisData.lastUpdated || 0) < 24 * 60 * 60 * 1000)) {
+      if (!redisData.history) redisData.history = [];
+      if (!redisData.cart) redisData.cart = [];
+      inMemorySessions.set(senderId, redisData);
+      return redisData;
+    }
+  } catch (redisErr) {
+    console.warn("Atenționare citire sesiune Redis:", redisErr);
+  }
+
+  // 2. Firebase Firestore (Persistent pe Vercel Serverless)
   try {
     const sessionRef = doc(db, 'instagram_order_sessions', senderId);
     const snap = await getDoc(sessionRef);
@@ -918,7 +937,7 @@ async function getSession(senderId: string) {
     console.warn("Atenționare citire sesiune Firestore:", firestoreErr);
   }
 
-  // 2. MongoDB Fallback
+  // 3. MongoDB Fallback
   try {
     const { db: mongoDb } = await connectToDatabase();
     const mongoDoc = await mongoDb.collection('instagram_order_sessions').findOne({ senderId });
@@ -950,7 +969,14 @@ async function saveSession(senderId: string, sessionData: any) {
   };
   inMemorySessions.set(senderId, updatedData);
 
-  // 1. Salvare în Firebase Firestore
+  // 1. Salvare în Upstash Redis (Persistent & sincronizat cross-container instant)
+  try {
+    await redisSessionClient.set(`session:ig:${senderId}`, updatedData, { ex: 24 * 3600 });
+  } catch (redisErr) {
+    console.warn("Atenționare salvare sesiune Redis:", redisErr);
+  }
+
+  // 2. Salvare în Firebase Firestore
   try {
     const sessionRef = doc(db, 'instagram_order_sessions', senderId);
     const firestoreData = JSON.parse(JSON.stringify(updatedData));
@@ -959,7 +985,7 @@ async function saveSession(senderId: string, sessionData: any) {
     console.warn("Atenționare salvare sesiune Firestore:", firestoreErr);
   }
 
-  // 2. Salvare în MongoDB (Atlas)
+  // 3. Salvare în MongoDB (Atlas)
   try {
     const { db: mongoDb } = await connectToDatabase();
     await mongoDb.collection('instagram_order_sessions').updateOne(
