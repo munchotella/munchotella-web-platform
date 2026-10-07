@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Phone } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -335,12 +335,12 @@ export default function CinematicScrollHero() {
           {t('subtitle')}
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons & Mobile Direct Phone */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.65, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-wrap items-center gap-4"
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4"
         >
           <MagneticButton>
             <Link
@@ -351,6 +351,15 @@ export default function CinematicScrollHero() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </MagneticButton>
+
+          {/* Mobile Direct Phone Link - Doar iconita Phone + numarul curat */}
+          <a
+            href="tel:079006499"
+            className="flex md:hidden items-center gap-2 px-3.5 py-2 rounded-full text-white hover:text-[#D4A853] transition-all duration-300 active:scale-95 bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md min-h-[44px] shadow-md"
+          >
+            <Phone className="w-4 h-4 text-[#D4A853]" />
+            <span className="text-[14px] font-bold tracking-wider font-sans">079 006 499</span>
+          </a>
         </motion.div>
       </div>
 

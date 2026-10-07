@@ -195,9 +195,6 @@ export default function Navbar() {
                 {/* Notifications in Mobile Menu */}
                 <NotificationsDropdown isScrolled={true} />
                 
-                {/* Language Switcher in Mobile Menu */}
-                <LanguageSwitcher isScrolled={true} />
-                
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
                   aria-label="Închide meniul mobil"
