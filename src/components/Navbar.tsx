@@ -53,14 +53,14 @@ export default function Navbar() {
           : "bg-gradient-to-b from-[#1A120B]/80 to-transparent border-transparent"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 group z-50">
+        <Link href="/" onClick={handleLogoClick} className="flex items-center gap-1.5 sm:gap-2 group z-50">
           <LogoIconSVG 
-            className="h-10 w-10 md:h-12 md:w-12 transition-all duration-300 group-hover:scale-105 text-[#f3922c]" 
+            className="h-9 w-9 sm:h-10 sm:w-10 md:h-12 md:w-12 transition-all duration-300 group-hover:scale-105 text-[#f3922c] shrink-0" 
           />
           <LogoTextSVG 
-            className={`h-[45px] md:h-[55px] w-auto transition-colors duration-300 ${
+            className={`h-[34px] sm:h-[45px] md:h-[55px] w-auto transition-colors duration-300 ${
               effectiveIsScrolled 
                 ? "text-[#1A120B] group-hover:text-[#D4A853]" 
                 : "text-white group-hover:text-[#D4A853]"
@@ -77,14 +77,14 @@ export default function Navbar() {
         </div>
 
         {/* Trailing Icons */}
-        <div className={`flex items-center space-x-2 md:space-x-4 ${effectiveIsScrolled ? "text-[#1A120B]" : "text-white"}`}>
+        <div className={`flex items-center space-x-1.5 sm:space-x-2 md:space-x-4 ${effectiveIsScrolled ? "text-[#1A120B]" : "text-white"}`}>
           <a href="tel:+37379006499" className={`hidden md:flex items-center space-x-2 text-[14px] font-bold hover:text-[#D4A853] transition-colors`}>
             <Phone className="w-4 h-4 text-[#D4A853]" />
             <span>079 006 499</span>
           </a>
           
-          <div className="hidden md:block">
-            <LanguageSwitcher />
+          <div>
+            <LanguageSwitcher isScrolled={effectiveIsScrolled} />
           </div>
           
           <div className="hidden md:block">
@@ -196,7 +196,7 @@ export default function Navbar() {
                 <NotificationsDropdown isScrolled={true} />
                 
                 {/* Language Switcher in Mobile Menu */}
-                <LanguageSwitcher />
+                <LanguageSwitcher isScrolled={true} />
                 
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
