@@ -325,9 +325,6 @@ export default function ProductCustomizationModal({
                   {/* Product Details */}
                   <div className="p-4 sm:p-5 flex-1 flex flex-col justify-start">
                     <div>
-                      <p className="text-[13px] text-[#999999] mb-1 font-normal select-none leading-5">
-                        *Produsele din imagine sunt cu titlu de prezentare
-                      </p>
                       <div className="flex justify-between items-start gap-2">
                         <h3 className="font-sans text-[18px] sm:text-[20px] font-bold text-[#1A202C] leading-snug">
                           {product.name}
