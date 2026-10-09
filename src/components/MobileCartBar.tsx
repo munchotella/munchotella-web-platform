@@ -60,20 +60,20 @@ export default function MobileCartBar() {
               aria-label={t("viewCart")}
               className="flex items-center gap-2.5 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
             >
-              {/* Badge Icon Coș cu accent auriu cald */}
-              <div className="relative w-10 h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/40 flex items-center justify-center text-[#D4A853] shrink-0 shadow-inner">
-                <ShoppingBag className="w-4 h-4 text-[#D4A853]" />
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
+              {/* Badge Icon Coș cu styling identic 1:1 cu cel din Navbar */}
+              <div className="relative w-10 h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/30 flex items-center justify-center text-white shrink-0 shadow-inner">
+                <ShoppingBag className="w-4 h-4 text-white" />
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[#D4A853] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md">
                   {totalItems}
                 </span>
               </div>
 
-              {/* Informații preț & cantitate cu typographic hierarchy riguroasă */}
+              {/* Informații preț & cantitate cu typographic hierarchy riguroasă (font-sans Outfit) */}
               <div className="flex flex-col justify-center leading-tight">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
+                <span className="font-sans text-[10px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
                   {t("itemsCount", { count: totalItems })}
                 </span>
-                <span className="font-serif font-bold text-base text-[#F9F6F0] tracking-tight whitespace-nowrap">
+                <span className="font-sans font-extrabold text-[16px] text-white tracking-tight whitespace-nowrap">
                   {totalPrice} MDL
                 </span>
               </div>
