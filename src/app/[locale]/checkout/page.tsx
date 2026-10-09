@@ -34,7 +34,7 @@ import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import { translateTopping } from "@/utils/toppingTranslations";
+import { translateTopping, translateCustomizationNote } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
 import PaymentBadges from "@/components/PaymentBadges";
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
         entrance: prev.entrance || stored.entrance || "",
         floor: prev.floor || stored.floor || "",
         intercom: prev.intercom || stored.intercom || "",
-        notes: prev.notes || stored.notes || "",
+        notes: prev.notes || "",
         estimatedKm: prev.estimatedKm || stored.estimatedKm || 0,
         lat: prev.lat || stored.lat || null,
         lng: prev.lng || stored.lng || null,
@@ -213,8 +213,19 @@ export default function CheckoutPage() {
     if (typeof window === "undefined") return;
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const urlNotes = urlParams.get('notes');
-      const storedNotes = localStorage.getItem("munchotella_order_notes");
+      let rawUrlNotes = urlParams.get('notes');
+      if (rawUrlNotes) {
+        try {
+          rawUrlNotes = decodeURIComponent(rawUrlNotes);
+        } catch (_) {}
+      }
+
+      let rawStoredNotes = localStorage.getItem("munchotella_order_notes");
+      if (rawStoredNotes) {
+        try {
+          rawStoredNotes = decodeURIComponent(rawStoredNotes);
+        } catch (_) {}
+      }
 
       // Extragem toate mențiunile/excluderile specifice produselor din coș (ex: "Delux mini waffle: Fără fistic")
       const itemsNotes = items
@@ -222,8 +233,11 @@ export default function CheckoutPage() {
         .map((it: any) => `${it.name}: ${it.customization}`)
         .join(', ');
 
-      const relevantNotes = urlNotes || storedNotes || itemsNotes;
-      if (relevantNotes && relevantNotes.trim()) {
+      const rawCombined = rawUrlNotes || rawStoredNotes || itemsNotes;
+      if (rawCombined && rawCombined.trim()) {
+        // Traducem mențiunile de personalizare în limba activă a paginii (RO, RU, EN)
+        const relevantNotes = translateCustomizationNote(rawCombined, locale);
+
         setFormData(prev => {
           if (!prev.notes || prev.notes.trim() === '') {
             return { ...prev, notes: relevantNotes };
@@ -235,7 +249,7 @@ export default function CheckoutPage() {
         });
       }
     } catch (_) {}
-  }, [items]);
+  }, [items, locale]);
 
   // 2. Pre-fill date utilizator din AuthContext dacă este logat
   React.useEffect(() => {
@@ -287,7 +301,6 @@ export default function CheckoutPage() {
       entrance: formData.entrance,
       floor: formData.floor,
       intercom: formData.intercom,
-      notes: formData.notes,
       lat: formData.lat,
       lng: formData.lng,
       estimatedKm: formData.estimatedKm,
@@ -914,6 +927,12 @@ export default function CheckoutPage() {
       );
 
       clearCart();
+      setFormData(prev => ({ ...prev, notes: "" }));
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("munchotella_order_notes");
+        } catch (_) {}
+      }
       const trackingTarget = data.data?.trackingCode || data.data?._id;
       router.push(`/order-tracking/${trackingTarget}`);
       

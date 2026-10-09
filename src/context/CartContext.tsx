@@ -79,7 +79,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const notesParam = urlParams.get('notes');
 
         if (notesParam) {
-          localStorage.setItem("munchotella_order_notes", notesParam);
+          try {
+            const decodedNotes = decodeURIComponent(notesParam);
+            localStorage.setItem("munchotella_order_notes", decodedNotes);
+          } catch (_) {
+            localStorage.setItem("munchotella_order_notes", notesParam);
+          }
         }
 
         if (preloadedParam) {

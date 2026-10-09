@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Redis } from '@upstash/redis';
+import { translateCustomizationNote } from '@/utils/toppingTranslations';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -1784,7 +1785,13 @@ export function getCartUrlAndButton(currentSession: any, currentLang: string) {
   const cartJsonString = JSON.stringify(currentCart);
   const encodedCart = Buffer.from(cartJsonString, 'utf-8').toString('base64');
   
-  const cartNotes = currentCart.filter((i: any) => i.customization).map((i: any) => `${i.name}: ${i.customization}`).join(', ');
+  const cartNotes = currentCart
+    .filter((i: any) => i.customization)
+    .map((i: any) => {
+      const translatedCustomization = translateCustomizationNote(i.customization, currentLang);
+      return `${i.name}: ${translatedCustomization}`;
+    })
+    .join(', ');
   const schedParam = currentSession.scheduledTime ? `&scheduled=${encodeURIComponent(currentSession.scheduledTime)}` : '';
   const notesParam = cartNotes ? `&notes=${encodeURIComponent(cartNotes)}` : '';
 

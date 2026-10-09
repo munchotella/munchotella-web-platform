@@ -182,3 +182,89 @@ export function translateTopping(name: string, locale: string = 'ro'): string {
 
   return clean;
 }
+
+export const CUSTOMIZATION_NOTE_TRANSLATIONS: Record<string, Record<SupportedLocale, string>> = {
+  'Fără fistic': {
+    ro: 'Fără fistic',
+    ru: 'Без фисташек',
+    en: 'No pistachio',
+  },
+  'Fără nucușoare / arahide': {
+    ro: 'Fără nucușoare / arahide',
+    ru: 'Без орехов / арахиса',
+    en: 'No nuts / peanuts',
+  },
+  'Fără kiwi': {
+    ro: 'Fără kiwi',
+    ru: 'Без киви',
+    en: 'No kiwi',
+  },
+  'Fără căpșuni': {
+    ro: 'Fără căpșuni',
+    ru: 'Без клубники',
+    en: 'No strawberries',
+  },
+  'Fără banane': {
+    ro: 'Fără banane',
+    ru: 'Без бананов',
+    en: 'No bananas',
+  },
+  'Fără biscuiți Oreo': {
+    ro: 'Fără biscuiți Oreo',
+    ru: 'Без печенья Oreo',
+    en: 'No Oreo cookies',
+  },
+  'Fără biscuiți Lotus': {
+    ro: 'Fără biscuiți Lotus',
+    ru: 'Без печенья Lotus',
+    en: 'No Lotus cookies',
+  },
+  'Fără ciocolată albă': {
+    ro: 'Fără ciocolată albă',
+    ru: 'Без белого шоколада',
+    en: 'No white chocolate',
+  },
+  'Fără Nutella': {
+    ro: 'Fără Nutella',
+    ru: 'Без Nutella',
+    en: 'No Nutella',
+  },
+};
+
+/**
+ * Traduce o notiță/mențiune de personalizare (ex: "Fără fistic" -> "Без фисташек" / "No pistachio")
+ * Suportă traducerea frazelor compuse (ex: "Delux crepe: Fără fistic, Fără căpșuni").
+ */
+export function translateCustomizationNote(noteText: string, locale: string = 'ro'): string {
+  if (!noteText || typeof noteText !== 'string') return '';
+  const lang: SupportedLocale = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'ro';
+
+  // Normalizează și decodifică dacă au rămas secvențe URL
+  let decoded = noteText;
+  try {
+    decoded = decodeURIComponent(noteText);
+  } catch (_) {}
+
+  // Iterăm prin intrările dicționarului și înlocuim fiecare variantă găsită (fie că a venit în RO, RU sau EN)
+  let result = decoded;
+  for (const [canonicalKey, translations] of Object.entries(CUSTOMIZATION_NOTE_TRANSLATIONS)) {
+    const allVariants = [
+      canonicalKey,
+      translations.ro,
+      translations.ru,
+      translations.en,
+    ];
+
+    for (const variant of allVariants) {
+      if (!variant) continue;
+      // Regex case-insensitive cu escape pentru caractere speciale
+      const escaped = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(^|[,;:•\\s])(${escaped})($|[,;:•\\s])`, 'gi');
+      result = result.replace(regex, (match, prefix, _matchedWord, suffix) => {
+        return `${prefix}${translations[lang]}${suffix}`;
+      });
+    }
+  }
+
+  return result.trim();
+}
