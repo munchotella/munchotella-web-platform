@@ -23,7 +23,8 @@ import {
   PhoneCall,
   Edit3,
   X,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
@@ -1255,7 +1256,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans selection:bg-[#D4A853] selection:text-white pt-28 pb-32">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans selection:bg-[#D4A853] selection:text-white pt-28 pb-36 lg:pb-44">
       <div className="max-w-[1200px] mx-auto px-4 md:px-8">
         {/* Header navigation */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
@@ -2009,17 +2010,17 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right Column: Sticky Summary Panel */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto no-scrollbar">
-            <div className="bg-[#FFFCF6] p-5 sm:p-7 md:p-8 rounded-[28px] md:rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto pr-1 pb-6 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent]">
+            <div className="bg-[#FFFCF6] p-5 sm:p-6 md:p-7 pb-8 sm:pb-9 md:pb-10 rounded-[28px] md:rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
               {/* Decorative background circle */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#D4A853]/5 rounded-full blur-2xl pointer-events-none" />
               
-              <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B] pb-5 sm:pb-6 flex items-center gap-2 relative z-10">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1A120B] pb-4 sm:pb-5 flex items-center gap-2 relative z-10">
                 {t('orderSummary')}
               </h3>
 
               {/* Items List */}
-              <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 no-scrollbar relative z-10 mb-6 border-b border-[#E8E2D9] pb-6">
+              <div className="space-y-3.5 max-h-40 xl:max-h-52 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent] relative z-10 mb-5 border-b border-[#E8E2D9] pb-4">
                 {items.map((item) => (
                   <div key={item.cartItemId} className="flex justify-between items-start gap-4">
                     <div className="flex items-start gap-3">
@@ -2144,14 +2145,14 @@ export default function CheckoutPage() {
               </div>
 
               {/* Grand Total & Final Button */}
-              <div className="relative z-10 mt-8 pt-6 border-t border-[#E8E2D9]">
-                <div className="flex justify-between items-end mb-6">
+              <div className="relative z-10 mt-6 pt-5 border-t border-[#E8E2D9]">
+                <div className="flex justify-between items-end mb-4">
                   <span className="font-bold text-[#1A120B] uppercase tracking-wider text-xs">{t('totalToPay')}</span>
                   <span className="font-serif text-3xl md:text-4xl font-bold text-[#D4A853] leading-none">{grandTotal} MDL</span>
                 </div>
 
                 {/* Notice Timp Execuție & Livrare Taxi (Conform aplicației mobile: 1h - 1h 30min) */}
-                <div className="mb-5 bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl p-4 space-y-2.5 text-xs text-[#736A60]">
+                <div className="mb-3.5 bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl p-3 sm:p-3.5 space-y-2 text-xs text-[#736A60]">
                   <div className="flex items-start gap-2.5">
                     <Clock className="w-4 h-4 text-[#9E721D] shrink-0 mt-0.5" />
                     <p className="leading-relaxed">
@@ -2168,7 +2169,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Terms and Conditions Acceptance Checkbox (MAIB Requirement) */}
-                <div className="mb-5">
+                <div className="mb-4">
                   <label className="flex items-start gap-3 cursor-pointer select-none group">
                     <input
                       type="checkbox"
@@ -2315,6 +2316,16 @@ export default function CheckoutPage() {
                     {t('missingInfo')}
                   </p>
                 )}
+
+                {/* Trust & Security Badge directly below button with dedicated breathing room */}
+                <div className="mt-4 pt-1 text-center">
+                  <p className="text-[11px] text-[#736A60] flex items-center justify-center gap-1.5 font-medium">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#D4A853]" />
+                    <span>{t('secureOrderBadge')}</span>
+                  </p>
+                </div>
+
+                <div className="h-3 sm:h-4" />
               </div>
             </div>
           </div>

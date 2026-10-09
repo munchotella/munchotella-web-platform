@@ -209,11 +209,12 @@
     "callRestaurantBtn": "📞 Sună la Restaurant (+373 79 006 499)",
     "applyingPromo": "Se verifică...",
     "confirmPhoneModalTitle": "Confirmă Numărul de Telefon",
-    "confirmPhoneModalSubtitle": "Te vom apela pe acest număr în 2-3 minute pentru a confirma adresa și pregătirea comenzii:",
+    "confirmPhoneModalSubtitle": "Te sunăm pe acest număr în 2-3 minute pentru a confirma adresa și începerea pregătirii:",
     "confirmPhoneModalBtn": "Da, numărul e corect — Trimite Comanda",
     "confirmPhoneModalEdit": "Modifică numărul",
-    "confirmPhoneModalNotice": "Te rugăm să verifici cu atenție cifrele pentru a putea primi comanda caldă.",
-    "confirmPhoneContactLabel": "Număr Contact Livrare"
+    "confirmPhoneModalNotice": "Verifică atent cifrele ca să te putem contacta rapid, iar desertul tău să ajungă cald și proaspăt.",
+    "confirmPhoneContactLabel": "Număr Contact Livrare",
+    "secureOrderBadge": "Comandă securizată • Confirmare rapidă în 2-3 minute"
   },
   "MobileCartBar": {
     "viewCart": "Coșul tău",
