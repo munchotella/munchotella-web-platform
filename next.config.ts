@@ -21,9 +21,9 @@ const ContentSecurityPolicy = [
   // worker-src: necesar pentru web workers (vector tiles Google Maps)
   "worker-src 'self' blob:",
   // child-src: iframe / web workers
-  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com",
-  // frame-src: Firebase auth popup, Google Maps iframe and reCAPTCHA
-  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com",
+  "child-src 'self' blob: https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com https://www.facebook.com https://*.facebook.com",
+  // frame-src: Firebase auth popup, Google Maps iframe, reCAPTCHA and Meta Pixel
+  "frame-src 'self' https://munchotella-d67f1.firebaseapp.com https://accounts.google.com https://www.google.com https://www.munchotella.md https://munchotella.md https://auth.munchotella.md https://www.recaptcha.net https://recaptcha.google.com https://www.facebook.com https://*.facebook.com",
   // media-src: audio/video propriu
   "media-src 'self'",
   // object-src: blochează complet plugin-urile (Flash etc.)
@@ -31,7 +31,7 @@ const ContentSecurityPolicy = [
   // base-uri: previne atacurile de tip base tag injection
   "base-uri 'self'",
   // form-action: restricționează unde pot fi trimise formularele
-  "form-action 'self'",
+  "form-action 'self' https://www.facebook.com https://*.facebook.com",
   // upgrade-insecure-requests: forțează toate resursele pe HTTPS
   "upgrade-insecure-requests",
 ].join('; ');
