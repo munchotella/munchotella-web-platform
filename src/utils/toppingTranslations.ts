@@ -251,6 +251,8 @@ export function translateCustomizationNote(noteText: string, locale: string = 'r
     const allVariants = [
       canonicalKey,
       translations.ro,
+      // Variante fără diacritice în română
+      translations.ro.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
       translations.ru,
       translations.en,
     ];

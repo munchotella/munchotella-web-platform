@@ -239,13 +239,15 @@ export default function CheckoutPage() {
         const relevantNotes = translateCustomizationNote(rawCombined, locale);
 
         setFormData(prev => {
+          // Dacă este prima completare sau valoarea anterioară era o variantă a aceleiași mențiuni într-o altă limbă
           if (!prev.notes || prev.notes.trim() === '') {
             return { ...prev, notes: relevantNotes };
           }
-          if (!prev.notes.includes(relevantNotes)) {
-            return { ...prev, notes: `${prev.notes}, ${relevantNotes}` };
+          const prevTranslated = translateCustomizationNote(prev.notes, locale);
+          if (prevTranslated === relevantNotes || prev.notes.includes(relevantNotes)) {
+            return { ...prev, notes: relevantNotes };
           }
-          return prev;
+          return { ...prev, notes: `${prev.notes}, ${relevantNotes}` };
         });
       }
     } catch (_) {}
