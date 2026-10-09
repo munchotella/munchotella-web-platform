@@ -2010,7 +2010,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right Column: Sticky Summary Panel */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto pr-1 pb-6 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent]">
+          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-6 xl:top-20 h-fit max-h-[calc(100dvh-3rem)] lg:overflow-y-auto pr-1 pb-8 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent]">
             <div className="bg-[#FFFCF6] p-5 sm:p-6 md:p-7 pb-8 sm:pb-9 md:pb-10 rounded-[28px] md:rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
               {/* Decorative background circle */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#D4A853]/5 rounded-full blur-2xl pointer-events-none" />
@@ -2020,7 +2020,7 @@ export default function CheckoutPage() {
               </h3>
 
               {/* Items List */}
-              <div className="space-y-3.5 max-h-40 xl:max-h-52 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent] relative z-10 mb-5 border-b border-[#E8E2D9] pb-4">
+              <div className="space-y-3 max-h-36 sm:max-h-40 xl:max-h-48 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:#D4A853_transparent] relative z-10 mb-4 border-b border-[#E8E2D9] pb-3.5">
                 {items.map((item) => (
                   <div key={item.cartItemId} className="flex justify-between items-start gap-4">
                     <div className="flex items-start gap-3">
@@ -2152,7 +2152,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Notice Timp Execuție & Livrare Taxi (Conform aplicației mobile: 1h - 1h 30min) */}
-                <div className="mb-3.5 bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl p-3 sm:p-3.5 space-y-2 text-xs text-[#736A60]">
+                <div className="mb-3.5 bg-[#FAF7F2] border border-[#E8E2D9] rounded-2xl p-2.5 sm:p-3 space-y-1.5 text-xs text-[#736A60]">
                   <div className="flex items-start gap-2.5">
                     <Clock className="w-4 h-4 text-[#9E721D] shrink-0 mt-0.5" />
                     <p className="leading-relaxed">
