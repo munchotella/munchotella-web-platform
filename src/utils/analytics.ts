@@ -269,21 +269,10 @@ export function trackPurchase(
     const numItems = items.reduce((acc, curr) => acc + (curr.quantity || 1), 0);
     const contentIds = items.map((i) => String(i.id || i.name));
 
-    // Meta Pixel: Purchase (with { eventID: orderId } for exact Server CAPI deduplication)
-    if (typeof window.fbq === "function") {
-      window.fbq("track", "Purchase", {
-        content_ids: contentIds,
-        contents: items.map((i) => ({
-          id: String(i.id || i.name),
-          quantity: i.quantity || 1,
-          item_price: typeof i.price === "number" ? i.price : 0,
-        })),
-        content_type: "product",
-        num_items: numItems,
-        value: val,
-        currency: customer?.currency || "MDL",
-      }, { eventID: orderId });
-    }
+    // ═══ META CAPI (Soluția B Ajustată): Evenimentul Purchase nu se mai trimite din browser ═══
+    // Conversia este expediată exclusiv și autoritar din Backend CAPI când comanda este confirmată
+    // de operator ('confirmed'). Astfel se elimină 100% vânzările false din comenzi de test sau anulate.
+    // Clientul raportează pe Meta doar InitiateCheckout și AddToCart.
 
     // GA4: purchase
     if (typeof window.gtag === "function") {
