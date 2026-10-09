@@ -212,7 +212,8 @@
     "confirmPhoneModalSubtitle": "Te vom apela pe acest număr în 2-3 minute pentru a confirma adresa și pregătirea comenzii:",
     "confirmPhoneModalBtn": "Da, numărul e corect — Trimite Comanda",
     "confirmPhoneModalEdit": "Modifică numărul",
-    "confirmPhoneModalNotice": "Te rugăm să verifici cu atenție cifrele pentru a putea primi comanda caldă."
+    "confirmPhoneModalNotice": "Te rugăm să verifici cu atenție cifrele pentru a putea primi comanda caldă.",
+    "confirmPhoneContactLabel": "Număr Contact Livrare"
   },
   "MobileCartBar": {
     "viewCart": "Coșul tău",

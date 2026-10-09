@@ -2371,7 +2371,7 @@ export default function CheckoutPage() {
                     <div className="w-14 h-14 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center mb-3 text-[#D4A853]">
                       <PhoneCall className="w-7 h-7" />
                     </div>
-                    <h3 className="font-serif text-2xl font-bold text-[#1A120B]">
+                    <h3 className="font-sans text-xl sm:text-2xl font-extrabold text-[#1A120B] tracking-tight">
                       {t('confirmPhoneModalTitle')}
                     </h3>
                     <p className="text-xs text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
@@ -2382,10 +2382,29 @@ export default function CheckoutPage() {
                   {/* Big Phone Number Display Card */}
                   <div className="my-5 p-4 rounded-2xl bg-white border-2 border-[#D4A853] shadow-sm text-center">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C6B1B] block mb-1">
-                      Număr Contact Livrare
+                      {t('confirmPhoneContactLabel')}
                     </span>
-                    <p className="font-mono text-2xl sm:text-3xl font-extrabold text-[#1A120B] tracking-wide">
-                      {selectedCountry.dialCode} {formData.phone}
+                    <p className="font-sans text-2xl sm:text-3xl font-extrabold text-[#1A120B] tracking-tight">
+                      {(() => {
+                        const raw = formData.phone.trim();
+                        const digits = raw.replace(/\D/g, '');
+                        // Extragem cifrele naționale din R. Moldova
+                        let local = digits;
+                        if (local.startsWith('373')) {
+                          local = local.slice(3);
+                        } else if (local.startsWith('0')) {
+                          local = local.slice(1);
+                        }
+                        const isMoldova = selectedCountry.dialCode === '+373' || selectedCountry.code === 'MD' || digits.startsWith('373');
+                        // Dacă avem format standard de 8 cifre pentru Moldova (ex: 60262289 -> +373 60 262 289)
+                        if (isMoldova && local.length === 8) {
+                          return `+373 ${local.slice(0, 2)} ${local.slice(2, 5)} ${local.slice(5)}`;
+                        }
+                        // Fallback dacă nu este un număr standard de 8 cifre sau este altă țară
+                        const prefix = selectedCountry.dialCode.startsWith('+') ? selectedCountry.dialCode : `+${selectedCountry.dialCode}`;
+                        const cleanPhone = raw.startsWith('+') ? raw.replace(/^\+\d{1,4}\s*/, '') : raw;
+                        return `${prefix} ${cleanPhone}`;
+                      })()}
                     </p>
                     <p className="text-[11px] text-[#736A60] mt-2 flex items-center justify-center gap-1">
                       <span>📍 {formData.street || "Preluare din Boutique"}</span>

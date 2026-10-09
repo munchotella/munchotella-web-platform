@@ -212,7 +212,8 @@
     "confirmPhoneModalSubtitle": "We will call you on this number in 2-3 minutes to confirm your address and preparation:",
     "confirmPhoneModalBtn": "Yes, number is correct — Send Order",
     "confirmPhoneModalEdit": "Edit phone number",
-    "confirmPhoneModalNotice": "Please double check the digits so we can deliver your warm dessert without delay."
+    "confirmPhoneModalNotice": "Please double check the digits so we can deliver your warm dessert without delay.",
+    "confirmPhoneContactLabel": "Delivery Contact Number"
   },
   "MobileCartBar": {
     "viewCart": "Your Cart",

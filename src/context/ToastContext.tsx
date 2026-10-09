@@ -47,7 +47,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       
       {/* Toast Container - Poziționat pe mobil deasupra barei plutitoare de coș */}
-      <div className="fixed bottom-24 sm:bottom-6 left-4 sm:left-auto right-4 sm:right-6 z-[150] flex flex-col gap-2.5 sm:gap-3 pointer-events-none max-w-sm w-auto">
+      <div className="fixed bottom-28 sm:bottom-6 left-4 sm:left-auto right-4 sm:right-6 z-[150] flex flex-col gap-2.5 sm:gap-3 pointer-events-none max-w-sm w-auto">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div

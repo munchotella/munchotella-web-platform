@@ -47,9 +47,9 @@ export default function MobileCartBar() {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 80, opacity: 0, scale: 0.96 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-4 inset-x-3.5 z-40 md:hidden pointer-events-none"
+          className="fixed bottom-6 inset-x-3.5 z-40 md:hidden pointer-events-none"
           style={{
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)"
+            paddingBottom: "env(safe-area-inset-bottom, 0px)"
           }}
         >
           <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[20px] p-2.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2.5">
