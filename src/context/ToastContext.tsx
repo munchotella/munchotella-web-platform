@@ -23,13 +23,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((message: string) => {
-    const id = ++toastCount;
-    setToasts((prev) => [...prev, { id, message }]);
-    
-    // Auto remove after 3s
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    setToasts((prev) => {
+      // Evităm duplicarea vizuală dacă același mesaj este deja afișat activ
+      if (prev.some((t) => t.message === message)) {
+        return prev;
+      }
+      const id = ++toastCount;
+      // Auto remove after 3s
+      setTimeout(() => {
+        setToasts((current) => current.filter((t) => t.id !== id));
+      }, 3000);
+      return [...prev, { id, message }];
+    });
   }, []);
 
   const removeToast = (id: number) => {

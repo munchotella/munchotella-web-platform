@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
-import { useToast } from "@/context/ToastContext";
 import { useTranslations, useLocale } from "next-intl";
 import { translateTopping } from "@/utils/toppingTranslations";
 import { trackAddToCart } from "@/utils/analytics";
@@ -33,9 +32,7 @@ export default function ProductCustomizationModal({
   onClose,
 }: ProductCustomizationModalProps) {
   const { addToCart } = useCart();
-  const { showToast } = useToast();
   const t = useTranslations("Toppings");
-  const tCart = useTranslations("Cart");
   const locale = useLocale();
   const [selectedToppings, setSelectedToppings] = useState<ToppingOption[]>([]);
   const [quantity, setQuantity] = useState(1);
@@ -249,9 +246,6 @@ export default function ProductCustomizationModal({
       selectedToppings,
       quantity,
     });
-
-    // Feedback tactil/vizual instant: Afișează notificarea plutitoare deasupra barei de coș
-    showToast(tCart('addedToCartToast', { name: product.name }));
 
     // Track AddToCart for Meta Pixel & GA4
     trackAddToCart(
