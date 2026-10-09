@@ -9,9 +9,8 @@ import { Redis } from '@upstash/redis';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const PERMANENT_META_PAGE_ACCESS_TOKEN = "EAAVxZCgeumYUBSCIdviX1bYuubsuZCp3TWPXSPZCE9TfaJKTHu7fTv542LYbiOFC2ZB16SZAAprVec1Dvx8db6ydyU4shHOb8ZAI6wxLsF9mep5cKYjQivMxLbRp21qoOsdwZBZCe2yc5vZBTwA4noZArn3edbYSs8b9ZA8IDHP4H5l73BuM7xQvhYfXe1TF3Gj8zWVi8kL";
-const INSTAGRAM_ACCOUNT_ID = "17841407196466279";
-const FACEBOOK_PAGE_ID = "2033309050260259";
+const INSTAGRAM_ACCOUNT_ID = process.env.INSTAGRAM_ACCOUNT_ID || "17841407196466279";
+const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID || "2033309050260259";
 
 // Catalogul oficial de produse cu ingrediente exacte și alias-uri extinse
 const MENU_CATALOG = [
@@ -2523,7 +2522,7 @@ async function sendMetaTextMessage(
   text: string, 
   quickReplies?: Array<{ title: string; payload: string }>
 ) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
     return { error: "Missing META_PAGE_ACCESS_TOKEN" };
@@ -2572,7 +2571,7 @@ async function sendMetaGenericCard(
   channel: 'instagram' | 'messenger' = 'instagram',
   lang: string = 'ro'
 ) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
     return { error: "Missing META_PAGE_ACCESS_TOKEN" };
@@ -2709,7 +2708,7 @@ async function sendMetaGenericLinkCard(
   url: string,
   buttonTitle: string
 ) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) return { error: "Missing token" };
 
   const safeTitle = title.length > 80 ? title.substring(0, 77) + "..." : title;
@@ -2809,7 +2808,7 @@ async function sendDispatchResponse(
 }
 
 async function sendMetaButtonResponse(senderId: string, text: string, url: string, buttonTitle: string) {
-  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN || PERMANENT_META_PAGE_ACCESS_TOKEN;
+  const metaAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
   if (!metaAccessToken) {
     console.error("META_PAGE_ACCESS_TOKEN lipsă în variabilele de mediu.");
     return { error: "Missing META_PAGE_ACCESS_TOKEN" };
