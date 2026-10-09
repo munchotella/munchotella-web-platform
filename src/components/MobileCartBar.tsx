@@ -52,28 +52,28 @@ export default function MobileCartBar() {
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)"
           }}
         >
-          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[22px] px-3.5 py-3 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-3">
+          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[20px] p-2.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2.5">
             {/* Secțiunea Stânga: Trigger Coș / Detalii Comandă */}
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
               aria-label={t("viewCart")}
-              className="flex items-center gap-3 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity"
+              className="flex items-center gap-2.5 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
             >
               {/* Badge Icon Coș cu accent auriu cald */}
-              <div className="relative w-11 h-11 rounded-2xl bg-[#261B12] border border-[#D4A853]/40 flex items-center justify-center text-[#D4A853] shrink-0 shadow-inner">
-                <ShoppingBag className="w-5 h-5 text-[#D4A853]" />
-                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
+              <div className="relative w-10 h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/40 flex items-center justify-center text-[#D4A853] shrink-0 shadow-inner">
+                <ShoppingBag className="w-4 h-4 text-[#D4A853]" />
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
                   {totalItems}
                 </span>
               </div>
 
               {/* Informații preț & cantitate cu typographic hierarchy riguroasă */}
-              <div className="flex flex-col min-w-0 justify-center">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#A89F91] truncate leading-tight">
+              <div className="flex flex-col justify-center leading-tight">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
                   {t("itemsCount", { count: totalItems })}
                 </span>
-                <span className="font-serif font-bold text-[17px] text-[#F9F6F0] leading-snug tracking-tight whitespace-nowrap">
+                <span className="font-serif font-bold text-base text-[#F9F6F0] tracking-tight whitespace-nowrap">
                   {totalPrice} MDL
                 </span>
               </div>
@@ -83,10 +83,10 @@ export default function MobileCartBar() {
             <button
               type="button"
               onClick={() => router.push("/checkout")}
-              className="h-[46px] px-5 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
+              className="h-[42px] px-4 sm:px-5 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
             >
               <span className="whitespace-nowrap font-extrabold">{t("finalizeOrder")}</span>
-              <ArrowRight className="w-4 h-4 shrink-0 text-[#1A120B]" />
+              <ArrowRight className="w-3.5 h-3.5 shrink-0 text-[#1A120B]" />
             </button>
           </div>
         </motion.div>
