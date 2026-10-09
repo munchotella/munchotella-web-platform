@@ -397,10 +397,21 @@ export default function CheckoutPage() {
             draftOrderId,
             customer: {
               name: formData.name || "Oaspete",
-              phone: `${selectedCountry.dialCode}${cleanPhone.startsWith('+') ? cleanPhone.slice(selectedCountry.dialCode.length) : cleanPhone}`,
-              address: (doorDelivery && formData.estimatedKm < 1.0)
-                ? `${formData.street}${formData.entrance ? ', Sc. ' + formData.entrance : ''}${formData.floor ? ', Et. ' + formData.floor : ''}${formData.apartment ? ', Ap. ' + formData.apartment : ''}${formData.intercom ? ', Interfon: ' + formData.intercom : ''}`
-                : formData.street,
+              phone: (() => {
+                let p = cleanPhone;
+                if (p.startsWith('+')) p = p.slice(selectedCountry.dialCode.length);
+                if (selectedCountry.dialCode === '+373') {
+                  if (p.startsWith('373')) p = p.slice(3);
+                  if (p.startsWith('0')) p = p.slice(1);
+                  return `+373${p}`;
+                }
+                return `${selectedCountry.dialCode}${p}`;
+              })(),
+              address: deliveryType === 'pickup'
+                ? "Preluare din Boutique (Nicolae Testemițanu 21/1)"
+                : ((doorDelivery && formData.estimatedKm < 1.0)
+                  ? `${formData.street}${formData.entrance ? ', Sc. ' + formData.entrance : ''}${formData.floor ? ', Et. ' + formData.floor : ''}${formData.apartment ? ', Ap. ' + formData.apartment : ''}${formData.intercom ? ', Interfon: ' + formData.intercom : ''}`
+                  : formData.street),
               notes: (doorDelivery && formData.estimatedKm < 1.0 && (formData.apartment || formData.entrance || formData.floor || formData.intercom))
                 ? `[LIVRARE LA UȘĂ: Sc. ${formData.entrance || '-'}, Et. ${formData.floor || '-'}, Ap. ${formData.apartment || '-'}, Interfon: ${formData.intercom || '-'}] ${formData.notes || ''}`
                 : formData.notes,
