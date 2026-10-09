@@ -207,7 +207,17 @@
     "networkErrorDesc": "Your order is safely kept in your cart. You can retry now or confirm your order by phone with one tap.",
     "retryOrderBtn": "Retry Placing Order",
     "callRestaurantBtn": "📞 Call the Restaurant (+373 79 006 499)",
-    "applyingPromo": "Applying..."
+    "applyingPromo": "Applying...",
+    "confirmPhoneModalTitle": "Confirm Phone Number",
+    "confirmPhoneModalSubtitle": "We will call you on this number in 2-3 minutes to confirm your address and preparation:",
+    "confirmPhoneModalBtn": "Yes, number is correct — Send Order",
+    "confirmPhoneModalEdit": "Edit phone number",
+    "confirmPhoneModalNotice": "Please double check the digits so we can deliver your warm dessert without delay."
+  },
+  "MobileCartBar": {
+    "viewCart": "View Cart",
+    "finalizeOrder": "Checkout",
+    "itemsCount": "{count} {count, plural, one {item} other {items}}"
   },
   "LiveStore": {
     "openNow": "Open Now",

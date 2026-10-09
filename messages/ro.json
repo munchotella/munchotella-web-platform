@@ -207,7 +207,17 @@
     "networkErrorDesc": "Comanda ta este salvată în siguranță în coș. Poți reîncerca acum sau poți confirma comanda telefonic cu un singur click.",
     "retryOrderBtn": "Reîncearcă Plasarea Comenzii",
     "callRestaurantBtn": "📞 Sună la Restaurant (+373 79 006 499)",
-    "applyingPromo": "Se verifică..."
+    "applyingPromo": "Se verifică...",
+    "confirmPhoneModalTitle": "Confirmă Numărul de Telefon",
+    "confirmPhoneModalSubtitle": "Te vom apela pe acest număr în 2-3 minute pentru a confirma adresa și pregătirea comenzii:",
+    "confirmPhoneModalBtn": "Da, numărul e corect — Trimite Comanda",
+    "confirmPhoneModalEdit": "Modifică numărul",
+    "confirmPhoneModalNotice": "Te rugăm să verifici cu atenție cifrele pentru a putea primi comanda caldă."
+  },
+  "MobileCartBar": {
+    "viewCart": "Vezi Coșul",
+    "finalizeOrder": "Finalizează Comanda",
+    "itemsCount": "{count} {count, plural, one {produs} few {produse} other {produse}}"
   },
   "LiveStore": {
     "openNow": "Deschis Acum",

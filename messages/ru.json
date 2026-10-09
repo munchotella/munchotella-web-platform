@@ -207,7 +207,17 @@
     "networkErrorDesc": "Ваш заказ сохранен в корзине. Вы можете повторить попытку сейчас или подтвердить заказ по телефону в один клик.",
     "retryOrderBtn": "Повторить оформление заказа",
     "callRestaurantBtn": "📞 Позвонить в ресторан (+373 79 006 499)",
-    "applyingPromo": "Проверяем..."
+    "applyingPromo": "Проверяем...",
+    "confirmPhoneModalTitle": "Подтвердите номер телефона",
+    "confirmPhoneModalSubtitle": "Мы позвоним вам по этому номеру через 2-3 минуты для подтверждения адреса и начала приготовления:",
+    "confirmPhoneModalBtn": "Да, номер верный — Отправить заказ",
+    "confirmPhoneModalEdit": "Изменить номер",
+    "confirmPhoneModalNotice": "Пожалуйста, внимательно проверьте цифры, чтобы получить десерт свежим и горячим."
+  },
+  "MobileCartBar": {
+    "viewCart": "Открыть корзину",
+    "finalizeOrder": "Оформить заказ",
+    "itemsCount": "{count} {count, plural, one {товар} few {товара} other {товаров}}"
   },
   "LiveStore": {
     "openNow": "Открыто сейчас",

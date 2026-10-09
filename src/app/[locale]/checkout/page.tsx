@@ -20,6 +20,8 @@ import {
   FileText,
   ChevronDown,
   Smartphone,
+  PhoneCall,
+  Edit3,
   X,
   Loader2
 } from "lucide-react";
@@ -304,6 +306,9 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
+
+  // Modal confirmare vizuală număr de telefon (fricțiune minimă fără SMS)
+  const [isPhoneConfirmModalOpen, setIsPhoneConfirmModalOpen] = useState(false);
 
   // OTP states for guest cash orders
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
@@ -961,16 +966,29 @@ export default function CheckoutPage() {
       }
     }
 
-    // Cerință de securitate: Orice client oaspete (GUEST / nelogat sau fără telefon verificat)
-    // este obligat să își confirme numărul prin SMS OTP atât la plata CASH, cât și la plata CARD
+    // Optimizare conversie: La plata Cash / POS la livrare, eliminăm blocajul SMS OTP
+    // și folosim confirmarea vizuală a numărului cu apel de confirmare.
+    // Clientul verifică cifrele pe ecran și comanda este plasată fără întârziere.
     const isGuestOrder = !user || !user.isPhoneVerified;
     if (isGuestOrder) {
+      if (paymentMethod === "cash" || paymentMethod === "pos") {
+        setIsPhoneConfirmModalOpen(true);
+        return;
+      }
+      
+      // Pentru plăți online cu cardul sau excepții, se păstrează verificarea SMS
       const sent = await triggerOtpSms();
       if (!sent) return;
       return;
     }
 
     await executePlaceOrder();
+  };
+
+  const handleConfirmPhoneAndPlaceOrder = async () => {
+    setIsPhoneConfirmModalOpen(false);
+    // unverifiedPhone: true marchează comanda pentru confirmare telefonică de către dispecer
+    await executePlaceOrder(token || undefined, true);
   };
 
   const handleVerifyOtpAndPlaceOrder = async (e: React.FormEvent) => {
@@ -2295,6 +2313,110 @@ export default function CheckoutPage() {
           setAddressError("");
         }}
       />
+
+      {/* Modal Confirmare Vizuală Număr de Telefon pentru Comenzi Cash */}
+      {isMounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isPhoneConfirmModalOpen && (
+            <div className="fixed inset-0 z-[100] overflow-y-auto">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => !isSubmitting && setIsPhoneConfirmModalOpen(false)}
+                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
+              />
+
+              <div className="flex min-h-full items-center justify-center p-4 py-8 text-center relative z-[101]">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  className="relative w-full max-w-md bg-[#FCF9F4] rounded-[28px] border border-[#E8E2D9] p-6 sm:p-8 shadow-2xl text-left"
+                >
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    onClick={() => !isSubmitting && setIsPhoneConfirmModalOpen(false)}
+                    aria-label="Închide"
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer shadow-sm z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+
+                  {/* Header */}
+                  <div className="flex flex-col items-center text-center mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-[#D4A853]/15 border border-[#D4A853]/30 flex items-center justify-center mb-3 text-[#D4A853]">
+                      <PhoneCall className="w-7 h-7" />
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold text-[#1A120B]">
+                      {t('confirmPhoneModalTitle')}
+                    </h3>
+                    <p className="text-xs text-[#736A60] mt-1.5 leading-relaxed max-w-xs">
+                      {t('confirmPhoneModalSubtitle')}
+                    </p>
+                  </div>
+
+                  {/* Big Phone Number Display Card */}
+                  <div className="my-5 p-4 rounded-2xl bg-white border-2 border-[#D4A853] shadow-sm text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C6B1B] block mb-1">
+                      Număr Contact Livrare
+                    </span>
+                    <p className="font-mono text-2xl sm:text-3xl font-extrabold text-[#1A120B] tracking-wide">
+                      {selectedCountry.dialCode} {formData.phone}
+                    </p>
+                    <p className="text-[11px] text-[#736A60] mt-2 flex items-center justify-center gap-1">
+                      <span>📍 {formData.street || "Preluare din Boutique"}</span>
+                    </p>
+                  </div>
+
+                  {/* Warning notice */}
+                  <p className="text-[11px] text-[#8C6B1B] bg-amber-50/70 border border-amber-200/60 rounded-xl p-2.5 mb-5 text-center leading-relaxed">
+                    💡 {t('confirmPhoneModalNotice')}
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={handleConfirmPhoneAndPlaceOrder}
+                      className="w-full py-4 rounded-full bg-[#1A120B] text-white font-bold text-sm hover:bg-[#D4A853] hover:text-[#1A120B] active:scale-[0.99] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{t('sendingOrder')}</span>
+                        </>
+                      ) : (
+                        <span>{t('confirmPhoneModalBtn')}</span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => {
+                        setIsPhoneConfirmModalOpen(false);
+                        setActiveStep(1);
+                        setTimeout(() => {
+                          phoneInputRef.current?.focus();
+                        }, 100);
+                      }}
+                      className="w-full py-2.5 text-center text-xs font-semibold text-[#736A60] hover:text-[#1A120B] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>{t('confirmPhoneModalEdit')}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* OTP Verification Modal for Guest Cash Orders */}
       {isMounted && typeof document !== "undefined" && createPortal(
