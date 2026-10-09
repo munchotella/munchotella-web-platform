@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
 
 const languages = [
@@ -19,6 +19,7 @@ interface LanguageSwitcherProps {
 
 export default function LanguageSwitcher({ isScrolled = true, className = "" }: LanguageSwitcherProps) {
   const locale = useLocale();
+  const t = useTranslations("Header");
   const router = useRouter();
   const pathname = usePathname();
   
@@ -51,7 +52,7 @@ export default function LanguageSwitcher({ isScrolled = true, className = "" }: 
             ? "bg-[#FAF7F2] text-[#1A120B] border-transparent hover:border-[#E8E2D9] hover:text-[#D4A853]" 
             : "bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-[#D4A853] backdrop-blur-sm"
         }`}
-        aria-label="Schimbă limba"
+        aria-label={t('ariaChangeLanguage')}
       >
         <span className="uppercase">{locale}</span>
         <ChevronDown size={13} className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />

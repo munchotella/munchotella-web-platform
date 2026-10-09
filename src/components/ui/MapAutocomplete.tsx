@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 import { Autocomplete } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/context/GoogleMapsContext";
+import { useTranslations } from "next-intl";
 
 export interface PlaceSelectionMeta {
   isGenericCity?: boolean;
@@ -69,10 +70,12 @@ export default function MapAutocomplete({
   value,
   onChange,
   onPlaceSelected,
-  placeholder = "Caută adresa...",
+  placeholder,
   className = "",
   required = false
 }: MapAutocompleteProps) {
+  const t = useTranslations("MapPicker");
+  const displayPlaceholder = placeholder || t("defaultAddressPlaceholder");
   const { isLoaded, loadError } = useGoogleMaps();
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -157,7 +160,7 @@ export default function MapAutocomplete({
   };
 
   if (loadError) {
-    return <div className="text-red-500">Eroare la încărcarea hărții Google.</div>;
+    return <div className="text-red-500">{t("loadError")}</div>;
   }
 
   return (
@@ -179,7 +182,7 @@ export default function MapAutocomplete({
               value={inputValue}
               onChange={handleInputChange}
               onBlur={handleBlur}
-              placeholder={placeholder}
+              placeholder={displayPlaceholder}
               className={className}
               required={required}
               autoComplete="off"
@@ -188,7 +191,7 @@ export default function MapAutocomplete({
           {isGeocoding && (
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center gap-1 bg-white/90 px-2 py-0.5 rounded-md shadow-sm border border-[#E8E2D9]">
               <Loader2 className="w-3.5 h-3.5 text-[#D4A853] animate-spin" />
-              <span className="text-[10px] font-semibold text-[#736A60]">Localizare...</span>
+              <span className="text-[10px] font-semibold text-[#736A60]">{t("locating")}</span>
             </div>
           )}
         </div>
@@ -198,7 +201,7 @@ export default function MapAutocomplete({
             type="text"
             value={inputValue}
             onChange={handleInputChange}
-            placeholder="Se încarcă Google Maps..."
+            placeholder={t("loadingMaps")}
             className={className}
             disabled
           />

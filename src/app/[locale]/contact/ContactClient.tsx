@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { ChevronLeft, Phone, MapPin, Clock, Send, ShoppingBag, CheckCircle2, ArrowUpRight, MessageSquare, Heart, ThumbsUp, Share2, Smartphone, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimateIn } from "@/components/ui/AnimateIn";
@@ -45,7 +44,7 @@ export default function ContactClient() {
       }
 
       if (!/^[67]\d{7}$/.test(localDigits)) {
-        alert("Acceptăm exclusiv numere din Republica Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).");
+        alert(t('moldovaPhoneOnly'));
         setIsSending(false);
         return;
       }
@@ -64,7 +63,7 @@ export default function ContactClient() {
       }
     } catch (error) {
       console.error("Error triggering OTP:", error);
-      alert("A apărut o eroare la trimiterea SMS-ului. Te rog să încerci din nou.");
+      alert(t('smsSendError'));
       setIsSending(false);
     }
   };
@@ -93,11 +92,11 @@ export default function ContactClient() {
           setView('form');
         }, 4000);
       } else {
-        setErrorMsg("A apărut o eroare la salvarea mesajului.");
+        setErrorMsg(t('saveMessageError'));
       }
     } catch (error) {
       console.error("Cod incorect:", error);
-      setErrorMsg("Codul SMS introdus este incorect.");
+      setErrorMsg(t('invalidOtp'));
     } finally {
       setIsSending(false);
     }
@@ -171,8 +170,8 @@ export default function ContactClient() {
                       </div>
                       <div>
                         <h4 className="font-serif text-base sm:text-lg font-bold text-[#1A120B]">{t('scheduleTitle')}</h4>
-                        <p className="text-xs sm:text-sm font-light text-[#736A60]">Luni - Duminică: 16:00 - 00:00</p>
-                        <p className="text-[11px] text-[#D4A853] font-bold mt-0.5">Miercuri: Închis</p>
+                        <p className="text-xs sm:text-sm font-light text-[#736A60]">{t('scheduleTime')}</p>
+                        <p className="text-[11px] text-[#D4A853] font-bold mt-0.5">{t('scheduleClosed')}</p>
                       </div>
                     </div>
                   </div>
@@ -240,7 +239,7 @@ export default function ContactClient() {
                         transition={{ delay: 0.7, duration: 0.5 }}
                         className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3 z-10"
                       >
-                        {t('messageSent') || "Mesaj trimis!"}
+                        {t('messageSent')}
                       </motion.h4>
                       
                       <motion.p 
@@ -249,7 +248,7 @@ export default function ContactClient() {
                         transition={{ delay: 0.9, duration: 0.5 }}
                         className="text-base md:text-lg text-[#736A60] font-light max-w-sm mx-auto z-10"
                       >
-                        {t('messageSentDesc') || "Îți mulțumim! Te vom contacta în cel mai scurt timp posibil."}
+                        {t('messageSentDesc')}
                       </motion.p>
                     </motion.div>
                   ) : view === 'otp' ? (
@@ -293,7 +292,7 @@ export default function ContactClient() {
                           disabled={isSending || otpCode.length < 6}
                           className={`w-full text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${isSending || otpCode.length < 6 ? 'bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed' : 'bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] hover:shadow-xl hover:-translate-y-0.5'}`}
                         >
-                          <span>{isSending ? (t('submittingReview') || 'Se verifică...') : (t('verifyCode') || 'Confirmă și Trimite')}</span>
+                          <span>{isSending ? t('verifying') : t('verifyCode')}</span>
                           {!isSending && <CheckCircle2 className="w-4 h-4" />}
                         </button>
 
@@ -306,7 +305,7 @@ export default function ContactClient() {
                           }}
                           className="w-full text-center text-xs font-bold uppercase tracking-widest text-[#736A60] hover:text-[#D4A853] transition-colors py-2 block"
                         >
-                          ← Înapoi la completare date
+                          {t('backToEdit')}
                         </button>
                       </form>
                     </motion.div>

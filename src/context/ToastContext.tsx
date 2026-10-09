@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Toast {
   id: number;
@@ -18,6 +19,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 let toastCount = 0;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("Notifications");
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((message: string) => {
@@ -55,7 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <span className="text-[13px] sm:text-[14px] font-medium mr-2 flex-1">{toast.message}</span>
               <button 
                 onClick={() => removeToast(toast.id)}
-                aria-label="Închide notificarea"
+                aria-label={t('ariaCloseNotification')}
                 className="text-white/40 hover:text-white transition-colors p-1 min-w-[32px] min-h-[32px] flex items-center justify-center cursor-pointer ml-auto shrink-0"
               >
                 <X size={16} />

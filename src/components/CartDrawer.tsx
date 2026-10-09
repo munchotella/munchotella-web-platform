@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ChevronLeft, CreditCard, Banknote, CheckCircle, MapPin, Smartphone } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useCart } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { translateTopping } from "@/utils/toppingTranslations";
@@ -13,6 +13,7 @@ import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
+import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
 
 const libraries: any[] = ["places"];
 
@@ -55,6 +56,15 @@ export default function CartDrawer() {
   };
 
   const handleCheckout = () => {
+    trackInitiateCheckout(
+      items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      totalPrice
+    );
     setIsCartOpen(false);
     router.push("/checkout");
   };
@@ -103,6 +113,12 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
         return;
       }
       // Direct order placement fallback for Cash on Delivery
+      trackPurchase(
+        `drawer-${Date.now()}`,
+        items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+        totalPrice,
+        { name: formData.name, phone: formData.phone }
+      );
       setIsSubmitting(false);
       setView('success');
       setTimeout(() => {
@@ -111,6 +127,12 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
       }, 3500);
     } catch (error: any) {
       console.warn("SMS verification bypassed, confirming cash order directly:", error);
+      trackPurchase(
+        `drawer-${Date.now()}`,
+        items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+        totalPrice,
+        { name: formData.name, phone: formData.phone }
+      );
       setIsSubmitting(false);
       setView('success');
       setTimeout(() => {
@@ -128,6 +150,12 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
 
     try {
       await confirmationResult.confirm(otpCode);
+      trackPurchase(
+        `drawer-${Date.now()}`,
+        items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+        totalPrice,
+        { name: formData.name, phone: formData.phone }
+      );
       setIsSubmitting(false);
       setView('success');
       setTimeout(() => {
@@ -166,7 +194,7 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
             <div className="flex items-center justify-between px-5 py-4 sm:p-6 border-b border-[#E8E2D9] bg-white shrink-0">
               <div className="flex items-center gap-2 sm:gap-3">
                 {(view === 'checkout' || view === 'otp') ? (
-                  <button onClick={() => setView(view === 'otp' ? 'checkout' : 'cart')} className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#F5F2EC] rounded-full transition-colors mr-1 cursor-pointer" aria-label="Înapoi">
+                  <button onClick={() => setView(view === 'otp' ? 'checkout' : 'cart')} className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#F5F2EC] rounded-full transition-colors mr-1 cursor-pointer" aria-label={t('ariaBack')}>
                     <ChevronLeft className="w-5 h-5 text-[#1A120B]" />
                   </button>
                 ) : (
@@ -178,7 +206,7 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
               </div>
               <button
                 onClick={handleClose}
-                aria-label="Închide coșul"
+                aria-label={t('ariaCloseCart')}
                 className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[#F5F2EC] rounded-full transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5 text-[#4e4540]" />
@@ -212,7 +240,7 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
                               <h3 className="font-serif text-lg text-[#1A120B] font-medium leading-tight">{item.name}</h3>
                               <button
                                 onClick={() => removeFromCart(item.cartItemId)}
-                                aria-label="Șterge produsul"
+                                aria-label={t('ariaRemoveItem')}
                                 className="text-[#736A60] hover:text-red-500 transition-colors p-2 min-w-[36px] min-h-[36px] flex items-center justify-center -mr-2 -mt-2 cursor-pointer"
                               >
                                 <X className="w-4 h-4" />
@@ -237,7 +265,7 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
                               <div className="flex items-center bg-[#F5F2EC] rounded-full p-1 border border-[#E8E2D9]">
                                 <button
                                   onClick={() => updateQuantity(item.cartItemId, -1)}
-                                  aria-label="Scade cantitatea"
+                                  aria-label={t('ariaDecreaseQty')}
                                   className="w-8 h-8 min-w-[32px] min-h-[32px] sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] active:scale-95 transition-all cursor-pointer"
                                 >
                                   <Minus className="w-3.5 h-3.5" />
@@ -245,7 +273,7 @@ const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/
                                 <span className="w-8 text-center text-sm font-bold text-[#1A120B]">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.cartItemId, 1)}
-                                  aria-label="Crește cantitatea"
+                                  aria-label={t('ariaIncreaseQty')}
                                   className="w-8 h-8 min-w-[32px] min-h-[32px] sm:w-9 sm:h-9 flex items-center justify-center bg-white rounded-full text-[#1A120B] shadow-sm hover:bg-[#E8E2D9] active:scale-95 transition-all cursor-pointer"
                                 >
                                   <Plus className="w-3.5 h-3.5" />

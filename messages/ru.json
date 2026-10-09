@@ -16,7 +16,8 @@
     "badgeSpecialty": "Фирменное блюдо",
     "deluxCrepeDesc": "Нежный французский блинчик, щедро наполненный Nutella®, белым бельгийским шоколадом, Oreo, печеньем Lotus, арахисом и Kinder Bueno.",
     "deluxWaffleDesc": "16 нежных мини-вафель, политых теплой Nutella®, белым бельгийским шоколадом и топпингами на выбор (Oreo и Kinder Bueno).",
-    "lotusMiniWaffleDesc": "Нежные мини-вафли, покрытые нежным карамелизированным кремом Lotus Biscoff и посыпанные хрустящим печеньем."
+    "lotusMiniWaffleDesc": "Нежные мини-вафли, покрытые нежным карамелизированным кремом Lotus Biscoff и посыпанные хрустящим печеньем.",
+    "googleReviewBadge": "Отзыв Google"
   },
   "Hero": {
     "title1": "Сладкое искусство,",
@@ -29,7 +30,8 @@
     "video2Subtitle": "Тонкие блинчики, Nutella и свежие фрукты",
     "video3Title": "Delux и Lotus Mini Waffles",
     "video3Subtitle": "Карамелизированная паста Biscoff и белый шоколад",
-    "tapToPlay": "Воспроизвести"
+    "tapToPlay": "Воспроизвести",
+    "ariaSelectShot": "Выбрать кадр {number}"
   },
   "Process": {
     "sectionTitle": "Как мы готовим ваш десерт?",
@@ -53,7 +55,17 @@
     "section3Subtitle": "Наша Команда",
     "section3Title": "Люди, стоящие за Munchotella",
     "quote": "\"Munchotella родилась из простого желания съесть по-настоящему хороший десерт, с большим количеством шоколада и качественными ингредиентами. Мы не хотели изобретать велосипед, мы просто хотели сделать лучшую вафлю, которую вы когда-либо ели.\"",
-    "quoteAuthor": "— Семья Munchotella"
+    "quoteAuthor": "— Семья Munchotella",
+    "teamImageAlt": "Команда Munchotella",
+    "timelineTitle": "Развитие Munchotella",
+    "timeline2023Title": "Как зародилась идея",
+    "timeline2023Desc": "Всё началось просто: мы поняли, что в Кишинёве трудно найти по-настоящему вкусный блинчик с оригинальным шоколадом, а не дешёвыми разбавленными кремами.",
+    "timeline2024Title": "Первые рецепты",
+    "timeline2024Desc": "Последовали месяцы на кухне, пока мы не нашли идеальные пропорции, чтобы вафля получалась слегка хрустящей снаружи и невероятно воздушной внутри.",
+    "timelineTodayBadge": "Сегодня",
+    "timelineTodayTitle": "Сегодня в Munchotella",
+    "timelineTodayDesc": "Ждём вас в нашем заведении, где мы готовим каждый заказ на месте, прямо перед вами. Наша миссия неизменна: сделать ваш день слаще с честным и качественным десертом.",
+    "viewMenuBtn": "Посмотреть наше меню"
   },
   "Menu": {
     "metaTitle": "Ремесленное Меню и Цены — Вафли, Блинчики | Munchotella",
@@ -185,7 +197,17 @@
     "phoneInvalidFormat": "Принимаются только номера Молдовы (+373) из 8 цифр (напр. 069 123 456 или 079 123 456).",
     "addressRequired": "Пожалуйста, введите адрес доставки или выберите его на карте.",
     "addressTooGeneric": "Пожалуйста, укажите точный адрес (улицу и номер дома, а не только город).",
-    "orderSubmitError": "Произошла ошибка при отправке заказа. Пожалуйста, попробуйте еще раз."
+    "orderSubmitError": "Произошла ошибка при отправке заказа. Пожалуйста, попробуйте еще раз.",
+    "ariaCloseSms": "Закрыть проверку SMS",
+    "otpCallFallbackBtn": "📞 Отправить заказ с подтверждением по звонку",
+    "otpNoSmsCallFallback": "Не пришло SMS? Подтвердить заказ по телефонному звонку",
+    "orderConnectingKitchen": "Связываемся с кухней...",
+    "orderSlowNetworkProcessing": "Медленное соединение, обрабатываем заказ...",
+    "networkErrorTitle": "Соединение прервано",
+    "networkErrorDesc": "Ваш заказ сохранен в корзине. Вы можете повторить попытку сейчас или подтвердить заказ по телефону в один клик.",
+    "retryOrderBtn": "Повторить оформление заказа",
+    "callRestaurantBtn": "📞 Позвонить в ресторан (+373 79 006 499)",
+    "applyingPromo": "Проверяем..."
   },
   "LiveStore": {
     "openNow": "Открыто сейчас",
@@ -204,7 +226,11 @@
     "story": "История",
     "myProfile": "Мой Профиль",
     "myAccount": "Мой Аккаунт",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "ariaCart": "Корзина покупок",
+    "ariaOpenMenu": "Открыть мобильное меню",
+    "ariaCloseMenu": "Закрыть мобильное меню",
+    "ariaChangeLanguage": "Сменить язык"
   },
   "Profile": {
     "hello": "Привет",
@@ -227,7 +253,10 @@
     "reviewSuccess": "Спасибо за ваш отзыв!",
     "reviewError": "Ошибка при отправке отзыва.",
     "activeOrder": "Активный заказ",
+    "orderReceived": "Заказ принят",
     "orderPreparing": "Заказ готовится",
+    "orderReady": "Заказ готов",
+    "orderOnTheWay": "Заказ в пути",
     "orderReadyIn": "Готов через",
     "trackLive": "Следить в реальном времени",
     "recentOrders": "Последние заказы",
@@ -241,7 +270,13 @@
     "orderAgain": "Заказать снова",
     "youGaveStars": "Вы поставили {rating}/5 звезд",
     "leaveReview": "Оставить отзыв",
-    "viewTracking": "Следить за заказом"
+    "viewTracking": "Следить за заказом",
+    "reviewOrderTitle": "Как прошёл ваш заказ?",
+    "reviewOrderNumber": "Заказ",
+    "reviewCommentOptional": "Ваш отзыв (необязательно)",
+    "cancel": "Отмена",
+    "reviewSaved": "Отзыв успешно сохранён!",
+    "rateStarAria": "Поставить {rating} звёзд"
   },
   "Global": {
     "continue": "Продолжить",
@@ -249,14 +284,16 @@
     "cancel": "Отмена",
     "save": "Сохранить",
     "addBtn": "Добавить",
-    "currency": "MDL"
+    "currency": "MDL",
+    "moldovaOnlyTooltip": "Доставка и контакты исключительно по Республике Молдова (+373)"
   },
   "Categories": {
     "Toate": "Все",
     "Băuturi": "Напитки",
     "Specialități": "Спецпредложения",
     "Waffles": "Вафли",
-    "Crepes": "Блины"
+    "Crepes": "Блины",
+    "Pancakes": "Панкейки"
   },
   "Contact": {
     "metaTitle": "Контакты и Локация Бутика в Кишинёве | Munchotella",
@@ -289,7 +326,13 @@
     "socialMedia": "Следите за нами",
     "follow": "Подписаться",
     "tiktokDesc": "Смотрите наши десерты и закулисье.",
-    "dessertRestaurant": "Десертный ресторан"
+    "dessertRestaurant": "Десертный ресторан",
+    "moldovaPhoneOnly": "Мы принимаем исключительно номера Республики Молдова (+373) из 8 цифр (напр. 069 123 456 или 079 123 456).",
+    "smsSendError": "Произошла ошибка при отправке SMS. Пожалуйста, попробуйте еще раз.",
+    "saveMessageError": "Произошла ошибка при сохранении сообщения.",
+    "invalidOtp": "Введен неверный SMS-код.",
+    "backToEdit": "← Назад к заполнению данных",
+    "verifying": "Проверка..."
   },
   "AddressManager": {
     "confirmDelete": "Вы уверены, что хотите удалить этот адрес?",
@@ -311,7 +354,8 @@
     "gpsSaved": "✓ GPS координаты сохранены",
     "saving": "Сохранение...",
     "saveAddress": "Сохранить адрес",
-    "saveError": "Ошибка при сохранении адреса"
+    "saveError": "Ошибка при сохранении адреса",
+    "closeModal": "Закрыть окно"
   },
   "AccountSettings": {
     "imageTooLarge": "Изображение слишком велико. Максимально допустимый размер - 5МБ.",
@@ -392,7 +436,24 @@
     "directLine": "Прямая линия Concierge",
     "copiedToClipboard": "Номер скопирован в буфер:",
     "boutiqueAddress": "ул. Николае Тестемицану 21/1, Кишинёв",
-    "boutiqueHours": "Понедельник – Воскресенье: 16:00 – 00:00 (Среда: Выходной)"
+    "boutiqueHours": "Понедельник – Воскресенье: 16:00 – 00:00 (Среда: Выходной)",
+    "orderNotFoundTitle": "Ой!",
+    "orderNotFound": "Заказ не найден.",
+    "orderLoadError": "Ошибка при загрузке заказа.",
+    "goToMenu": "Перейти в меню",
+    "pickupFree": "Бесплатный самовывоз из бутика",
+    "pickupTitle": "Самовывоз из бутика",
+    "pickupDesc": "Ждем вас в нашем бутике по адресу ул. Николае Тестемицану 21/1!",
+    "helpCancelledTitle": "Нужна помощь с этим заказом?",
+    "helpCancelledDesc": "Наша служба поддержки готова ответить на любые вопросы по отмененному заказу.",
+    "closeBannerAria": "Закрыть баннер уведомлений",
+    "closeAria": "Закрыть",
+    "checkingOrderProgress": "Проверяем статус заказа...",
+    "trackingRetryPrompt": "Медленное соединение. Повторяем попытку связи...",
+    "trackingRetryBtn": "Повторить проверку",
+    "trackingPhoneFallback": "📞 Позвонить в ресторан (+373 79 006 499)",
+    "trackingPendingSyncTitle": "Заказ обрабатывается",
+    "trackingPendingSyncDesc": "Ваш заказ передан на кухню, но интернет-соединение замедлено. Вы можете повторить проверку или позвонить напрямую в ресторан для мгновенного подтверждения."
   },
   "Legal": {
     "title": "Юридическая информация | Munchotella",
@@ -437,7 +498,8 @@
     "address2": "Кишинев, Республика Молдова",
     "scheduleTitle": "График работы",
     "schedule1": "Понедельник - Воскресенье: 16:00 - 00:00",
-    "schedule2": "Среда: Закрыто"
+    "schedule2": "Среда: Закрыто",
+    "mapIframeTitle": "Карта расположения Munchotella"
   },
   "Toppings": {
     "extraNutella": "Nutella®",
@@ -457,7 +519,8 @@
     "customize": "Настройте свой десерт",
     "optional": "Опционально",
     "quantity": "Количество",
-    "addToCart": "В Корзину"
+    "addToCart": "В Корзину",
+    "ariaCloseModal": "Закрыть окно"
   },
   "CartDrawer": {
     "incorrectCode": "Введен неверный код.",
@@ -485,7 +548,12 @@
     "contactShortly": "Мы свяжемся с вами в ближайшее время для подтверждения.",
     "subtotal": "Подытог",
     "toCheckout": "К оформлению",
-    "confirmOrder": "Подтвердить заказ"
+    "confirmOrder": "Подтвердить заказ",
+    "ariaBack": "Назад",
+    "ariaCloseCart": "Закрыть корзину",
+    "ariaRemoveItem": "Удалить товар",
+    "ariaDecreaseQty": "Уменьшить количество",
+    "ariaIncreaseQty": "Увеличить количество"
   },
   "Notifications": {
     "title": "Уведомления",
@@ -500,7 +568,9 @@
     "viewOrder": "Посмотреть заказ",
     "notifOrderPreparingBody": "Ваш заказ сейчас готовится.",
     "notifOrderDeliveredBody": "Ваш заказ доставлен! Приятного аппетита.",
-    "notifOrderCancelledBody": "Ваш заказ был отменен."
+    "notifOrderCancelledBody": "Ваш заказ был отменен.",
+    "ariaCloseNotifications": "Закрыть уведомления",
+    "ariaCloseNotification": "Закрыть уведомление"
   },
   "Redirect": {
     "redirectingReviews": "Перенаправление на отзывы..."
@@ -520,7 +590,14 @@
     "schedule": "График работы",
     "scheduleTime": "Понедельник - Воскресенье: 16:00 - 00:00",
     "scheduleClosed": "Среда: Закрыто",
-    "rights": "Все права защищены."
+    "rights": "Все права защищены.",
+    "securePaymentMethods": "Безопасные способы оплаты:",
+    "sslSecured": "256-битный SSL • Партнёр maib",
+    "instagramAria": "Наша страница в Instagram",
+    "facebookAria": "Наша страница в Facebook",
+    "tiktokAria": "Наша страница в TikTok",
+    "miaTitle": "MIA Мгновенные платежи — 0% Комиссия",
+    "zeroCommission": "0% комиссия"
   },
   "FAQ": {
     "badge": "БЫСТРЫЕ ОТВЕТЫ",
@@ -672,5 +749,133 @@
     "deletingAccount": "Удаление данных с серверов...",
     "accountDeletedSuccess": "Ваш аккаунт был окончательно удалён. Спасибо за каждый сладкий момент, проведённый с Munchotella!",
     "farewellNote": "Если вам снова захочется аромата горячих вафель прямо из вафельницы, с тёплой Nutella® и свежеобжаренной фисташкой — двери нашей кухни на ул. Николае Тестемицану 21/1 в Кишинёве всегда открыты."
+  },
+  "StickyBar": {
+    "viewOrder": "Посмотреть заказ",
+    "openCart": "Открыть корзину"
+  },
+  "CheckoutSuccess": {
+    "badge": "Оплата успешно подтверждена",
+    "title": "Спасибо за ваш заказ!",
+    "description": "Транзакция была безопасно обработана и подтверждена через шлюз <strong>maib</strong>. Кухня Munchotella уже начала готовить ваши десерты!",
+    "merchant": "Продавец:",
+    "orderNumber": "Номер заказа:",
+    "maibTransactionId": "ID транзакции maib:",
+    "loading": "Загрузка деталей заказа...",
+    "transactionDate": "Дата транзакции:",
+    "amountPaid": "Оплаченная сумма:",
+    "orderedProducts": "Заказанные товары:",
+    "paymentStatus": "Статус оплаты:",
+    "statusCompleted": "Подтверждено",
+    "backToMenu": "Вернуться в меню",
+    "deliveryDetails": "Детали доставки",
+    "secureProcessor": "Безопасный процессинг платежей"
+  },
+  "CheckoutFail": {
+    "badge": "Транзакция не подтверждена",
+    "title": "Оплата не была завершена",
+    "description": "Транзакция была отменена или не смогла быть авторизована банком-эмитентом карты. Средства с вашего счета не списывались.",
+    "orderReference": "Номер заказа:",
+    "maibSessionId": "ID сессии maib:",
+    "tryAgain": "Попробовать снова",
+    "backToMenu": "Вернуться в меню",
+    "paymentNotice": "Вы можете оплатить картой, Apple Pay, Google Pay или MIA"
+  },
+  "Auth": {
+    "titleName": "Как вас зовут?",
+    "subName": "Укажите ваше имя для заказов",
+    "titleTerms": "Условия и положения",
+    "subTerms": "Ознакомьтесь и примите политику Munchotella",
+    "titleForgot": "Восстановление пароля",
+    "subForgotPhone": "Введите номер телефона для получения временного пароля",
+    "subForgotEmail": "Введите адрес эл. почты для восстановления",
+    "titleWelcome": "С возвращением",
+    "subWelcome": "Войдите в свой аккаунт Munchotella",
+    "titleRegister": "Стать участником",
+    "subRegister": "Присоединяйтесь к нашему сладкому сообществу",
+    "closeModal": "Закрыть окно",
+    "continueGoogle": "Продолжить с Google",
+    "continueFacebook": "Продолжить с Facebook",
+    "orDivider": "или",
+    "placeholderFirstName": "Имя (напр: Мария)",
+    "placeholderLastName": "Фамилия (напр: Попеску)",
+    "placeholderFullName": "Полное имя (напр: Мария Попеску)",
+    "placeholderEmail": "Адрес эл. почты",
+    "placeholderPassword": "Пароль",
+    "placeholderOtp": "6-значный OTP код",
+    "nextStep": "Следующий шаг",
+    "finishRegistration": "Завершить регистрацию",
+    "loginBtn": "Войти",
+    "registerBtn": "Создать аккаунт",
+    "confirmBtn": "Подтвердить",
+    "verifyCodeBtn": "Проверить код",
+    "forgotPasswordLink": "Забыли пароль?",
+    "backToPhone": "Назад к телефону",
+    "backToLogin": "Назад ко входу",
+    "goToLogin": "Перейти ко входу",
+    "tabPhone": "Номер телефона",
+    "tabEmail": "Email",
+    "noAccount": "Еще нет аккаунта?",
+    "createOne": "Создать",
+    "haveAccount": "Уже есть аккаунт?",
+    "signIn": "Войти",
+    "termsConsentPre": "Пожалуйста, подтвердите согласие с ",
+    "termsLinkText": "Условиями и положениями",
+    "termsConsentAnd": " и ",
+    "privacyLinkText": "Политикой конфиденциальности",
+    "termsConsentPost": " Munchotella.",
+    "agreeTerms": "Я согласен с Условиями и Положениями",
+    "chooseRecoveryMethod": "Как вы хотите восстановить пароль?",
+    "viaSms": "По SMS",
+    "viaEmail": "По Email",
+    "otpSentNote": "Мы отправили 6-значный код на ваш телефон.",
+    "recoverySuccess": "Восстановление успешно!",
+    "tempPasswordLabel": "Ваш временный пароль:",
+    "tempPasswordNote": "Используйте этот пароль для входа, затем смените его в профиле.",
+    "checkEmailTitle": "Проверьте вашу почту",
+    "tempPasswordSentEmail": "Временный пароль успешно отправлен!",
+    "errSocial": "Ошибка входа через соцсети.",
+    "errGeneric": "Что-то пошло не так. Попробуйте снова.",
+    "errPhoneRequired": "Пожалуйста, введите номер телефона.",
+    "errForgotInit": "Не удалось начать восстановление пароля.",
+    "errSmsSend": "Ошибка отправки SMS. Проверьте номер и попробуйте снова.",
+    "errOtpRequired": "Введите 6-значный код.",
+    "errOtpInvalid": "Неверный или просроченный код.",
+    "errNameRequired": "Пожалуйста, заполните имя и фамилию.",
+    "errTermsRequired": "Необходимо принять Условия для продолжения.",
+    "errRegisterFailed": "Не удалось завершить регистрацию.",
+    "successPasswordReset": "Пароль успешно сброшен!",
+    "forceChangeTitle": "Смена пароля",
+    "forceChangeSubtitle": "Вы вошли с временным паролем. Установите новый пароль для безопасности аккаунта.",
+    "newPasswordLabel": "Новый пароль",
+    "confirmPasswordLabel": "Подтвердите новый пароль",
+    "placeholderMin8": "Минимум 8 символов",
+    "placeholderRepeat": "Повторите новый пароль",
+    "saveNewPasswordBtn": "Сохранить новый пароль",
+    "errMin8": "Новый пароль должен содержать не менее 8 символов.",
+    "errMismatch": "Пароли не совпадают.",
+    "errChangeFailed": "Не удалось изменить пароль.",
+    "successChanged": "Пароль успешно изменен!"
+  },
+  "MapPicker": {
+    "loadingMaps": "Загрузка Google Maps...",
+    "backToOrder": "Назад к заказу",
+    "close": "Закрыть",
+    "searchPlaceholder": "Поиск дома, улицы или ориентира...",
+    "toggle3d": "Переключить между спутником и 3D",
+    "satelliteActive": "🛰️ Спутник",
+    "view3d": "🗺️ 3D Вид",
+    "myLocation": "Моё текущее местоположение",
+    "zoomIn": "Приблизить",
+    "zoomOut": "Отдалить",
+    "geocodingBadge": "ОПРЕДЕЛЕНИЕ АДРЕСА...",
+    "selectedBadge": "АДРЕС ДОСТАВКИ ВЫБРАН",
+    "determiningAddress": "Определяется точный адрес...",
+    "selectLocationPrompt": "Выберите точку на карте",
+    "instruction": "Перемещайте карту или нажмите на точку, чтобы установить пин у вашего входа",
+    "confirmAddress": "Подтвердить этот адрес",
+    "defaultAddressPlaceholder": "Поиск адреса...",
+    "loadError": "Ошибка загрузки Google карт.",
+    "locating": "Определение..."
   }
 }

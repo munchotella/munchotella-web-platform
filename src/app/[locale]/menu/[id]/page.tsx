@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ShoppingBag, ChevronLeft, Star, Leaf, Droplets } from "lucide-react";
@@ -9,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { trackViewContent, trackAddToCart } from "@/utils/analytics";
 
 // Mock database
 const products = {
@@ -51,8 +53,15 @@ export default function ProductPage() {
     const found = (products as any)[id];
     
     setTimeout(() => {
-      setProduct(found || products["crepe-dubai"]); // Fallback for demo
+      const activeProd = found || products["crepe-dubai"];
+      setProduct(activeProd);
       setLoading(false);
+      trackViewContent({
+        id: activeProd.id,
+        name: activeProd.name,
+        price: activeProd.price,
+        category: "Crepes",
+      });
     }, 500);
   }, [params]);
 
@@ -72,6 +81,16 @@ export default function ProductPage() {
       quantity: 1,
       image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=600&auto=format&fit=crop" // Mock image
     });
+    trackAddToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: "Crepes",
+      },
+      1,
+      product.price
+    );
   };
 
   return (

@@ -7,8 +7,10 @@ import { AlertCircle, RefreshCw, ShoppingBag, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PaymentBadges from "@/components/PaymentBadges";
+import { useTranslations } from "next-intl";
 
 function FailContent() {
+  const t = useTranslations("CheckoutFail");
   const searchParams = useSearchParams();
   const checkoutId = searchParams.get("checkoutId");
   const orderId = searchParams.get("orderId");
@@ -24,15 +26,15 @@ function FailContent() {
       </div>
 
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E53E3E]/10 text-[#E53E3E] text-xs font-bold uppercase tracking-wider mb-3">
-        Tranzacție Neconfirmată
+        {t('badge')}
       </span>
 
       <h1 className="font-serif text-3xl md:text-4xl font-bold text-[#1A120B] mb-3">
-        Plata nu a fost finalizată
+        {t('title')}
       </h1>
       
       <p className="text-[#736A60] text-sm md:text-base mb-8 max-w-md mx-auto leading-relaxed">
-        Tranzacția a fost anulată sau nu a putut fi autorizată de către banca emitentă a cardului. Niciun fond nu a fost retras din contul tău.
+        {t('description')}
       </p>
 
       {/* Order Details */}
@@ -40,13 +42,13 @@ function FailContent() {
         <div className="bg-white rounded-2xl border border-[#E8E2D9] p-5 mb-8 text-left space-y-3 text-sm shadow-xs">
           {orderId && (
             <div className="flex justify-between items-center py-1 border-b border-[#E8E2D9]/60">
-              <span className="text-[#736A60]">Referință Comandă:</span>
+              <span className="text-[#736A60]">{t('orderReference')}</span>
               <span className="font-mono font-bold text-[#1A120B]">{orderId}</span>
             </div>
           )}
           {checkoutId && (
             <div className="flex justify-between items-center py-1">
-              <span className="text-[#736A60]">ID Sesiune maib:</span>
+              <span className="text-[#736A60]">{t('maibSessionId')}</span>
               <span className="font-mono text-xs text-[#736A60] max-w-[200px] truncate">{checkoutId}</span>
             </div>
           )}
@@ -60,21 +62,21 @@ function FailContent() {
           className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#1A120B] text-white font-bold text-sm hover:bg-[#D4A853] transition-colors flex items-center justify-center gap-2 shadow-lg"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Încearcă din Nou</span>
+          <span>{t('tryAgain')}</span>
         </Link>
         <Link
           href="/menu"
           className="w-full sm:w-auto px-6 py-3.5 rounded-full border border-[#E8E2D9] bg-white text-[#1A120B] font-bold text-sm hover:bg-[#FAF7F2] transition-colors flex items-center justify-center gap-2"
         >
           <ArrowLeft className="w-4 h-4 text-[#736A60]" />
-          <span>Înapoi la Meniu</span>
+          <span>{t('backToMenu')}</span>
         </Link>
       </div>
 
       {/* Footer Badges */}
       <div className="mt-10 pt-6 border-t border-[#E8E2D9]/70 flex flex-col items-center gap-3">
         <span className="text-[11px] uppercase tracking-wider text-[#736A60]/80 font-medium">
-          Poți achita online cu Card, Apple Pay, Google Pay sau MIA
+          {t('paymentNotice')}
         </span>
         <PaymentBadges variant="checkout" />
       </div>

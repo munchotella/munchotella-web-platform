@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, CheckCircle, Clock, ShoppingBag, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 interface Notification {
@@ -152,7 +152,7 @@ export default function NotificationsDropdown({ isScrolled = false }: Notificati
           >
             <div className="bg-[#1A120B] p-4 flex justify-between items-center text-white">
               <h3 className="font-serif font-bold text-lg">{t('title')}</h3>
-              <button onClick={() => setIsOpen(false)} aria-label="Închide notificările" className="text-white/60 hover:text-white transition-colors cursor-pointer">
+              <button onClick={() => setIsOpen(false)} aria-label={t('ariaCloseNotifications')} className="text-white/60 hover:text-white transition-colors cursor-pointer">
                 <X size={18} />
               </button>
             </div>

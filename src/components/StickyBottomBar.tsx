@@ -3,8 +3,10 @@
 import React from "react";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useTranslations } from "next-intl";
 
 export default function StickyBottomBar() {
+  const t = useTranslations("StickyBar");
   const { totalItems, totalPrice, setIsCartOpen } = useCart();
 
   return (
@@ -19,7 +21,7 @@ export default function StickyBottomBar() {
               {totalItems}
             </div>
             <span className="font-bold text-[13px] uppercase tracking-widest flex-1 text-center pl-2">
-              Vezi Comanda
+              {t('viewOrder')}
             </span>
             <span className="font-bold text-[15px] bg-[#FFFDF8]/30 px-3.5 py-1.5 rounded-full backdrop-blur-sm">
               {totalPrice} MDL
@@ -29,7 +31,7 @@ export default function StickyBottomBar() {
           <div className="flex items-center justify-center w-full gap-2 py-1">
             <ShoppingBag className="w-5 h-5 text-[#1A120B]/70" />
             <span className="font-bold text-[15px] uppercase tracking-wide text-[#1A120B]">
-              Deschide Coșul
+              {t('openCart')}
             </span>
           </div>
         )}

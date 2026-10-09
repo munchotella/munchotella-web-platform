@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/context/AuthContext";
 import { useCart, CartItem } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,10 +12,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AddressManager from "@/components/profile/AddressManager";
 import AccountSettings from "@/components/profile/AccountSettings";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { translateTopping, SupportedLocale } from "@/utils/toppingTranslations";
 
 export default function ProfilePage() {
   const t = useTranslations('Profile');
+  const locale = useLocale();
   const { user, token, isLoading, logout } = useAuth();
   const { replaceCart } = useCart();
   const router = useRouter();
@@ -331,10 +333,10 @@ export default function ProfilePage() {
                       <span>{t('activeOrder')}</span>
                     </div>
                     <h3 className="text-2xl font-serif text-[#FDF9F1] mb-2">
-                      {activeOrder.status === 'pending' ? t('orderReceived') || 'Comanda a fost primită' :
-                       activeOrder.status === 'preparing' ? t('orderPreparing') || 'Comanda se prepară' :
-                       activeOrder.status === 'ready' ? t('orderReady') || 'Comanda este gata' :
-                       t('orderOnTheWay') || 'Comanda este pe drum'}
+                      {activeOrder.status === 'pending' ? t('orderReceived') :
+                       activeOrder.status === 'preparing' ? t('orderPreparing') :
+                       activeOrder.status === 'ready' ? t('orderReady') :
+                       t('orderOnTheWay')}
                     </h3>
                     <p className="text-white/70 text-sm">{activeItemNames} {t('orderReadyIn')}</p>
                   </div>
@@ -393,7 +395,8 @@ export default function ProfilePage() {
                 ) : (
                   orders.map((order, index) => {
                     const isExpanded = expandedOrderId === order._id;
-                    const orderDate = new Date(order.createdAt).toLocaleDateString("ro-RO", { day: "numeric", month: "short", year: "numeric" });
+                    const dateLocale = locale === 'ru' ? 'ru-RU' : locale === 'en' ? 'en-US' : 'ro-RO';
+                    const orderDate = new Date(order.createdAt).toLocaleDateString(dateLocale, { day: "numeric", month: "short", year: "numeric" });
                     
                     // Afișăm un rezumat din primele 2 produse pentru titlu
                     const orderSummary = order.items.slice(0, 2).map((i: any) => `${i.name || i.menuItem?.name} x${i.quantity}`).join(", ") + (order.items.length > 2 ? ` + ${order.items.length - 2} ${t('others')}` : "");
@@ -458,7 +461,7 @@ export default function ProfilePage() {
                                         {item.modifiers && item.modifiers.length > 0 && (
                                           <div className="text-[13px] text-[#1A120B]/50 mt-1 pl-4 flex flex-col">
                                             {item.modifiers.map((mod: any, mIdx: number) => (
-                                              <span key={mIdx}>+ {mod.title}: {mod.optionName}</span>
+                                              <span key={mIdx}>+ {translateTopping(mod.title || 'Topping', locale as SupportedLocale)}: {translateTopping(mod.optionName, locale as SupportedLocale)}</span>
                                             ))}
                                           </div>
                                         )}
@@ -562,9 +565,9 @@ export default function ProfilePage() {
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="bg-white rounded-[32px] p-6 sm:p-8 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto relative z-10 shadow-2xl border border-[#E8E2D9] flex flex-col overscroll-contain"
               >
-                <h3 className="text-xl sm:text-2xl font-serif text-[#1A120B] mb-2 text-center">Cum a fost comanda ta?</h3>
+                <h3 className="text-xl sm:text-2xl font-serif text-[#1A120B] mb-2 text-center">{t('reviewOrderTitle')}</h3>
                 <p className="text-xs text-[#1A120B]/60 text-center mb-5 sm:mb-6">
-                  Comanda #{reviewOrder._id.slice(-6).toUpperCase()}
+                  {t('reviewOrderNumber')} #{reviewOrder._id.slice(-6).toUpperCase()}
                 </p>
 
                 <form onSubmit={handleReviewSubmit} className="space-y-5 sm:space-y-6">
@@ -576,7 +579,7 @@ export default function ProfilePage() {
                         type="button"
                         onClick={() => setSelectedRating(star)}
                         className="p-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-                        aria-label={`Acordă ${star} stele`}
+                        aria-label={t('rateStarAria', { rating: star })}
                       >
                         <Star 
                           size={28} 
@@ -587,11 +590,11 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#1A120B]/70 mb-2">Comentariul tău (opțional)</label>
+                    <label className="block text-xs font-bold text-[#1A120B]/70 mb-2">{t('reviewCommentOptional')}</label>
                     <textarea
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="Spune-ne cum a fost gustul, livrarea etc..."
+                      placeholder={t('reviewPlaceholder')}
                       className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl p-4 text-sm text-[#1A120B] focus:outline-none focus:border-[#D4A853] min-h-[90px] resize-none"
                     />
                   </div>
@@ -602,14 +605,14 @@ export default function ProfilePage() {
                       onClick={() => setReviewOrder(null)}
                       className="flex-1 min-h-[44px] py-3 sm:py-3.5 bg-gray-100 text-[#1A120B]/70 rounded-xl font-bold hover:bg-gray-200 transition-colors cursor-pointer flex items-center justify-center text-sm"
                     >
-                      Anulează
+                      {t('cancel')}
                     </button>
                     <button
                       type="submit"
                       disabled={submittingReview}
                       className="flex-1 min-h-[44px] py-3 sm:py-3.5 bg-[#1A120B] text-white rounded-xl font-bold hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center text-sm"
                     >
-                      {submittingReview ? "Se trimite..." : "Trimite Recenzia"}
+                      {submittingReview ? t('submittingReview') : t('submitReview')}
                     </button>
                   </div>
                 </form>

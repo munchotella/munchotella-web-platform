@@ -16,7 +16,8 @@
     "badgeSpecialty": "House Specialty",
     "deluxCrepeDesc": "Fine French crepe generously filled with Nutella®, Belgian white chocolate, Oreo, Lotus biscuits, peanuts, and Kinder Bueno.",
     "deluxWaffleDesc": "16 tender mini waffles drizzled with warm Nutella®, Belgian white chocolate, and toppings of choice (Oreo and Kinder Bueno).",
-    "lotusMiniWaffleDesc": "Tender mini waffles dipped in caramelized Lotus Biscoff smooth cream and sprinkled with crushed crunchy biscuits."
+    "lotusMiniWaffleDesc": "Tender mini waffles dipped in caramelized Lotus Biscoff smooth cream and sprinkled with crushed crunchy biscuits.",
+    "googleReviewBadge": "Google Review"
   },
   "Hero": {
     "title1": "Sweet art,",
@@ -29,7 +30,8 @@
     "video2Subtitle": "Thin Crepes, Nutella and Fresh Fruits",
     "video3Title": "Delux and Lotus Mini Waffles",
     "video3Subtitle": "Caramelized Biscoff Spread and White Chocolate",
-    "tapToPlay": "Play Video"
+    "tapToPlay": "Play Video",
+    "ariaSelectShot": "Select shot {number}"
   },
   "Process": {
     "sectionTitle": "How do we prepare your dessert?",
@@ -53,7 +55,17 @@
     "section3Subtitle": "Our Team",
     "section3Title": "The people behind Munchotella",
     "quote": "\"Munchotella was born from a simple craving to eat a really good dessert, with lots of chocolate and quality ingredients. We didn't want to reinvent the wheel, we just wanted to make the best waffle you've ever eaten.\"",
-    "quoteAuthor": "— The Munchotella Family"
+    "quoteAuthor": "— The Munchotella Family",
+    "teamImageAlt": "Munchotella Team",
+    "timelineTitle": "The Munchotella Journey",
+    "timeline2023Title": "How the Idea Was Born",
+    "timeline2023Desc": "It all started simply: we realized that in Chisinau it was hard to find a truly good crepe packed with original chocolate, rather than cheap, diluted spreads.",
+    "timeline2024Title": "First Recipes",
+    "timeline2024Desc": "Months in the kitchen followed, perfecting the recipe until our waffle achieved the ideal balance: delicately crisp on the outside, light and fluffy on the inside.",
+    "timelineTodayBadge": "Today",
+    "timelineTodayTitle": "Today at Munchotella",
+    "timelineTodayDesc": "We welcome you to our boutique, where every order is crafted fresh right before your eyes. Our mission remains unchanged: sweetening your day with an authentic, quality dessert.",
+    "viewMenuBtn": "Explore Our Menu"
   },
   "Menu": {
     "metaTitle": "Artisan Menu & Prices — Waffles, Crepes | Munchotella",
@@ -185,7 +197,17 @@
     "phoneInvalidFormat": "We only accept Moldovan numbers (+373) with 8 digits (e.g., 069 123 456 or 079 123 456).",
     "addressRequired": "Please enter the delivery address or select it on the map.",
     "addressTooGeneric": "Please enter an exact address (street and house/building number, not just the city).",
-    "orderSubmitError": "There was a problem submitting your order. Please try again."
+    "orderSubmitError": "There was a problem submitting your order. Please try again.",
+    "ariaCloseSms": "Close SMS verification",
+    "otpCallFallbackBtn": "📞 Send order with phone call confirmation",
+    "otpNoSmsCallFallback": "Didn't receive the SMS? Confirm order via phone call",
+    "orderConnectingKitchen": "Connecting with the kitchen...",
+    "orderSlowNetworkProcessing": "Slow network, processing your order...",
+    "networkErrorTitle": "Connection Interrupted",
+    "networkErrorDesc": "Your order is safely kept in your cart. You can retry now or confirm your order by phone with one tap.",
+    "retryOrderBtn": "Retry Placing Order",
+    "callRestaurantBtn": "📞 Call the Restaurant (+373 79 006 499)",
+    "applyingPromo": "Applying..."
   },
   "LiveStore": {
     "openNow": "Open Now",
@@ -204,7 +226,11 @@
     "story": "Story",
     "myProfile": "My Profile",
     "myAccount": "My Account",
-    "logout": "Logout"
+    "logout": "Logout",
+    "ariaCart": "Shopping cart",
+    "ariaOpenMenu": "Open mobile menu",
+    "ariaCloseMenu": "Close mobile menu",
+    "ariaChangeLanguage": "Change language"
   },
   "Profile": {
     "hello": "Hello",
@@ -227,7 +253,10 @@
     "reviewSuccess": "Thank you for your review!",
     "reviewError": "Error submitting review.",
     "activeOrder": "Active Order",
+    "orderReceived": "Order received",
     "orderPreparing": "Order Preparing",
+    "orderReady": "Order is ready",
+    "orderOnTheWay": "Order is on the way",
     "orderReadyIn": "Ready in",
     "trackLive": "Track Live",
     "recentOrders": "Recent Orders",
@@ -241,7 +270,13 @@
     "orderAgain": "Order again",
     "youGaveStars": "You gave {rating}/5 stars",
     "leaveReview": "Leave a Review",
-    "viewTracking": "View Live Tracking"
+    "viewTracking": "View Live Tracking",
+    "reviewOrderTitle": "How was your order?",
+    "reviewOrderNumber": "Order",
+    "reviewCommentOptional": "Your comment (optional)",
+    "cancel": "Cancel",
+    "reviewSaved": "Review saved successfully!",
+    "rateStarAria": "Give {rating} stars"
   },
   "Global": {
     "continue": "Continue",
@@ -249,14 +284,16 @@
     "cancel": "Cancel",
     "save": "Save",
     "addBtn": "Add",
-    "currency": "MDL"
+    "currency": "MDL",
+    "moldovaOnlyTooltip": "Delivery and contact exclusively in the Republic of Moldova (+373)"
   },
   "Categories": {
     "Toate": "All",
     "Băuturi": "Drinks",
     "Specialități": "Specialties",
     "Waffles": "Waffles",
-    "Crepes": "Crepes"
+    "Crepes": "Crepes",
+    "Pancakes": "Pancakes"
   },
   "Contact": {
     "metaTitle": "Contact & Boutique Location Chișinău | Munchotella",
@@ -289,7 +326,13 @@
     "socialMedia": "Follow Us",
     "follow": "Follow",
     "tiktokDesc": "See the latest desserts and behind the scenes.",
-    "dessertRestaurant": "Dessert Restaurant"
+    "dessertRestaurant": "Dessert Restaurant",
+    "moldovaPhoneOnly": "We accept only Republic of Moldova numbers (+373) with 8 digits (e.g., 069 123 456 or 079 123 456).",
+    "smsSendError": "An error occurred sending the SMS. Please try again.",
+    "saveMessageError": "An error occurred saving your message.",
+    "invalidOtp": "The entered SMS code is incorrect.",
+    "backToEdit": "← Back to details",
+    "verifying": "Verifying..."
   },
   "AddressManager": {
     "confirmDelete": "Are you sure you want to delete this address?",
@@ -311,7 +354,8 @@
     "gpsSaved": "✓ GPS coordinates saved",
     "saving": "Saving...",
     "saveAddress": "Save Address",
-    "saveError": "Error saving address"
+    "saveError": "Error saving address",
+    "closeModal": "Close window"
   },
   "AccountSettings": {
     "imageTooLarge": "The image is too large. The maximum allowed size is 5MB.",
@@ -392,7 +436,24 @@
     "directLine": "Direct Concierge Line",
     "copiedToClipboard": "Number copied to clipboard:",
     "boutiqueAddress": "21/1 Nicolae Testemițanu St., Chișinău",
-    "boutiqueHours": "Monday – Sunday: 16:00 – 00:00 (Wednesday: Closed)"
+    "boutiqueHours": "Monday – Sunday: 16:00 – 00:00 (Wednesday: Closed)",
+    "orderNotFoundTitle": "Oops!",
+    "orderNotFound": "Order not found.",
+    "orderLoadError": "Error loading order.",
+    "goToMenu": "Go to Menu",
+    "pickupFree": "Free Boutique Pickup",
+    "pickupTitle": "Boutique Pickup",
+    "pickupDesc": "We look forward to welcoming you at our boutique on Str. Nicolae Testemițanu 21/1!",
+    "helpCancelledTitle": "Need help with this order?",
+    "helpCancelledDesc": "Our support desk is at your service for any questions regarding the cancelled order.",
+    "closeBannerAria": "Close notification banner",
+    "closeAria": "Close",
+    "checkingOrderProgress": "Checking order status...",
+    "trackingRetryPrompt": "Slow connection. Retrying connection...",
+    "trackingRetryBtn": "Retry Status Check",
+    "trackingPhoneFallback": "📞 Call the Restaurant (+373 79 006 499)",
+    "trackingPendingSyncTitle": "Order is Processing",
+    "trackingPendingSyncDesc": "Your order was sent to the kitchen, but the internet connection is slow. You can retry checking status or call the restaurant directly for instant confirmation."
   },
   "Legal": {
     "title": "Legal Information | Munchotella",
@@ -437,7 +498,8 @@
     "address2": "Chisinau, Republic of Moldova",
     "scheduleTitle": "Schedule",
     "schedule1": "Monday - Sunday: 16:00 - 00:00",
-    "schedule2": "Wednesday: Closed"
+    "schedule2": "Wednesday: Closed",
+    "mapIframeTitle": "Munchotella location map"
   },
   "Toppings": {
     "extraNutella": "Nutella®",
@@ -457,7 +519,8 @@
     "customize": "Customize your dessert",
     "optional": "Optional",
     "quantity": "Quantity",
-    "addToCart": "Add to Cart"
+    "addToCart": "Add to Cart",
+    "ariaCloseModal": "Close window"
   },
   "CartDrawer": {
     "incorrectCode": "The entered code is incorrect.",
@@ -485,7 +548,12 @@
     "contactShortly": "We will contact you shortly for confirmation.",
     "subtotal": "Subtotal",
     "toCheckout": "To Checkout",
-    "confirmOrder": "Confirm Order"
+    "confirmOrder": "Confirm Order",
+    "ariaBack": "Back",
+    "ariaCloseCart": "Close cart",
+    "ariaRemoveItem": "Remove item",
+    "ariaDecreaseQty": "Decrease quantity",
+    "ariaIncreaseQty": "Increase quantity"
   },
   "Notifications": {
     "title": "Notifications",
@@ -500,7 +568,9 @@
     "viewOrder": "View Order",
     "notifOrderPreparingBody": "Your order is now being prepared.",
     "notifOrderDeliveredBody": "Your order has been delivered! Enjoy your meal.",
-    "notifOrderCancelledBody": "Your order has been cancelled."
+    "notifOrderCancelledBody": "Your order has been cancelled.",
+    "ariaCloseNotifications": "Close notifications",
+    "ariaCloseNotification": "Close notification"
   },
   "Redirect": {
     "redirectingReviews": "Redirecting to reviews..."
@@ -520,7 +590,14 @@
     "schedule": "Schedule",
     "scheduleTime": "Monday - Sunday: 16:00 - 00:00",
     "scheduleClosed": "Wednesday: Closed",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "securePaymentMethods": "Secure Payment Methods:",
+    "sslSecured": "256-bit SSL Secured • maib Partner",
+    "instagramAria": "Our Instagram page",
+    "facebookAria": "Our Facebook page",
+    "tiktokAria": "Our TikTok page",
+    "miaTitle": "MIA Instant Payments — 0% Fee",
+    "zeroCommission": "0% fee"
   },
   "FAQ": {
     "badge": "FRESH ANSWERS",
@@ -672,5 +749,133 @@
     "deletingAccount": "Purging records from servers...",
     "accountDeletedSuccess": "Your account has been permanently deleted. Thank you for every sweet moment shared with Munchotella!",
     "farewellNote": "Whenever you crave the scent of steaming hot waffles fresh off the iron, drizzled with warm Nutella® and freshly roasted pistachio, our kitchen on 21/1 Nicolae Testemitanu St. will always welcome you."
+  },
+  "StickyBar": {
+    "viewOrder": "View Order",
+    "openCart": "Open Cart"
+  },
+  "CheckoutSuccess": {
+    "badge": "Payment Confirmed Successfully",
+    "title": "Thank you for your order!",
+    "description": "The transaction was securely processed and confirmed through the <strong>maib</strong> gateway. Munchotella kitchen has already started preparing your treats!",
+    "merchant": "Merchant:",
+    "orderNumber": "Order Number:",
+    "maibTransactionId": "maib Transaction ID:",
+    "loading": "Loading order details...",
+    "transactionDate": "Transaction Date:",
+    "amountPaid": "Amount Paid:",
+    "orderedProducts": "Ordered Products:",
+    "paymentStatus": "Payment Status:",
+    "statusCompleted": "Confirmed",
+    "backToMenu": "Back to Menu",
+    "deliveryDetails": "Delivery Details",
+    "secureProcessor": "Secure Payment Processor"
+  },
+  "CheckoutFail": {
+    "badge": "Transaction Unconfirmed",
+    "title": "Payment was not completed",
+    "description": "The transaction was canceled or could not be authorized by the card-issuing bank. No funds were debited from your account.",
+    "orderReference": "Order Reference:",
+    "maibSessionId": "maib Session ID:",
+    "tryAgain": "Try Again",
+    "backToMenu": "Back to Menu",
+    "paymentNotice": "You can pay online with Card, Apple Pay, Google Pay, or MIA"
+  },
+  "Auth": {
+    "titleName": "What is your name?",
+    "subName": "Tell us your name for orders",
+    "titleTerms": "Terms & Conditions",
+    "subTerms": "Review and accept Munchotella policy",
+    "titleForgot": "Password Recovery",
+    "subForgotPhone": "Enter your phone to receive a temporary password",
+    "subForgotEmail": "Enter your email address for recovery",
+    "titleWelcome": "Welcome back",
+    "subWelcome": "Access your Munchotella account",
+    "titleRegister": "Become a Member",
+    "subRegister": "Join our sweet community",
+    "closeModal": "Close window",
+    "continueGoogle": "Continue with Google",
+    "continueFacebook": "Continue with Facebook",
+    "orDivider": "or",
+    "placeholderFirstName": "First name (e.g. Maria)",
+    "placeholderLastName": "Last name (e.g. Smith)",
+    "placeholderFullName": "Full name (e.g. Maria Popescu)",
+    "placeholderEmail": "Email address",
+    "placeholderPassword": "Password",
+    "placeholderOtp": "6-digit OTP code",
+    "nextStep": "Next Step",
+    "finishRegistration": "Finish Registration",
+    "loginBtn": "Sign In",
+    "registerBtn": "Create Account",
+    "confirmBtn": "Confirm",
+    "verifyCodeBtn": "Verify Code",
+    "forgotPasswordLink": "Forgot password?",
+    "backToPhone": "Back to phone",
+    "backToLogin": "Back to Sign In",
+    "goToLogin": "Go to Sign In",
+    "tabPhone": "Phone Number",
+    "tabEmail": "Email",
+    "noAccount": "Don't have an account yet?",
+    "createOne": "Create one",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "termsConsentPre": "Please confirm that you agree with ",
+    "termsLinkText": "Terms and Conditions",
+    "termsConsentAnd": " and ",
+    "privacyLinkText": "Privacy Policy",
+    "termsConsentPost": " of Munchotella.",
+    "agreeTerms": "I agree to Terms & Conditions",
+    "chooseRecoveryMethod": "How do you want to recover your password?",
+    "viaSms": "Via SMS",
+    "viaEmail": "Via Email",
+    "otpSentNote": "We sent a 6-digit code to your phone.",
+    "recoverySuccess": "Recovery Successful!",
+    "tempPasswordLabel": "Your temporary password is:",
+    "tempPasswordNote": "Use this password to log in, then change it in your account.",
+    "checkEmailTitle": "Check your Email",
+    "tempPasswordSentEmail": "Temporary password has been sent successfully!",
+    "errSocial": "Social login failed.",
+    "errGeneric": "Something went wrong. Try again.",
+    "errPhoneRequired": "Please enter your phone number.",
+    "errForgotInit": "Could not initiate password recovery.",
+    "errSmsSend": "Error sending SMS. Verify number and try again.",
+    "errOtpRequired": "Enter the 6-digit code.",
+    "errOtpInvalid": "Incorrect or expired code.",
+    "errNameRequired": "Please fill in first and last name.",
+    "errTermsRequired": "You must accept Terms & Conditions to continue.",
+    "errRegisterFailed": "Could not complete registration.",
+    "successPasswordReset": "Password has been successfully reset!",
+    "forceChangeTitle": "Change Password",
+    "forceChangeSubtitle": "You logged in with a temporary password. Set a new password for account security.",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "placeholderMin8": "Minimum 8 characters",
+    "placeholderRepeat": "Repeat new password",
+    "saveNewPasswordBtn": "Save New Password",
+    "errMin8": "New password must be at least 8 characters.",
+    "errMismatch": "Passwords do not match.",
+    "errChangeFailed": "Could not change password.",
+    "successChanged": "Password changed successfully!"
+  },
+  "MapPicker": {
+    "loadingMaps": "Loading Google Maps...",
+    "backToOrder": "Back to Order",
+    "close": "Close",
+    "searchPlaceholder": "Search building, street or landmark...",
+    "toggle3d": "Toggle Satellite / 3D Map",
+    "satelliteActive": "🛰️ Satellite Active",
+    "view3d": "🗺️ 3D View",
+    "myLocation": "My current location",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "geocodingBadge": "IDENTIFYING ADDRESS...",
+    "selectedBadge": "DELIVERY ADDRESS SELECTED",
+    "determiningAddress": "Determining exact address...",
+    "selectLocationPrompt": "Select a location on the map",
+    "instruction": "Drag the map or click on the location to place the pin at your entrance",
+    "confirmAddress": "Confirm This Address",
+    "defaultAddressPlaceholder": "Search address...",
+    "loadError": "Error loading Google Maps.",
+    "locating": "Locating..."
   }
 }

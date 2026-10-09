@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface PaymentBadgesProps {
   className?: string;
@@ -8,6 +9,7 @@ interface PaymentBadgesProps {
 }
 
 export default function PaymentBadges({ className = "", variant = "footer" }: PaymentBadgesProps) {
+  const t = useTranslations("Footer");
   const isCheckout = variant === "checkout";
 
   return (
@@ -98,11 +100,11 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
             ? "h-8 px-2.5 bg-gradient-to-r from-[#D4A853]/15 to-[#F3922C]/15 border-[#D4A853]/40 shadow-xs" 
             : "h-8 px-3 bg-gradient-to-r from-[#D4A853]/20 to-[#F3922C]/20 border-[#D4A853]/40 hover:border-[#D4A853]/70"
         }`}
-        title="MIA Plăți Instant — 0% Comision"
+        title={t('miaTitle')}
       >
         <span className="text-[10px] font-black tracking-widest text-[#D4A853]">MIA</span>
         <span className="text-[9px] font-medium px-1 py-0.5 rounded bg-[#D4A853] text-[#1A120B] leading-none">
-          0% comision
+          {t('zeroCommission')}
         </span>
       </div>
     </div>

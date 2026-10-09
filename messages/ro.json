@@ -16,7 +16,8 @@
     "badgeSpecialty": "Specialitatea Casei",
     "deluxCrepeDesc": "Clătită fină franțuzească umplută generos cu Nutella®, ciocolată albă belgiană, Oreo, biscuiți Lotus, arahide și Kinder Bueno.",
     "deluxWaffleDesc": "16 mini waffles fragede stropite cu Nutella® caldă, ciocolată albă belgiană și toppinguri la alegere (Oreo și Kinder Bueno).",
-    "lotusMiniWaffleDesc": "Mini waffles fragede scufundate în crema fină Lotus Biscoff caramelizată și presărate cu biscuiți crocanți sfărâmați."
+    "lotusMiniWaffleDesc": "Mini waffles fragede scufundate în crema fină Lotus Biscoff caramelizată și presărate cu biscuiți crocanți sfărâmați.",
+    "googleReviewBadge": "Recenzie Google"
   },
   "Hero": {
     "title1": "Arta dulce,",
@@ -29,7 +30,8 @@
     "video2Subtitle": "Clătite Subțiri, Nutella și Fructe Proaspete",
     "video3Title": "Delux și Lotus Mini Waffles",
     "video3Subtitle": "Pastă Biscoff Caramelizată și Ciocolată Albă",
-    "tapToPlay": "Redă Video"
+    "tapToPlay": "Redă Video",
+    "ariaSelectShot": "Selectează cadrul {number}"
   },
   "Process": {
     "sectionTitle": "Cum preparăm desertul tău?",
@@ -53,7 +55,17 @@
     "section3Subtitle": "Echipa Noastră",
     "section3Title": "Oamenii din spatele Munchotella",
     "quote": "\"Munchotella s-a născut dintr-o poftă simplă de a mânca un desert cu adevărat bun, cu multă ciocolată și ingrediente de calitate. Nu am vrut să reinventăm roata, am vrut doar să facem cel mai bun waffle pe care l-ai mâncat vreodată.\"",
-    "quoteAuthor": "— Familia Munchotella"
+    "quoteAuthor": "— Familia Munchotella",
+    "teamImageAlt": "Echipa Munchotella",
+    "timelineTitle": "Evoluția Munchotella",
+    "timeline2023Title": "Cum ne-a venit ideea",
+    "timeline2023Desc": "Totul a început simplu: ne-am dat seama că în Chișinău e greu să găsești o clătită cu adevărat bună, plină de ciocolată originală, nu doar cu creme ieftine și diluate.",
+    "timeline2024Title": "Primele rețete",
+    "timeline2024Desc": "Au urmat luni de zile petrecute în bucătărie, stricând kilograme întregi de aluat, până când am găsit proporția perfectă pentru ca waffla să iasă ușor crocantă la exterior, dar foarte pufoasă în interior.",
+    "timelineTodayBadge": "Astăzi",
+    "timelineTodayTitle": "Azi la Munchotella",
+    "timelineTodayDesc": "Te așteptăm în locația noastră, unde pregătim fiecare comandă pe loc, exact în fața ta. Misiunea noastră a rămas aceeași: să-ți facem ziua mai dulce, cu un desert corect.",
+    "viewMenuBtn": "Vezi Meniul Nostru"
   },
   "Menu": {
     "metaTitle": "Meniu Artizanal & Prețuri Waffles, Crepes | Munchotella",
@@ -185,7 +197,17 @@
     "phoneInvalidFormat": "Acceptăm exclusiv numere din R. Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).",
     "addressRequired": "Te rugăm să introduci adresa de livrare sau să o alegi pe hartă.",
     "addressTooGeneric": "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).",
-    "orderSubmitError": "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou."
+    "orderSubmitError": "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.",
+    "ariaCloseSms": "Închide verificarea SMS",
+    "otpCallFallbackBtn": "📞 Trimite comanda cu confirmare prin apel telefonic",
+    "otpNoSmsCallFallback": "Nu primești SMS-ul? Confirmă comanda prin apel telefonic",
+    "orderConnectingKitchen": "Se conectează cu bucătăria...",
+    "orderSlowNetworkProcessing": "Conexiune lentă, procesăm comanda...",
+    "networkErrorTitle": "Conexiune Întreruptă",
+    "networkErrorDesc": "Comanda ta este salvată în siguranță în coș. Poți reîncerca acum sau poți confirma comanda telefonic cu un singur click.",
+    "retryOrderBtn": "Reîncearcă Plasarea Comenzii",
+    "callRestaurantBtn": "📞 Sună la Restaurant (+373 79 006 499)",
+    "applyingPromo": "Se verifică..."
   },
   "LiveStore": {
     "openNow": "Deschis Acum",
@@ -204,7 +226,11 @@
     "story": "Povestea",
     "myProfile": "Profilul Meu",
     "myAccount": "Contul Meu",
-    "logout": "Deconectare"
+    "logout": "Deconectare",
+    "ariaCart": "Coș de cumpărături",
+    "ariaOpenMenu": "Deschide meniul mobil",
+    "ariaCloseMenu": "Închide meniul mobil",
+    "ariaChangeLanguage": "Schimbă limba"
   },
   "Profile": {
     "hello": "Salut",
@@ -227,7 +253,10 @@
     "reviewSuccess": "Mulțumim pentru recenzie!",
     "reviewError": "Eroare la trimiterea recenziei.",
     "activeOrder": "Comandă Activă",
+    "orderReceived": "Comanda a fost primită",
     "orderPreparing": "Comanda se prepară",
+    "orderReady": "Comanda este gata",
+    "orderOnTheWay": "Comanda este pe drum",
     "orderReadyIn": "Gata în",
     "trackLive": "Urmărește Live",
     "recentOrders": "Comenzi Recente",
@@ -241,7 +270,13 @@
     "orderAgain": "Comandă din nou",
     "youGaveStars": "Ai oferit {rating}/5 stele",
     "leaveReview": "Lasă o Recenzie",
-    "viewTracking": "Vezi Tracking Live"
+    "viewTracking": "Vezi Tracking Live",
+    "reviewOrderTitle": "Cum a fost comanda ta?",
+    "reviewOrderNumber": "Comanda",
+    "reviewCommentOptional": "Comentariul tău (opțional)",
+    "cancel": "Anulează",
+    "reviewSaved": "Recenzia a fost salvată cu succes!",
+    "rateStarAria": "Acordă {rating} stele"
   },
   "Global": {
     "continue": "Continuă",
@@ -249,7 +284,8 @@
     "cancel": "Renunță",
     "save": "Salvează",
     "addBtn": "Adaugă",
-    "currency": "MDL"
+    "currency": "MDL",
+    "moldovaOnlyTooltip": "Livrare și contact exclusiv în Republica Moldova (+373)"
   },
   "Categories": {
     "Toate": "Toate",
@@ -290,7 +326,13 @@
     "socialMedia": "Urmărește-ne",
     "follow": "Urmărește",
     "tiktokDesc": "Vezi cele mai noi deserturi și din spatele culiselor.",
-    "dessertRestaurant": "Restaurant de Deserturi"
+    "dessertRestaurant": "Restaurant de Deserturi",
+    "moldovaPhoneOnly": "Acceptăm exclusiv numere din Republica Moldova (+373) cu 8 cifre (ex: 069 123 456 sau 079 123 456).",
+    "smsSendError": "A apărut o eroare la trimiterea SMS-ului. Te rugăm să încerci din nou.",
+    "saveMessageError": "A apărut o eroare la salvarea mesajului.",
+    "invalidOtp": "Codul SMS introdus este incorect.",
+    "backToEdit": "← Înapoi la completare date",
+    "verifying": "Se verifică..."
   },
   "AddressManager": {
     "confirmDelete": "Sigur vrei să ștergi această adresă?",
@@ -312,7 +354,8 @@
     "gpsSaved": "✓ Coordonate GPS salvate",
     "saving": "Se salvează...",
     "saveAddress": "Salvează Adresa",
-    "saveError": "Eroare la salvarea adresei"
+    "saveError": "Eroare la salvarea adresei",
+    "closeModal": "Închide fereastra"
   },
   "AccountSettings": {
     "imageTooLarge": "Imaginea este prea mare. Dimensiunea maximă admisă este de 5MB.",
@@ -393,7 +436,24 @@
     "directLine": "Linie Directă Concierge",
     "copiedToClipboard": "Număr copiat în clipboard:",
     "boutiqueAddress": "Str. Nicolae Testemițanu 21/1, Chișinău",
-    "boutiqueHours": "Luni – Duminică: 16:00 – 00:00 (Miercuri: Închis)"
+    "boutiqueHours": "Luni – Duminică: 16:00 – 00:00 (Miercuri: Închis)",
+    "orderNotFoundTitle": "Ups!",
+    "orderNotFound": "Comanda nu a fost găsită.",
+    "orderLoadError": "Eroare la încărcarea comenzii.",
+    "goToMenu": "Mergi la Meniu",
+    "pickupFree": "Preluare Gratuită din Boutique",
+    "pickupTitle": "Preluare din Boutique",
+    "pickupDesc": "Te așteptăm cu drag în boutique-ul nostru din Str. Nicolae Testemițanu 21/1!",
+    "helpCancelledTitle": "Ai nevoie de ajutor cu această comandă?",
+    "helpCancelledDesc": "Dispeceratul nostru este la dispoziția ta pentru orice clarificare legată de comanda anulată.",
+    "closeBannerAria": "Închide banner notificări",
+    "closeAria": "Închide",
+    "checkingOrderProgress": "Se verifică starea comenzii...",
+    "trackingRetryPrompt": "Conexiunea este lentă. Reîncercăm conectarea...",
+    "trackingRetryBtn": "Reîncearcă Verificarea",
+    "trackingPhoneFallback": "📞 Sună la Restaurant (+373 79 006 499)",
+    "trackingPendingSyncTitle": "Comanda se procesează",
+    "trackingPendingSyncDesc": "Comanda ta a fost transmisă către bucătărie, însă conexiunea de internet este lentă. Poți reîncerca verificarea sau poți suna direct la restaurant pentru confirmare pe loc."
   },
   "Legal": {
     "title": "Informații Juridice | Munchotella",
@@ -438,7 +498,8 @@
     "address2": "Chișinău, Republica Moldova",
     "scheduleTitle": "Program",
     "schedule1": "Luni - Duminică: 16:00 - 00:00",
-    "schedule2": "Miercuri: Închis"
+    "schedule2": "Miercuri: Închis",
+    "mapIframeTitle": "Harta locației Munchotella"
   },
   "Toppings": {
     "extraNutella": "Nutella®",
@@ -458,7 +519,8 @@
     "customize": "Personalizează-ți desertul",
     "optional": "Opțional",
     "quantity": "Cantitate",
-    "addToCart": "Adaugă în Coș"
+    "addToCart": "Adaugă în Coș",
+    "ariaCloseModal": "Închide fereastra"
   },
   "CartDrawer": {
     "incorrectCode": "Codul introdus este incorect.",
@@ -486,7 +548,12 @@
     "contactShortly": "Te vom contacta în scurt timp pentru confirmare.",
     "subtotal": "Subtotal",
     "toCheckout": "Spre Finalizare",
-    "confirmOrder": "Confirmă Comanda"
+    "confirmOrder": "Confirmă Comanda",
+    "ariaBack": "Înapoi",
+    "ariaCloseCart": "Închide coșul",
+    "ariaRemoveItem": "Șterge produsul",
+    "ariaDecreaseQty": "Scade cantitatea",
+    "ariaIncreaseQty": "Crește cantitatea"
   },
   "Notifications": {
     "title": "Notificări",
@@ -501,7 +568,9 @@
     "viewOrder": "Vezi Comanda",
     "notifOrderPreparingBody": "Comanda ta este in curs de preparare.",
     "notifOrderDeliveredBody": "Comanda ta a fost livrata! Pofta buna.",
-    "notifOrderCancelledBody": "Comanda ta a fost anulata."
+    "notifOrderCancelledBody": "Comanda ta a fost anulata.",
+    "ariaCloseNotifications": "Închide notificările",
+    "ariaCloseNotification": "Închide notificarea"
   },
   "Redirect": {
     "redirectingReviews": "Se redirecționează la recenzii..."
@@ -521,7 +590,14 @@
     "schedule": "Program",
     "scheduleTime": "Luni - Duminică: 16:00 - 00:00",
     "scheduleClosed": "Miercuri: Închis",
-    "rights": "Toate drepturile rezervate."
+    "rights": "Toate drepturile rezervate.",
+    "securePaymentMethods": "Metode de Plată Securizate:",
+    "sslSecured": "Securizat 256-bit SSL • Partener maib",
+    "instagramAria": "Pagina noastră de Instagram",
+    "facebookAria": "Pagina noastră de Facebook",
+    "tiktokAria": "Pagina noastră de TikTok",
+    "miaTitle": "MIA Plăți Instant — 0% Comision",
+    "zeroCommission": "0% comision"
   },
   "FAQ": {
     "badge": "RĂSPUNSURI RAPIDE",
@@ -673,5 +749,133 @@
     "deletingAccount": "Se șterg datele din server...",
     "accountDeletedSuccess": "Contul tău a fost șters definitiv. Îți mulțumim pentru fiecare moment dulce petrecut la Munchotella!",
     "farewellNote": "Dacă vreodată ți se face poftă de mirosul de waffles fierbinți aburind din wafflieră, cu Nutella® caldă și fistic copt pe loc, ușa noastră de pe str. Nicolae Testemițanu 21/1 rămâne mereu deschisă."
+  },
+  "StickyBar": {
+    "viewOrder": "Vezi Comanda",
+    "openCart": "Deschide Coșul"
+  },
+  "CheckoutSuccess": {
+    "badge": "Plată Confirmată cu Succes",
+    "title": "Îți mulțumim pentru comandă!",
+    "description": "Tranzacția a fost procesată și confirmată în siguranță prin gateway-ul <strong>maib</strong>. Bucătăria Munchotella a început deja pregătirea bunătăților tale!",
+    "merchant": "Comerciant:",
+    "orderNumber": "Număr Comandă:",
+    "maibTransactionId": "ID Tranzacție maib:",
+    "loading": "Se încarcă detaliile comenzii...",
+    "transactionDate": "Data Tranzacției:",
+    "amountPaid": "Suma Achitată:",
+    "orderedProducts": "Produse Comandate:",
+    "paymentStatus": "Status Plată:",
+    "statusCompleted": "Confirmat",
+    "backToMenu": "Înapoi la Meniu",
+    "deliveryDetails": "Detalii Livrare",
+    "secureProcessor": "Procesator Plăți Securizat"
+  },
+  "CheckoutFail": {
+    "badge": "Tranzacție Neconfirmată",
+    "title": "Plata nu a fost finalizată",
+    "description": "Tranzacția a fost anulată sau nu a putut fi autorizată de către banca emitentă a cardului. Niciun fond nu a fost retras din contul tău.",
+    "orderReference": "Referință Comandă:",
+    "maibSessionId": "ID Sesiune maib:",
+    "tryAgain": "Încearcă din Nou",
+    "backToMenu": "Înapoi la Meniu",
+    "paymentNotice": "Poți achita online cu Card, Apple Pay, Google Pay sau MIA"
+  },
+  "Auth": {
+    "titleName": "Cum te numești?",
+    "subName": "Spune-ne numele tău pentru comenzi",
+    "titleTerms": "Termeni și Condiții",
+    "subTerms": "Revizuiește și acceptă politica Munchotella",
+    "titleForgot": "Recuperare Parolă",
+    "subForgotPhone": "Introdu telefonul pentru a primi parola temporară",
+    "subForgotEmail": "Introdu adresa de email pentru recuperare",
+    "titleWelcome": "Bine ai revenit",
+    "subWelcome": "Accesează-ți contul Munchotella",
+    "titleRegister": "Devino Membru",
+    "subRegister": "Alătură-te comunității noastre dulci",
+    "closeModal": "Închide fereastra",
+    "continueGoogle": "Continuă cu Google",
+    "continueFacebook": "Continuă cu Facebook",
+    "orDivider": "sau",
+    "placeholderFirstName": "Prenume (ex: Maria)",
+    "placeholderLastName": "Nume de familie (ex: Popescu)",
+    "placeholderFullName": "Nume complet (ex: Maria Popescu)",
+    "placeholderEmail": "Adresa de email",
+    "placeholderPassword": "Parola",
+    "placeholderOtp": "Cod OTP din 6 cifre",
+    "nextStep": "Pasul Următor",
+    "finishRegistration": "Finalizează Înregistrarea",
+    "loginBtn": "Autentificare",
+    "registerBtn": "Creează Cont",
+    "confirmBtn": "Confirmă",
+    "verifyCodeBtn": "Verifică Codul",
+    "forgotPasswordLink": "Ai uitat parola?",
+    "backToPhone": "Înapoi la telefon",
+    "backToLogin": "Înapoi la Autentificare",
+    "goToLogin": "Mergi la Autentificare",
+    "tabPhone": "Număr de Telefon",
+    "tabEmail": "Email",
+    "noAccount": "Nu ai un cont încă?",
+    "createOne": "Creează unul",
+    "haveAccount": "Ai deja un cont?",
+    "signIn": "Autentifică-te",
+    "termsConsentPre": "Te rugăm să confirmi că ești de acord cu ",
+    "termsLinkText": "Termenii și Condițiile",
+    "termsConsentAnd": " și ",
+    "privacyLinkText": "Politica de Confidențialitate",
+    "termsConsentPost": " Munchotella.",
+    "agreeTerms": "Sunt de acord cu Termenii & Condițiile",
+    "chooseRecoveryMethod": "Cum dorești să recuperezi parola?",
+    "viaSms": "Prin SMS",
+    "viaEmail": "Prin Email",
+    "otpSentNote": "Am trimis un cod de 6 cifre pe telefonul tău.",
+    "recoverySuccess": "Recuperare reușită!",
+    "tempPasswordLabel": "Parola ta temporară este:",
+    "tempPasswordNote": "Folosește această parolă pentru a te autentifica, apoi schimb-o din contul tău.",
+    "checkEmailTitle": "Verifică-ți Emailul",
+    "tempPasswordSentEmail": "Parola temporară a fost trimisă cu succes!",
+    "errSocial": "Conectarea socială a eșuat.",
+    "errGeneric": "Ceva nu a funcționat. Încearcă din nou.",
+    "errPhoneRequired": "Te rugăm să introduci numărul de telefon.",
+    "errForgotInit": "Nu am putut iniția recuperarea parolei.",
+    "errSmsSend": "Eroare la trimiterea SMS-ului. Verifică numărul și încearcă din nou.",
+    "errOtpRequired": "Introdu codul din 6 cifre.",
+    "errOtpInvalid": "Cod incorect sau expirat.",
+    "errNameRequired": "Te rugăm să completezi prenumele și numele.",
+    "errTermsRequired": "Trebuie să accepți Termenii și Condițiile pentru a continua.",
+    "errRegisterFailed": "Nu s-a putut finaliza înregistrarea.",
+    "successPasswordReset": "Parola a fost resetată cu succes!",
+    "forceChangeTitle": "Schimbare Parolă",
+    "forceChangeSubtitle": "Te-ai autentificat cu o parolă temporară. Setează o parolă nouă pentru securitatea contului.",
+    "newPasswordLabel": "Parolă nouă",
+    "confirmPasswordLabel": "Confirmă parola nouă",
+    "placeholderMin8": "Minim 8 caractere",
+    "placeholderRepeat": "Repetă parola nouă",
+    "saveNewPasswordBtn": "Salvează Parola Nouă",
+    "errMin8": "Parola nouă trebuie să aibă cel puțin 8 caractere.",
+    "errMismatch": "Parolele nu se potrivesc.",
+    "errChangeFailed": "Nu s-a putut schimba parola.",
+    "successChanged": "Parola a fost schimbată cu succes!"
+  },
+  "MapPicker": {
+    "loadingMaps": "Se încarcă Google Maps...",
+    "backToOrder": "Înapoi la Comandă",
+    "close": "Închide",
+    "searchPlaceholder": "Caută bloc, stradă sau reper...",
+    "toggle3d": "Schimbă între Satelit și Hartă 3D",
+    "satelliteActive": "🛰️ Satelit Activ",
+    "view3d": "🗺️ Vedere 3D",
+    "myLocation": "Locația mea curentă",
+    "zoomIn": "Mărește",
+    "zoomOut": "Micșorează",
+    "geocodingBadge": "IDENTIFICARE ADRESĂ...",
+    "selectedBadge": "ADRESĂ LIVRARE SELECTATĂ",
+    "determiningAddress": "Se determină adresa exactă...",
+    "selectLocationPrompt": "Selectează o locație pe hartă",
+    "instruction": "Trage harta sau fă click pe locație pentru a poziționa pinul pe intrarea ta",
+    "confirmAddress": "Confirmă Această Adresă",
+    "defaultAddressPlaceholder": "Caută adresa...",
+    "loadError": "Eroare la încărcarea hărții Google.",
+    "locating": "Localizare..."
   }
 }

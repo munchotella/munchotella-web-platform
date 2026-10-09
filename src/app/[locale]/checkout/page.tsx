@@ -2,8 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "@/i18n/routing";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import {
   ChevronLeft,
   MapPin,
@@ -37,6 +36,7 @@ import { translateTopping } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
 import PaymentBadges from "@/components/PaymentBadges";
+import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -94,9 +94,26 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
 
   const [isMounted, setIsMounted] = useState(false);
+  const hasTrackedCheckout = React.useRef(false);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && items && items.length > 0 && !hasTrackedCheckout.current) {
+      hasTrackedCheckout.current = true;
+      trackInitiateCheckout(
+        items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        totalPrice
+      );
+    }
+  }, [isMounted, items, totalPrice]);
 
   const [activeStep, setActiveStep] = useState<number>(1);
   const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
@@ -117,6 +134,7 @@ export default function CheckoutPage() {
     display: string;
   } | null>(null);
   const [couponError, setCouponError] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -147,6 +165,12 @@ export default function CheckoutPage() {
   const [phoneError, setPhoneError] = useState("");
   const [nameError, setNameError] = useState("");
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isNetworkFail, setIsNetworkFail] = useState(false);
+  const [submissionStage, setSubmissionStage] = useState<'idle' | 'sending' | 'connecting' | 'slow_network'>('idle');
+  const lastOrderAttemptRef = React.useRef<{ overrideToken?: string; unverifiedPhone: boolean }>({
+    overrideToken: undefined,
+    unverifiedPhone: false,
+  });
 
   const nameInputRef = React.useRef<HTMLInputElement>(null);
   const phoneInputRef = React.useRef<HTMLInputElement>(null);
@@ -307,7 +331,9 @@ export default function CheckoutPage() {
   React.useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch("https://munchotella-api.onrender.com/api/settings/store-status");
+        const res = await fetch("https://munchotella-api.onrender.com/api/settings/store-status", {
+          signal: AbortSignal.timeout(8000)
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
@@ -340,6 +366,7 @@ export default function CheckoutPage() {
         const res = await fetch("https://munchotella-api.onrender.com/api/orders/draft", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(8000),
           body: JSON.stringify({
             draftOrderId,
             customer: {
@@ -514,6 +541,7 @@ export default function CheckoutPage() {
     const code = couponCode.trim().toUpperCase();
     if (!code) return;
 
+    setIsApplyingCoupon(true);
     try {
       const res = await fetch("https://munchotella-api.onrender.com/api/promo/validate", {
         method: "POST",
@@ -540,6 +568,8 @@ export default function CheckoutPage() {
     } catch (err) {
       setCouponError(t('promoError'));
       setActivePromo(null);
+    } finally {
+      setIsApplyingCoupon(false);
     }
   };
 
@@ -636,9 +666,26 @@ export default function CheckoutPage() {
   };
 
   const executePlaceOrder = async (overrideToken?: string, unverifiedPhone: boolean = false) => {
+    lastOrderAttemptRef.current = { overrideToken, unverifiedPhone };
     setIsSubmitting(true);
+    setSubmissionStage('sending');
+    setIsNetworkFail(false);
     setServerError(null);
     const activeAuthToken = overrideToken || token;
+
+    // Timers pentru feedback progresiv pe conexiuni lente (3G / metrou / bloc)
+    const tConnecting = setTimeout(() => {
+      setSubmissionStage('connecting');
+    }, 3000);
+
+    const tSlow = setTimeout(() => {
+      setSubmissionStage('slow_network');
+    }, 8000);
+
+    const cleanupTimers = () => {
+      clearTimeout(tConnecting);
+      clearTimeout(tSlow);
+    };
 
     try {
       const menuItems = items.filter(i => !String(i.cartItemId).startsWith('drink_'));
@@ -725,18 +772,71 @@ export default function CheckoutPage() {
       };
 
       const API_URL = "https://munchotella-api.onrender.com/api";
-      
-      const res = await fetch(`${API_URL}/orders`, {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(activeAuthToken ? { "Authorization": `Bearer ${activeAuthToken}` } : {})
-        },
-        body: JSON.stringify(orderPayload)
-      });
 
-      const data = await res.json();
+      const attemptFetch = async (signal: AbortSignal) => {
+        return await fetch(`${API_URL}/orders`, {
+          credentials: "include",
+          method: "POST",
+          signal,
+          headers: {
+            "Content-Type": "application/json",
+            ...(activeAuthToken ? { "Authorization": `Bearer ${activeAuthToken}` } : {})
+          },
+          body: JSON.stringify(orderPayload)
+        });
+      };
+
+      let res: Response | null = null;
+      let data: any = null;
+      let networkFailed = false;
+
+      // Încercare 1 cu timeout de 25 secunde
+      try {
+        const controller1 = new AbortController();
+        const timeout1 = setTimeout(() => controller1.abort(), 25000);
+        try {
+          res = await attemptFetch(controller1.signal);
+        } finally {
+          clearTimeout(timeout1);
+        }
+      } catch (err1: any) {
+        console.warn("Order placement attempt 1 failed:", err1);
+        networkFailed = true;
+      }
+
+      // Silent auto-retry: Dacă prima încercare a eșuat la rețea sau 502/503/504 gateway, reîncercăm după 1.5s
+      if (networkFailed || (res && res.status >= 502 && res.status <= 504)) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+          const controller2 = new AbortController();
+          const timeout2 = setTimeout(() => controller2.abort(), 25000);
+          try {
+            res = await attemptFetch(controller2.signal);
+            networkFailed = false;
+          } finally {
+            clearTimeout(timeout2);
+          }
+        } catch (err2: any) {
+          console.error("Order placement attempt 2 failed:", err2);
+          networkFailed = true;
+        }
+      }
+
+      cleanupTimers();
+
+      if (networkFailed || !res) {
+        setIsNetworkFail(true);
+        setServerError(t('networkErrorDesc') || "Comanda ta este salvată în siguranță în coș. Conexiunea a fost întreruptă.");
+        return;
+      }
+
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        setIsNetworkFail(true);
+        setServerError(t('networkErrorDesc') || "Comanda ta este salvată în siguranță în coș. Conexiunea a fost întreruptă.");
+        return;
+      }
 
       if (!data.success) {
         throw new Error(data.message || "Eroare la plasarea comenzii");
@@ -787,15 +887,38 @@ export default function CheckoutPage() {
          } catch(e) { console.error(e); }
       }
 
+      // Tracking Purchase pentru Meta Pixel și GA4
+      const orderId = String(data.data?.trackingCode || data.data?._id || data.data?.orderNumber || Date.now());
+      const finalAmount = Number(data.data?.finalTotal ?? grandTotal ?? totalPrice);
+
+      trackPurchase(
+        orderId,
+        items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        finalAmount,
+        {
+          currency: 'MDL',
+          email: formData.email,
+          phone: formData.phone,
+          name: formData.name,
+        }
+      );
+
       clearCart();
       const trackingTarget = data.data?.trackingCode || data.data?._id;
       router.push(`/order-tracking/${trackingTarget}`);
       
     } catch (err: any) {
       console.error(err);
+      cleanupTimers();
       setServerError(err.message || t('orderSubmitError') || "A apărut o problemă la trimiterea comenzii. Vă rugăm să încercați din nou.");
     } finally {
       setIsSubmitting(false);
+      setSubmissionStage('idle');
     }
   };
 
@@ -1896,16 +2019,25 @@ export default function CheckoutPage() {
                     <input
                       type="text"
                       placeholder={t('enterPromoCode')}
-                      className="flex-1 bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 text-xs outline-none uppercase font-bold text-[#1A120B] focus:border-[#D4A853]"
+                      disabled={isApplyingCoupon}
+                      className="flex-1 bg-white border border-[#E8E2D9] rounded-xl px-4 py-3 text-xs outline-none uppercase font-bold text-[#1A120B] focus:border-[#D4A853] disabled:opacity-60"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                     />
                     <button
                       type="button"
+                      disabled={isApplyingCoupon || !couponCode.trim()}
                       onClick={handleApplyCoupon}
-                      className="bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] text-white px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer"
+                      className="bg-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] disabled:opacity-60 disabled:cursor-not-allowed text-white px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-1.5 min-w-[70px]"
                     >
-                      {t('applyBtn')}
+                      {isApplyingCoupon ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>{t('applyingPromo')}</span>
+                        </>
+                      ) : (
+                        t('applyBtn')
+                      )}
                     </button>
                   </div>
                   {activePromo && (
@@ -2032,20 +2164,65 @@ export default function CheckoutPage() {
                 </div>
 
                 {serverError && (
-                  <div className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
-                    <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
-                    <div className="flex-1 leading-relaxed">
-                      <p className="font-bold">Eroare la trimiterea comenzii</p>
-                      <p className="mt-0.5">{serverError}</p>
+                  isNetworkFail ? (
+                    <div className="mb-6 p-5 rounded-3xl bg-amber-50/90 border border-amber-200 text-[#1A120B] shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
+                          <AlertCircle className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-serif font-bold text-base text-[#1A120B]">
+                            {t('networkErrorTitle')}
+                          </h4>
+                          <p className="text-xs text-[#736A60] mt-1 leading-relaxed">
+                            {serverError}
+                          </p>
+                          <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => executePlaceOrder(lastOrderAttemptRef.current.overrideToken, lastOrderAttemptRef.current.unverifiedPhone)}
+                              disabled={isSubmitting}
+                              className="px-4 py-2.5 bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+                            >
+                              <Loader2 className={`w-3.5 h-3.5 ${isSubmitting ? 'animate-spin' : 'hidden'}`} />
+                              <span>{t('retryOrderBtn')}</span>
+                            </button>
+                            <a
+                              href="tel:+37379006499"
+                              className="px-4 py-2.5 bg-white border border-[#E8E2D9] hover:border-[#D4A853] text-[#1A120B] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-center shadow-xs"
+                            >
+                              <span>{t('callRestaurantBtn')}</span>
+                            </a>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setServerError(null);
+                            setIsNetworkFail(false);
+                          }}
+                          className="text-[#736A60] hover:text-[#1A120B] p-1 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setServerError(null)}
-                      className="text-red-400 hover:text-red-700 p-1 -mr-1 -mt-1 cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+                      <div className="flex-1 leading-relaxed">
+                        <p className="font-bold">Eroare la trimiterea comenzii</p>
+                        <p className="mt-0.5">{serverError}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setServerError(null)}
+                        className="text-red-400 hover:text-red-700 p-1 -mr-1 -mt-1 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )
                 )}
 
                 <button
@@ -2058,7 +2235,16 @@ export default function CheckoutPage() {
                   }`}
                 >
                   {isSubmitting ? (
-                    <span>{t('sendingOrder')}</span>
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-[#D4A853]" />
+                      <span>
+                        {submissionStage === 'connecting'
+                          ? t('orderConnectingKitchen')
+                          : submissionStage === 'slow_network'
+                          ? t('orderSlowNetworkProcessing')
+                          : t('sendingOrder')}
+                      </span>
+                    </div>
                   ) : isSendingOtp ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -2081,7 +2267,7 @@ export default function CheckoutPage() {
                       onClick={handlePlaceOrderWithCallConfirmation}
                       className="self-start text-xs font-bold text-[#1A120B] underline hover:text-[#D4A853] transition-colors cursor-pointer"
                     >
-                      📞 Trimite comanda cu confirmare prin apel telefonic
+                      {t('otpCallFallbackBtn')}
                     </button>
                   </div>
                 )}
@@ -2137,7 +2323,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
-                    aria-label="Închide verificarea SMS"
+                    aria-label={t('ariaCloseSms')}
                     className="absolute top-3 right-3 sm:top-4 sm:right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer shadow-sm z-10"
                   >
                     <X className="w-4 h-4" />
@@ -2221,7 +2407,7 @@ export default function CheckoutPage() {
                         onClick={handlePlaceOrderWithCallConfirmation}
                         className="text-[11px] text-[#736A60] hover:text-[#1A120B] underline transition-colors cursor-pointer"
                       >
-                        Nu primești SMS-ul? Confirmă comanda prin apel telefonic
+                        {t('otpNoSmsCallFallback')}
                       </button>
                     </div>
                   </form>

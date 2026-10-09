@@ -145,7 +145,7 @@ export default function Navbar() {
           ) : (
             <button 
               onClick={() => setIsCartOpen(true)}
-              aria-label="Cart" 
+              aria-label={t('ariaCart')} 
               className={`flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full transition-colors active:scale-95 cursor-pointer ${
                 effectiveIsScrolled ? "hover:bg-[#1A1A1A]/5 text-[#1A120B]" : "hover:bg-white/10 text-white"
               }`}
@@ -157,7 +157,7 @@ export default function Navbar() {
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Deschide meniul mobil"
+            aria-label={t('ariaOpenMenu')}
             className={`md:hidden flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full transition-colors active:scale-95 ml-1 ${
               effectiveIsScrolled ? "bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B]" : "bg-white/10 hover:bg-white/20 text-white"
             }`}
@@ -197,7 +197,7 @@ export default function Navbar() {
                 
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  aria-label="Închide meniul mobil"
+                  aria-label={t('ariaCloseMenu')}
                   className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#1A1A1A]/5 hover:bg-[#1A1A1A]/10 text-[#1A120B] transition-colors cursor-pointer"
                 >
                   <X size={22} />

@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 
 export default function ForceChangePasswordModal() {
+  const t = useTranslations("Auth");
   const { user, token, updateUser } = useAuth();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,13 +26,13 @@ export default function ForceChangePasswordModal() {
     setSuccessMsg("");
 
     if (newPassword.length < 8) {
-      setErrorMsg("Parola nouă trebuie să aibă cel puțin 8 caractere.");
+      setErrorMsg(t("errMin8"));
       setLoading(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setErrorMsg("Parolele nu se potrivesc.");
+      setErrorMsg(t("errMismatch"));
       setLoading(false);
       return;
     }
@@ -48,14 +50,14 @@ export default function ForceChangePasswordModal() {
       const data = await res.json();
 
       if (!data.success) {
-        throw new Error(data.message || "Eroare la schimbarea parolei.");
+        throw new Error(data.message || t("errChangeFailed"));
       }
 
-      setSuccessMsg("Parola a fost schimbată cu succes!");
+      setSuccessMsg(t("successChanged"));
       updateUser({ mustChangePassword: false });
 
     } catch (err: any) {
-      setErrorMsg(err.message || "Nu s-a putut schimba parola.");
+      setErrorMsg(err.message || t("errChangeFailed"));
     } finally {
       setLoading(false);
     }
@@ -80,9 +82,9 @@ export default function ForceChangePasswordModal() {
             <div className="w-11 h-11 rounded-full bg-[#D4A853]/20 text-[#D4A853] flex items-center justify-center mx-auto mb-2.5">
               <Lock size={20} />
             </div>
-            <h2 className="text-xl sm:text-2xl font-serif text-[#FDF9F1]">Schimbare Parolă</h2>
+            <h2 className="text-xl sm:text-2xl font-serif text-[#FDF9F1]">{t("forceChangeTitle")}</h2>
             <p className="text-[#D4A853] text-xs mt-1 font-medium">
-              Te-ai autentificat cu o parolă temporară. Setează o parolă nouă pentru securitatea contului.
+              {t("forceChangeSubtitle")}
             </p>
           </div>
 
@@ -102,12 +104,12 @@ export default function ForceChangePasswordModal() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#1A120B]/70 mb-1">Parolă nouă</label>
+                <label className="block text-xs font-bold text-[#1A120B]/70 mb-1">{t("newPasswordLabel")}</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1A120B]/40" size={16} />
                   <input
                     type="password"
-                    placeholder="Minim 8 caractere"
+                    placeholder={t("placeholderMin8")}
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -117,12 +119,12 @@ export default function ForceChangePasswordModal() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#1A120B]/70 mb-1">Confirmă parola nouă</label>
+                <label className="block text-xs font-bold text-[#1A120B]/70 mb-1">{t("confirmPasswordLabel")}</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1A120B]/40" size={16} />
                   <input
                     type="password"
-                    placeholder="Repetă parola nouă"
+                    placeholder={t("placeholderRepeat")}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -140,7 +142,7 @@ export default function ForceChangePasswordModal() {
                   <Loader2 size={18} className="animate-spin" />
                 ) : (
                   <>
-                    <span>Salvează Parola Nouă</span>
+                    <span>{t("saveNewPasswordBtn")}</span>
                     <ArrowRight size={16} />
                   </>
                 )}

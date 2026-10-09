@@ -15,6 +15,7 @@ import ProductCustomizationModal, { ProductItem } from "@/components/ProductCust
 import ProductCard from "@/components/ProductCard";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { getOptimizedProductImage } from "@/utils/productImages";
 
 export default function MunchotellaBoutique() {
@@ -169,10 +170,10 @@ export default function MunchotellaBoutique() {
           </div>
           
           <div className="mt-16 text-center">
-            <a href="/menu" className="inline-flex items-center justify-center space-x-2 border-b-2 border-primary text-primary text-[14px] font-bold uppercase tracking-wider hover:text-[#D4A853] hover:border-[#D4A853] transition-colors duration-300 pb-1">
+            <Link href="/menu" className="inline-flex items-center justify-center space-x-2 border-b-2 border-primary text-primary text-[14px] font-bold uppercase tracking-wider hover:text-[#D4A853] hover:border-[#D4A853] transition-colors duration-300 pb-1">
               <span>{t('viewMenu')}</span>
               <ArrowUpRight className="w-4 h-4" />
-            </a>
+            </Link>
             
             {/* Features Section (Scrollytelling Editorial Process) */}
             </div>
@@ -199,7 +200,7 @@ export default function MunchotellaBoutique() {
                       <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
                     ))}
                   </div>
-                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
+                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">{t('googleReviewBadge')}</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   {t('review1Text')}
@@ -225,7 +226,7 @@ export default function MunchotellaBoutique() {
                       <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
                     ))}
                   </div>
-                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
+                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">{t('googleReviewBadge')}</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   {t('review2Text')}
@@ -251,7 +252,7 @@ export default function MunchotellaBoutique() {
                       <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
                     ))}
                   </div>
-                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
+                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">{t('googleReviewBadge')}</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   {t('review3Text')}
@@ -277,7 +278,7 @@ export default function MunchotellaBoutique() {
                       <Star key={i} className="w-4 h-4 fill-[#D4A853] text-[#D4A853]" />
                     ))}
                   </div>
-                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">Google Review</span>
+                  <span className="text-[10px] font-bold text-[#1A120B]/40 uppercase tracking-widest">{t('googleReviewBadge')}</span>
                 </div>
                 <p className="text-[#1A120B]/80 font-medium text-[15px] leading-relaxed mb-6 italic flex-grow">
                   {t('review4Text')}

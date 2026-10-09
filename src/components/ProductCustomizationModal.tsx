@@ -6,6 +6,7 @@ import { X, Plus, Minus, Check } from "lucide-react";
 import { useCart, ToppingOption } from "@/context/CartContext";
 import { useTranslations, useLocale } from "next-intl";
 import { translateTopping } from "@/utils/toppingTranslations";
+import { trackAddToCart } from "@/utils/analytics";
 
 export type ProductItem = {
   id: number | string;
@@ -245,6 +246,19 @@ export default function ProductCustomizationModal({
       selectedToppings,
       quantity,
     });
+
+    // Track AddToCart for Meta Pixel & GA4
+    trackAddToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: unitPrice,
+        category: product.rawCategory || product.category,
+      },
+      quantity,
+      totalPrice
+    );
+
     onClose();
   };
 
@@ -295,7 +309,7 @@ export default function ProductCustomizationModal({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Închide fereastra"
+                aria-label={t('ariaCloseModal')}
                 className="md:hidden absolute top-3 right-3 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white/90 text-[#1A1A1A] backdrop-blur-md flex items-center justify-center hover:bg-white transition-all cursor-pointer z-50 shadow-md border border-black/5"
               >
                 <X className="w-4 h-4" />
@@ -349,7 +363,7 @@ export default function ProductCustomizationModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      aria-label="Închide fereastra"
+                      aria-label={t('ariaCloseModal')}
                       className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[#F5EFEB] hover:bg-[#EAE1DB] text-[#1A1A1A] flex items-center justify-center transition-all cursor-pointer shadow-sm"
                     >
                       <X className="w-4 h-4" />

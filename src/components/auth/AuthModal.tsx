@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { defaultCountry, Country } from "@/data/countries";
 import { auth } from "@/lib/firebase";
+import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/routing";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -66,6 +68,8 @@ declare global {
 }
 
 export default function AuthModal() {
+  const t = useTranslations("Auth");
+  const locale = useLocale();
   const { isAuthModalOpen, setIsAuthModalOpen, login, user, token } = useAuth();
   
   const [modalStep, setModalStep] = useState<OnboardingStep>("AUTH");
@@ -161,7 +165,7 @@ export default function AuthModal() {
     } catch (err: any) {
       console.error(`Social Auth Error (${providerName}):`, err);
       if (err.code !== "auth/popup-closed-by-user") {
-        setErrorMsg(err.message || "Conectarea socială a eșuat.");
+        setErrorMsg(err.message || t('errSocial'));
       }
     } finally {
       setSocialLoading(false);
@@ -260,7 +264,7 @@ export default function AuthModal() {
       setPhone("");
       setIsLogin(true);
     } catch (err: any) {
-      setErrorMsg(err.message || "Ceva nu a funcționat. Încearcă din nou.");
+      setErrorMsg(err.message || t('errGeneric'));
     } finally {
       setLoading(false);
     }
@@ -269,7 +273,7 @@ export default function AuthModal() {
   const handleForgotPhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) {
-      setErrorMsg("Te rugăm să introduci numărul de telefon.");
+      setErrorMsg(t('errPhoneRequired'));
       return;
     }
     setForgotStep("method");
@@ -292,13 +296,13 @@ export default function AuthModal() {
         const data = await res.json();
         
         if (!data.success) {
-          throw new Error(data.message || "Eroare la recuperarea parolei");
+          throw new Error(data.message || t('errForgotInit'));
         }
         
-        setSuccessMsg(data.message || "Parola temporară a fost trimisă pe email!");
+        setSuccessMsg(data.message || t('tempPasswordSentEmail'));
         setForgotStep("success");
       } catch (err: any) {
-        setErrorMsg(err.message || "Nu am putut iniția recuperarea parolei.");
+        setErrorMsg(err.message || t('errForgotInit'));
       } finally {
         setLoading(false);
       }
@@ -314,7 +318,7 @@ export default function AuthModal() {
         setForgotStep("otp");
       } catch (error: any) {
         console.error("SMS Error Details:", error);
-        setErrorMsg(error.message || "Eroare la trimiterea SMS-ului. Verifică numărul și încearcă din nou.");
+        setErrorMsg(error.message || t('errSmsSend'));
         // reset recaptcha
         if (window.recaptchaVerifier) {
           window.recaptchaVerifier.clear();
@@ -329,7 +333,7 @@ export default function AuthModal() {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || otpCode.length !== 6 || !confirmationResult) {
-      setErrorMsg("Introdu codul din 6 cifre.");
+      setErrorMsg(t('errOtpRequired'));
       return;
     }
     setLoading(true);
@@ -347,19 +351,19 @@ export default function AuthModal() {
       const data = await res.json();
 
       if (!data.success) {
-        throw new Error(data.message || "Eroare la resetarea parolei.");
+        throw new Error(data.message || t('errOtpInvalid'));
       }
 
       if (data.data && data.data.tempPassword) {
         setTempPasswordDisplay(data.data.tempPassword);
         setForgotStep("success");
       } else {
-        setSuccessMsg("Parola a fost resetată cu succes!");
+        setSuccessMsg(t('successPasswordReset'));
         setForgotStep("success");
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Cod incorect sau expirat.");
+      setErrorMsg(err.message || t('errOtpInvalid'));
     } finally {
       setLoading(false);
     }
@@ -367,7 +371,7 @@ export default function AuthModal() {
 
   const handleCompleteNameStep = () => {
     if (!firstName.trim() || !lastName.trim()) {
-      setErrorMsg("Te rugăm să completezi prenumele și numele.");
+      setErrorMsg(t('errNameRequired'));
       return;
     }
     setErrorMsg("");
@@ -376,7 +380,7 @@ export default function AuthModal() {
 
   const handleCompleteTermsStep = async () => {
     if (!acceptedTerms) {
-      setErrorMsg("Trebuie să accepți Termenii și Condițiile pentru a continua.");
+      setErrorMsg(t('errTermsRequired'));
       return;
     }
     setLoading(true);
@@ -398,13 +402,13 @@ export default function AuthModal() {
       });
       const data = await res.json();
       if (!data.success) {
-        throw new Error(data.message || "Eroare la salvarea profilului.");
+        throw new Error(data.message || t('errRegisterFailed'));
       }
 
       setIsAuthModalOpen(false);
       setModalStep("AUTH");
     } catch (err: any) {
-      setErrorMsg(err.message || "Nu s-a putut finaliza înregistrarea.");
+      setErrorMsg(err.message || t('errRegisterFailed'));
     } finally {
       setLoading(false);
     }
@@ -454,28 +458,28 @@ export default function AuthModal() {
               <button 
                 onClick={() => setIsAuthModalOpen(false)}
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 min-w-[44px] min-h-[44px] rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 hover:text-[#D4A853] transition-colors z-20 cursor-pointer"
-                aria-label="Închide fereastra"
+                aria-label={t('closeModal')}
               >
                 <X size={18} />
               </button>
 
               <h2 className="font-serif text-2xl sm:text-3xl text-white font-bold tracking-tight relative z-10 px-8 sm:px-0">
                 {modalStep === "ONBOARDING_NAME" 
-                  ? "Cum te numești?" 
+                  ? t('titleName')
                   : modalStep === "ONBOARDING_TERMS" 
-                  ? "Termeni și Condiții" 
+                  ? t('titleTerms')
                   : isForgotPassword 
-                  ? "Recuperare Parolă" 
-                  : (isLogin ? "Bine ai revenit" : "Devino Membru")}
+                  ? t('titleForgot')
+                  : (isLogin ? t('titleWelcome') : t('titleRegister'))}
               </h2>
               <p className="text-[#D4A853] text-xs sm:text-sm mt-1.5 font-medium tracking-wide relative z-10 px-4 sm:px-0">
                 {modalStep === "ONBOARDING_NAME"
-                  ? "Spune-ne numele tău pentru comenzi"
+                  ? t('subName')
                   : modalStep === "ONBOARDING_TERMS"
-                  ? "Revizuiește și acceptă politica Munchotella"
+                  ? t('subTerms')
                   : isForgotPassword 
-                  ? (forgotMethod === "phone" ? "Introdu telefonul pentru a primi parola temporară" : "Introdu adresa de email pentru recuperare")
-                  : (isLogin ? "Accesează-ți contul Munchotella" : "Alătură-te comunității noastre dulci")}
+                  ? (forgotMethod === "phone" ? t('subForgotPhone') : t('subForgotEmail'))
+                  : (isLogin ? t('subWelcome') : t('subRegister'))}
               </p>
             </div>
 
@@ -507,7 +511,7 @@ export default function AuthModal() {
                     <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40" size={18} />
                     <input 
                       type="text" 
-                      placeholder="Prenume (ex: Maria)" 
+                      placeholder={t('placeholderFirstName')}
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
@@ -517,7 +521,7 @@ export default function AuthModal() {
                     <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40" size={18} />
                     <input 
                       type="text" 
-                      placeholder="Nume de familie (ex: Popescu)" 
+                      placeholder={t('placeholderLastName')}
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#E8E2D9] rounded-xl text-[15px] focus:outline-none focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/20 transition-all duration-300"
@@ -529,7 +533,7 @@ export default function AuthModal() {
                     disabled={!firstName.trim() || !lastName.trim()}
                     className="w-full mt-4 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-50 cursor-pointer group"
                   >
-                    <span className="group-hover:text-[#D4A853] transition-colors">Pasul Următor</span>
+                    <span className="group-hover:text-[#D4A853] transition-colors">{t('nextStep')}</span>
                     <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
@@ -539,7 +543,15 @@ export default function AuthModal() {
               {modalStep === "ONBOARDING_TERMS" && (
                 <div className="flex flex-col space-y-4">
                   <p className="text-sm text-[#1A120B]/70 leading-relaxed bg-white p-4 rounded-xl border border-[#E8E2D9]">
-                    Te rugăm să confirmi că ești de acord cu <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Termenii și Condițiile</a> și <a href="/ro/legal" target="_blank" className="text-[#D4A853] font-bold underline">Politica de Confidențialitate</a> Munchotella.
+                    {t('termsConsentPre')}
+                    <Link href="/legal" target="_blank" className="text-[#D4A853] font-bold underline">
+                      {t('termsLinkText')}
+                    </Link>
+                    {t('termsConsentAnd')}
+                    <Link href="/legal" target="_blank" className="text-[#D4A853] font-bold underline">
+                      {t('privacyLinkText')}
+                    </Link>
+                    {t('termsConsentPost')}
                   </p>
 
                   <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-xl hover:bg-black/5 transition-colors">
@@ -554,7 +566,7 @@ export default function AuthModal() {
                     }`}>
                       {acceptedTerms && <Check size={14} />}
                     </div>
-                    <span className="text-sm font-semibold text-[#1A120B]">Sunt de acord cu Termenii & Condițiile</span>
+                    <span className="text-sm font-semibold text-[#1A120B]">{t('agreeTerms')}</span>
                   </label>
 
                   <button 
@@ -566,7 +578,7 @@ export default function AuthModal() {
                       <Loader2 size={20} className="animate-spin text-[#D4A853]" />
                     ) : (
                       <>
-                        <span className="group-hover:text-[#D4A853] transition-colors">Finalizează Înregistrarea</span>
+                        <span className="group-hover:text-[#D4A853] transition-colors">{t('finishRegistration')}</span>
                         <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                       </>
                     )}
@@ -587,7 +599,7 @@ export default function AuthModal() {
                         className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-white border border-[#E8E2D9] rounded-xl font-semibold text-sm text-[#1A120B] hover:bg-gray-50 hover:border-[#D4A853]/50 transition-all shadow-sm cursor-pointer disabled:opacity-60"
                       >
                         <GoogleIcon />
-                        <span>Continuă cu Google</span>
+                        <span>{t('continueGoogle')}</span>
                       </button>
 
                       <button
@@ -597,24 +609,12 @@ export default function AuthModal() {
                         className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-white border border-[#E8E2D9] rounded-xl font-semibold text-sm text-[#1A120B] hover:bg-gray-50 hover:border-[#D4A853]/50 transition-all shadow-sm cursor-pointer disabled:opacity-60"
                       >
                         <FacebookIcon />
-                        <span>Continuă cu Facebook</span>
+                        <span>{t('continueFacebook')}</span>
                       </button>
-
-                      {/*
-                      <button
-                        type="button"
-                        disabled={socialLoading || loading}
-                        onClick={() => handleSocialLogin("apple")}
-                        className="w-full flex items-center justify-center space-x-3 py-3 px-4 bg-[#1A120B] text-white rounded-xl font-semibold text-sm hover:bg-[#2A1E14] transition-all shadow-sm cursor-pointer disabled:opacity-60"
-                      >
-                        <AppleIcon />
-                        <span>Continuă cu Apple</span>
-                      </button>
-                      */}
 
                       <div className="relative flex items-center justify-center my-4">
                         <div className="border-t border-[#E8E2D9] w-full"></div>
-                        <span className="bg-[#FAF8F5] px-3 text-xs text-[#1A120B]/50 font-medium uppercase tracking-wider relative z-10">sau</span>
+                        <span className="bg-[#FAF8F5] px-3 text-xs text-[#1A120B]/50 font-medium uppercase tracking-wider relative z-10">{t('orDivider')}</span>
                       </div>
                     </div>
                   )}
@@ -636,7 +636,7 @@ export default function AuthModal() {
                             />
                           </div>
                           <button type="submit" className="w-full relative bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors group cursor-pointer">
-                            <span>Următorul pas</span>
+                            <span>{t('nextStep')}</span>
                             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                           </button>
                         </form>
@@ -644,30 +644,30 @@ export default function AuthModal() {
 
                       {forgotStep === "method" && (
                         <div className="flex flex-col space-y-4">
-                          <p className="text-center text-[#1A120B] font-medium text-sm">Cum dorești să recuperezi parola?</p>
+                          <p className="text-center text-[#1A120B] font-medium text-sm">{t('chooseRecoveryMethod')}</p>
                           <div className="grid grid-cols-2 gap-3">
                             <button onClick={() => setResetMethod("sms")} className={`py-3 rounded-xl font-bold text-sm transition-all ${resetMethod === 'sms' ? 'bg-[#1A120B] text-white shadow-md' : 'bg-white border border-[#E8E2D9] text-[#1A120B]/60 hover:border-[#1A120B] hover:text-[#1A120B]'}`}>
-                              Prin SMS
+                              {t('viaSms')}
                             </button>
                             <button onClick={() => setResetMethod("email")} className={`py-3 rounded-xl font-bold text-sm transition-all ${resetMethod === 'email' ? 'bg-[#1A120B] text-white shadow-md' : 'bg-white border border-[#E8E2D9] text-[#1A120B]/60 hover:border-[#1A120B] hover:text-[#1A120B]'}`}>
-                              Prin Email
+                              {t('viaEmail')}
                             </button>
                           </div>
                           <button onClick={handleForgotMethodSubmit} disabled={loading} className="w-full mt-2 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer">
-                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>Confirmă</span>}
+                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>{t('confirmBtn')}</span>}
                           </button>
-                          <button onClick={() => setForgotStep("phone")} className="text-[13px] text-[#1A120B]/60 hover:text-[#1A120B] transition-colors mt-2">Înapoi la telefon</button>
+                          <button onClick={() => setForgotStep("phone")} className="text-[13px] text-[#1A120B]/60 hover:text-[#1A120B] transition-colors mt-2">{t('backToPhone')}</button>
                         </div>
                       )}
 
                       {forgotStep === "otp" && (
                         <form onSubmit={handleVerifyOtp} className="flex flex-col space-y-4">
-                          <p className="text-center text-[#1A120B] font-medium text-sm">Am trimis un cod de 6 cifre pe telefonul tău.</p>
+                          <p className="text-center text-[#1A120B] font-medium text-sm">{t('otpSentNote')}</p>
                           <div className="relative group focus-within:text-[#D4A853]">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
                             <input 
                               type="text" 
-                              placeholder="Cod OTP din 6 cifre" 
+                              placeholder={t('placeholderOtp')} 
                               required
                               value={otpCode}
                               onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0,6))}
@@ -675,7 +675,7 @@ export default function AuthModal() {
                             />
                           </div>
                           <button type="submit" disabled={loading} className="w-full mt-2 relative overflow-hidden bg-[#1A120B] text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer">
-                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>Verifică Codul</span>}
+                            {loading ? <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}><Loader2 size={20} /></motion.div> : <span>{t('verifyCodeBtn')}</span>}
                           </button>
                         </form>
                       )}
@@ -687,17 +687,17 @@ export default function AuthModal() {
                           </div>
                           {tempPasswordDisplay ? (
                             <>
-                              <h3 className="text-xl font-bold text-[#1A120B]">Recuperare reușită!</h3>
-                              <p className="text-[#1A120B]/70 text-sm">Parola ta temporară este:</p>
+                              <h3 className="text-xl font-bold text-[#1A120B]">{t('recoverySuccess')}</h3>
+                              <p className="text-[#1A120B]/70 text-sm">{t('tempPasswordLabel')}</p>
                               <div className="bg-gray-100 p-4 rounded-xl border border-gray-200 mt-2">
                                 <p className="font-mono text-2xl tracking-wider font-bold text-[#1A120B]">{tempPasswordDisplay}</p>
                               </div>
-                              <p className="text-[#1A120B]/60 text-xs mt-2">Folosește această parolă pentru a te autentifica, apoi schimb-o din contul tău.</p>
+                              <p className="text-[#1A120B]/60 text-xs mt-2">{t('tempPasswordNote')}</p>
                             </>
                           ) : (
                             <>
-                              <h3 className="text-xl font-bold text-[#1A120B]">Verifică-ți Emailul</h3>
-                              <p className="text-[#1A120B]/70 text-sm">{successMsg || "Parola temporară a fost trimisă cu succes!"}</p>
+                              <h3 className="text-xl font-bold text-[#1A120B]">{t('checkEmailTitle')}</h3>
+                              <p className="text-[#1A120B]/70 text-sm">{successMsg || t('tempPasswordSentEmail')}</p>
                             </>
                           )}
                         </div>
@@ -709,7 +709,7 @@ export default function AuthModal() {
                           onClick={() => { setIsForgotPassword(false); setForgotStep("phone"); setErrorMsg(""); setSuccessMsg(""); }}
                           className="text-[13px] text-[#1A120B]/60 hover:text-[#D4A853] font-medium transition-colors cursor-pointer"
                         >
-                          {forgotStep === "success" ? "Mergi la Autentificare" : "Înapoi la Autentificare"}
+                          {forgotStep === "success" ? t('goToLogin') : t('backToLogin')}
                         </button>
                       </div>
                     </div>
@@ -730,7 +730,7 @@ export default function AuthModal() {
                               }`}
                             >
                               <Phone size={14} />
-                              <span>Număr de Telefon</span>
+                              <span>{t('tabPhone')}</span>
                             </button>
                             <button
                               type="button"
@@ -742,7 +742,7 @@ export default function AuthModal() {
                               }`}
                             >
                               <Mail size={14} />
-                              <span>Email</span>
+                              <span>{t('tabEmail')}</span>
                             </button>
                           </div>
                         )}
@@ -761,7 +761,7 @@ export default function AuthModal() {
                                 <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
                                 <input 
                                   type="text" 
-                                  placeholder="Nume complet (ex: Maria Popescu)" 
+                                  placeholder={t('placeholderFullName')} 
                                   required={!isLogin}
                                   value={name}
                                   onChange={(e) => setName(e.target.value)}
@@ -812,7 +812,7 @@ export default function AuthModal() {
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
                             <input 
                               type="email" 
-                              placeholder="Adresa de email" 
+                              placeholder={t('placeholderEmail')} 
                               required
                               value={loginEmail}
                               onChange={(e) => setLoginEmail(e.target.value)}
@@ -826,7 +826,7 @@ export default function AuthModal() {
                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A120B]/40 group-focus-within:text-[#D4A853] transition-colors" size={18} />
                           <input 
                             type="password" 
-                            placeholder="Parola" 
+                            placeholder={t('placeholderPassword')} 
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -841,7 +841,7 @@ export default function AuthModal() {
                               onClick={() => { setIsForgotPassword(true); setErrorMsg(""); setSuccessMsg(""); }}
                               className="text-[13px] text-[#1A120B]/60 hover:text-[#D4A853] font-medium transition-colors cursor-pointer"
                             >
-                              Ai uitat parola?
+                              {t('forgotPasswordLink')}
                             </button>
                           </div>
                         )}
@@ -870,7 +870,7 @@ export default function AuthModal() {
                               </motion.div>
                             ) : (
                               <>
-                                <span>{isLogin ? "Autentificare" : "Creează Cont"}</span>
+                                <span>{isLogin ? t('loginBtn') : t('registerBtn')}</span>
                                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                               </>
                             )}
@@ -879,13 +879,13 @@ export default function AuthModal() {
                       </form>
 
                       <div className="mt-6 text-center text-sm text-[#1A120B]/60">
-                        {isLogin ? "Nu ai un cont încă?" : "Ai deja un cont?"}{" "}
+                        {isLogin ? t('noAccount') : t('haveAccount')}{" "}
                         <button 
-                          type="button"
+                          type="button" 
                           onClick={() => { setIsLogin(!isLogin); setErrorMsg(""); setSuccessMsg(""); setIsForgotPassword(false); }}
                           className="text-[#D4A853] font-bold hover:underline transition-all cursor-pointer"
                         >
-                          {isLogin ? "Creează unul" : "Autentifică-te"}
+                          {isLogin ? t('createOne') : t('signIn')}
                         </button>
                       </div>
                     </>

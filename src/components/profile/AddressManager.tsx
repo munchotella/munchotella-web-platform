@@ -224,7 +224,7 @@ export default function AddressManager() {
             >
               <button 
                 onClick={() => setIsModalOpen(false)}
-                aria-label="Închide fereastra"
+                aria-label={t('closeModal')}
                 className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1A120B]/40 hover:text-[#1A120B] bg-[#1A120B]/5 rounded-full transition-colors cursor-pointer"
               >
                 <X size={20} />

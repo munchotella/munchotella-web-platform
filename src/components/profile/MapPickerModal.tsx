@@ -7,6 +7,7 @@ import { useGoogleMaps } from "@/context/GoogleMapsContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, X, Check, ArrowLeft, Locate, Plus, Minus, Layers } from "lucide-react";
 import MapAutocomplete from "@/components/ui/MapAutocomplete";
+import { useTranslations } from "next-intl";
 
 interface MapPickerModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export default function MapPickerModal({
   initialAddress,
   onSelectLocation,
 }: MapPickerModalProps) {
+  const t = useTranslations("MapPicker");
   const { isLoaded, loadError } = useGoogleMaps();
 
   // Keep coords in ref for real-time tracking without re-rendering the GoogleMap component
@@ -261,7 +263,7 @@ export default function MapPickerModal({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-[#FAF7F2] text-[#1A120B] font-medium text-sm p-4 text-center">
-              Se încarcă Google Maps...
+              {t('loadingMaps')}
             </div>
           )}
         </div>
@@ -299,7 +301,7 @@ export default function MapPickerModal({
               type="button"
               onClick={onClose}
               className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853] hover:text-[#1A120B] transition-all cursor-pointer shrink-0"
-              title="Înapoi la Comandă"
+              title={t('backToOrder')}
             >
               <ArrowLeft size={18} />
             </button>
@@ -316,7 +318,7 @@ export default function MapPickerModal({
                     mapRef.current.setZoom(19);
                   }
                 }}
-                placeholder="Caută bloc, stradă sau reper..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full bg-white border border-[#E8E2D9] rounded-xl pl-9 pr-3 py-2 text-xs md:text-sm text-[#1A120B] font-medium outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all truncate"
               />
             </div>
@@ -325,7 +327,7 @@ export default function MapPickerModal({
               type="button"
               onClick={onClose}
               className="w-9 h-9 rounded-xl bg-transparent flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-black/5 transition-colors cursor-pointer shrink-0"
-              title="Închide"
+              title={t('close')}
             >
               <X size={18} />
             </button>
@@ -342,10 +344,10 @@ export default function MapPickerModal({
                 ? "bg-[#1A120B] text-[#D4A853] border-[#D4A853]"
                 : "bg-white/95 text-[#1A120B] border-[#E8E2D9] hover:bg-[#FAF7F2]"
             }`}
-            title="Schimbă între Satelit și Hartă 3D"
+            title={t('toggle3d')}
           >
             <Layers size={16} />
-            <span>{mapTypeId === "hybrid" ? "🛰️ Satelit Activ" : "🗺️ Vedere 3D"}</span>
+            <span>{mapTypeId === "hybrid" ? t('satelliteActive') : t('view3d')}</span>
           </button>
         </div>
 
@@ -354,7 +356,7 @@ export default function MapPickerModal({
           {/* Mobile Map Type Switcher Button */}
           <button
             type="button"
-            title="Comută Satelit / Hartă 3D"
+            title={t('toggle3d')}
             onClick={toggleMapType}
             className={`sm:hidden w-12 h-12 rounded-2xl shadow-xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
               mapTypeId === "hybrid"
@@ -368,7 +370,7 @@ export default function MapPickerModal({
           {/* GPS Locate Me Button */}
           <button
             type="button"
-            title="Locația mea curentă"
+            title={t('myLocation')}
             onClick={handleLocateMe}
             className="w-12 h-12 bg-white/95 backdrop-blur-md hover:bg-[#D4A853] text-[#1A120B] rounded-2xl shadow-xl border border-[#E8E2D9] flex items-center justify-center transition-all cursor-pointer group active:scale-95"
           >
@@ -379,7 +381,7 @@ export default function MapPickerModal({
           <div className="hidden sm:flex flex-col bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#E8E2D9] overflow-hidden">
             <button
               type="button"
-              title="Mărește"
+              title={t('zoomIn')}
               onClick={handleZoomIn}
               className="w-12 h-10 flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853]/20 border-b border-[#E8E2D9] transition-colors cursor-pointer"
             >
@@ -387,7 +389,7 @@ export default function MapPickerModal({
             </button>
             <button
               type="button"
-              title="Micșorează"
+              title={t('zoomOut')}
               onClick={handleZoomOut}
               className="w-12 h-10 flex items-center justify-center text-[#1A120B] hover:bg-[#D4A853]/20 transition-colors cursor-pointer"
             >
@@ -408,14 +410,14 @@ export default function MapPickerModal({
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="w-2 h-2 rounded-full bg-[#D4A853] animate-pulse"></span>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#D4A853]">
-                    {geocoding ? "IDENTIFICARE ADRESĂ..." : "ADRESĂ LIVRARE SELECTATĂ"}
+                    {geocoding ? t('geocodingBadge') : t('selectedBadge')}
                   </p>
                 </div>
                 <h4 className="text-xs md:text-sm font-serif font-bold text-[#1A120B] line-clamp-2 leading-snug">
-                  {geocoding ? "Se determină adresa exactă..." : addressText || "Selectează o locație pe hartă"}
+                  {geocoding ? t('determiningAddress') : addressText || t('selectLocationPrompt')}
                 </h4>
                 <p className="text-[10px] md:text-[11px] text-[#736A60] mt-0.5">
-                  Trage harta sau fă click pe locație pentru a poziționa pinul pe intrarea ta
+                  {t('instruction')}
                 </p>
               </div>
             </div>
@@ -427,7 +429,7 @@ export default function MapPickerModal({
               className="w-full h-12 md:h-13 bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg active:scale-[0.98]"
             >
               <Check size={18} />
-              <span>Confirmă Această Adresă</span>
+              <span>{t('confirmAddress')}</span>
             </button>
           </motion.div>
         </div>

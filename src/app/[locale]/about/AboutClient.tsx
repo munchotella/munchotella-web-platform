@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useTranslations } from "next-intl";
@@ -97,7 +97,7 @@ export default function AboutClient() {
               <div className="relative w-full h-[380px] sm:h-[500px] md:h-[700px] overflow-hidden rounded-sm border border-[#e5e2dd] shadow-lg">
                 <img 
                   src="/echipa.jpg" 
-                  alt="Echipa Munchotella" 
+                  alt={t('teamImageAlt')} 
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -111,7 +111,7 @@ export default function AboutClient() {
         <div className="max-w-[800px] mx-auto px-4 md:px-8">
           <AnimateIn direction="up">
             <div className="text-center mb-16 sm:mb-20">
-              <h2 className="font-serif text-3xl sm:text-4xl font-medium text-[#3d3028]">Evoluția Munchotella</h2>
+              <h2 className="font-serif text-3xl sm:text-4xl font-medium text-[#3d3028]">{t('timelineTitle')}</h2>
             </div>
           </AnimateIn>
 
@@ -120,9 +120,9 @@ export default function AboutClient() {
               <div className="relative">
                 <div className="absolute -left-[33px] sm:-left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#d4af37] border-4 border-[#fcf9f4]"></div>
                 <span className="text-[12px] font-bold text-[#d4af37] tracking-widest mb-2 block">2023</span>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">Cum ne-a venit ideea</h3>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">{t('timeline2023Title')}</h3>
                 <p className="text-[15px] sm:text-[16px] text-[#4e4540] leading-relaxed">
-                  Totul a început simplu: ne-am dat seama că în Chișinău e greu să găsești o clătită cu adevărat bună, plină de ciocolată originală, nu doar cu creme ieftine și diluate.
+                  {t('timeline2023Desc')}
                 </p>
               </div>
             </AnimateIn>
@@ -131,9 +131,9 @@ export default function AboutClient() {
               <div className="relative">
                 <div className="absolute -left-[33px] sm:-left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#d4af37] border-4 border-[#fcf9f4]"></div>
                 <span className="text-[12px] font-bold text-[#d4af37] tracking-widest mb-2 block">2024</span>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">Primele rețete</h3>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">{t('timeline2024Title')}</h3>
                 <p className="text-[15px] sm:text-[16px] text-[#4e4540] leading-relaxed">
-                  Au urmat luni de zile petrecute în bucătărie, stricând kilograme întregi de aluat, până când am găsit proporția perfectă pentru ca waffla să iasă ușor crocantă la exterior, dar foarte pufoasă în interior.
+                  {t('timeline2024Desc')}
                 </p>
               </div>
             </AnimateIn>
@@ -141,10 +141,10 @@ export default function AboutClient() {
             <AnimateIn direction="up" delay={0.3}>
               <div className="relative">
                 <div className="absolute -left-[33px] sm:-left-[41px] md:-left-[57px] top-1 w-4 h-4 rounded-full bg-[#3d3028] border-4 border-[#fcf9f4]"></div>
-                <span className="text-[12px] font-bold text-[#3d3028] tracking-widest mb-2 block">Astăzi</span>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">Azi la Munchotella</h3>
+                <span className="text-[12px] font-bold text-[#3d3028] tracking-widest mb-2 block">{t('timelineTodayBadge')}</span>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1c1c19] mb-2 sm:mb-3">{t('timelineTodayTitle')}</h3>
                 <p className="text-[16px] text-[#4e4540] leading-relaxed">
-                  Te așteptăm în locația noastră, unde pregătim fiecare comandă pe loc, exact în fața ta. Misiunea noastră a rămas aceeași: să-ți facem ziua mai dulce, cu un desert corect.
+                  {t('timelineTodayDesc')}
                 </p>
               </div>
             </AnimateIn>
@@ -153,7 +153,7 @@ export default function AboutClient() {
           <div className="mt-24 text-center">
             <Link href="/menu">
               <MagneticButton className="bg-[#55463E] text-white text-[12px] font-bold uppercase tracking-widest px-8 py-4 hover:bg-[#3d3028] transition-colors duration-300">
-                Vezi Meniul Nostru
+                {t('viewMenuBtn')}
               </MagneticButton>
             </Link>
           </div>

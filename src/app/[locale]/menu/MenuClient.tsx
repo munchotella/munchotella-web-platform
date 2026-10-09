@@ -2,7 +2,6 @@
 
 import { ArrowRight, ChevronLeft, Search, ShoppingBag, X, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -12,9 +11,11 @@ import ProductCustomizationModal, { ProductItem } from "@/components/ProductCust
 import ProductCard from "@/components/ProductCard";
 import { useLocale, useTranslations } from "next-intl";
 import { getOptimizedProductImage } from "@/utils/productImages";
+import { trackViewContent } from "@/utils/analytics";
 
 export default function MenuClient() {
   const t = useTranslations("Menu");
+  const tCat = useTranslations("Categories");
   const locale = useLocale();
   const [activeCategory, setActiveCategory] = useState(t('catAll'));
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,16 +36,28 @@ export default function MenuClient() {
       modifiers: item.modifiers,
     });
     setIsModalOpen(true);
+
+    // Track ViewContent for Meta Pixel & GA4
+    trackViewContent({
+      id: item.id,
+      name: item.name,
+      price: item.numericPrice ?? parseFloat(String(item.price)) ?? 0,
+      category: item.rawCategory || item.category,
+    });
   };
   
   const categoryMap: Record<string, string> = {
-    "waffles": "Waffles",
-    "crepes": "Crepes",
-    "pancakes": "Pancakes",
-    "drinks": t('catDrinks')
+    "waffles": tCat('Waffles'),
+    "crepes": tCat('Crepes'),
+    "pancakes": tCat('Pancakes'),
+    "drinks": tCat('Băuturi'),
+    "băuturi": tCat('Băuturi'),
+    "напитки": tCat('Băuturi'),
+    "specialități": tCat('Specialități'),
+    "specials": tCat('Specialități')
   };
   
-  const categories = [t('catAll'), "Waffles", "Crepes", "Pancakes", t('catDrinks')];
+  const categories = [t('catAll'), tCat('Waffles'), tCat('Crepes'), tCat('Pancakes'), tCat('Băuturi')];
   
   // Sort helper based on category bar order
   const categoryOrder = ["waffles", "crepes", "pancakes", "specials"];
@@ -75,7 +88,7 @@ export default function MenuClient() {
       name,
       price: `${item.price} ${item.currency}`,
       numericPrice: item.price,
-      category: categoryMap[item.category] || item.category,
+      category: categoryMap[item.category?.toLowerCase()] || categoryMap[item.category] || item.category,
       rawCategory: item.category?.toLowerCase() || "",
       desc,
       img: getOptimizedProductImage(name, item.image),
@@ -91,7 +104,10 @@ export default function MenuClient() {
   useEffect(() => {
     const syncMenuFromBackend = async () => {
       try {
-        const res = await fetch("https://munchotella-api.onrender.com/api/menu", { credentials: "include" });
+        const res = await fetch("https://munchotella-api.onrender.com/api/menu", { 
+          credentials: "include",
+          signal: AbortSignal.timeout(8000)
+        });
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           const liveItems = data.data.map((item: any, index: number) => {
@@ -118,7 +134,7 @@ export default function MenuClient() {
               name,
               price: `${item.price} ${item.currency || 'MDL'}`,
               numericPrice: item.price,
-              category: categoryMap[item.category] || item.category,
+              category: categoryMap[item.category?.toLowerCase()] || categoryMap[item.category] || item.category,
               rawCategory: item.category?.toLowerCase() || "",
               desc,
               img: getOptimizedProductImage(name, item.imageUrl || item.image),

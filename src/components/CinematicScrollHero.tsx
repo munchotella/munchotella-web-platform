@@ -400,7 +400,7 @@ export default function CinematicScrollHero() {
                   switchToTrack(idx);
                 }}
                 className="p-1.5 min-h-[32px] flex items-center justify-center cursor-pointer"
-                aria-label={`Select shot ${idx + 1}`}
+                aria-label={t('ariaSelectShot', { number: idx + 1 })}
               >
                 <span
                   className={`h-1.5 rounded-full transition-all duration-300 block ${

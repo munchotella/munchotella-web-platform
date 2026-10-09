@@ -7,6 +7,11 @@ export const TOPPING_TRANSLATIONS: Record<string, Record<SupportedLocale, string
     ru: 'Топпинги',
     en: 'Toppings',
   },
+  'Toppinguri': {
+    ro: 'Toppinguri',
+    ru: 'Топпинги',
+    en: 'Toppings',
+  },
   'Topping': {
     ro: 'Toppinguri',
     ru: 'Топпинги',

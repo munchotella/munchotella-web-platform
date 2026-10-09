@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronLeft, 
@@ -40,6 +41,8 @@ export default function OrderTrackingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTrackingPending, setIsTrackingPending] = useState<boolean>(false);
+  const [reloadKey, setReloadKey] = useState<number>(0);
 
   // Web Push Notification State
   const [notifPermission, setNotifPermission] = useState<string>("default");
@@ -211,13 +214,21 @@ export default function OrderTrackingPage() {
 
     let isMounted = true;
     let pollInterval: NodeJS.Timeout | null = null;
+    let initialRetryCount = 0;
+    const maxRetries = 3;
 
     const fetchOrder = async (isFirstLoad: boolean = false) => {
       try {
         const API_URL = "https://munchotella-api.onrender.com/api";
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const res = await fetch(`${API_URL}/orders/track/${orderId}`, {
-          credentials: "include"
+          credentials: "include",
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         const data = await res.json();
 
         if (!isMounted) return;
@@ -228,6 +239,8 @@ export default function OrderTrackingPage() {
           const currentStatus = freshOrder.status || "pending";
           setCurrentStepIndex(getStepIndex(currentStatus));
           setError(null);
+          setIsTrackingPending(false);
+          setLoading(false);
 
           // Declanșare notificare push la schimbarea statusului
           if (prevStatusRef.current && prevStatusRef.current !== currentStatus) {
@@ -244,16 +257,32 @@ export default function OrderTrackingPage() {
           }
         } else {
           if (isFirstLoad) {
-            setError(data.message || "Comanda nu a fost găsită.");
+            if (initialRetryCount < maxRetries) {
+              initialRetryCount++;
+              setTimeout(() => {
+                if (isMounted) fetchOrder(true);
+              }, 2000);
+              return;
+            }
+            setIsTrackingPending(true);
+            setError(data.message || t('orderNotFound'));
           }
         }
       } catch (err: any) {
         console.error("Eroare la preluarea comenzii:", err);
         if (isFirstLoad && !orderData) {
-          setError("Eroare la încărcarea comenzii.");
+          if (initialRetryCount < maxRetries) {
+            initialRetryCount++;
+            setTimeout(() => {
+              if (isMounted) fetchOrder(true);
+            }, 2000);
+            return;
+          }
+          setIsTrackingPending(true);
+          setError(t('orderLoadError'));
         }
       } finally {
-        if (isMounted && isFirstLoad) {
+        if (isMounted && isFirstLoad && initialRetryCount >= maxRetries) {
           setLoading(false);
         }
       }
@@ -270,25 +299,59 @@ export default function OrderTrackingPage() {
       isMounted = false;
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [orderId]);
+  }, [orderId, reloadKey]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFFCF6] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#D4A853] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#FFFCF6] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-12 h-12 border-4 border-[#D4A853] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-xs uppercase tracking-widest font-bold text-[#736A60]">
+          {t('checkingOrderProgress')}
+        </p>
       </div>
     );
   }
 
   if (error || !orderData) {
     return (
-      <main className="min-h-screen bg-[#FFFCF6] flex flex-col">
+      <main className="min-h-screen bg-[#FFFCF6] flex flex-col selection:bg-[#D4A853] selection:text-white">
         <Navbar />
         <div className="flex-1 pt-32 pb-24 max-w-[800px] mx-auto px-6 w-full flex flex-col items-center justify-center text-center">
-          <h1 className="text-3xl font-serif text-[#1A120B] mb-4">Ups!</h1>
-          <p className="text-[#1A120B]/60 mb-8">{error || "Comanda nu a fost găsită"}</p>
-          <button onClick={() => router.push('/menu')} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer">
-            Mergi la Meniu
+          <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 mb-6 shadow-sm">
+            <Clock className="w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-serif font-bold text-[#1A120B] mb-3">
+            {isTrackingPending ? t('trackingPendingSyncTitle') : t('orderNotFoundTitle')}
+          </h1>
+          <p className="text-[#736A60] text-sm max-w-md mb-8 leading-relaxed">
+            {isTrackingPending ? t('trackingPendingSyncDesc') : (error || t('orderNotFound'))}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
+            <button
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+                setIsTrackingPending(false);
+                setReloadKey(k => k + 1);
+              }}
+              className="w-full bg-[#1A120B] text-white px-6 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer shadow-sm"
+            >
+              {t('trackingRetryBtn')}
+            </button>
+            <a
+              href="tel:+37379006499"
+              className="w-full bg-white border border-[#E8E2D9] text-[#1A120B] hover:border-[#D4A853] px-6 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors text-center shadow-xs"
+            >
+              {t('trackingPhoneFallback')}
+            </a>
+          </div>
+
+          <button 
+            onClick={() => router.push('/menu')} 
+            className="mt-6 text-xs font-semibold text-[#736A60] hover:text-[#1A120B] transition-colors underline underline-offset-4 cursor-pointer"
+          >
+            {t('goToMenu')}
           </button>
         </div>
         <Footer />
@@ -350,7 +413,7 @@ export default function OrderTrackingPage() {
             >
               <button 
                 onClick={handleDismissBanner}
-                aria-label="Închide banner notificări"
+                aria-label={t('closeBannerAria')}
                 className="absolute top-4 right-4 text-[#736A60] hover:text-[#1A120B] p-1.5 rounded-full hover:bg-[#FAF7F2] transition-colors cursor-pointer"
               >
                 <X size={16} />
@@ -462,7 +525,7 @@ export default function OrderTrackingPage() {
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setActivePopover(null); }}
                           className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-white/10 shrink-0 cursor-pointer"
-                          aria-label="Închide"
+                          aria-label={t('closeAria')}
                         >
                           <X size={13} />
                         </button>
@@ -554,7 +617,7 @@ export default function OrderTrackingPage() {
               {orderData.deliveryType === "pickup" ? (
                 <>
                   <p className="text-white/90 font-medium">Nicolae Testemițanu 21/1</p>
-                  <p className="text-[#D4A853] text-sm mt-1">Preluare Gratuită din Boutique</p>
+                  <p className="text-[#D4A853] text-sm mt-1">{t('pickupFree')}</p>
                 </>
               ) : (
                 <>
@@ -590,17 +653,17 @@ export default function OrderTrackingPage() {
             
             <h3 className="font-bold text-[#1A120B] mb-2 text-lg">
               {isCancelled 
-                ? "Ai nevoie de ajutor cu această comandă?" 
+                ? t('helpCancelledTitle') 
                 : orderData.deliveryType === "pickup" 
-                  ? "Preluare din Boutique" 
+                  ? t('pickupTitle') 
                   : t('ownCourier')}
             </h3>
 
             <p className="text-[#736A60] text-sm mb-6 leading-relaxed max-w-xs">
               {isCancelled
-                ? "Dispeceratul nostru este la dispoziția ta pentru orice clarificare legată de comanda anulată."
+                ? t('helpCancelledDesc')
                 : orderData.deliveryType === "pickup" 
-                  ? "Te așteptăm cu drag în boutique-ul nostru din Str. Nicolae Testemițanu 21/1!" 
+                  ? t('pickupDesc') 
                   : t('courierAssigned')}
             </p>
 
@@ -657,7 +720,7 @@ export default function OrderTrackingPage() {
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setActivePopover(null); }}
                         className="text-white/40 hover:text-white transition-colors p-0.5 rounded-full hover:bg-white/10 shrink-0 cursor-pointer"
-                        aria-label="Închide"
+                        aria-label={t('closeAria')}
                       >
                         <X size={13} />
                       </button>
