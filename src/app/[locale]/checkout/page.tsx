@@ -40,6 +40,7 @@ import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
 import PaymentBadges from "@/components/PaymentBadges";
 import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
+import { getMetaTrackingPayload } from "@/utils/metaTracking";
 
 // GPS Coordonate Restaurant Munchotella — Nicolae Testemițanu 21/1, Chișinău
 const RESTAURANT_LOCATION = {
@@ -434,6 +435,7 @@ export default function CheckoutPage() {
             })),
             deliveryType,
             doorDelivery: (formData.estimatedKm < 1.0 && formData.isGeocoded) ? doorDelivery : false,
+            metaTracking: getMetaTrackingPayload(),
           }),
         });
 
@@ -806,6 +808,7 @@ export default function CheckoutPage() {
         scheduledTime: timing === "scheduled" ? scheduledTime : null,
         draftOrderId: draftOrderId || undefined,
         unverifiedPhone,
+        metaTracking: getMetaTrackingPayload(),
       };
 
       const API_URL = "https://munchotella-api.onrender.com/api";

@@ -9,8 +9,12 @@ import CartDrawer from "@/components/CartDrawer";
 import MobileCartBar from "@/components/MobileCartBar";
 import AuthModal from "@/components/auth/AuthModal";
 import ForceChangePasswordModal from "@/components/auth/ForceChangePasswordModal";
+import { initMetaTracking } from "@/utils/metaTracking";
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    initMetaTracking();
+  }, []);
   return (
     <ToastProvider>
       <GoogleMapsProvider>
