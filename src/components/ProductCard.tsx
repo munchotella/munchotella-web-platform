@@ -115,7 +115,7 @@ export default function ProductCard({ item, onSelect }: ProductCardProps) {
           className="w-full min-h-[44px] bg-[#D4A853] hover:bg-[#C09640] text-[#1A120B] font-bold text-[14px] py-3 rounded-full transition-colors duration-300 flex items-center justify-center gap-2 mt-auto cursor-pointer active:scale-[0.99]"
         >
           <Plus className="w-4 h-4" />
-          <span>{t('orderNow') || "Comandă Acum"}</span>
+          <span>{t('orderNow') || "Adaugă"}</span>
         </button>
       </div>
     </motion.div>

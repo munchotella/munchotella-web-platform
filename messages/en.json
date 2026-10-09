@@ -80,7 +80,7 @@
     "catDrinks": "Drinks",
     "badgeHouseSpecial": "House Special",
     "badgeTopSeller": "Top Seller",
-    "orderNow": "Order Now",
+    "orderNow": "Add",
     "noResults": "No desserts found matching your search.",
     "resetFilters": "Reset Filters"
   },
@@ -214,7 +214,8 @@
     "confirmPhoneModalEdit": "Edit phone number",
     "confirmPhoneModalNotice": "Please double-check the digits so we can reach you quickly.",
     "confirmPhoneContactLabel": "Delivery contact number",
-    "secureOrderBadge": "Secure order • Quick confirmation in 2–3 minutes"
+    "secureOrderBadge": "Secure order • Quick confirmation in 2–3 minutes",
+    "otpHighValueBadge": "Security verification for orders over 800 MDL"
   },
   "MobileCartBar": {
     "viewCart": "Your cart",

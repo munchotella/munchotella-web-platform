@@ -80,7 +80,7 @@
     "catDrinks": "Напитки",
     "badgeHouseSpecial": "Фирменное блюдо",
     "badgeTopSeller": "Хит продаж",
-    "orderNow": "Заказать сейчас",
+    "orderNow": "Добавить",
     "noResults": "Десерты, соответствующие вашему поиску, не найдены.",
     "resetFilters": "Сбросить фильтры"
   },
@@ -214,7 +214,8 @@
     "confirmPhoneModalEdit": "Изменить номер",
     "confirmPhoneModalNotice": "Внимательно проверьте цифры, чтобы мы смогли быстро связаться с вами.",
     "confirmPhoneContactLabel": "Контактный номер для доставки",
-    "secureOrderBadge": "Безопасный заказ • Быстрое подтверждение за 2-3 минуты"
+    "secureOrderBadge": "Безопасный заказ • Быстрое подтверждение за 2-3 минуты",
+    "otpHighValueBadge": "Проверка безопасности для заказов от 800 MDL"
   },
   "MobileCartBar": {
     "viewCart": "Ваша корзина",

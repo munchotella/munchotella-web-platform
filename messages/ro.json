@@ -80,7 +80,7 @@
     "catDrinks": "Băuturi",
     "badgeHouseSpecial": "Specialitatea Casei",
     "badgeTopSeller": "Top Seller",
-    "orderNow": "Comandă Acum",
+    "orderNow": "Adaugă",
     "noResults": "Nu am găsit deserturi care să corespundă căutării tale.",
     "resetFilters": "Resetează Filtrele"
   },
@@ -214,7 +214,8 @@
     "confirmPhoneModalEdit": "Modifică numărul",
     "confirmPhoneModalNotice": "Verifică atent cifrele ca să te putem contacta rapid.",
     "confirmPhoneContactLabel": "Număr de contact pentru livrare",
-    "secureOrderBadge": "Comandă securizată • Confirmare rapidă în 2-3 minute"
+    "secureOrderBadge": "Comandă securizată • Confirmare rapidă în 2-3 minute",
+    "otpHighValueBadge": "Verificare de securitate pentru comenzi de peste 800 MDL"
   },
   "MobileCartBar": {
     "viewCart": "Coșul tău",

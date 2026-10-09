@@ -66,6 +66,9 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 // Cheie de persistență profil checkout (Cookies & LocalStorage)
 const CHECKOUT_PROFILE_KEY = "munchotella_checkout_profile";
 
+// Prag de securitate Smart OTP: comenzile Cash/Card peste această sumă cer obligatoriu SMS
+const CASH_OTP_SECURITY_THRESHOLD_MDL = 800;
+
 function getStoredCheckoutProfile() {
   if (typeof window === "undefined") return null;
   try {
@@ -990,19 +993,22 @@ export default function CheckoutPage() {
       }
     }
 
-    // Optimizare conversie: La plata Cash / POS la livrare, eliminăm blocajul SMS OTP
-    // și folosim confirmarea vizuală a numărului cu apel de confirmare.
-    // Clientul verifică cifrele pe ecran și comanda este plasată fără întârziere.
+    // Smart OTP & Verificare Securizată:
+    // 1. Pentru orice comandă de valoare mare (>= 800 MDL), indiferent dacă este Cash, POS sau Card,
+    // cerem obligatoriu confirmare prin SMS OTP pentru a preveni farsele și comenzile fictive.
+    // 2. Pentru comenzi obișnuite (< 800 MDL), atât la Cash cât și la Card:
+    // afișăm popup-ul de verificare vizuală a numărului pentru ca clientul să valideze rapid cifrele.
     const isGuestOrder = !user || !user.isPhoneVerified;
     if (isGuestOrder) {
-      if (paymentMethod === "cash" || paymentMethod === "pos") {
-        setIsPhoneConfirmModalOpen(true);
+      const isHighValueOrder = grandTotal >= CASH_OTP_SECURITY_THRESHOLD_MDL;
+      if (isHighValueOrder) {
+        const sent = await triggerOtpSms();
+        if (!sent) return;
         return;
       }
-      
-      // Pentru plăți online cu cardul sau excepții, se păstrează verificarea SMS
-      const sent = await triggerOtpSms();
-      if (!sent) return;
+
+      // Pentru comenzi sub 800 MDL (Cash, POS sau Card) -> popup verificare vizuală număr
+      setIsPhoneConfirmModalOpen(true);
       return;
     }
 
@@ -2534,6 +2540,12 @@ export default function CheckoutPage() {
                         {selectedCountry.dialCode} {formData.phone}
                       </span>
                     </p>
+                    {grandTotal >= CASH_OTP_SECURITY_THRESHOLD_MDL && (
+                      <div className="mt-2.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-[#D4A853]/30 text-[#8C6B1B] text-[11px] font-semibold text-center inline-flex items-center gap-1.5 mx-auto">
+                        <span>🛡️</span>
+                        <span>{t('otpHighValueBadge')}</span>
+                      </div>
+                    )}
                     {isDevMockOtp && (
                       <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] text-center font-medium leading-relaxed">
                         🔧 <strong>Mod Testare Localhost:</strong> Restricțiile Google API Key blochează SMS pe localhost. Introduceți codul de test: <strong>123456</strong>.
