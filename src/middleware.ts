@@ -36,10 +36,13 @@ export default function middleware(req: NextRequest) {
   const cleanPath = pathname.replace(/^\/(ro|ru|en)/, '');
   const langPrefix = pathname.match(/^\/(ro|ru|en)/)?.[0] || '';
 
-  // Redirecționare dedicată reclame & campanii: /menu fără prefix forțează direct limba Română (/ro/menu)
-  if (pathname === '/menu') {
-    url.pathname = '/ro/menu';
-    return NextResponse.redirect(url, 307);
+  // Redirecționare dedicată reclame & campanii: dacă utilizatorul accesează /menu sau /ro/menu
+  // Setăm cookie-ul de limbă pe 'ro' pentru a preveni detectarea automată a englezei din browser
+  if (pathname === '/menu' || pathname === '/ro/menu') {
+    req.cookies.set('NEXT_LOCALE', 'ro');
+    const response = intlMiddleware(req);
+    response.cookies.set('NEXT_LOCALE', 'ro', { path: '/', maxAge: 31536000 });
+    return response;
   }
 
   // Redirecționare istorică curată: /delivery -> /livrare (HTTP 301 Permanent, FĂRĂ hash fragment)
