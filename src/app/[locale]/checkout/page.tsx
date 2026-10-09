@@ -175,6 +175,8 @@ export default function CheckoutPage() {
     unverifiedPhone: false,
   });
 
+  const [isPhoneHighlighted, setIsPhoneHighlighted] = useState(false);
+
   const nameInputRef = React.useRef<HTMLInputElement>(null);
   const phoneInputRef = React.useRef<HTMLInputElement>(null);
   const apartmentInputRef = React.useRef<HTMLInputElement>(null);
@@ -1013,6 +1015,25 @@ export default function CheckoutPage() {
     await executePlaceOrder(token || undefined, true);
   };
 
+  const handleEditPhone = () => {
+    setIsPhoneConfirmModalOpen(false);
+    setActiveStep(2);
+    setIsPhoneHighlighted(true);
+    setTimeout(() => {
+      if (phoneInputRef.current) {
+        phoneInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        phoneInputRef.current.focus();
+        try {
+          const len = phoneInputRef.current.value.length;
+          phoneInputRef.current.setSelectionRange(len, len);
+        } catch (_) {}
+      }
+    }, 180);
+    setTimeout(() => {
+      setIsPhoneHighlighted(false);
+    }, 2500);
+  };
+
   const handleVerifyOtpAndPlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otpCode || otpCode.length < 6) return;
@@ -1427,9 +1448,11 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
-                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm transition-all ${
+                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm transition-all duration-300 ${
                           phoneError 
                             ? 'border-red-500 ring-1 ring-red-500/20' 
+                            : isPhoneHighlighted
+                            ? 'border-[#D4A853] ring-4 ring-[#D4A853]/40 shadow-md scale-[1.01]'
                             : 'border-[#E8E2D9] focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853]'
                         }`}>
                           <CountrySelector
@@ -1446,6 +1469,7 @@ export default function CheckoutPage() {
                             onChange={(e) => {
                               setFormData({ ...formData, phone: e.target.value });
                               if (phoneError) setPhoneError("");
+                              if (isPhoneHighlighted) setIsPhoneHighlighted(false);
                             }}
                           />
                         </div>
@@ -2448,13 +2472,7 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       disabled={isSubmitting}
-                      onClick={() => {
-                        setIsPhoneConfirmModalOpen(false);
-                        setActiveStep(1);
-                        setTimeout(() => {
-                          phoneInputRef.current?.focus();
-                        }, 100);
-                      }}
+                      onClick={handleEditPhone}
                       className="w-full py-2.5 text-center text-xs font-semibold text-[#736A60] hover:text-[#1A120B] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
