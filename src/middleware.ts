@@ -36,6 +36,12 @@ export default function middleware(req: NextRequest) {
   const cleanPath = pathname.replace(/^\/(ro|ru|en)/, '');
   const langPrefix = pathname.match(/^\/(ro|ru|en)/)?.[0] || '';
 
+  // Redirecționare dedicată reclame & campanii: /menu fără prefix forțează direct limba Română (/ro/menu)
+  if (pathname === '/menu') {
+    url.pathname = '/ro/menu';
+    return NextResponse.redirect(url, 307);
+  }
+
   // Redirecționare istorică curată: /delivery -> /livrare (HTTP 301 Permanent, FĂRĂ hash fragment)
   if (cleanPath === '/delivery') {
     url.pathname = langPrefix ? `${langPrefix}/livrare` : '/livrare';
