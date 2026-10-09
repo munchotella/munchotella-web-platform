@@ -215,9 +215,9 @@
     "confirmPhoneModalNotice": "Пожалуйста, внимательно проверьте цифры, чтобы получить десерт свежим и горячим."
   },
   "MobileCartBar": {
-    "viewCart": "Открыть корзину",
+    "viewCart": "Ваша корзина",
     "finalizeOrder": "Оформить заказ",
-    "itemsCount": "{count} {count, plural, one {товар} few {товара} other {товаров}}"
+    "itemsCount": "{count, plural, one {1 товар} few {{count} товара} other {{count} товаров}}"
   },
   "LiveStore": {
     "openNow": "Открыто сейчас",

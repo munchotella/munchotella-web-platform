@@ -215,9 +215,9 @@
     "confirmPhoneModalNotice": "Please double check the digits so we can deliver your warm dessert without delay."
   },
   "MobileCartBar": {
-    "viewCart": "View Cart",
+    "viewCart": "Your Cart",
     "finalizeOrder": "Checkout",
-    "itemsCount": "{count} {count, plural, one {item} other {items}}"
+    "itemsCount": "{count, plural, one {1 item} other {{count} items}}"
   },
   "LiveStore": {
     "openNow": "Open Now",

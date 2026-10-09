@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, ArrowRight } from "lucide-react";
@@ -13,59 +13,84 @@ export default function MobileCartBar() {
   const router = useRouter();
   const t = useTranslations("MobileCartBar");
   const { items, totalItems, totalPrice, setIsCartOpen } = useCart();
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
-  // Ascundem bara pe checkout, admin, sau dacă nu avem produse în coș
+  // Monitorizăm dacă un modal este deschis pe ecran (prin lock-ul pe document.body.style.overflow)
+  // astfel încât bara să se retragă elegant și să nu interfereze cu butonul de configurare produs
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkModalState = () => {
+      const isLocked = document.body.style.overflow === "hidden";
+      setIsProductModalOpen(isLocked);
+    };
+
+    const observer = new MutationObserver(checkModalState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    checkModalState();
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Ascundem bara pe pagina de checkout, în panoul de admin, când coșul e gol sau când un modal e deschis
   const isCheckout = pathname.includes("/checkout");
   const isAdmin = pathname.includes("/admin");
   const hasItems = items && items.length > 0;
 
-  if (isCheckout || isAdmin || !hasItems) {
-    return null;
-  }
+  const isVisible = hasItems && !isCheckout && !isAdmin && !isProductModalOpen;
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed bottom-4 left-4 right-4 z-40 md:hidden"
-      >
-        <div className="bg-[#1A120B] text-white rounded-2xl p-3 shadow-2xl border border-[#D4A853]/40 flex items-center justify-between gap-3 backdrop-blur-md">
-          {/* Partea stângă: Deschide drawer-ul de coș */}
-          <button
-            type="button"
-            onClick={() => setIsCartOpen(true)}
-            className="flex items-center gap-2.5 px-2 py-1 text-left cursor-pointer"
-          >
-            <div className="relative w-10 h-10 rounded-xl bg-[#D4A853]/20 flex items-center justify-center text-[#D4A853] shrink-0 border border-[#D4A853]/30">
-              <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
-                {totalItems}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] text-[#A89F91] uppercase tracking-wider font-semibold">
-                {t("itemsCount", { count: totalItems })}
-              </span>
-              <span className="font-serif font-bold text-base text-white">
-                {totalPrice} MDL
-              </span>
-            </div>
-          </button>
+      {isVisible && (
+        <motion.div
+          initial={{ y: 80, opacity: 0, scale: 0.96 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 80, opacity: 0, scale: 0.96 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-4 inset-x-3.5 z-40 md:hidden pointer-events-none"
+          style={{
+            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)"
+          }}
+        >
+          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[22px] px-3.5 py-3 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-3">
+            {/* Secțiunea Stânga: Trigger Coș / Detalii Comandă */}
+            <button
+              type="button"
+              onClick={() => setIsCartOpen(true)}
+              aria-label={t("viewCart")}
+              className="flex items-center gap-3 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity"
+            >
+              {/* Badge Icon Coș cu accent auriu cald */}
+              <div className="relative w-11 h-11 rounded-2xl bg-[#261B12] border border-[#D4A853]/40 flex items-center justify-center text-[#D4A853] shrink-0 shadow-inner">
+                <ShoppingBag className="w-5 h-5 text-[#D4A853]" />
+                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
+                  {totalItems}
+                </span>
+              </div>
 
-          {/* Partea dreaptă: Buton mare auriu direct la Checkout */}
-          <button
-            type="button"
-            onClick={() => router.push("/checkout")}
-            className="flex items-center gap-1.5 bg-[#D4A853] text-[#1A120B] px-5 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#E5BC66] active:scale-95 transition-all shadow-md cursor-pointer shrink-0"
-          >
-            <span>{t("finalizeOrder")}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </motion.div>
+              {/* Informații preț & cantitate cu typographic hierarchy riguroasă */}
+              <div className="flex flex-col min-w-0 justify-center">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#A89F91] truncate leading-tight">
+                  {t("itemsCount", { count: totalItems })}
+                </span>
+                <span className="font-serif font-bold text-[17px] text-[#F9F6F0] leading-snug tracking-tight whitespace-nowrap">
+                  {totalPrice} MDL
+                </span>
+              </div>
+            </button>
+
+            {/* Secțiunea Dreapta: Buton Direct Checkout Proporționat Impecabil */}
+            <button
+              type="button"
+              onClick={() => router.push("/checkout")}
+              className="h-[46px] px-5 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
+            >
+              <span className="whitespace-nowrap font-extrabold">{t("finalizeOrder")}</span>
+              <ArrowRight className="w-4 h-4 shrink-0 text-[#1A120B]" />
+            </button>
+          </div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }

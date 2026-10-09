@@ -215,9 +215,9 @@
     "confirmPhoneModalNotice": "Te rugăm să verifici cu atenție cifrele pentru a putea primi comanda caldă."
   },
   "MobileCartBar": {
-    "viewCart": "Vezi Coșul",
+    "viewCart": "Coșul tău",
     "finalizeOrder": "Finalizează Comanda",
-    "itemsCount": "{count} {count, plural, one {produs} few {produse} other {produse}}"
+    "itemsCount": "{count, plural, one {1 produs} few {{count} produse} other {{count} produse}}"
   },
   "LiveStore": {
     "openNow": "Deschis Acum",
