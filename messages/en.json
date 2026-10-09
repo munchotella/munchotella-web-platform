@@ -212,7 +212,7 @@
     "confirmPhoneModalSubtitle": "We'll call you at this number in 2–3 minutes to confirm your address and begin preparation:",
     "confirmPhoneModalBtn": "Yes, the number is correct — send order",
     "confirmPhoneModalEdit": "Edit phone number",
-    "confirmPhoneModalNotice": "Please double-check the digits so we can reach you quickly and deliver your dessert fresh and warm.",
+    "confirmPhoneModalNotice": "Please double-check the digits so we can reach you quickly.",
     "confirmPhoneContactLabel": "Delivery contact number",
     "secureOrderBadge": "Secure order • Quick confirmation in 2–3 minutes"
   },

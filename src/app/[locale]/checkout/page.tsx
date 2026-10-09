@@ -2447,7 +2447,7 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Warning notice */}
-                  <p className="text-[11px] text-[#8C6B1B] bg-amber-50/70 border border-amber-200/60 rounded-xl p-2.5 mb-5 text-center leading-relaxed">
+                  <p className="text-xs sm:text-[13px] font-medium text-[#8C6B1B] bg-amber-50/70 border border-amber-200/60 rounded-xl px-3.5 py-2.5 mb-5 text-center leading-relaxed">
                     💡 {t('confirmPhoneModalNotice')}
                   </p>
 
