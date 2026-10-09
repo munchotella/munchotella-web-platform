@@ -11,6 +11,7 @@
  */
 
 const STORAGE_KEY_FBCLID = "_munch_fbclid";
+const STORAGE_KEY_FBCLID_TS = "_munch_fbclid_ts";
 const STORAGE_KEY_UTM = "_munch_utm";
 const COOKIE_EXPIRY_DAYS = 30;
 
@@ -50,16 +51,19 @@ export function initMetaTracking(): void {
     const urlParams = new URLSearchParams(window.location.search);
     const fbclid = urlParams.get("fbclid");
 
-    // 1. Capture & Persist fbclid
+    // 1. Capture & Persist fbclid along with its original capture timestamp
     if (fbclid && fbclid.trim().length > 0) {
       const cleanFbclid = fbclid.trim();
+      const clickTime = Date.now();
       localStorage.setItem(STORAGE_KEY_FBCLID, cleanFbclid);
+      localStorage.setItem(STORAGE_KEY_FBCLID_TS, String(clickTime));
       setCookie(STORAGE_KEY_FBCLID, cleanFbclid);
+      setCookie(STORAGE_KEY_FBCLID_TS, String(clickTime));
 
       // Construct official Meta _fbc format: fb.1.<creation_time>.<fbclid>
       const existingFbc = getCookie("_fbc");
       if (!existingFbc) {
-        const fbcValue = `fb.1.${Date.now()}.${cleanFbclid}`;
+        const fbcValue = `fb.1.${clickTime}.${cleanFbclid}`;
         setCookie("_fbc", fbcValue);
       }
     }
@@ -117,9 +121,10 @@ export function getMetaTrackingPayload(): MetaTrackingPayload {
     // 2. Recover fbclid from storage if cookie was wiped
     let fbclid = localStorage.getItem(STORAGE_KEY_FBCLID) || getCookie(STORAGE_KEY_FBCLID);
 
-    // If _fbc is missing but fbclid is known, synthesize official _fbc
+    // If _fbc is missing but fbclid is known, synthesize official _fbc using original click timestamp
     if (!fbc && fbclid) {
-      fbc = `fb.1.${Date.now()}.${fbclid}`;
+      const clickTime = localStorage.getItem(STORAGE_KEY_FBCLID_TS) || getCookie(STORAGE_KEY_FBCLID_TS) || Date.now();
+      fbc = `fb.1.${clickTime}.${fbclid}`;
     }
 
     // 3. Recover UTMs

@@ -927,8 +927,8 @@ export default function CheckoutPage() {
          } catch(e) { console.error(e); }
       }
 
-      // Tracking Purchase pentru Meta Pixel și GA4
-      const orderId = String(data.data?.trackingCode || data.data?._id || data.data?.orderNumber || Date.now());
+      // Tracking Purchase pentru Meta Pixel și GA4 (Folosim garantat MongoDB _id identic cu cel din Server CAPI)
+      const orderId = String(data.data?._id || data.data?.trackingCode || data.data?.orderNumber || Date.now());
       const finalAmount = Number(data.data?.finalTotal ?? grandTotal ?? totalPrice);
 
       trackPurchase(
