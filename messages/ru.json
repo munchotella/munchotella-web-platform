@@ -219,7 +219,7 @@
   },
   "MobileCartBar": {
     "viewCart": "Ваша корзина",
-    "finalizeOrder": "Оформить заказ",
+    "finalizeOrder": "К заказу",
     "itemsCount": "{count, plural, one {1 товар} few {{count} товара} other {{count} товаров}}"
   },
   "LiveStore": {

@@ -219,7 +219,7 @@
   },
   "MobileCartBar": {
     "viewCart": "Coșul tău",
-    "finalizeOrder": "Finalizează comanda",
+    "finalizeOrder": "Comandă",
     "itemsCount": "{count, plural, one {1 produs} few {{count} produse} other {{count} produse}}"
   },
   "LiveStore": {

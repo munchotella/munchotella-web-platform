@@ -52,16 +52,16 @@ export default function MobileCartBar() {
             paddingBottom: "env(safe-area-inset-bottom, 0px)"
           }}
         >
-          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[20px] p-2.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2.5">
+          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[20px] p-2 sm:p-2.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2 overflow-hidden">
             {/* Secțiunea Stânga: Trigger Coș / Detalii Comandă */}
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
               aria-label={t("viewCart")}
-              className="flex items-center gap-2.5 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
+              className="flex items-center gap-2 sm:gap-2.5 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
             >
               {/* Badge Icon Coș cu styling identic 1:1 cu cel din Navbar */}
-              <div className="relative w-10 h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/30 flex items-center justify-center text-white shrink-0 shadow-inner">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/30 flex items-center justify-center text-white shrink-0 shadow-inner">
                 <ShoppingBag className="w-4 h-4 text-white" />
                 <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[#D4A853] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md">
                   {totalItems}
@@ -73,7 +73,7 @@ export default function MobileCartBar() {
                 <span className="font-sans text-[10px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
                   {t("itemsCount", { count: totalItems })}
                 </span>
-                <span className="font-sans font-extrabold text-[16px] text-white tracking-tight whitespace-nowrap">
+                <span className="font-sans font-extrabold text-[15px] sm:text-[16px] text-white tracking-tight whitespace-nowrap">
                   {totalPrice} MDL
                 </span>
               </div>
@@ -83,7 +83,7 @@ export default function MobileCartBar() {
             <button
               type="button"
               onClick={() => router.push("/checkout")}
-              className="h-[42px] px-4 sm:px-5 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
+              className="h-[40px] sm:h-[42px] px-3 sm:px-4 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-[11px] sm:text-xs uppercase tracking-wide flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
             >
               <span className="whitespace-nowrap font-extrabold">{t("finalizeOrder")}</span>
               <ArrowRight className="w-3.5 h-3.5 shrink-0 text-[#1A120B]" />
