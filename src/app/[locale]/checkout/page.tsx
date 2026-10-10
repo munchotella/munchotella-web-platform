@@ -278,7 +278,7 @@ export default function CheckoutPage() {
             updatedLat = defaultAddr.lat;
             updatedLng = defaultAddr.lng;
             const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, defaultAddr.lat, defaultAddr.lng);
-            updatedKm = straightDist * 1.3;
+            updatedKm = straightDist * 1.35;
             updatedGeocoded = true;
           }
         }
@@ -1236,7 +1236,7 @@ export default function CheckoutPage() {
                   return;
                 }
                 const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
-                const roadDist = straightDist * 1.3;
+                const roadDist = straightDist * 1.35;
                 setFormData(prev => ({
                   ...prev,
                   street: res.address,
@@ -1537,7 +1537,7 @@ export default function CheckoutPage() {
                                     onClick={() => {
                                       const dist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, addr.lat, addr.lng);
                                       setFormData(prev => ({
-                                        ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.3, isGeocoded: true
+                                        ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.35, isGeocoded: true
                                       }));
                                       setAddressError("");
                                       setSaveAddress(false);
@@ -1584,7 +1584,7 @@ export default function CheckoutPage() {
                                 return;
                               }
                               const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
-                              const roadDist = straightDist * 1.3;
+                              const roadDist = straightDist * 1.35;
                               setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
                               setAddressError("");
                             }}
@@ -2384,7 +2384,7 @@ export default function CheckoutPage() {
         initialAddress={formData.street || undefined}
         onSelectLocation={({ address, lat, lng }) => {
           const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
-          const roadDist = straightDist * 1.3;
+          const roadDist = straightDist * 1.35;
           setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
           setAddressError("");
         }}

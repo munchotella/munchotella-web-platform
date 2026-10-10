@@ -10,6 +10,7 @@ export interface PlaceSelectionMeta {
   isGenericCity?: boolean;
   types?: string[];
   place?: google.maps.places.PlaceResult;
+  source?: string;
 }
 
 interface MapAutocompleteProps {
@@ -19,6 +20,74 @@ interface MapAutocompleteProps {
   placeholder?: string;
   className?: string;
   required?: boolean;
+}
+
+// Coordonate Boutique Munchotella (Nicolae Testemițanu 21/1, Chișinău)
+const RESTAURANT_LOCATION = { lat: 46.996452, lng: 28.834809 };
+
+// Bounding box pentru Chișinău și împrejurimi (bias pentru Google Places)
+const CHISINAU_BOUNDS = {
+  north: 47.12,
+  south: 46.90,
+  east: 29.00,
+  west: 28.70,
+};
+
+function getStraightDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function hasFractionOrSubnumber(text: string): boolean {
+  return /\b\d+\s*[\/-]\s*\d+\b/.test(text) || /\b\d+[a-zA-Z]\b/.test(text);
+}
+
+function isExplicitSuburb(text: string): boolean {
+  const lower = text.toLowerCase();
+  return lower.includes('trușeni') || lower.includes('truseni') ||
+         lower.includes('bălți') || lower.includes('balti') ||
+         lower.includes('orhei') || lower.includes('cahul') ||
+         lower.includes('ungheni') || lower.includes('soroca') ||
+         lower.includes('strășeni') || lower.includes('straseni') ||
+         lower.includes('criuleni') || lower.includes('aneni');
+}
+
+/**
+ * Apelează proxy-ul backend de geocodare de precizie (Map.md Simpals -> OpenStreetMap -> Google rescue)
+ */
+async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number; lng: number; formatted_address: string; isGenericCity?: boolean; source?: string } | null> {
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+    const res = await fetch(`${API_URL}/maps/geocode?address=${encodeURIComponent(rawAddress)}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data && typeof json.data.lat === 'number' && typeof json.data.lng === 'number') {
+        const clean = (json.data.formatted_address || rawAddress).trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
+        const knownCities = ['chișinău', 'chisinau', 'bălți', 'balti', 'orhei', 'strășeni', 'straseni', 'ialoveni', 'ungheni', 'cahul', 'soroca', 'tiraspol', 'bender'];
+        const isGenericCity = knownCities.includes(clean);
+
+        return {
+          lat: json.data.lat,
+          lng: json.data.lng,
+          formatted_address: json.data.formatted_address || rawAddress,
+          isGenericCity,
+          source: json.data.source || 'backend'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("[MapAutocomplete] Precision geocode network error:", err);
+  }
+  return null;
 }
 
 /**
@@ -92,12 +161,32 @@ export default function MapAutocomplete({
     setAutocomplete(autocompleteObj);
   };
 
-  const geocodeFallback = (rawAddress: string) => {
+  const geocodeFallback = async (rawAddress: string) => {
     if (!rawAddress || rawAddress.trim().length < 3) return;
     if (rawAddress.trim() === lastResolvedAddressRef.current.trim()) return;
-    if (typeof window === "undefined" || !window.google?.maps?.Geocoder) return;
 
     setIsGeocoding(true);
+
+    // 1. Încercăm mai întâi geocodarea de precizie prin backend (Map.md -> OSM) dacă are fracții sau e căutare text
+    const precision = await fetchPrecisionGeocode(rawAddress);
+    if (precision) {
+      setIsGeocoding(false);
+      lastResolvedAddressRef.current = precision.formatted_address;
+      setInputValue(precision.formatted_address);
+      onChange(precision.formatted_address);
+      onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
+        isGenericCity: precision.isGenericCity,
+        source: precision.source
+      });
+      return;
+    }
+
+    // 2. Fallback la Google Geocoder dacă backend-ul nu este disponibil
+    if (typeof window === "undefined" || !window.google?.maps?.Geocoder) {
+      setIsGeocoding(false);
+      return;
+    }
+
     const geocoder = new window.google.maps.Geocoder();
     const queryAddress = rawAddress.toLowerCase().includes("chișinău") || rawAddress.toLowerCase().includes("chisinau")
       ? rawAddress
@@ -106,7 +195,8 @@ export default function MapAutocomplete({
     geocoder.geocode(
       {
         address: queryAddress,
-        componentRestrictions: { country: "md" }
+        componentRestrictions: { country: "md" },
+        bounds: CHISINAU_BOUNDS
       },
       (results, status) => {
         setIsGeocoding(false);
@@ -126,13 +216,56 @@ export default function MapAutocomplete({
     );
   };
 
-  const onPlaceChanged = () => {
+  const onPlaceChanged = async () => {
     if (autocomplete !== null) {
       const place = autocomplete.getPlace();
+      const currentInput = inputValue.trim();
+
+      // Dacă utilizatorul a tastat o adresă cu fracție (ex: 115/1, 24/2), Google Maps adesea ignoră fracția
+      // sau sare la o suburbie. În acest caz, interogăm direct backend-ul (Map.md) cu textul complet!
+      if (currentInput && hasFractionOrSubnumber(currentInput)) {
+        setIsGeocoding(true);
+        const precision = await fetchPrecisionGeocode(currentInput);
+        setIsGeocoding(false);
+        if (precision) {
+          lastResolvedAddressRef.current = precision.formatted_address;
+          setInputValue(precision.formatted_address);
+          onChange(precision.formatted_address);
+          onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
+            isGenericCity: precision.isGenericCity,
+            source: precision.source
+          });
+          return;
+        }
+      }
+
       if (place && place.geometry && place.geometry.location) {
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
         const address = place.formatted_address || place.name || "";
+
+        // Protecție Trușeni / suburbii false: dacă Google a returnat o locație la > 7.5 km aerieni,
+        // dar utilizatorul nu a scris acea suburbie în input, căutăm precizia pe Chișinău via backend
+        const straightDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
+        if (straightDist > 7.5 && currentInput && !isExplicitSuburb(currentInput)) {
+          setIsGeocoding(true);
+          const precision = await fetchPrecisionGeocode(currentInput);
+          setIsGeocoding(false);
+          if (precision) {
+            const precisionDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, precision.lat, precision.lng);
+            if (precisionDist <= 7.5) {
+              lastResolvedAddressRef.current = precision.formatted_address;
+              setInputValue(precision.formatted_address);
+              onChange(precision.formatted_address);
+              onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
+                isGenericCity: precision.isGenericCity,
+                source: precision.source
+              });
+              return;
+            }
+          }
+        }
+
         const isGenericCity = checkIfGenericCity(place, address);
 
         lastResolvedAddressRef.current = address;
@@ -174,7 +307,9 @@ export default function MapAutocomplete({
             onPlaceChanged={onPlaceChanged}
             options={{
               componentRestrictions: { country: "md" }, // Restrict to Moldova
-              fields: ["address_components", "formatted_address", "geometry", "name", "types"]
+              fields: ["address_components", "formatted_address", "geometry", "name", "types"],
+              bounds: CHISINAU_BOUNDS,
+              strictBounds: false
             }}
           >
             <input
