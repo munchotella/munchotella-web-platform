@@ -136,6 +136,24 @@ function checkIfGenericCity(place: google.maps.places.PlaceResult | google.maps.
   return false;
 }
 
+interface FractionSuggestion {
+  lat: number;
+  lng: number;
+  formatted_address: string;
+  isGenericCity?: boolean;
+  source?: string;
+}
+
+function parseAddressParts(formattedAddress: string): { streetPart: string; cityPart: string } {
+  const commaIdx = formattedAddress.indexOf(',');
+  if (commaIdx !== -1) {
+    const streetPart = formattedAddress.slice(0, commaIdx).trim();
+    const cityPart = formattedAddress.slice(commaIdx + 1).trim();
+    return { streetPart, cityPart };
+  }
+  return { streetPart: formattedAddress, cityPart: "Chișinău, Moldova" };
+}
+
 export default function MapAutocomplete({
   value,
   onChange,
@@ -150,6 +168,10 @@ export default function MapAutocomplete({
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   
+  // Stare pentru sugestia inteligentă de fracție (Map.md)
+  const [fractionSuggestion, setFractionSuggestion] = useState<FractionSuggestion | null>(null);
+  const [isFetchingFraction, setIsFetchingFraction] = useState(false);
+
   // Keep local value in sync with prop for typing
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -161,8 +183,53 @@ export default function MapAutocomplete({
     userTypedInputRef.current = value;
   }, [value]);
 
+  const hasFraction = hasFractionOrSubnumber(inputValue);
+
+  // Efect debounced pentru căutarea automată a adreselor cu fracții pe Map.md
+  useEffect(() => {
+    if (!hasFractionOrSubnumber(inputValue) || inputValue.trim().length < 4) {
+      setFractionSuggestion(null);
+      setIsFetchingFraction(false);
+      return;
+    }
+
+    // Nu căutăm din nou dacă adresa curentă este deja cea rezolvată
+    if (inputValue.trim().toLowerCase() === lastResolvedAddressRef.current.trim().toLowerCase()) {
+      setFractionSuggestion(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsFetchingFraction(true);
+      const precision = await fetchPrecisionGeocode(inputValue.trim());
+      setIsFetchingFraction(false);
+      if (precision && hasFractionOrSubnumber(userTypedInputRef.current)) {
+        setFractionSuggestion(precision);
+      } else {
+        setFractionSuggestion(null);
+      }
+    }, 220);
+
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
   const onLoad = (autocompleteObj: google.maps.places.Autocomplete) => {
     setAutocomplete(autocompleteObj);
+  };
+
+  const selectFractionSuggestion = (suggestion: FractionSuggestion) => {
+    lastResolvedAddressRef.current = suggestion.formatted_address;
+    userTypedInputRef.current = suggestion.formatted_address;
+    setInputValue(suggestion.formatted_address);
+    if (inputRef.current) {
+      inputRef.current.value = suggestion.formatted_address;
+    }
+    setFractionSuggestion(null);
+    onChange(suggestion.formatted_address);
+    onPlaceSelected(suggestion.lat, suggestion.lng, suggestion.formatted_address, {
+      isGenericCity: suggestion.isGenericCity,
+      source: suggestion.source
+    });
   };
 
   const geocodeFallback = async (rawAddress: string) => {
@@ -233,9 +300,9 @@ export default function MapAutocomplete({
 
       // 1. Dacă textul tastat conține o fracție (ex: 115/1, 24/2, 86/4, 67a) sau Google a extras o fracție:
       // Map.md deține planul cadastral complet al Chișinăului și rezolvă adresa exactă!
-      const hasFraction = hasFractionOrSubnumber(userTyped) || hasFractionOrSubnumber(address);
+      const hasFrac = hasFractionOrSubnumber(userTyped) || hasFractionOrSubnumber(address);
 
-      if (hasFraction && (userTyped || address)) {
+      if (hasFrac && (userTyped || address)) {
         setIsGeocoding(true);
         const precision = await fetchPrecisionGeocode(userTyped || address);
         setIsGeocoding(false);
@@ -308,6 +375,14 @@ export default function MapAutocomplete({
     onChange(val);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && fractionSuggestion) {
+      e.preventDefault();
+      e.stopPropagation();
+      selectFractionSuggestion(fractionSuggestion);
+    }
+  };
+
   const handleBlur = () => {
     const liveVal = (userTypedInputRef.current || inputRef.current?.value || inputValue || "").trim();
     if (liveVal && liveVal.length >= 3 && liveVal !== lastResolvedAddressRef.current.trim()) {
@@ -319,8 +394,26 @@ export default function MapAutocomplete({
     return <div className="text-red-500">{t("loadError")}</div>;
   }
 
+  const showFractionPopup = Boolean(
+    fractionSuggestion &&
+    inputValue.trim().toLowerCase() !== fractionSuggestion.formatted_address.trim().toLowerCase()
+  );
+
   return (
     <div className="relative w-full">
+      {/* Când utilizatorul tastează o fracție, suprimăm popup-ul generic Google Places (.pac-container)
+          care oferă sugestii incorecte din suburbii precum Trușeni sau Tohatin */}
+      {hasFraction && (
+        <style>{`
+          .pac-container {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        `}</style>
+      )}
+
       <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
       
       {isLoaded ? (
@@ -340,6 +433,7 @@ export default function MapAutocomplete({
               type="text"
               value={inputValue}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               onBlur={handleBlur}
               placeholder={displayPlaceholder}
               className={className}
@@ -347,10 +441,51 @@ export default function MapAutocomplete({
               autoComplete="off"
             />
           </Autocomplete>
-          {isGeocoding && (
+
+          {/* Indicator fin de căutare / localizare */}
+          {(isGeocoding || isFetchingFraction) && (
             <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center gap-1 bg-white/90 px-2 py-0.5 rounded-md shadow-sm border border-[#E8E2D9]">
               <Loader2 className="w-3.5 h-3.5 text-[#D4A853] animate-spin" />
               <span className="text-[10px] font-semibold text-[#736A60]">{t("locating")}</span>
+            </div>
+          )}
+
+          {/* Pop-up inteligent pentru adrese cu fracție din Chișinău (Map.md) */}
+          {showFractionPopup && fractionSuggestion && (
+            <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-[#E8E2D9] overflow-hidden">
+              <div
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  selectFractionSuggestion(fractionSuggestion);
+                }}
+                className="p-3.5 flex items-center justify-between hover:bg-[#FAF7F2] cursor-pointer transition-colors group"
+              >
+                <div className="flex items-start gap-3 min-w-0 pr-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] border border-[#E8E2D9] flex items-center justify-center shrink-0 mt-0.5 group-hover:border-[#D4A853]/40 group-hover:bg-[#F5EFEB] transition-colors">
+                    <MapPin className="w-4 h-4 text-[#D4A853]" />
+                  </div>
+                  <div className="min-w-0">
+                    {(() => {
+                      const { streetPart, cityPart } = parseAddressParts(fractionSuggestion.formatted_address);
+                      return (
+                        <>
+                          <p className="text-sm font-semibold text-[#1A120B] truncate leading-snug">
+                            {streetPart}
+                          </p>
+                          <p className="text-xs text-[#736A60] truncate mt-0.5">
+                            {cityPart}
+                          </p>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <div className="shrink-0 pl-2">
+                  <span className="inline-flex items-center text-[10px] font-semibold text-[#A0988E] uppercase tracking-wider bg-[#F5EFEB] px-2 py-1 rounded border border-[#E8E2D9]">
+                    Enter ↵
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>
