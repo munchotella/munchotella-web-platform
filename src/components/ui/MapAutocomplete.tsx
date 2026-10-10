@@ -153,10 +153,12 @@ export default function MapAutocomplete({
   // Keep local value in sync with prop for typing
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userTypedInputRef = useRef(value);
   const lastResolvedAddressRef = useRef("");
 
   useEffect(() => {
     setInputValue(value);
+    userTypedInputRef.current = value;
   }, [value]);
 
   const onLoad = (autocompleteObj: google.maps.places.Autocomplete) => {
@@ -174,6 +176,7 @@ export default function MapAutocomplete({
     if (precision) {
       setIsGeocoding(false);
       lastResolvedAddressRef.current = precision.formatted_address;
+      userTypedInputRef.current = precision.formatted_address;
       setInputValue(precision.formatted_address);
       if (inputRef.current) inputRef.current.value = precision.formatted_address;
       onChange(precision.formatted_address);
@@ -211,6 +214,7 @@ export default function MapAutocomplete({
           const isGenericCity = checkIfGenericCity(results[0], resolvedAddress);
 
           lastResolvedAddressRef.current = resolvedAddress;
+          userTypedInputRef.current = resolvedAddress;
           setInputValue(resolvedAddress);
           if (inputRef.current) inputRef.current.value = resolvedAddress;
           onChange(resolvedAddress);
@@ -222,20 +226,22 @@ export default function MapAutocomplete({
 
   const onPlaceChanged = async () => {
     if (autocomplete !== null) {
-      const liveInput = (inputRef.current?.value || inputValue || "").trim();
+      const userTyped = (userTypedInputRef.current || "").trim();
       const place = autocomplete.getPlace();
-      const rawQuery = liveInput || place?.name || "";
+      const address = place?.formatted_address || place?.name || "";
+      const rawQuery = userTyped || address || inputRef.current?.value || "";
 
-      // 1. Dacă textul conține o fracție (ex: 115/1, 24/2, 86/4, 67a) sau dacă Google returnează
-      // o clădire cu fracție: Map.md are planul cadastral complet al Chișinăului!
-      const hasFraction = hasFractionOrSubnumber(rawQuery) || hasFractionOrSubnumber(place?.name || "");
+      // 1. Dacă textul tastat conține o fracție (ex: 115/1, 24/2, 86/4, 67a) sau Google a extras o fracție:
+      // Map.md deține planul cadastral complet al Chișinăului și rezolvă adresa exactă!
+      const hasFraction = hasFractionOrSubnumber(userTyped) || hasFractionOrSubnumber(address);
 
-      if (hasFraction && rawQuery) {
+      if (hasFraction && (userTyped || address)) {
         setIsGeocoding(true);
-        const precision = await fetchPrecisionGeocode(rawQuery);
+        const precision = await fetchPrecisionGeocode(userTyped || address);
         setIsGeocoding(false);
         if (precision) {
           lastResolvedAddressRef.current = precision.formatted_address;
+          userTypedInputRef.current = precision.formatted_address;
           setInputValue(precision.formatted_address);
           if (inputRef.current) inputRef.current.value = precision.formatted_address;
           onChange(precision.formatted_address);
@@ -250,25 +256,25 @@ export default function MapAutocomplete({
       if (place && place.geometry && place.geometry.location) {
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
-        const address = place.formatted_address || place.name || "";
         const straightDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
 
-        // 2. Protecție împotriva săririi în suburbii / alte sate (Tohatin, Trușeni, Strășeni):
+        // 2. Protecție împotriva săririi în suburbii / alte localități (Tohatin, Trușeni, Strășeni):
         // Dacă Google returnează o adresă la > 7.5 km aerieni sau fără "Chișinău" în adresa formatată,
-        // dar utilizatorul nu a menționat explicit acea suburbie în căutare:
+        // dar utilizatorul NU a cerut explicit acea suburbie:
         const addressLower = address.toLowerCase();
-        const queryLower = rawQuery.toLowerCase();
+        const userLower = userTyped.toLowerCase();
         const isOutsideChisinau = straightDist > 7.5 || (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
-        const explicitLocality = isExplicitSuburb(queryLower);
+        const explicitLocality = isExplicitSuburb(userLower);
 
-        if (isOutsideChisinau && !explicitLocality && rawQuery) {
+        if (isOutsideChisinau && !explicitLocality && (userTyped || rawQuery)) {
           setIsGeocoding(true);
-          const precision = await fetchPrecisionGeocode(rawQuery);
+          const precision = await fetchPrecisionGeocode(userTyped || rawQuery);
           setIsGeocoding(false);
           if (precision) {
             const precisionDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, precision.lat, precision.lng);
             if (precisionDist <= 7.5) {
               lastResolvedAddressRef.current = precision.formatted_address;
+              userTypedInputRef.current = precision.formatted_address;
               setInputValue(precision.formatted_address);
               if (inputRef.current) inputRef.current.value = precision.formatted_address;
               onChange(precision.formatted_address);
@@ -284,6 +290,7 @@ export default function MapAutocomplete({
         const isGenericCity = checkIfGenericCity(place, address);
 
         lastResolvedAddressRef.current = address;
+        userTypedInputRef.current = address;
         setInputValue(address);
         if (inputRef.current) inputRef.current.value = address;
         onChange(address);
@@ -295,13 +302,16 @@ export default function MapAutocomplete({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    onChange(e.target.value);
+    const val = e.target.value;
+    userTypedInputRef.current = val;
+    setInputValue(val);
+    onChange(val);
   };
 
   const handleBlur = () => {
-    if (inputValue && inputValue.trim().length >= 3 && inputValue.trim() !== lastResolvedAddressRef.current.trim()) {
-      geocodeFallback(inputValue);
+    const liveVal = (userTypedInputRef.current || inputRef.current?.value || inputValue || "").trim();
+    if (liveVal && liveVal.length >= 3 && liveVal !== lastResolvedAddressRef.current.trim()) {
+      geocodeFallback(liveVal);
     }
   };
 
