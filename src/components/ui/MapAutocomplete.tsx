@@ -51,12 +51,13 @@ function hasFractionOrSubnumber(text: string): boolean {
 
 function isExplicitSuburb(text: string): boolean {
   const lower = text.toLowerCase();
-  return lower.includes('trușeni') || lower.includes('truseni') ||
-         lower.includes('bălți') || lower.includes('balti') ||
-         lower.includes('orhei') || lower.includes('cahul') ||
-         lower.includes('ungheni') || lower.includes('soroca') ||
-         lower.includes('strășeni') || lower.includes('straseni') ||
-         lower.includes('criuleni') || lower.includes('aneni');
+  const suburbs = [
+    'trușeni', 'truseni', 'tohatin', 'bubuieci', 'băcioi', 'bacioi', 'sângera', 'sangera',
+    'colonița', 'colonita', 'cricova', 'vadul lui vodă', 'vatra', 'ghidighici', 'durlești', 'durlesti',
+    'codru', 'stăuceni', 'stauceni', 'dumbrava', 'bălți', 'balti', 'orhei', 'cahul', 'ungheni',
+    'soroca', 'strășeni', 'straseni', 'criuleni', 'aneni', 'cimișlia', 'cimislia', 'mereni'
+  ];
+  return suburbs.some(s => lower.includes(s));
 }
 
 /**
@@ -151,6 +152,7 @@ export default function MapAutocomplete({
   
   // Keep local value in sync with prop for typing
   const [inputValue, setInputValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
   const lastResolvedAddressRef = useRef("");
 
   useEffect(() => {
@@ -173,6 +175,7 @@ export default function MapAutocomplete({
       setIsGeocoding(false);
       lastResolvedAddressRef.current = precision.formatted_address;
       setInputValue(precision.formatted_address);
+      if (inputRef.current) inputRef.current.value = precision.formatted_address;
       onChange(precision.formatted_address);
       onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
         isGenericCity: precision.isGenericCity,
@@ -209,6 +212,7 @@ export default function MapAutocomplete({
 
           lastResolvedAddressRef.current = resolvedAddress;
           setInputValue(resolvedAddress);
+          if (inputRef.current) inputRef.current.value = resolvedAddress;
           onChange(resolvedAddress);
           onPlaceSelected(lat, lng, resolvedAddress, { isGenericCity, types: results[0].types });
         }
@@ -218,18 +222,22 @@ export default function MapAutocomplete({
 
   const onPlaceChanged = async () => {
     if (autocomplete !== null) {
+      const liveInput = (inputRef.current?.value || inputValue || "").trim();
       const place = autocomplete.getPlace();
-      const currentInput = inputValue.trim();
+      const rawQuery = liveInput || place?.name || "";
 
-      // Dacă utilizatorul a tastat o adresă cu fracție (ex: 115/1, 24/2), Google Maps adesea ignoră fracția
-      // sau sare la o suburbie. În acest caz, interogăm direct backend-ul (Map.md) cu textul complet!
-      if (currentInput && hasFractionOrSubnumber(currentInput)) {
+      // 1. Dacă textul conține o fracție (ex: 115/1, 24/2, 86/4, 67a) sau dacă Google returnează
+      // o clădire cu fracție: Map.md are planul cadastral complet al Chișinăului!
+      const hasFraction = hasFractionOrSubnumber(rawQuery) || hasFractionOrSubnumber(place?.name || "");
+
+      if (hasFraction && rawQuery) {
         setIsGeocoding(true);
-        const precision = await fetchPrecisionGeocode(currentInput);
+        const precision = await fetchPrecisionGeocode(rawQuery);
         setIsGeocoding(false);
         if (precision) {
           lastResolvedAddressRef.current = precision.formatted_address;
           setInputValue(precision.formatted_address);
+          if (inputRef.current) inputRef.current.value = precision.formatted_address;
           onChange(precision.formatted_address);
           onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
             isGenericCity: precision.isGenericCity,
@@ -243,19 +251,26 @@ export default function MapAutocomplete({
         const lat = place.geometry.location.lat();
         const lng = place.geometry.location.lng();
         const address = place.formatted_address || place.name || "";
-
-        // Protecție Trușeni / suburbii false: dacă Google a returnat o locație la > 7.5 km aerieni,
-        // dar utilizatorul nu a scris acea suburbie în input, căutăm precizia pe Chișinău via backend
         const straightDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
-        if (straightDist > 7.5 && currentInput && !isExplicitSuburb(currentInput)) {
+
+        // 2. Protecție împotriva săririi în suburbii / alte sate (Tohatin, Trușeni, Strășeni):
+        // Dacă Google returnează o adresă la > 7.5 km aerieni sau fără "Chișinău" în adresa formatată,
+        // dar utilizatorul nu a menționat explicit acea suburbie în căutare:
+        const addressLower = address.toLowerCase();
+        const queryLower = rawQuery.toLowerCase();
+        const isOutsideChisinau = straightDist > 7.5 || (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
+        const explicitLocality = isExplicitSuburb(queryLower);
+
+        if (isOutsideChisinau && !explicitLocality && rawQuery) {
           setIsGeocoding(true);
-          const precision = await fetchPrecisionGeocode(currentInput);
+          const precision = await fetchPrecisionGeocode(rawQuery);
           setIsGeocoding(false);
           if (precision) {
             const precisionDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, precision.lat, precision.lng);
             if (precisionDist <= 7.5) {
               lastResolvedAddressRef.current = precision.formatted_address;
               setInputValue(precision.formatted_address);
+              if (inputRef.current) inputRef.current.value = precision.formatted_address;
               onChange(precision.formatted_address);
               onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
                 isGenericCity: precision.isGenericCity,
@@ -270,13 +285,11 @@ export default function MapAutocomplete({
 
         lastResolvedAddressRef.current = address;
         setInputValue(address);
+        if (inputRef.current) inputRef.current.value = address;
         onChange(address);
         onPlaceSelected(lat, lng, address, { isGenericCity, types: place.types, place });
-      } else if (place && place.name) {
-        // Caz când utilizatorul a tastat/lipit text și a apăsat Enter fără click pe dropdown
-        geocodeFallback(place.name);
-      } else if (inputValue) {
-        geocodeFallback(inputValue);
+      } else if (rawQuery) {
+        geocodeFallback(rawQuery);
       }
     }
   };
@@ -313,6 +326,7 @@ export default function MapAutocomplete({
             }}
           >
             <input
+              ref={inputRef}
               type="text"
               value={inputValue}
               onChange={handleInputChange}
