@@ -163,6 +163,14 @@ body {
   padding: 6px !important;
 }
 
+/* Suprimă dropdown-ul Google Places exclusiv când clasa munchotella-suppress-pac este activă pe body */
+body.munchotella-suppress-pac .pac-container {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .pac-item {
   padding: 10px 14px !important;
   border-top: 1px solid #F0ECE4 !important;

@@ -185,6 +185,23 @@ export default function MapAutocomplete({
 
   const hasFraction = hasFractionOrSubnumber(inputValue);
 
+  // Controlăm clasa pe document.body pentru a suprima .pac-container DOAR când utilizatorul tastează fracții,
+  // fără a folosi taguri <style> în JSX care se hoist-uiesc în <head> în React 19 și blochează dropdown-ul permanent.
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (hasFraction) {
+        document.body.classList.add("munchotella-suppress-pac");
+      } else {
+        document.body.classList.remove("munchotella-suppress-pac");
+      }
+    }
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.classList.remove("munchotella-suppress-pac");
+      }
+    };
+  }, [hasFraction]);
+
   // Efect debounced pentru căutarea automată a adreselor cu fracții pe Map.md
   useEffect(() => {
     if (!hasFractionOrSubnumber(inputValue) || inputValue.trim().length < 4) {
@@ -401,19 +418,6 @@ export default function MapAutocomplete({
 
   return (
     <div className="relative w-full">
-      {/* Când utilizatorul tastează o fracție, suprimăm popup-ul generic Google Places (.pac-container)
-          care oferă sugestii incorecte din suburbii precum Trușeni sau Tohatin */}
-      {hasFraction && (
-        <style>{`
-          .pac-container {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-          }
-        `}</style>
-      )}
-
       <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D4A853] z-10 pointer-events-none" />
       
       {isLoaded ? (
