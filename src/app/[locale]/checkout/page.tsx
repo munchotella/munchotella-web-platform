@@ -490,14 +490,14 @@ export default function CheckoutPage() {
 
     const roadDistance = formData.estimatedKm;
 
-    if (roadDistance > 10.0) {
+    if (roadDistance > 14.0) {
       return {
         fee: 0,
         isDeliverable: false,
         isPedestrian: false,
         distanceKm: roadDistance,
         hasAddress: true,
-        typeLabel: "În Afara Ariei de Livrare (max 10 km)",
+        typeLabel: "În Afara Ariei de Livrare (max 14 km)",
       };
     }
 

@@ -343,11 +343,11 @@ export default function MapAutocomplete({
         const straightDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
 
         // 2. Protecție împotriva săririi în suburbii / alte localități (Tohatin, Trușeni, Strășeni):
-        // Dacă Google returnează o adresă la > 7.5 km aerieni sau fără "Chișinău" în adresa formatată,
+        // Dacă Google returnează o adresă la > 10.5 km aerieni sau fără "Chișinău" în adresa formatată,
         // dar utilizatorul NU a cerut explicit acea suburbie:
         const addressLower = address.toLowerCase();
         const userLower = userTyped.toLowerCase();
-        const isOutsideChisinau = straightDist > 7.5 || (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
+        const isOutsideChisinau = straightDist > 10.5 || (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
         const explicitLocality = isExplicitSuburb(userLower);
 
         if (isOutsideChisinau && !explicitLocality && (userTyped || rawQuery)) {
@@ -356,7 +356,7 @@ export default function MapAutocomplete({
           setIsGeocoding(false);
           if (precision) {
             const precisionDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, precision.lat, precision.lng);
-            if (precisionDist <= 7.5) {
+            if (precisionDist <= 10.5) {
               lastResolvedAddressRef.current = precision.formatted_address;
               userTypedInputRef.current = precision.formatted_address;
               setInputValue(precision.formatted_address);
