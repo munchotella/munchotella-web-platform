@@ -65,7 +65,7 @@ function isExplicitSuburb(text: string): boolean {
  */
 async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number; lng: number; formatted_address: string; isGenericCity?: boolean; source?: string } | null> {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://munchotella-api.onrender.com/api";
+    const API_URL = "https://munchotella-api.onrender.com/api";
     const res = await fetch(`${API_URL}/maps/geocode?address=${encodeURIComponent(rawAddress)}`, {
       headers: { 'Accept': 'application/json' }
     });
