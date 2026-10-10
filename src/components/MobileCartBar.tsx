@@ -47,45 +47,48 @@ export default function MobileCartBar() {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 80, opacity: 0, scale: 0.96 }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-6 inset-x-3.5 z-40 md:hidden pointer-events-none"
+          className="fixed bottom-6 inset-x-0 z-40 md:hidden pointer-events-none flex justify-center px-4"
           style={{
             paddingBottom: "env(safe-area-inset-bottom, 0px)"
           }}
         >
-          <div className="pointer-events-auto w-full bg-[#1A120B] text-white rounded-[20px] p-2 sm:p-2.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2 overflow-hidden">
+          <div className="pointer-events-auto bg-[#1A120B] text-white rounded-full p-1.5 pl-2.5 sm:pl-3 pr-1.5 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.55),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center gap-2.5 sm:gap-3 border border-[#D4A853]/25">
             {/* Secțiunea Stânga: Trigger Coș / Detalii Comandă */}
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
               aria-label={t("viewCart")}
-              className="flex items-center gap-2 sm:gap-2.5 min-w-0 pl-1 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
+              className="flex items-center gap-2 min-w-0 py-0.5 text-left cursor-pointer group active:opacity-85 transition-opacity shrink-0"
             >
-              {/* Badge Icon Coș cu styling identic 1:1 cu cel din Navbar */}
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#261B12] border border-[#D4A853]/30 flex items-center justify-center text-white shrink-0 shadow-inner">
-                <ShoppingBag className="w-4 h-4 text-white" />
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-[#D4A853] text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md">
+              {/* Badge Icon Coș cu styling Warm Luxury */}
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#261B12] border border-[#D4A853]/30 flex items-center justify-center text-white shrink-0 shadow-inner">
+                <ShoppingBag className="w-3.5 h-3.5 text-white" />
+                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
                   {totalItems}
                 </span>
               </div>
 
-              {/* Informații preț & cantitate cu typographic hierarchy riguroasă (font-sans Outfit) */}
+              {/* Informații preț & cantitate */}
               <div className="flex flex-col justify-center leading-tight">
-                <span className="font-sans text-[10px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
+                <span className="font-sans text-[9.5px] uppercase font-bold tracking-wider text-[#A89F91] whitespace-nowrap">
                   {t("itemsCount", { count: totalItems })}
                 </span>
-                <span className="font-sans font-extrabold text-[15px] sm:text-[16px] text-white tracking-tight whitespace-nowrap">
+                <span className="font-sans font-extrabold text-[14px] sm:text-[15px] text-white tracking-tight whitespace-nowrap">
                   {totalPrice} MDL
                 </span>
               </div>
             </button>
 
-            {/* Secțiunea Dreapta: Buton Direct Checkout Proporționat Impecabil */}
+            {/* Separator Vertical Fin (Champagne Gold Hairline) */}
+            <div className="w-[1px] h-5 bg-white/15 shrink-0" aria-hidden="true" />
+
+            {/* Secțiunea Dreapta: Buton Direct Checkout Pill */}
             <button
               type="button"
               onClick={() => router.push("/checkout")}
-              className="h-[40px] sm:h-[42px] px-3 sm:px-4 bg-[#D4A853] text-[#1A120B] rounded-xl font-bold text-[11px] sm:text-xs uppercase tracking-wide flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.97] transition-all shadow-md shrink-0 cursor-pointer"
+              className="h-[36px] sm:h-[38px] px-3.5 sm:px-4 bg-[#D4A853] text-[#1A120B] rounded-full font-extrabold text-[11px] sm:text-xs uppercase tracking-wide flex items-center gap-1.5 hover:bg-[#DEB461] active:scale-[0.96] transition-all shadow-[0_4px_14px_rgba(212,168,83,0.35)] shrink-0 cursor-pointer"
             >
-              <span className="whitespace-nowrap font-extrabold">{t("finalizeOrder")}</span>
+              <span className="whitespace-nowrap font-black">{t("finalizeOrder")}</span>
               <ArrowRight className="w-3.5 h-3.5 shrink-0 text-[#1A120B]" />
             </button>
           </div>
