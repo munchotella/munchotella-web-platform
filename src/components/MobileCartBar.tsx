@@ -58,21 +58,19 @@ export default function MobileCartBar() {
             tabIndex={0}
             className="pointer-events-auto w-full max-w-[370px] h-[52px] sm:h-[54px] bg-[#1A120B] text-white rounded-full px-3.5 sm:px-4 shadow-[0_16px_36px_-6px_rgba(26,18,11,0.65),0_0_0_1px_rgba(212,168,83,0.35)] flex items-center justify-between gap-2.5 sm:gap-3 border border-[#D4A853]/30 cursor-pointer active:scale-[0.98] transition-all group"
           >
-            {/* Stânga: Badge Coș cu număr de produse (tap deschide sertarul) */}
+            {/* Stânga: Iconiță Coș albă (identică cu cea de sus) + Număr de produse în dreapta (tap deschide coșul) */}
             <div
               onClick={(e) => {
                 e.stopPropagation();
                 setIsCartOpen(true);
               }}
               aria-label={t("viewCart")}
-              className="flex items-center gap-2 shrink-0 cursor-pointer py-1"
+              className="flex items-center gap-2 shrink-0 cursor-pointer py-1 pl-1"
             >
-              <div className="relative w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-[#261B12] border border-[#D4A853]/40 flex items-center justify-center text-white shadow-inner group-hover:border-[#D4A853] transition-colors">
-                <ShoppingBag className="w-4 h-4 text-[#D4A853]" />
-                <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 bg-[#D4A853] text-[#1A120B] text-[10px] font-black rounded-full flex items-center justify-center shadow-md">
-                  {totalItems}
-                </span>
-              </div>
+              <ShoppingBag className="w-5 h-5 text-white shrink-0 group-hover:scale-105 transition-transform" />
+              <span className="flex items-center justify-center bg-[#D4A853] text-white text-[11px] font-bold w-5 h-5 min-w-[20px] px-1 rounded-full shadow-sm">
+                {totalItems}
+              </span>
             </div>
 
             {/* Centru: Text de Acțiune Auriu Bold */}
