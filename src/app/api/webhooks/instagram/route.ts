@@ -1307,7 +1307,7 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
   const lower = text.toLowerCase().trim();
 
   const isDineIn = /(\b(pe loc|la mese|la masa|la masă|in cafenea|în cafenea|in local|în local|venim la voi|servim acolo|mancam acolo|mâncăm acolo|посидеть|в кафе|на месте|dine in|dine-in|at the cafe|inside)\b)/i.test(lower);
-  const isWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('среду') || lower.includes('wednesday');
+  const isMonday = lower.includes('luni') || lower.includes('понедельник') || lower.includes('monday');
   
   const hasPreorderKeyword = /(\b(precomanda|precomandă|precomenzi|pe mai tarziu|pe mai târziu|mai tarziu|mai târziu|[iî]n avans|programat[aă]?|pe cand|pe când|pe diseara|pe diseară|diseara|diseară|pe maine|pe mâine|pe mîine|pe miine|pentru maine|pentru mâine|pentru mîine|pentru miine|предзаказ|на потом|попозже|на вечер|на завтра|preorder|pre-order|later|for tomorrow|tonight)\b)/i.test(lower);
   const timeMatch = lower.match(/\b(?:la\s*ora|pentru\s*ora|ora|la|at)\s*(\d{1,2}(?::\d{2})?)\b/i);
@@ -1321,14 +1321,14 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
     return { handled: false };
   }
 
-  // Avertisment explicit: Miercuri este închis
-  if (isWednesday) {
-    const wedReply = lang === 'ru'
-      ? "Обратите внимание: по средам у нас выходной день! ✨ Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
+  // Avertisment explicit: Luni este închis
+  if (isMonday) {
+    const monReply = lang === 'ru'
+      ? "Обратите внимание: по понедельникам у нас выходной день! ✨ Будем очень рады приготовить ваш заказ в любой другой день недели с 16:00 до 00:00!"
       : lang === 'en'
-      ? "Please note: we are closed on Wednesdays! ✨ We'd love to prepare your order on any other day of the week from 16:00 to 00:00!"
-      : "Vă informăm cu drag că Miercuri este singura noastră zi liberă săptămânală (închis)! ✨ Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
-    return { handled: true, replyText: wedReply };
+      ? "Please note: we are closed on Mondays! ✨ We'd love to prepare your order on any other day of the week from 16:00 to 00:00!"
+      : "Vă informăm cu drag că Luni este singura noastră zi liberă săptămânală (închis)! ✨ Vă putem pregăti cu mare drag comanda pentru oricare altă zi din săptămână, între 16:00 și 00:00!";
+    return { handled: true, replyText: monReply };
   }
 
   const detectedHour = timeMatch ? timeMatch[1] : null;
@@ -1670,24 +1670,24 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
   }
 
   if (isHoursQ) {
-    const mentionsWednesday = lower.includes('miercuri') || lower.includes('среда') || lower.includes('wednesday');
-    if (mentionsWednesday) {
+    const mentionsMonday = lower.includes('luni') || lower.includes('понедельник') || lower.includes('monday');
+    if (mentionsMonday) {
       return {
         handled: true,
         replyText: lang === 'ru'
-          ? "По средам у нас выходной день! ✨ В остальные дни ждем вас с 16:00 до 00:00! ✨"
+          ? "По понедельникам у нас выходной день! ✨ В остальные дни ждем вас с 16:00 до 00:00! ✨"
           : lang === 'en'
-          ? "We are closed on Wednesdays! ✨ On all other days, we warmly welcome you from 16:00 to 00:00! ✨"
-          : "Miercuri este singura noastră zi liberă (închis)! ✨ În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
+          ? "We are closed on Mondays! ✨ On all other days, we warmly welcome you from 16:00 to 00:00! ✨"
+          : "Luni este singura noastră zi liberă (închis)! ✨ În restul săptămânii vă așteptăm zilnic de la 16:00 până la 00:00! ✨"
       };
     }
     return {
       handled: true,
       replyText: lang === 'ru'
-        ? "Мы открыты ежедневно с 16:00 до 00:00 (Среда: выходной). Ждем вас с радостью! ✨"
+        ? "Мы открыты ежедневно с 16:00 до 00:00 (Понедельник: выходной). Ждем вас с радостью! ✨"
         : lang === 'en'
-        ? "We are open daily from 16:00 to 00:00 (Wednesdays: Closed). We look forward to seeing you! ✨"
-        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Miercuri: Închis). Vă așteptăm cu drag! ✨"
+        ? "We are open daily from 16:00 to 00:00 (Mondays: Closed). We look forward to seeing you! ✨"
+        : "Suntem deschiși zilnic de la 16:00 până la 00:00 (Luni: Închis). Vă așteptăm cu drag! ✨"
     };
   }
 
@@ -2383,7 +2383,7 @@ export async function processMessage(
       const schedInfo = session.scheduledTime ? `Programare/Oră menționată: ${session.scheduledTime}` : 'Comandă imediată';
 
       const dynamicPrompt = `You are the friendly virtual assistant of the artisanal dessert boutique Munchotella Waffle Boutique in Chișinău (21/1 Nicolae Testemițanu St.).
-Opening hours: 16:00 - 00:00 (Wednesdays: Closed).
+Opening hours: 16:00 - 00:00 (Mondays: Closed).
 Key products: Royal sushi (crepe sushi roll around a whole fresh banana with Nutella, Belgian white chocolate, strawberries, pistachio, peanuts - 155 MDL), Crepe Dubai with pistachio and kataifi (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), drinks.
 Note on Sushi: In our menu, sushi crepe is named "Royal sushi". If customers write "sushi banana", "sushi cu banana" or "sushi", it refers to Royal sushi. It cannot be prepared without banana.
 Essential Rules:

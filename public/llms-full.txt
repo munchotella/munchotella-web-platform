@@ -37,9 +37,9 @@ Munchotella operează pe baza unui model hibrid adaptat specificului nocturn:
 
 | Ziua Săptămânii | Bucătărie Caldă & Livrare Nocturnă | Pre-Comenzi Online pe Site |
 |---|---|---|
-| Luni | 16:00 - 23:59 | 24/7 Non-Stop |
+| Luni | ÎNCHIS (Igienizare & Mentenanță Laborator) | 24/7 Non-Stop (pentru Marți) |
 | Marți | 16:00 - 23:59 | 24/7 Non-Stop |
-| Miercuri | ÎNCHIS (Igienizare & Mentenanță Laborator) | 24/7 Non-Stop (pentru Joi) |
+| Miercuri | 16:00 - 23:59 | 24/7 Non-Stop |
 | Joi | 16:00 - 23:59 | 24/7 Non-Stop |
 | Vineri | 16:00 - 23:59 | 24/7 Non-Stop |
 | Sâmbătă | 16:00 - 23:59 | 24/7 Non-Stop |

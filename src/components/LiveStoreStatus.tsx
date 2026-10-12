@@ -59,16 +59,16 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
         // Fallback local dacă API-ul este temporar indisponibil
       }
 
-      // Offline Safe Fallback: Miercuri închis, altfel 16:00 - 24:00
+      // Offline Safe Fallback: Luni închis, altfel 16:00 - 24:00
       const now = new Date();
       const day = now.getDay();
       const hours = now.getHours();
 
-      if (day === 3) {
+      if (day === 1) {
         setStatus({
           isOpen: false,
-          badgeKey: 'closedWednesday',
-          statusText: 'Închis Miercuri',
+          badgeKey: 'closedMonday',
+          statusText: 'Închis Luni',
         });
       } else if (hours >= 16 && hours < 24) {
         setStatus({

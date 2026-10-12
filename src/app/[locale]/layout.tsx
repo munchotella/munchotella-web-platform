@@ -177,8 +177,8 @@ export default async function RootLayout({
                   "name": "Bucătărie Caldă și Livrare Nocturnă la Domiciliu",
                   "description": "Preparare proaspătă pe loc și livrare rapidă în Chișinău în cutii termoizolante",
                   "dayOfWeek": [
-                    "Monday",
                     "Tuesday",
+                    "Wednesday",
                     "Thursday",
                     "Friday",
                     "Saturday",
