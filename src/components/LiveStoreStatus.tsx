@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { localizeNextOpeningLabel } from "@/lib/delivery";
 
 interface StoreStatusResponse {
   isOpen: boolean;
@@ -23,6 +24,7 @@ let lastFetchTime = 0;
 
 export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBackground?: boolean }) {
   const t = useTranslations("LiveStore");
+  const locale = useLocale();
   const [status, setStatus] = useState<StoreStatusResponse>(() => {
     return cachedStatus || {
       isOpen: true,
@@ -100,7 +102,7 @@ export default function LiveStoreStatus({ isDarkBackground = true }: { isDarkBac
       if (status.isHoliday && status.holidayName) {
         displayText = `${t('closedHoliday')}: ${status.holidayName}`;
       } else if (!status.isOpen && status.nextOpening?.label) {
-        displayText = `${displayText} • ${status.nextOpening.label}`;
+        displayText = `${displayText} • ${localizeNextOpeningLabel(status.nextOpening.label, locale)}`;
       }
     } catch {
       displayText = status.statusText || 'Munchotella';

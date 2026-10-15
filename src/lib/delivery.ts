@@ -271,3 +271,170 @@ export function formatDeliveryFee(fee: number, locale: string = "ro"): string {
   const prefix = locale === "ru" ? "Доставка" : locale === "en" ? "Delivery" : "Livrare";
   return `${prefix}: ${fee} MDL`;
 }
+
+/**
+ * Munchotella operating hours 30-minute time slots (16:00 – 23:30, 16 slots).
+ */
+export const AVAILABLE_TIME_SLOTS = [
+  "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30",
+  "20:00", "20:30", "21:00", "21:30",
+  "22:00", "22:30", "23:00", "23:30",
+] as const;
+
+export const CHECKOUT_OPERATING_TIME_SLOTS = AVAILABLE_TIME_SLOTS;
+
+/**
+ * Localizes backend Romanian next-opening labels across RO, RU, EN.
+ * e.g. "Azi la 16:00" -> RO: "Azi la 16:00", RU: "Сегодня в 16:00", EN: "Today at 16:00"
+ *      "Mâine la 16:00" -> RO: "Mâine la 16:00", RU: "Завтра в 16:00", EN: "Tomorrow at 16:00"
+ */
+export function localizeNextOpeningLabel(
+  rawLabel?: string,
+  locale: string = "ro"
+): string {
+  if (!rawLabel || typeof rawLabel !== "string") return "";
+
+  const lang = locale.startsWith("ru") ? "ru" : locale.startsWith("en") ? "en" : "ro";
+  const trimmed = rawLabel.trim();
+
+  // Helper function to clean leading "ora " / "orele " from extracted time
+  const cleanTimeStr = (t: string) => t.replace(/^(?:ora|orele|at|в)\s+/i, '').trim();
+
+  // 1. Pattern: "Azi / Astăzi" with "la", "de la", ",", or whitespace
+  const aziMatch = trimmed.match(/^(?:Azi|Ast[ăa]zi)(?:,?\s+(?:la|de\s+la|ora)?\s*|,\s*|\s+)(.*)$/i);
+  if (aziMatch) {
+    const time = cleanTimeStr(aziMatch[1]);
+    if (lang === "ru") return `Сегодня в ${time}`;
+    if (lang === "en") return `Today at ${time}`;
+    return `Azi la ${time}`;
+  }
+
+  // 2. Pattern: "Mâine / Maine" with "la", "de la", ",", or whitespace
+  const maineMatch = trimmed.match(/^M[âa]ine(?:,?\s+(?:la|de\s+la|ora)?\s*|,\s*|\s+)(.*)$/i);
+  if (maineMatch) {
+    const time = cleanTimeStr(maineMatch[1]);
+    if (lang === "ru") return `Завтра в ${time}`;
+    if (lang === "en") return `Tomorrow at ${time}`;
+    return `Mâine la ${time}`;
+  }
+
+  // 3. Pattern: English/Russian inputs already localized from backend
+  const todayEnMatch = trimmed.match(/^Today\s+(?:at\s+)?(.*)$/i);
+  if (todayEnMatch) {
+    const time = cleanTimeStr(todayEnMatch[1]);
+    if (lang === "ru") return `Сегодня в ${time}`;
+    if (lang === "en") return `Today at ${time}`;
+    return `Azi la ${time}`;
+  }
+  const tomorrowEnMatch = trimmed.match(/^Tomorrow\s+(?:at\s+)?(.*)$/i);
+  if (tomorrowEnMatch) {
+    const time = cleanTimeStr(tomorrowEnMatch[1]);
+    if (lang === "ru") return `Завтра в ${time}`;
+    if (lang === "en") return `Tomorrow at ${time}`;
+    return `Mâine la ${time}`;
+  }
+  const todayRuMatch = trimmed.match(/^Сегодня\s+(?:в\s+)?(.*)$/i);
+  if (todayRuMatch) {
+    const time = cleanTimeStr(todayRuMatch[1]);
+    if (lang === "ru") return `Сегодня в ${time}`;
+    if (lang === "en") return `Today at ${time}`;
+    return `Azi la ${time}`;
+  }
+  const tomorrowRuMatch = trimmed.match(/^Завтра\s+(?:в\s+)?(.*)$/i);
+  if (tomorrowRuMatch) {
+    const time = cleanTimeStr(tomorrowRuMatch[1]);
+    if (lang === "ru") return `Завтра в ${time}`;
+    if (lang === "en") return `Tomorrow at ${time}`;
+    return `Mâine la ${time}`;
+  }
+
+  // 4. Pattern: Days of the week (Luni, Marți, Miercuri, Joi, Vineri, Sâmbătă, Duminică)
+  const days: Record<string, { ru: string; en: string; ro: string }> = {
+    luni: { ro: "Luni", ru: "В понедельник", en: "Monday" },
+    "marți": { ro: "Marți", ru: "Во вторник", en: "Tuesday" },
+    marti: { ro: "Marți", ru: "Во вторник", en: "Tuesday" },
+    miercuri: { ro: "Miercuri", ru: "В среду", en: "Wednesday" },
+    joi: { ro: "Joi", ru: "В четверг", en: "Thursday" },
+    vineri: { ro: "Vineri", ru: "В пятницу", en: "Friday" },
+    "sâmbătă": { ro: "Sâmbătă", ru: "В субботу", en: "Saturday" },
+    sambata: { ro: "Sâmbătă", ru: "В субботу", en: "Saturday" },
+    "duminică": { ro: "Duminică", ru: "В воскресенье", en: "Sunday" },
+    duminica: { ro: "Duminică", ru: "В воскресенье", en: "Sunday" },
+  };
+
+  const dayMatch = trimmed.match(/^([a-zăîâșț]+)(?:,?\s+(?:la|de\s+la|ora)?\s*|,\s*|\s+)(.*)$/i);
+  if (dayMatch) {
+    const dayKey = dayMatch[1].toLowerCase();
+    const time = cleanTimeStr(dayMatch[2]);
+    if (days[dayKey]) {
+      if (lang === "ru") return `${days[dayKey].ru} в ${time}`;
+      if (lang === "en") return `${days[dayKey].en} at ${time}`;
+      return `${days[dayKey].ro} la ${time}`;
+    }
+  }
+
+  // 5. Pattern: Numeric date or Date with month (e.g., "16.10 la 16:00", "16 octombrie la 16:00")
+  const months: Record<string, { ro: string; ru: string; en: string }> = {
+    ianuarie: { ro: "ianuarie", ru: "января", en: "January" },
+    ian: { ro: "ian.", ru: "янв.", en: "Jan" },
+    februarie: { ro: "februarie", ru: "февраля", en: "February" },
+    feb: { ro: "feb.", ru: "февр.", en: "Feb" },
+    martie: { ro: "martie", ru: "марта", en: "March" },
+    mar: { ro: "mar.", ru: "мар.", en: "Mar" },
+    aprilie: { ro: "aprilie", ru: "апреля", en: "April" },
+    apr: { ro: "apr.", ru: "апр.", en: "Apr" },
+    mai: { ro: "mai", ru: "мая", en: "May" },
+    iunie: { ro: "iunie", ru: "июня", en: "June" },
+    iun: { ro: "iun.", ru: "июн.", en: "Jun" },
+    iulie: { ro: "iulie", ru: "июля", en: "July" },
+    iul: { ro: "iul.", ru: "июл.", en: "Jul" },
+    august: { ro: "august", ru: "августа", en: "August" },
+    aug: { ro: "aug.", ru: "авг.", en: "Aug" },
+    septembrie: { ro: "septembrie", ru: "сентября", en: "September" },
+    sept: { ro: "sept.", ru: "сент.", en: "Sept" },
+    octombrie: { ro: "octombrie", ru: "октября", en: "October" },
+    oct: { ro: "oct.", ru: "окт.", en: "Oct" },
+    noiembrie: { ro: "noiembrie", ru: "ноября", en: "November" },
+    noi: { ro: "noi.", ru: "нояб.", en: "Nov" },
+    decembrie: { ro: "decembrie", ru: "декабря", en: "December" },
+    dec: { ro: "dec.", ru: "дек.", en: "Dec" },
+  };
+
+  const dateMatch = trimmed.match(/^(\d{1,2}(?:[./-]\d{1,2}(?:[./-]\d{2,4})?|\s+[a-zăîâșț.]+))(?:,?\s+(?:la|de\s+la|ora)?\s*|,\s*|\s+)(.*)$/i);
+  if (dateMatch) {
+    const rawDatePart = dateMatch[1].trim();
+    const time = cleanTimeStr(dateMatch[2]);
+
+    let dateRo = rawDatePart;
+    let dateRu = rawDatePart;
+    let dateEn = rawDatePart;
+
+    for (const [mKey, mTrans] of Object.entries(months)) {
+      const mRegex = new RegExp(`\\b${mKey}\\b`, 'i');
+      if (mRegex.test(rawDatePart)) {
+        dateRo = rawDatePart.replace(mRegex, mTrans.ro);
+        dateRu = rawDatePart.replace(mRegex, mTrans.ru);
+        dateEn = rawDatePart.replace(mRegex, mTrans.en);
+        break;
+      }
+    }
+
+    if (lang === "ru") return `${dateRu} в ${time}`;
+    if (lang === "en") return `${dateEn} at ${time}`;
+    return `${dateRo} la ${time}`;
+  }
+
+  // 6. Generic fallback: if it contains " la HH:mm"
+  const genericLaMatch = trimmed.match(/^(.*)\s+la\s+(.*)$/i);
+  if (genericLaMatch) {
+    const prefix = genericLaMatch[1].trim();
+    const time = cleanTimeStr(genericLaMatch[2]);
+    if (lang === "ru") return `${prefix} в ${time}`;
+    if (lang === "en") return `${prefix} at ${time}`;
+    return `${prefix} la ${time}`;
+  }
+
+  return trimmed;
+}
+

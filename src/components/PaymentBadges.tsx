@@ -13,12 +13,12 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
   const isCheckout = variant === "checkout";
 
   return (
-    <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
+    <div className={`flex ${isCheckout ? "flex-wrap sm:flex-nowrap gap-1.5 sm:gap-2" : "flex-wrap gap-2.5"} items-center ${className}`}>
       {/* Visa */}
       <div 
         className={`flex items-center justify-center rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs" 
+            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs shrink-0" 
             : "h-8 px-3 bg-white/10 border-white/15 hover:bg-white/20 hover:border-white/30"
         }`}
         title="Visa"
@@ -32,7 +32,7 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
       <div 
         className={`flex items-center justify-center rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs" 
+            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs shrink-0" 
             : "h-8 px-3 bg-white/10 border-white/15 hover:bg-white/20 hover:border-white/30"
         }`}
         title="Mastercard"
@@ -48,7 +48,7 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
       <div 
         className={`flex items-center justify-center gap-1 rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-[#008F79]/10 border-[#008F79]/30" 
+            ? "h-8 px-2.5 bg-[#008F79]/10 border-[#008F79]/30 shrink-0" 
             : "h-8 px-3 bg-[#008F79]/20 border-[#008F79]/40 hover:bg-[#008F79]/30"
         }`}
         title="maib e-Commerce Checkout"
@@ -63,7 +63,7 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
       <div 
         className={`flex items-center justify-center rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-black text-white border-black" 
+            ? "h-8 px-2.5 bg-black text-white border-black shrink-0" 
             : "h-8 px-3 bg-white/10 border-white/15 hover:bg-white/20 hover:border-white/30"
         }`}
         title="Apple Pay"
@@ -80,7 +80,7 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
       <div 
         className={`flex items-center justify-center rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs" 
+            ? "h-8 px-2.5 bg-white border-[#E8E2D9] shadow-xs shrink-0" 
             : "h-8 px-3 bg-white/10 border-white/15 hover:bg-white/20 hover:border-white/30"
         }`}
         title="Google Pay"
@@ -97,14 +97,14 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
       <div 
         className={`flex items-center justify-center gap-1.5 rounded-lg border transition-all duration-300 ${
           isCheckout 
-            ? "h-8 px-2.5 bg-gradient-to-r from-[#D4A853]/15 to-[#F3922C]/15 border-[#D4A853]/40 shadow-xs" 
+            ? "h-8 px-2.5 bg-gradient-to-r from-[#D4A853]/15 to-[#F3922C]/15 border-[#D4A853]/40 shadow-xs shrink-0" 
             : "h-8 px-3 bg-gradient-to-r from-[#D4A853]/20 to-[#F3922C]/20 border-[#D4A853]/40 hover:border-[#D4A853]/70"
         }`}
         title={t('miaTitle')}
       >
         <span className="text-[10px] font-black tracking-widest text-[#D4A853]">MIA</span>
         <span className="text-[9px] font-medium px-1 py-0.5 rounded bg-[#D4A853] text-[#1A120B] leading-none">
-          {t('zeroCommission')}
+          <span className="whitespace-nowrap">{t('zeroCommission')}</span>
         </span>
       </div>
     </div>

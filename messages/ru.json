@@ -169,6 +169,8 @@
     "calculatedAtStep2": "Рассчитывается на шаге 2",
     "pedestrianDelivery": "Пешая",
     "taxiDelivery": "Такси",
+    "enterAddress": "Введите адрес доставки",
+    "calculatingDistance": "Определяется расстояние...",
     "outOfRange": "Извините, но введенный адрес находится за пределами максимального радиуса доставки (14 км).",
     "totalToPay": "Итого к оплате",
     "orderTimeNoticePre": "Заказ будет выполнен примерно за ",
@@ -222,7 +224,11 @@
     "walkingDeliveryDoor": "Пешая доставка до двери",
     "deliveryFeeLabel": "Доставка: {fee} MDL",
     "pickupFree": "Бесплатный самовывоз из бутика",
-    "kmUnit": "км"
+    "kmUnit": "км",
+    "pickupBoutiqueName": "Бутик Munchotella",
+    "pickupBoutiqueAddress": "Ул. Николае Тестемицану 21/1, Кишинёв",
+    "pickupBoutiqueNote": "⏱️ Свежий и бесплатный самовывоз примерно через 20-30 минут.",
+    "orderSubmissionError": "Ошибка при отправке заказа"
   },
   "MobileCartBar": {
     "viewCart": "Ваша корзина",

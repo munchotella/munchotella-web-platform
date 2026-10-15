@@ -144,8 +144,8 @@
     "preOrderOnlyNotice": "We'll bake your treats fresh right at opening. Choose when you'd like to receive your order:",
     "step4Title": "How do you prefer to pay?",
     "cashTitle": "Cash on {type}",
-    "cashDelivery": "Delivery",
-    "cashPickup": "Pickup",
+    "cashDelivery": "delivery",
+    "cashPickup": "pickup",
     "cashDesc": "Pay cash to the courier/barista",
     "posTitle": "Card via POS",
     "posDesc": "Card payment via mobile POS terminal upon delivery",
@@ -169,6 +169,8 @@
     "calculatedAtStep2": "Calculated at step 2",
     "pedestrianDelivery": "Walking",
     "taxiDelivery": "Taxi",
+    "enterAddress": "Enter delivery address",
+    "calculatingDistance": "Calculating distance...",
     "outOfRange": "Sorry, the address entered exceeds our maximum delivery radius (14 km).",
     "totalToPay": "Total to pay",
     "orderTimeNoticePre": "The order will be ready in approximately ",
@@ -222,7 +224,11 @@
     "walkingDeliveryDoor": "Walking delivery to door",
     "deliveryFeeLabel": "Delivery: {fee} MDL",
     "pickupFree": "Free pickup from boutique",
-    "kmUnit": "km"
+    "kmUnit": "km",
+    "pickupBoutiqueName": "Munchotella Boutique",
+    "pickupBoutiqueAddress": "21/1 Nicolae Testemițanu Street, Chișinău",
+    "pickupBoutiqueNote": "⏱️ Fresh and free pickup in approximately 20-30 minutes.",
+    "orderSubmissionError": "Error submitting order"
   },
   "MobileCartBar": {
     "viewCart": "Your cart",

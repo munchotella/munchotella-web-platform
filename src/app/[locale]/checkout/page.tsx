@@ -38,7 +38,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { translateTopping, translateCustomizationNote } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
-import { calculateDelivery, formatDistance, formatDeliveryFee, RESTAURANT_LOCATION, getDistanceFromLatLonInKm, MAX_DELIVERY_RADIUS_KM } from "@/lib/delivery";
+import { calculateDelivery, formatDistance, formatDeliveryFee, RESTAURANT_LOCATION, getDistanceFromLatLonInKm, MAX_DELIVERY_RADIUS_KM, AVAILABLE_TIME_SLOTS, localizeNextOpeningLabel } from "@/lib/delivery";
 import PaymentBadges from "@/components/PaymentBadges";
 import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
 import { getMetaTrackingPayload } from "@/utils/metaTracking";
@@ -113,7 +113,30 @@ export default function CheckoutPage() {
   const [addressLabel, setAddressLabel] = useState("Acasă");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "online">("online");
   const [timing, setTiming] = useState<"asap" | "scheduled">("asap");
-  const [scheduledTime, setScheduledTime] = useState("18:00");
+  const [scheduledTime, setScheduledTime] = useState("16:00");
+  const [isTimePopoverOpen, setIsTimePopoverOpen] = useState(false);
+  const timePopoverRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (timePopoverRef.current && !timePopoverRef.current.contains(event.target as Node)) {
+        setIsTimePopoverOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsTimePopoverOpen(false);
+      }
+    };
+    if (isTimePopoverOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isTimePopoverOpen]);
 
   const [couponCode, setCouponCode] = useState("");
   const [activePromo, setActivePromo] = useState<{
@@ -336,6 +359,7 @@ export default function CheckoutPage() {
     isOpen: boolean;
     isEmergencyClosed?: boolean;
     reason?: string;
+    badgeKey?: string;
     nextOpening?: { label: string; time: string; date: string } | null;
   }>({ isOpen: true });
 
@@ -359,6 +383,24 @@ export default function CheckoutPage() {
 
   // Verificare status magazin la inițializare
   React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("closed") === "true" || sp.get("forceClosed") === "true" || sp.has("closed")) {
+        setStoreStatus({
+          isOpen: false,
+          badgeKey: "closedCurrently",
+          nextOpening: {
+            label: "Azi la 16:00",
+            time: "16:00",
+            date: new Date().toISOString().split("T")[0],
+          },
+        });
+        setTiming("scheduled");
+        setScheduledTime("16:00");
+        return;
+      }
+    }
+
     const fetchStatus = async () => {
       try {
         const res = await fetch("https://munchotella-api.onrender.com/api/settings/store-status", {
@@ -718,7 +760,12 @@ export default function CheckoutPage() {
         ? `[LIVRARE LA UȘĂ: Sc. ${formData.entrance || '-'}, Et. ${formData.floor || '-'}, Ap. ${formData.apartment || '-'}, Interfon: ${formData.intercom || '-'}]`
         : '';
 
+      const timeNote = (!storeStatus.isOpen || timing === "scheduled")
+        ? `[PROGRAMARE: ${scheduledTime || "16:00"}]`
+        : '';
+
       const aggregatedNotes = [
+        timeNote,
         doorNotes,
         formData.notes,
         ...items.filter(i => (i as any).customization).map(i => `Notă ${i.name}: ${(i as any).customization}`)
@@ -769,8 +816,8 @@ export default function CheckoutPage() {
         deliveryType,
         needsCutlery: false,
         promoCode: activePromo ? activePromo.code : undefined,
-        timing,
-        scheduledTime: timing === "scheduled" ? scheduledTime : null,
+        timing: !storeStatus.isOpen ? "scheduled" : timing,
+        scheduledTime: (!storeStatus.isOpen || timing === "scheduled") ? (scheduledTime || "16:00") : null,
         draftOrderId: draftOrderId || undefined,
         unverifiedPhone,
         metaTracking: getMetaTrackingPayload(),
@@ -1191,7 +1238,7 @@ export default function CheckoutPage() {
                     <div className="flex justify-between items-start gap-2">
                       <Truck className={`w-6 h-6 ${deliveryType === "delivery" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
                       <span className="text-[11px] font-bold text-[#9E721D] bg-[#D4A853]/15 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
-                        ⏱️ ~35-45 min
+                        ⏱️ ~30-60 {locale === 'ru' ? 'мин' : 'min'}
                       </span>
                     </div>
                     <div className="mt-3">
@@ -1215,7 +1262,7 @@ export default function CheckoutPage() {
                       <Store className={`w-6 h-6 ${deliveryType === "pickup" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
                       <div className="flex items-center gap-1.5 flex-wrap justify-end">
                         <span className="text-[11px] font-bold text-[#9E721D] bg-[#D4A853]/15 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
-                          ⏱️ ~20-30 min
+                          ⏱️ ~20-30 {locale === 'ru' ? 'мин' : 'min'}
                         </span>
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1A120B] text-white px-2 py-0.5 rounded-full shrink-0">
                           {t('free')} (0 MDL)
@@ -1234,21 +1281,71 @@ export default function CheckoutPage() {
                   <div className="mt-4 p-4 rounded-2xl bg-[#D4A853]/10 border border-[#D4A853]/30 text-xs text-[#1A120B] flex flex-col gap-2 leading-relaxed">
                     <div className="font-bold flex items-center gap-2 text-[#8C6B1B]">
                       <Clock className="w-4 h-4 text-[#8C6B1B] shrink-0" />
-                      <span>{t('storeClosedBanner')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}</span>
+                      <span>{t('storeClosedBanner')} {storeStatus.nextOpening?.label ? `(${localizeNextOpeningLabel(storeStatus.nextOpening.label, locale)})` : ''}</span>
                     </div>
                     <p className="text-[#736A60]">
                       {t('preOrderOnlyNotice')}
                     </p>
-                    <div className="pt-1 flex items-center gap-3">
+                    <div className="pt-1 flex flex-wrap items-center gap-3">
                       <label className="text-[11px] font-bold uppercase tracking-wider text-[#736A60]">
-                        {t('desiredTime')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}:
+                        {t('desiredTime')} {storeStatus.nextOpening?.label ? `(${localizeNextOpeningLabel(storeStatus.nextOpening.label, locale)})` : ''}:
                       </label>
-                      <input
-                        type="time"
-                        value={scheduledTime}
-                        onChange={(e) => setScheduledTime(e.target.value)}
-                        className="bg-white border border-[#E8E2D9] rounded-xl px-3 py-1.5 text-sm font-bold text-[#1A120B] outline-none focus:border-[#D4A853]"
-                      />
+                      
+                      {/* Munchotella Warm Luxury Time Slot Selector (#FAF7F2, #FFFCF6, #1A120B, #D4A853) */}
+                      <div className="relative" ref={timePopoverRef}>
+                        <button
+                          type="button"
+                          data-testid="custom-time-trigger"
+                          onClick={() => setIsTimePopoverOpen(!isTimePopoverOpen)}
+                          aria-expanded={isTimePopoverOpen}
+                          aria-haspopup="dialog"
+                          className="bg-white hover:bg-[#FFFCF6] border border-[#E8E2D9] hover:border-[#D4A853]/60 rounded-xl px-3.5 py-1.5 text-sm font-bold text-[#1A120B] outline-none flex items-center gap-2.5 shadow-xs transition-all cursor-pointer"
+                        >
+                          <Clock className="w-4 h-4 text-[#D4A853] shrink-0" />
+                          <span>{scheduledTime || "16:00"}</span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-[#736A60] transition-transform duration-200 ${
+                              isTimePopoverOpen ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+
+                        {isTimePopoverOpen && (
+                          <div
+                            data-testid="custom-time-popover"
+                            role="dialog"
+                            aria-label="Time slots"
+                            className="absolute z-50 mt-2 left-0 sm:left-auto sm:right-0 bg-[#FFFCF6] border border-[#D4A853]/30 rounded-2xl p-3 shadow-xl backdrop-blur-md w-[276px] max-w-[calc(100vw-2.5rem)] sm:w-80"
+                          >
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-[#8C6B1B] mb-2 px-1">
+                              {t('desiredTime')} (16:00 – 23:30)
+                            </div>
+                            <div className="grid grid-cols-4 gap-1.5">
+                              {AVAILABLE_TIME_SLOTS.map((slot) => {
+                                const isSelected = slot === (scheduledTime || "16:00");
+                                return (
+                                  <button
+                                    key={slot}
+                                    type="button"
+                                    onClick={() => {
+                                      setScheduledTime(slot);
+                                      setTiming("scheduled");
+                                      setIsTimePopoverOpen(false);
+                                    }}
+                                    className={`py-2 px-1 text-xs rounded-xl font-bold transition-all text-center cursor-pointer ${
+                                      isSelected
+                                        ? "bg-[#1A120B] text-[#D4A853] shadow-xs ring-1 ring-[#D4A853]"
+                                        : "bg-white hover:bg-[#FAF7F2] text-[#1A120B] border border-[#E8E2D9] hover:border-[#D4A853]/50"
+                                    }`}
+                                  >
+                                    {slot}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1750,10 +1847,10 @@ export default function CheckoutPage() {
                         <Store className="w-6 h-6" />
                       </div>
                       <div className="space-y-1 text-xs text-[#736A60]">
-                        <h4 className="font-bold text-sm text-[#1A120B]">Munchotella Boutique</h4>
-                        <p className="text-sm text-[#4A4238]">Strada Nicolae Testemițanu 21/1, Chișinău</p>
+                        <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupBoutiqueName')}</h4>
+                        <p className="text-sm text-[#4A4238]">{t('pickupBoutiqueAddress')}</p>
                         <p className="text-xs text-[#9E721D] font-medium pt-1">
-                          ⏱️ Ridicare proaspătă și gratuită în aproximativ 20-30 de minute.
+                          {t('pickupBoutiqueNote')}
                         </p>
                       </div>
                     </div>
@@ -1832,12 +1929,9 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    {/* Payment Badges & MIA Notice */}
-                    <div className="pt-2 border-t border-[#E8E2D9]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                      <PaymentBadges variant="checkout" />
-                      <span className="text-[11px] font-bold text-[#008F79] bg-[#008F79]/10 px-2.5 py-1 rounded-md">
-                        MIA: 0% comision
-                      </span>
+                    {/* Payment Badges */}
+                    <div className="pt-2.5 border-t border-[#E8E2D9]/60">
+                      <PaymentBadges variant="checkout" className="gap-2 sm:flex-nowrap" />
                     </div>
                   </button>
 
@@ -1899,7 +1993,7 @@ export default function CheckoutPage() {
                         )}
                         {item.customization && (
                           <p className="text-[11px] text-[#C47E2B] mt-1 font-medium bg-[#FDF6EC] px-2 py-0.5 rounded border border-[#E8D5B0] inline-block">
-                            📝 {item.customization}
+                            📝 {translateCustomizationNote(item.customization, locale)}
                           </p>
                         )}
                       </div>
@@ -2114,7 +2208,7 @@ export default function CheckoutPage() {
                     <div className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2.5">
                       <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
                       <div className="flex-1 leading-relaxed">
-                        <p className="font-bold">Eroare la trimiterea comenzii</p>
+                        <p className="font-bold">{t('orderSubmissionError')}</p>
                         <p className="mt-0.5">{serverError}</p>
                       </div>
                       <button
