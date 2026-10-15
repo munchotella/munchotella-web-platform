@@ -10,20 +10,20 @@ const playfairFont = Playfair_Display({
   weight: ["400", "500", "600", "700"],
   subsets: ["latin", "cyrillic"],
   display: "swap",
-  variable: "--font-serif",
+  variable: "--font-playfair",
 });
 
 const outfitFont = Outfit({
   subsets: ["latin", "latin-ext"],
   display: "swap",
-  variable: "--font-sans",
+  variable: "--font-outfit",
 });
 
 const greatVibesFont = Great_Vibes({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-logo",
+  variable: "--font-great-vibes",
 });
 
 export const metadata: Metadata = {

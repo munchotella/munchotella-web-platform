@@ -44,21 +44,6 @@ export default function PaymentBadges({ className = "", variant = "footer" }: Pa
         </svg>
       </div>
 
-      {/* maib */}
-      <div 
-        className={`flex items-center justify-center gap-1 rounded-lg border transition-all duration-300 ${
-          isCheckout 
-            ? "h-8 px-2.5 bg-[#008F79]/10 border-[#008F79]/30 shrink-0" 
-            : "h-8 px-3 bg-[#008F79]/20 border-[#008F79]/40 hover:bg-[#008F79]/30"
-        }`}
-        title="maib e-Commerce Checkout"
-      >
-        <span className="w-2 h-2 rounded-full bg-[#00B497] animate-pulse" />
-        <span className={`text-[11px] font-black tracking-tight ${isCheckout ? "text-[#008F79]" : "text-white"}`}>
-          maib
-        </span>
-      </div>
-
       {/* Apple Pay */}
       <div 
         className={`flex items-center justify-center rounded-lg border transition-all duration-300 ${

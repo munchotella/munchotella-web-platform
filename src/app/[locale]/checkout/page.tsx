@@ -16,8 +16,6 @@ import {
   Tag,
   CheckCircle2,
   AlertCircle,
-  User,
-  FileText,
   ChevronDown,
   Smartphone,
   PhoneCall,
@@ -31,14 +29,14 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "fi
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
-import MapAutocomplete, { checkIfStreetWithoutNumber } from "@/components/ui/MapAutocomplete";
+import MapAutocomplete from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { translateTopping, translateCustomizationNote } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
-import { calculateDelivery, formatDistance, formatDeliveryFee, RESTAURANT_LOCATION, getDistanceFromLatLonInKm, MAX_DELIVERY_RADIUS_KM, AVAILABLE_TIME_SLOTS, localizeNextOpeningLabel } from "@/lib/delivery";
+import { calculateDelivery, RESTAURANT_LOCATION, getDistanceFromLatLonInKm, AVAILABLE_TIME_SLOTS, localizeNextOpeningLabel } from "@/lib/delivery";
 import PaymentBadges from "@/components/PaymentBadges";
 import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
 import { getMetaTrackingPayload } from "@/utils/metaTracking";
@@ -155,7 +153,6 @@ export default function CheckoutPage() {
     email: "",
     phone: "",
     street: "",
-    house: "",
     apartment: "",
     entrance: "",
     floor: "",
@@ -352,7 +349,6 @@ export default function CheckoutPage() {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendCount, setResendCount] = useState(0);
 
   // Stare program magazin dinamic
   const [storeStatus, setStoreStatus] = useState<{
@@ -672,7 +668,6 @@ export default function CheckoutPage() {
         setIsDevMockOtp(false);
         setIsOtpModalOpen(true);
         setResendCooldown(60);
-        setResendCount(prev => prev + 1);
         return true;
       } else {
         throw new Error("Firebase Auth not initialized");
@@ -701,8 +696,8 @@ export default function CheckoutPage() {
       }
 
       const userFriendlyMsg = err.code === 'auth/quota-exceeded'
-        ? "Limita de SMS-uri zilnice a fost atinsă. Poți plasa comanda cu confirmare prin apel telefonic sau alege plata online cu cardul."
-        : (err.message || "Eroare la trimiterea codului SMS. Verifică numărul și încearcă din nou.");
+        ? t('smsQuotaExceeded')
+        : (err.message || t('smsSendFailed'));
       setSmsDispatchError(userFriendlyMsg);
       setOtpError(userFriendlyMsg);
       return false;
@@ -748,8 +743,6 @@ export default function CheckoutPage() {
         if (formData.floor) extras.push(`Etaj ${formData.floor}`);
         if (formData.apartment) extras.push(`Ap. ${formData.apartment}`);
         if (formData.intercom) extras.push(`Interfon: ${formData.intercom}`);
-      } else if (deliveryType === 'delivery' && formData.house) {
-        extras.push(`Bloc/Scară: ${formData.house}`);
       }
 
       if (extras.length > 0) {
@@ -891,7 +884,7 @@ export default function CheckoutPage() {
       }
 
       if (!data.success) {
-        throw new Error(data.message || "Eroare la plasarea comenzii");
+        throw new Error(data.message || t('orderSubmissionError'));
       }
 
       // Salvare automată a adresei în cont dacă s-a bifat sau la prima comandă
@@ -1112,7 +1105,7 @@ export default function CheckoutPage() {
 
       if (isDevMockOtp) {
         if (otpCode !== "123456") {
-          throw new Error("Cod de testare invalid! Pentru test pe localhost introduceți codul: 123456");
+          throw new Error(t('devMockOtpInvalid'));
         }
       } else if (confirmationResult) {
         // 1. Confirmare Firebase Phone Auth
@@ -1159,8 +1152,6 @@ export default function CheckoutPage() {
     }
   };
 
-  
-
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans flex items-center justify-center pt-28 pb-20 px-6">
@@ -1182,11 +1173,6 @@ export default function CheckoutPage() {
       </div>
     );
   }
-
-  const accordionVariants: Variants = {
-    hidden: { height: 0, opacity: 0, marginTop: 0 },
-    visible: { height: "auto", opacity: 1, marginTop: 24, transition: { duration: 0.3, ease: "easeInOut" } }
-  };
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1A120B] font-sans selection:bg-[#D4A853] selection:text-white pt-28 pb-36 lg:pb-44">
@@ -1271,7 +1257,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="mt-3">
                       <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupTitle')}</h4>
-                      <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițanu 21/1</p>
+                      <p className="text-[11px] text-[#736A60] mt-0.5">{t('pickupShortAddress')}</p>
                     </div>
                   </button>
                 </div>
@@ -1314,7 +1300,7 @@ export default function CheckoutPage() {
                           <div
                             data-testid="custom-time-popover"
                             role="dialog"
-                            aria-label="Time slots"
+                            aria-label={t('desiredTime')}
                             className="absolute z-50 mt-2 left-0 sm:left-auto sm:right-0 bg-[#FFFCF6] border border-[#D4A853]/30 rounded-2xl p-3 shadow-xl backdrop-blur-md w-[276px] max-w-[calc(100vw-2.5rem)] sm:w-80"
                           >
                             <div className="text-[11px] font-bold uppercase tracking-wider text-[#8C6B1B] mb-2 px-1">
@@ -1409,7 +1395,7 @@ export default function CheckoutPage() {
                         ref={phoneInputRef}
                         type="tel"
                         required
-                        placeholder="069 123 456"
+                        placeholder={t('placeholderPhone')}
                         className="w-full bg-transparent border-none px-4 py-3.5 outline-none text-[#1A120B] text-sm shadow-none"
                         value={formData.phone}
                         onChange={(e) => {
@@ -1481,6 +1467,16 @@ export default function CheckoutPage() {
                           {user.addresses.map((addr: any) => {
                             const isSelected = formData.street === addr.street;
                             const iconName = addr.label === 'Acasă' ? '🏠' : addr.label === 'Birou' ? '💼' : addr.label === 'Prieten' ? '👥' : '📌';
+                            const translatedAddrLabel =
+                              addr.label === 'Acasă'
+                                ? t('addressLabelHome')
+                                : addr.label === 'Birou'
+                                ? t('addressLabelOffice')
+                                : addr.label === 'Prieten'
+                                ? t('addressLabelFriend')
+                                : addr.label === 'Altul'
+                                ? t('addressLabelOther')
+                                : addr.label;
                             return (
                               <button
                                 key={addr._id}
@@ -1500,7 +1496,7 @@ export default function CheckoutPage() {
                                 }`}
                               >
                                 <span>{iconName}</span>
-                                <span>{addr.label}</span>
+                                <span>{translatedAddrLabel}</span>
                               </button>
                             );
                           })}
@@ -1554,13 +1550,7 @@ export default function CheckoutPage() {
                       {!addressError && missingHouseNumberWarning && (
                         <div className="mt-2 p-3 rounded-xl bg-amber-50/90 border border-amber-300/80 text-[#8C6B1B] text-xs flex items-start gap-2 leading-relaxed">
                           <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-                          <span>
-                            {locale === 'ru'
-                              ? 'Вы выбрали только улицу — пожалуйста, допишите номер дома или корпуса (напр.: 115/1) для точной доставки.'
-                              : locale === 'en'
-                              ? 'You selected only the street — please add the building or house number (e.g., 115/1) for accurate delivery.'
-                              : 'Ai selectat doar strada — te rugăm să adaugi în câmp și numărul blocului sau al clădirii (ex: 115/1).'}
-                          </span>
+                          <span>{t('missingHouseNumberNotice')}</span>
                         </div>
                       )}
 
@@ -1569,12 +1559,12 @@ export default function CheckoutPage() {
                           <div className="mt-2.5 px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex flex-wrap items-center justify-between gap-2 text-xs">
                             <div className="flex items-center gap-2 text-[#1A120B] font-medium">
                               <span className="text-[#D4A853]">📍</span>
-                              <span>~{deliveryCalc.distanceKm} {locale === 'ru' ? 'км' : 'km'}</span>
+                              <span>~{deliveryCalc.distanceKm} {t('kmUnit')}</span>
                               <span className="text-[#C5BCB1]">•</span>
                               <span className="text-[#736A60]">{deliveryCalc.typeLabel}</span>
                             </div>
                             <span className="font-bold text-[#1A120B] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D9]">
-                              {locale === 'ru' ? 'Доставка' : locale === 'en' ? 'Delivery' : 'Livrare'}: {deliveryFee} MDL
+                              {t('deliveryFeeLabel', { fee: deliveryFee })}
                             </span>
                           </div>
                         ) : (
@@ -1582,11 +1572,7 @@ export default function CheckoutPage() {
                             <div className="flex items-start gap-2 font-semibold">
                               <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
                               <span>
-                                {locale === 'ru'
-                                  ? `Адрес находится за пределами зоны доставки (~${Math.round(deliveryCalc.distanceKm * 10) / 10} км, макс. 14 км).`
-                                  : locale === 'en'
-                                  ? `Address is outside our delivery zone (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`
-                                  : `Adresa se află în afara razei de livrare (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`}
+                                {t('outsideDeliveryZoneDistance', { distance: Math.round(deliveryCalc.distanceKm * 10) / 10 })}
                               </span>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -1856,30 +1842,16 @@ export default function CheckoutPage() {
                     </div>
                   </>
                 )}
-              </div>
 
-              {/* Divider */}
-              <div className="border-t border-[#E8E2D9]/70" />
-
-              {/* Section 4: Kitchen & Courier Comments (PERMANENTLY VISIBLE) */}
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm mt-0.5">
-                    4
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('orderNotes')}</h3>
-                    <p className="text-xs text-[#736A60] mt-1 leading-relaxed">
-                      {t('orderNotesDesc') || "Menționează aici excluderi de ingrediente (fără nucușoare, fără fistic) sau indicații speciale pentru curier (cod interfon, etaj)."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-1">
+                {/* Order Comment (Permanently Visible, Native Website Field Label & Font) */}
+                <div className="pt-2">
+                  <label className="block font-sans text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">
+                    {t('orderNotes')}
+                  </label>
                   <input
                     type="text"
                     placeholder={t('placeholderNotes')}
-                    className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B]"
+                    className="w-full font-sans bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B] placeholder:text-[#736A60]/70"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   />
@@ -1889,17 +1861,17 @@ export default function CheckoutPage() {
               {/* Divider */}
               <div className="border-t border-[#E8E2D9]/70" />
 
-              {/* Section 5: Metoda de Plată (maib Online & Cash Only) */}
+              {/* Section 4: Metoda de Plată (Online & Cash Only) */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
-                    5
+                    4
                   </div>
                   <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step4Title')}</h3>
                 </div>
 
                 <div className="space-y-3">
-                  {/* Option 1: Online Payment (maib) */}
+                  {/* Option 1: Online Payment */}
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("online")}
@@ -1915,12 +1887,7 @@ export default function CheckoutPage() {
                           <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#008F79]/15 text-[#008F79]">
-                              maib
-                            </span>
-                          </div>
+                          <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
                           <p className="text-[11px] text-[#736A60] mt-0.5">{t('onlineDesc')}</p>
                         </div>
                       </div>
@@ -2075,7 +2042,7 @@ export default function CheckoutPage() {
                     {deliveryType === 'delivery' && (
                       <span className="text-[10px] mt-0.5 text-[#736A60]">
                         {!hasAddress ? (
-                          <span className="text-[#D4A853] font-medium">{t('calculatedAtStep2')}</span>
+                          <span className="text-[#D4A853] font-medium">{t('calculatedAfterAddress')}</span>
                         ) : (
                           `~${deliveryCalc.distanceKm} ${locale === "ru" ? "км" : "km"} (${deliveryCalc.isPedestrian ? t("pedestrianDelivery") : t("taxiDelivery")})`
                         )}
@@ -2084,7 +2051,7 @@ export default function CheckoutPage() {
                   </div>
                   <span className="text-[#1A120B]">
                     {deliveryType === 'delivery' && !hasAddress ? (
-                      <span className="text-[#736A60] text-xs font-normal italic">{t('calculatedAtStep2')}</span>
+                      <span className="text-[#736A60] text-xs font-normal italic">{t('calculatedAfterAddress')}</span>
                     ) : deliveryFee === 0 ? (
                       <span className="text-[#D4A853] font-bold">{t('free')}</span>
                     ) : (
@@ -2324,7 +2291,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => !isSubmitting && setIsPhoneConfirmModalOpen(false)}
-                    aria-label="Închide"
+                    aria-label={t('ariaCloseModal')}
                     className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-[#E8E2D9] flex items-center justify-center text-[#736A60] hover:text-[#1A120B] hover:bg-[#F5F2EC] transition-colors cursor-pointer shadow-sm z-10"
                   >
                     <X className="w-4 h-4" />
@@ -2371,7 +2338,7 @@ export default function CheckoutPage() {
                       })()}
                     </p>
                     <p className="text-[11px] text-[#736A60] mt-2 flex items-center justify-center gap-1">
-                      <span>📍 {formData.street || "Preluare din Boutique"}</span>
+                      <span>📍 {formData.street || t('pickupTitle')}</span>
                     </p>
                   </div>
 
@@ -2471,7 +2438,7 @@ export default function CheckoutPage() {
                     )}
                     {isDevMockOtp && (
                       <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] text-center font-medium leading-relaxed">
-                        🔧 <strong>Mod Testare Localhost:</strong> Restricțiile Google API Key blochează SMS pe localhost. Introduceți codul de test: <strong>123456</strong>.
+                        🔧 {t('devMockOtpBanner')}
                       </div>
                     )}
                   </div>
