@@ -13,7 +13,7 @@ import { auth } from "@/lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
-import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
+import { trackPurchase } from "@/utils/analytics";
 
 const libraries: any[] = ["places"];
 
@@ -56,15 +56,6 @@ export default function CartDrawer() {
   };
 
   const handleCheckout = () => {
-    trackInitiateCheckout(
-      items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-      totalPrice
-    );
     setIsCartOpen(false);
     router.push("/checkout");
   };

@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 
 export interface PlaceSelectionMeta {
   isGenericCity?: boolean;
+  isStreetWithoutNumber?: boolean;
   types?: string[];
   place?: google.maps.places.PlaceResult;
   source?: string;
@@ -25,12 +26,12 @@ interface MapAutocompleteProps {
 // Coordonate Boutique Munchotella (Nicolae Testemițanu 21/1, Chișinău)
 const RESTAURANT_LOCATION = { lat: 46.996452, lng: 28.834809 };
 
-// Bounding box pentru Chișinău și împrejurimi (bias pentru Google Places)
+// Bounding box urban pentru Chișinău (exclude Băcioi la sud de 46.948 pentru a prioritiza bulevardele din oraș)
 const CHISINAU_BOUNDS = {
-  north: 47.12,
-  south: 46.90,
-  east: 29.00,
-  west: 28.70,
+  north: 47.08,
+  south: 46.948,
+  east: 28.93,
+  west: 28.74,
 };
 
 function getStraightDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -50,20 +51,87 @@ function hasFractionOrSubnumber(text: string): boolean {
 }
 
 function isExplicitSuburb(text: string): boolean {
-  const lower = text.toLowerCase();
+  const lower = (text || "").toLowerCase();
   const suburbs = [
-    'trușeni', 'truseni', 'tohatin', 'bubuieci', 'băcioi', 'bacioi', 'sângera', 'sangera',
+    'trușeni', 'truseni', 'tohatin', 'bubuieci', 'băcioi', 'bacioi', 'sângera', 'sangera', 'sîngera', 'singera',
     'colonița', 'colonita', 'cricova', 'vadul lui vodă', 'vatra', 'ghidighici', 'durlești', 'durlesti',
-    'codru', 'stăuceni', 'stauceni', 'dumbrava', 'bălți', 'balti', 'orhei', 'cahul', 'ungheni',
-    'soroca', 'strășeni', 'straseni', 'criuleni', 'aneni', 'cimișlia', 'cimislia', 'mereni'
+    'codru', 'stăuceni', 'stauceni', 'dumbrava', 'grătiești', 'gratiesti', 'ciorescu', 'revaca', 'dobrogea',
+    'bălți', 'balti', 'orhei', 'cahul', 'ungheni', 'soroca', 'strășeni', 'straseni', 'criuleni', 'aneni',
+    'cimișlia', 'cimislia', 'mereni', 'ialoveni'
   ];
   return suburbs.some(s => lower.includes(s));
+}
+
+function checkPlaceInSuburb(
+  place: google.maps.places.PlaceResult | google.maps.GeocoderResult | undefined,
+  formattedAddress: string,
+  lat: number
+): boolean {
+  if (isExplicitSuburb(formattedAddress)) return true;
+  if (lat < 46.948) return true; // La sud de Porțile Orașului (comuna Băcioi / Sângera / Revaca)
+  const comps = place?.address_components || [];
+  for (const comp of comps) {
+    if (isExplicitSuburb(comp.long_name || "") || isExplicitSuburb(comp.short_name || "")) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Verifică dacă utilizatorul a selectat doar numele unei străzi / unui bulevard fără număr de casă sau bloc.
+ * Exclude reperele cunoscute (hoteluri, mall-uri, spitale, universități).
+ */
+export function checkIfStreetWithoutNumber(
+  formattedAddress: string,
+  userTyped: string,
+  types?: string[]
+): boolean {
+  const cleanText = `${formattedAddress} ${userTyped}`
+    .replace(/\bMD\s*-\s*\d{4}\b/gi, "") // ignoră codul poștal MD-2001
+    .replace(/,\s*(?:chișinău|chisinau|moldova).*/gi, "")
+    .trim();
+
+  // Dacă există deja un număr de clădire / bloc în text, adresa este completă
+  if (/\d/.test(cleanText)) {
+    return false;
+  }
+
+  const poiTypes = [
+    'establishment',
+    'point_of_interest',
+    'hospital',
+    'hotel',
+    'lodging',
+    'school',
+    'university',
+    'shopping_mall',
+    'Store',
+    'park',
+    'airport',
+    'transit_station',
+  ];
+  if (types && types.some(t => poiTypes.includes(t))) {
+    return false;
+  }
+
+  const lowerFull = `${formattedAddress} ${userTyped}`.toLowerCase();
+  const landmarkKeywords = [
+    'hotel', 'mall', 'malldova', 'spital', 'clinica', 'universitat', 'usmf', 'utm', 'usm', 'asem', 'ulim',
+    'parc', 'gara', 'autogara', 'aeroport', 'kaufland', 'linella', 'nr1', 'pegas', 'atrium', 'sun city',
+    'unic', 'gemeni', 'patria', 'stadion', 'arena', 'piata', 'piața', 'liceu', 'colegiu', 'gradinita', 'grădinița'
+  ];
+  if (landmarkKeywords.some(k => lowerFull.includes(k))) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
  * Apelează proxy-ul backend de geocodare de precizie (Map.md Simpals -> OpenStreetMap -> Google rescue)
  */
-async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number; lng: number; formatted_address: string; isGenericCity?: boolean; source?: string } | null> {
+async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number; lng: number; formatted_address: string; isGenericCity?: boolean; isStreetWithoutNumber?: boolean; source?: string } | null> {
   try {
     const API_URL = "https://munchotella-api.onrender.com/api";
     const res = await fetch(`${API_URL}/maps/geocode?address=${encodeURIComponent(rawAddress)}`, {
@@ -72,15 +140,18 @@ async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number;
     if (res.ok) {
       const json = await res.json();
       if (json.success && json.data && typeof json.data.lat === 'number' && typeof json.data.lng === 'number') {
-        const clean = (json.data.formatted_address || rawAddress).trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
+        const formatted = json.data.formatted_address || rawAddress;
+        const clean = formatted.trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
         const knownCities = ['chișinău', 'chisinau', 'bălți', 'balti', 'orhei', 'strășeni', 'straseni', 'ialoveni', 'ungheni', 'cahul', 'soroca', 'tiraspol', 'bender'];
         const isGenericCity = knownCities.includes(clean);
+        const isStreetWithoutNumber = !isGenericCity && checkIfStreetWithoutNumber(formatted, rawAddress);
 
         return {
           lat: json.data.lat,
           lng: json.data.lng,
-          formatted_address: json.data.formatted_address || rawAddress,
+          formatted_address: formatted,
           isGenericCity,
+          isStreetWithoutNumber,
           source: json.data.source || 'backend'
         };
       }
@@ -89,6 +160,50 @@ async function fetchPrecisionGeocode(rawAddress: string): Promise<{ lat: number;
     console.warn("[MapAutocomplete] Precision geocode network error:", err);
   }
   return null;
+}
+
+/**
+ * Rescue client-side pe zona strict urbană a Chișinăului dacă o stradă fără fracție (ex: "Ștefan Cel Mare")
+ * a fost trimisă de Google în comuna Băcioi (lat < 46.948) sau în altă suburbie.
+ */
+async function rescueUrbanChisinauStreet(rawQuery: string): Promise<{ lat: number; lng: number; formatted_address: string; types?: string[] } | null> {
+  if (typeof window === "undefined" || !window.google?.maps?.Geocoder) return null;
+  const cleanStreet = rawQuery
+    .replace(/,\s*(?:băcioi|bacioi|trușeni|truseni|tohatin|bubuieci|chișinău|chisinau|moldova).*/gi, "")
+    .trim();
+  if (!cleanStreet) return null;
+
+  const geocoder = new window.google.maps.Geocoder();
+  const urbanQuery = cleanStreet.toLowerCase().includes("ștefan cel mare") || cleanStreet.toLowerCase().includes("stefan cel mare")
+    ? `Bulevardul Ștefan cel Mare și Sfânt ${cleanStreet.replace(/.*(?:ștefan cel mare și sfânt|stefan cel mare si sfant|ștefan cel mare|stefan cel mare)\s*/i, "")}, Sectorul Centru, Chișinău, Moldova`.replace(/\s+,/g, ",")
+    : `${cleanStreet}, Sectorul Centru, Chișinău, Moldova`;
+
+  return new Promise((resolve) => {
+    geocoder.geocode(
+      {
+        address: urbanQuery,
+        componentRestrictions: { country: "md" },
+        bounds: CHISINAU_BOUNDS,
+      },
+      (results, status) => {
+        if (status === "OK" && results && results[0]?.geometry?.location) {
+          const loc = results[0].geometry.location;
+          const rLat = loc.lat();
+          const rLng = loc.lng();
+          if (rLat >= 46.948 && rLat <= 47.08) {
+            resolve({
+              lat: rLat,
+              lng: rLng,
+              formatted_address: results[0].formatted_address || urbanQuery,
+              types: results[0].types,
+            });
+            return;
+          }
+        }
+        resolve(null);
+      }
+    );
+  });
 }
 
 /**
@@ -141,6 +256,7 @@ interface FractionSuggestion {
   lng: number;
   formatted_address: string;
   isGenericCity?: boolean;
+  isStreetWithoutNumber?: boolean;
   source?: string;
 }
 
@@ -245,6 +361,7 @@ export default function MapAutocomplete({
     onChange(suggestion.formatted_address);
     onPlaceSelected(suggestion.lat, suggestion.lng, suggestion.formatted_address, {
       isGenericCity: suggestion.isGenericCity,
+      isStreetWithoutNumber: suggestion.isStreetWithoutNumber,
       source: suggestion.source
     });
   };
@@ -254,10 +371,11 @@ export default function MapAutocomplete({
     if (rawAddress.trim() === lastResolvedAddressRef.current.trim()) return;
 
     setIsGeocoding(true);
+    const explicitLocality = isExplicitSuburb(rawAddress);
 
-    // 1. Încercăm mai întâi geocodarea de precizie prin backend (Map.md -> OSM) dacă are fracții sau e căutare text
+    // 1. Încercăm mai întâi geocodarea de precizie prin backend (Map.md -> OSM)
     const precision = await fetchPrecisionGeocode(rawAddress);
-    if (precision) {
+    if (precision && (explicitLocality || precision.lat >= 46.948)) {
       setIsGeocoding(false);
       lastResolvedAddressRef.current = precision.formatted_address;
       userTypedInputRef.current = precision.formatted_address;
@@ -266,12 +384,13 @@ export default function MapAutocomplete({
       onChange(precision.formatted_address);
       onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
         isGenericCity: precision.isGenericCity,
+        isStreetWithoutNumber: precision.isStreetWithoutNumber,
         source: precision.source
       });
       return;
     }
 
-    // 2. Fallback la Google Geocoder dacă backend-ul nu este disponibil
+    // 2. Fallback la Google Geocoder
     if (typeof window === "undefined" || !window.google?.maps?.Geocoder) {
       setIsGeocoding(false);
       return;
@@ -288,21 +407,36 @@ export default function MapAutocomplete({
         componentRestrictions: { country: "md" },
         bounds: CHISINAU_BOUNDS
       },
-      (results, status) => {
-        setIsGeocoding(false);
+      async (results, status) => {
         if (status === "OK" && results && results[0] && results[0].geometry?.location) {
           const loc = results[0].geometry.location;
-          const lat = loc.lat();
-          const lng = loc.lng();
-          const resolvedAddress = results[0].formatted_address || rawAddress;
+          let lat = loc.lat();
+          let lng = loc.lng();
+          let resolvedAddress = results[0].formatted_address || rawAddress;
+          let resolvedTypes = results[0].types;
+
+          if (!explicitLocality && checkPlaceInSuburb(results[0], resolvedAddress, lat)) {
+            const rescued = await rescueUrbanChisinauStreet(rawAddress);
+            if (rescued) {
+              lat = rescued.lat;
+              lng = rescued.lng;
+              resolvedAddress = rescued.formatted_address;
+              resolvedTypes = rescued.types || resolvedTypes;
+            }
+          }
+
+          setIsGeocoding(false);
           const isGenericCity = checkIfGenericCity(results[0], resolvedAddress);
+          const isStreetWithoutNumber = !isGenericCity && checkIfStreetWithoutNumber(resolvedAddress, rawAddress, resolvedTypes);
 
           lastResolvedAddressRef.current = resolvedAddress;
           userTypedInputRef.current = resolvedAddress;
           setInputValue(resolvedAddress);
           if (inputRef.current) inputRef.current.value = resolvedAddress;
           onChange(resolvedAddress);
-          onPlaceSelected(lat, lng, resolvedAddress, { isGenericCity, types: results[0].types });
+          onPlaceSelected(lat, lng, resolvedAddress, { isGenericCity, isStreetWithoutNumber, types: resolvedTypes });
+        } else {
+          setIsGeocoding(false);
         }
       }
     );
@@ -331,6 +465,7 @@ export default function MapAutocomplete({
           onChange(precision.formatted_address);
           onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
             isGenericCity: precision.isGenericCity,
+            isStreetWithoutNumber: false,
             source: precision.source
           });
           return;
@@ -342,21 +477,25 @@ export default function MapAutocomplete({
         const lng = place.geometry.location.lng();
         const straightDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
 
-        // 2. Protecție împotriva săririi în suburbii / alte localități (Tohatin, Trușeni, Strășeni):
-        // Dacă Google returnează o adresă la > 10.5 km aerieni sau fără "Chișinău" în adresa formatată,
-        // dar utilizatorul NU a cerut explicit acea suburbie:
+        // 2. Protecție împotriva săririi în suburbii / comune (Băcioi, Trușeni, Tohatin, Durlești, Strășeni):
+        // Verificăm atât distanța (> 7.2 km aerieni), cât și address_components + lat < 46.948 (Băcioi),
+        // atunci când utilizatorul NU a cerut explicit acea suburbie:
         const addressLower = address.toLowerCase();
         const userLower = userTyped.toLowerCase();
-        const isOutsideChisinau = straightDist > 10.5 || (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
+        const inSuburb = checkPlaceInSuburb(place, address, lat);
+        const isOutsideChisinau =
+          straightDist > 7.2 ||
+          inSuburb ||
+          (!addressLower.includes("chișinău") && !addressLower.includes("chisinau"));
         const explicitLocality = isExplicitSuburb(userLower);
 
         if (isOutsideChisinau && !explicitLocality && (userTyped || rawQuery)) {
           setIsGeocoding(true);
           const precision = await fetchPrecisionGeocode(userTyped || rawQuery);
-          setIsGeocoding(false);
-          if (precision) {
+          if (precision && precision.lat >= 46.948 && !isExplicitSuburb(precision.formatted_address)) {
             const precisionDist = getStraightDistanceKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, precision.lat, precision.lng);
-            if (precisionDist <= 10.5) {
+            if (precisionDist <= 10.5 && (precisionDist < straightDist || inSuburb)) {
+              setIsGeocoding(false);
               lastResolvedAddressRef.current = precision.formatted_address;
               userTypedInputRef.current = precision.formatted_address;
               setInputValue(precision.formatted_address);
@@ -364,21 +503,46 @@ export default function MapAutocomplete({
               onChange(precision.formatted_address);
               onPlaceSelected(precision.lat, precision.lng, precision.formatted_address, {
                 isGenericCity: precision.isGenericCity,
+                isStreetWithoutNumber: precision.isStreetWithoutNumber,
                 source: precision.source
               });
               return;
             }
           }
+
+          // Fallback client-side direct pe zona urbană Chișinău (ex: "Ștefan Cel Mare" sărit în Băcioi)
+          if (inSuburb) {
+            const rescued = await rescueUrbanChisinauStreet(userTyped || rawQuery);
+            setIsGeocoding(false);
+            if (rescued) {
+              const isGenericCity = false;
+              const isStreetWithoutNumber = checkIfStreetWithoutNumber(rescued.formatted_address, userTyped, rescued.types);
+              lastResolvedAddressRef.current = rescued.formatted_address;
+              userTypedInputRef.current = rescued.formatted_address;
+              setInputValue(rescued.formatted_address);
+              if (inputRef.current) inputRef.current.value = rescued.formatted_address;
+              onChange(rescued.formatted_address);
+              onPlaceSelected(rescued.lat, rescued.lng, rescued.formatted_address, {
+                isGenericCity,
+                isStreetWithoutNumber,
+                types: rescued.types,
+                source: "urban_chisinau_rescue"
+              });
+              return;
+            }
+          }
+          setIsGeocoding(false);
         }
 
         const isGenericCity = checkIfGenericCity(place, address);
+        const isStreetWithoutNumber = !isGenericCity && checkIfStreetWithoutNumber(address, userTyped, place.types);
 
         lastResolvedAddressRef.current = address;
         userTypedInputRef.current = address;
         setInputValue(address);
         if (inputRef.current) inputRef.current.value = address;
         onChange(address);
-        onPlaceSelected(lat, lng, address, { isGenericCity, types: place.types, place });
+        onPlaceSelected(lat, lng, address, { isGenericCity, isStreetWithoutNumber, types: place.types, place });
       } else if (rawQuery) {
         geocodeFallback(rawQuery);
       }

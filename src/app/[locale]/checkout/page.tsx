@@ -31,7 +31,7 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "fi
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import LiveStoreStatus from "@/components/LiveStoreStatus";
-import MapAutocomplete from "@/components/ui/MapAutocomplete";
+import MapAutocomplete, { checkIfStreetWithoutNumber } from "@/components/ui/MapAutocomplete";
 import MapPickerModal from "@/components/profile/MapPickerModal";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -66,6 +66,7 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 
 // Cheie de persistență profil checkout (Cookies & LocalStorage)
 const CHECKOUT_PROFILE_KEY = "munchotella_checkout_profile";
+const DRAFT_ORDER_STORAGE_KEY = "munchotella_draft_order_id";
 
 // Prag de securitate Smart OTP: comenzile Cash/Card peste această sumă cer obligatoriu SMS
 const CASH_OTP_SECURITY_THRESHOLD_MDL = 800;
@@ -169,6 +170,7 @@ export default function CheckoutPage() {
   });
 
   const [addressError, setAddressError] = useState("");
+  const [missingHouseNumberWarning, setMissingHouseNumberWarning] = useState(false);
   const [phoneError, setPhoneError] = useState("");
   const [nameError, setNameError] = useState("");
   const [serverError, setServerError] = useState<string | null>(null);
@@ -352,7 +354,23 @@ export default function CheckoutPage() {
     nextOpening?: { label: string; time: string; date: string } | null;
   }>({ isOpen: true });
 
-  const [draftOrderId, setDraftOrderId] = useState<string | null>(null);
+  const [draftOrderId, setDraftOrderId] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return sessionStorage.getItem(DRAFT_ORDER_STORAGE_KEY);
+      } catch (_) {}
+    }
+    return null;
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && !draftOrderId) {
+      try {
+        const savedDraftId = sessionStorage.getItem(DRAFT_ORDER_STORAGE_KEY);
+        if (savedDraftId) setDraftOrderId(savedDraftId);
+      } catch (_) {}
+    }
+  }, [draftOrderId]);
 
   // Verificare status magazin la inițializare
   React.useEffect(() => {
@@ -390,12 +408,19 @@ export default function CheckoutPage() {
 
     const timer = setTimeout(async () => {
       try {
+        let currentDraftId = draftOrderId;
+        if (!currentDraftId && typeof window !== "undefined") {
+          try {
+            currentDraftId = sessionStorage.getItem(DRAFT_ORDER_STORAGE_KEY);
+          } catch (_) {}
+        }
+
         const res = await fetch("https://munchotella-api.onrender.com/api/orders/draft", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: AbortSignal.timeout(8000),
           body: JSON.stringify({
-            draftOrderId,
+            draftOrderId: currentDraftId,
             customer: {
               name: formData.name || "Oaspete",
               phone: (() => {
@@ -442,6 +467,11 @@ export default function CheckoutPage() {
         const data = await res.json();
         if (data.success && data.draftOrderId) {
           setDraftOrderId(data.draftOrderId);
+          if (typeof window !== "undefined") {
+            try {
+              sessionStorage.setItem(DRAFT_ORDER_STORAGE_KEY, String(data.draftOrderId));
+            } catch (_) {}
+          }
         }
       } catch (err) {
         // Ignorăm erorile de fundal pentru a nu deranja clientul
@@ -949,10 +979,12 @@ export default function CheckoutPage() {
       );
 
       clearCart();
+      setDraftOrderId(null);
       setFormData(prev => ({ ...prev, notes: "" }));
       if (typeof window !== "undefined") {
         try {
           localStorage.removeItem("munchotella_order_notes");
+          sessionStorage.removeItem(DRAFT_ORDER_STORAGE_KEY);
         } catch (_) {}
       }
       const trackingTarget = data.data?.trackingCode || data.data?._id;
@@ -1576,10 +1608,15 @@ export default function CheckoutPage() {
                             onChange={(val) => {
                               setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
                               if (addressError) setAddressError("");
+                              const cleanForDigits = val.replace(/\bMD\s*-\s*\d{4}\b/gi, "");
+                              if (/\d/.test(cleanForDigits) || !val.trim()) {
+                                setMissingHouseNumberWarning(false);
+                              }
                             }}
                             onPlaceSelected={(lat, lng, address, meta) => {
                               if (meta?.isGenericCity) {
                                 setFormData(prev => ({ ...prev, street: address, lat, lng, isGeocoded: false }));
+                                setMissingHouseNumberWarning(false);
                                 setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
                                 return;
                               }
@@ -1587,11 +1624,14 @@ export default function CheckoutPage() {
                               const roadDist = straightDist * 1.35;
                               setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
                               setAddressError("");
+                              setMissingHouseNumberWarning(Boolean(meta?.isStreetWithoutNumber));
                             }}
                             placeholder={t('placeholderAddress')}
                             className={`w-full bg-[#FFFCF6] border rounded-2xl pl-12 pr-5 py-4 text-sm outline-none transition-all ${
                               addressError 
                                 ? 'border-red-500 ring-1 ring-red-500/20' 
+                                : missingHouseNumberWarning
+                                ? 'border-amber-500 ring-1 ring-amber-500/20'
                                 : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
                             }`}
                             required={true}
@@ -1602,6 +1642,64 @@ export default function CheckoutPage() {
                               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                               <span>{addressError}</span>
                             </p>
+                          )}
+
+                          {!addressError && missingHouseNumberWarning && (
+                            <div className="mt-2 p-3 rounded-xl bg-amber-50/90 border border-amber-300/80 text-[#8C6B1B] text-xs flex items-start gap-2 leading-relaxed">
+                              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                              <span>
+                                {locale === 'ru'
+                                  ? 'Вы выбрали только улицу — пожалуйста, допишите номер дома или корпуса (напр.: 115/1) для точной доставки.'
+                                  : locale === 'en'
+                                  ? 'You selected only the street — please add the building or house number (e.g., 115/1) for accurate delivery.'
+                                  : 'Ai selectat doar strada — te rugăm să adaugi în câmp și numărul blocului sau al clădirii (ex: 115/1).'}
+                              </span>
+                            </div>
+                          )}
+
+                          {!addressError && hasAddress && (
+                            deliveryCalc.isDeliverable ? (
+                              <div className="mt-2.5 px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <div className="flex items-center gap-2 text-[#1A120B] font-medium">
+                                  <span className="text-[#D4A853]">📍</span>
+                                  <span>~{deliveryCalc.distanceKm} km</span>
+                                  <span className="text-[#C5BCB1]">•</span>
+                                  <span className="text-[#736A60]">{deliveryCalc.typeLabel}</span>
+                                </div>
+                                <span className="font-bold text-[#1A120B] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D9]">
+                                  {locale === 'ru' ? 'Доставка' : locale === 'en' ? 'Delivery' : 'Livrare'}: {deliveryFee} MDL
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="mt-2.5 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs space-y-2.5">
+                                <div className="flex items-start gap-2 font-semibold">
+                                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+                                  <span>
+                                    {locale === 'ru'
+                                      ? `Адрес находится за пределами зоны доставки (~${Math.round(deliveryCalc.distanceKm * 10) / 10} км, макс. 14 км).`
+                                      : locale === 'en'
+                                      ? `Address is outside our delivery zone (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`
+                                      : `Adresa se află în afara razei de livrare (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`}
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsMapModalOpen(true)}
+                                    className="px-3 py-1.5 rounded-lg bg-white border border-red-200 text-[#1A120B] font-bold text-[11px] hover:border-[#D4A853] transition-colors cursor-pointer"
+                                  >
+                                    📍 {t('selectOnMap')}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeliveryType("pickup")}
+                                    className="px-3 py-1.5 rounded-lg bg-[#1A120B] text-white font-bold text-[11px] hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer"
+                                  >
+                                    🛍️ {t('pickupTitle')} (0 MDL)
+                                  </button>
+                                </div>
+                              </div>
+                            )
                           )}
                         </div>
 
@@ -2387,6 +2485,7 @@ export default function CheckoutPage() {
           const roadDist = straightDist * 1.35;
           setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
           setAddressError("");
+          setMissingHouseNumberWarning(false);
         }}
       />
 
