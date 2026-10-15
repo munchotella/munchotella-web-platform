@@ -14,7 +14,7 @@ const INSTAGRAM_ACCOUNT_ID = process.env.INSTAGRAM_ACCOUNT_ID || "17841407196466
 const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID || "2033309050260259";
 
 // Catalogul oficial de produse cu ingrediente exacte și alias-uri extinse
-const MENU_CATALOG = [
+export const MENU_CATALOG = [
   // Waffles
   { 
     id: "waffle_sticks", 
@@ -36,7 +36,11 @@ const MENU_CATALOG = [
     ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus, fistic, arahide", 
     hasFistic: true, 
     hasArahide: true,
-    aliases: ["delux mini waffle", "delux mini waffles", "deluxe mini", "mini waffle delux", "delux mini", "mini vafli delux", "deluxe mini waffle", "делюкс мини", "мини вафли делюкс"]
+    aliases: [
+      "delux mini waffle", "delux mini waffles", "deluxe mini", "mini waffle delux", "delux mini", "mini vafli delux", "deluxe mini waffle", "делюкс мини", "мини вафли делюкс",
+      "mini pancake delux", "mini pancakes delux", "delux mini pancake", "delux mini pancakes", "мини панкейки делюкс", "делюкс мини панкейки",
+      "delux mini clatite", "delux mini clătite", "mini clatite delux", "mini clătite delux"
+    ]
   },
   { 
     id: "nutella_mini_waffles", 
@@ -47,7 +51,10 @@ const MENU_CATALOG = [
     ingredients: "16 mini waffles, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["nutella mini waffles", "nutella mini waffle", "mini waffle", "mini waffles", "fashafish", "fashafisha", "fasa", "fașa", "fasa fish", "fashafis", "gogosi mini", "gogoși mini", "mini clatite", "пончики", "нутелла мини вафли"]
+    aliases: [
+      "nutella mini waffles", "nutella mini waffle", "mini waffle", "mini waffles", "gogosi mini", "gogoși mini", "mini clatite", "mini clătite", "пончики", "нутелла мини вафли", "мини вафли",
+      "mini pancake", "mini pancakes", "pancakes mici", "pancake mici", "мини панкейки", "мини блинчики"
+    ]
   },
   { 
     id: "lotus_mini_waffles", 
@@ -80,7 +87,7 @@ const MENU_CATALOG = [
     ingredients: "Waffle, Nutella®, ciocolată albă Belgiană, biscuiți Oreo, biscuiți Lotus", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["classic waffle", "classic waffles", "waffle clasic", "waffle simpla", "vafle clasic", "clasic waffle", "vafli simpla", "классические вафли"]
+    aliases: ["classic waffle", "classic waffles", "waffle clasic", "waffle simpla", "vafle clasic", "clasic waffle", "vafli simpla", "классические вафли", "gofre", "vafli", "гофры", "вафли"]
   },
   { 
     id: "belgian_panda_waffle", 
@@ -115,7 +122,7 @@ const MENU_CATALOG = [
     ingredients: "Clătită, kataif crocant, cremă de fistic, Nutella®", 
     hasFistic: true, 
     hasArahide: false,
-    aliases: ["crepe dubai", "clatita dubai", "crepes dubai", "dubai", "kunafa", "kunafe", "knafe", "clatite dubai", "kataif", "ciocolata dubai", "clatita dubay", "кунафе", "дубай", "блинчик дубай"]
+    aliases: ["crepe dubai", "clatita dubai", "crepes dubai", "dubai", "kunafa", "kunafe", "knafe", "clatite dubai", "kataif", "ciocolata dubai", "clatita dubay", "кунафе", "кенефе", "дубай", "блинчик дубай"]
   },
   { 
     id: "delux_crepe", 
@@ -192,18 +199,18 @@ const MENU_CATALOG = [
     ingredients: "Sushi clătită cu banană întreagă proaspătă, Nutella®, ciocolată albă Belgiană, căpșuni proaspete, fistic, arahide", 
     hasFistic: true, 
     hasArahide: true,
-    aliases: ["royal sushi", "sushi royal", "sushi banana", "sushi cu banana", "banana sushi", "clatita sushi", "clatite sushi", "clatita cu banana sushi", "sushi", "суши", "роял суши", "банановые суши", "суши банан", "суши с бананом"]
+    aliases: ["royal sushi", "sushi royal", "clatita sushi", "clatite sushi", "sushi", "суши", "роял суши"]
   },
   { 
     id: "sushi_banana", 
-    name: "Royal sushi", 
-    price: 155, 
-    category: "crepes", 
+    name: "Sushi banana", 
+    price: 140, 
+    category: "specials", 
     image: "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fcd48bbfc389f658b22d0_Royal%20sushi%20115%20lei.png", 
-    ingredients: "Sushi clătită cu banană întreagă proaspătă, Nutella®, ciocolată albă Belgiană, căpșuni proaspete, fistic, arahide", 
-    hasFistic: true, 
-    hasArahide: true,
-    aliases: ["sushi banana", "banana sushi", "sushi cu banana", "clatita cu banana sushi", "банановые суши"]
+    ingredients: "Sushi clătită cu banană întreagă proaspătă, Nutella®, ciocolată albă Belgiană, biscuiți Lotus", 
+    hasFistic: false, 
+    hasArahide: false,
+    aliases: ["sushi banana", "banana sushi", "sushi cu banana", "clatita cu banana sushi", "банановые суши", "суши банан"]
   },
 
   // Pancakes
@@ -216,7 +223,7 @@ const MENU_CATALOG = [
     ingredients: "Pancakes, pastă Lotus Biscoff, ciocolată albă Belgiană, biscuiți Lotus", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["biskoff pancakes", "biscoff pancakes", "biscoff pancake", "pancake biscoff", "pancakes biscoff", "lotus pancake", "pancakes lotus", "панкейк бискофф"]
+    aliases: ["biskoff pancakes", "biscoff pancakes", "biscoff pancake", "pancake biscoff", "pancakes biscoff", "lotus pancake", "pancakes lotus", "pantcheki biscoff", "панкейк бискофф", "панкейки бискофф", "оладьи"]
   },
   { 
     id: "fruits_pancakes", 
@@ -238,7 +245,7 @@ const MENU_CATALOG = [
     ingredients: "Pancakes, Nutella®, ciocolată albă Belgiană, biscuiți Oreo & Lotus", 
     hasFistic: false, 
     hasArahide: false,
-    aliases: ["royal pancakes", "royal pancake", "pancake royal", "pancake delux", "pancakes delux", "delux pancake", "deluxe pancake", "pancake", "pancakes", "панкейк роял", "панкейки делюкс", "панкейк", "панкейки"]
+    aliases: ["royal pancakes", "royal pancake", "pancake royal", "pancakes royal", "pantcheki royal", "clatite royal", "clătite royal", "clatita royal", "clătită royal", "панкейк роял", "панкейки роял", "роял панкейк", "роял панкейки"]
   },
 
   // Drinks
@@ -459,7 +466,8 @@ export const AVAILABLE_TOPPINGS = [
 ];
 
 // Mapare directă la ID-uri MongoDB ObjectId reale pentru produsele din catalog
-const PRODUCT_NAME_TO_MONGO_ID: Record<string, string> = {
+export const PRODUCT_NAME_TO_MONGO_ID: Record<string, string> = {
+  // Waffles
   "waffle sticks": "69f25596d2fb9408904d1f32",
   "delux mini waffle": "69f25596d2fb9408904d1f3b",
   "nutella mini waffles": "69f25596d2fb9408904d1f46",
@@ -467,23 +475,42 @@ const PRODUCT_NAME_TO_MONGO_ID: Record<string, string> = {
   "fruits waffle": "69f25596d2fb9408904d1f56",
   "classic waffle": "69f25596d2fb9408904d1f5f",
   "belgian panda waffle": "69f25596d2fb9408904d1f68",
-  "biscoff waffle": "69f25596d2fb9408904d1f72",
-  "crepe dubai": "69f25596d2fb9408904d1f79",
-  "delux crepe": "69f25596d2fb9408904d1f7b",
+  "biscoff waffle": "69f25596d2fb9408904d1f6f",
+
+  // Crepes
+  "crepe dubai": "69f25596d2fb9408904d1fa3",
+  "delux crepe": "69f25596d2fb9408904d1f76",
   "biscoff crepe": "69f25596d2fb9408904d1f82",
   "fruits crepe": "69f25596d2fb9408904d1f89",
-  "oreo crepe": "69f25596d2fb9408904d1f90",
-  "kinder crepe": "69f25596d2fb9408904d1f97",
+  "oreo crepe": "69f25596d2fb9408904d1f92",
+  "kinder crepe": "69f25596d2fb9408904d1f9a",
+
+  // Specials
   "chocolate bites": "69f25596d2fb9408904d1fc4",
   "royal sushi": "69f25596d2fb9408904d1fd1",
-  "sushi banana": "69f25596d2fb9408904d1fd1",
+  "sushi banana": "69f25596d2fb9408904d1fdc",
   "sushi cu banana": "69f25596d2fb9408904d1fd1",
   "banana sushi": "69f25596d2fb9408904d1fd1",
   "sushi": "69f25596d2fb9408904d1fd1",
-  "classic pancakes": "69f25596d2fb9408904d1fa4",
+
+  // Pancakes
+  "biskoff pancakes": "69f25596d2fb9408904d1fab",
+  "biscoff pancakes": "69f25596d2fb9408904d1fab",
   "fruits pancakes": "69f25596d2fb9408904d1fb2",
-  "mini pancakes": "69f25596d2fb9408904d1fb9",
-  "royal pancakes": "69f25596d2fb9408904d1fc1"
+  "royal pancakes": "69f25596d2fb9408904d1fbb",
+
+  // Drinks
+  "ice lemonade": "69f25596d2fb9408904d1feb",
+  "milkshake oreo": "69f25596d2fb9408904d1fe4",
+  "milkshake kinder": "69f25596d2fb9408904d1fe5",
+  "milkshake nutella": "69f25596d2fb9408904d1fe6",
+  "milkshake strawberry": "69f25596d2fb9408904d1fe7",
+  "coca-cola": "69f25596d2fb9408904d1fe8",
+  "fanta": "69f25596d2fb9408904d1fe9",
+  "sprite": "6aa84211094d7728fe69d0af",
+  "apă dorna": "69f25596d2fb9408904d1fea",
+  "apa dorna": "69f25596d2fb9408904d1fea",
+  "ceai": "69f25596d2fb9408904d1fec"
 };
 
 async function getMongoIdForProduct(name: string, fallbackId: string): Promise<string> {
@@ -1373,7 +1400,7 @@ function handlePreorderAndScheduling(text: string, session: any, lang: string): 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HANDLER 4: COMPOUND PRODUCT PARSER (COMENZI MULTIPLE ÎNTR-UN SINGUR MESAJ)
 // ═══════════════════════════════════════════════════════════════════════════════
-interface ExtractedProductMatch {
+export interface ExtractedProductMatch {
   product: typeof MENU_CATALOG[0];
   quantity: number;
   customization?: string;
@@ -1381,35 +1408,75 @@ interface ExtractedProductMatch {
   score: number;
 }
 
-function matchSingleProductInSegment(segment: string): ExtractedProductMatch | null {
-  const lower = segment.toLowerCase().trim();
+export function findBestProductMatch(text: string): ExtractedProductMatch | null {
+  const lower = text.toLowerCase().trim();
   if (!lower || lower.length < 2) return null;
 
-  const isFAQ = /(\b(cat costa|cât costă|program|orar|deschis|adresa|locatie|unde|livrare|mese|terasa)\b)/i.test(lower);
-  const isExplicit = /(\b(vreau|adaug[aă]|pune|da-mi|comand[aă]|хочу|добавь)\b)/i.test(lower);
-  if (isFAQ && !isExplicit) return null;
+  // Clarificarea istorică pentru fashafish nu este un produs unic direct
+  if (/(?:^|[^a-zăâîșțа-яё])(fashafish|fashafisha|fașa|fasa|fasa fish|fashafis|фаша|фашафиш|фашафиша)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
+    return null;
+  }
 
+  // Extragere cantitate
   let quantity = 1;
   const qtyMatch = lower.match(/\b(\d+)\s*(porți[ie]?|buc[aă]ți?|doze?|sticle?|pahare?|x)?\b/);
-  if (qtyMatch && parseInt(qtyMatch[1]) > 0 && parseInt(qtyMatch[1]) <= 20) {
-    quantity = parseInt(qtyMatch[1]);
+  if (qtyMatch && parseInt(qtyMatch[1], 10) > 0 && parseInt(qtyMatch[1], 10) <= 20) {
+    quantity = parseInt(qtyMatch[1], 10);
   } else if (lower.includes('doua') || lower.includes('două') || lower.includes('два') || lower.includes('две')) {
     quantity = 2;
   } else if (lower.includes('trei') || lower.includes('три')) {
     quantity = 3;
   }
 
-  // Extragem toppingurile plătite și excluderile („fără ceva”) pentru acest segment
-  const custData = extractCustomizationAndToppings(segment);
+  // Extragere toppinguri și excluderi
+  const custData = extractCustomizationAndToppings(text);
   const customization = custData.exclusionsSummary || undefined;
   const toppings = custData.toppings.length > 0 ? custData.toppings : undefined;
 
-  const cleaned = cleanTextForMatching(segment);
+  // 1. REZOLVARE DEDICATĂ ARGOU MINI WAFFLES (16 BUCĂȚI) VS ROYAL PANCAKES
+  // „mini pancake”, „mini pancakes”, „pancakes mici”, „pancake mici”, „mini clatite”, „mini clătite”, „gogoși mini”, „мини панкейки”, „мини блинчики”, „mini waffle”, „мини вафли”
+  const isMiniWaffleSlang = /(?:^|[^a-zăâîșțа-яё])(mini\s*pancake[s]?|pancake[s]?\s*mici|pancake\s*mici|mini\s*cl[aă]tit[ea]|gogo[sș]i\s*mini|мини\s*панкейк[и]?|мини\s*блинчик[и]?|mini\s*waffle[s]?|mini\s*vafl[ie]?|мини\s*вафл[и]?)(?:$|[^a-zăâîșțа-яё])/i.test(lower) || (/\bmini\b/i.test(lower) && /\b(pancake[s]?|cl[aă]tit[ea]|вафл|блинчик)/i.test(lower));
+
+  if (isMiniWaffleSlang) {
+    // Dacă este însoțit de „delux” sau excluderi de nuci/arahide/alune/fistic
+    const hasDelux = /(?<![\p{L}\p{N}_])(delux|deluxe|делюкс)(?![\p{L}\p{N}_])/iu.test(lower);
+    const hasNutOrPistachioExclusion = custData.exclusions.some(e => {
+      const el = e.toLowerCase();
+      return el.includes('nucușoare') || el.includes('nucusoare') || el.includes('arahide') || el.includes('alune') || el.includes('nuci') || el.includes('fistic');
+    }) || /(?:^|[^a-zăâîșțа-яё])(f[aă]r[aă]\s+(?:nucu[sș]oar[eaă]?|nuci[sș]oar[eaă]?|arahide|alune|nuci|fistic)|без\s+(?:орешков|орехов|арахиса|фисташ(?:ек|ки)?)|no\s+(?:peanuts?|nuts?|pistachio))(?:$|[^a-zăâîșțа-яё])/i.test(lower);
+
+    if (hasDelux || hasNutOrPistachioExclusion) {
+      const deluxProduct = MENU_CATALOG.find(c => c.id === 'delux_mini_waffle')!;
+      return {
+        product: deluxProduct,
+        quantity,
+        customization,
+        toppings,
+        score: 1.0
+      };
+    } else {
+      const nutellaWaffles = MENU_CATALOG.find(c => c.id === 'nutella_mini_waffles')!;
+      return {
+        product: nutellaWaffles,
+        quantity,
+        customization,
+        toppings,
+        score: 1.0
+      };
+    }
+  }
+
+  // 2. POTRIVIRE GENERALĂ PENTRU TOATE PRODUSELE DIN CATALOG
+  const cleaned = cleanTextForMatching(text);
   let bestMatch: typeof MENU_CATALOG[0] | null = null;
   let bestScore = 0;
 
   for (const item of MENU_CATALOG) {
-    const isDrink = item.category === 'drinks';
+    // PROTECȚIE ABSOLUTĂ: Royal Pancakes nu se potrivește NICIODATĂ dacă mesajul conține argou de mini waffles/pancakes
+    if (item.id === 'royal_pancakes' && (isMiniWaffleSlang || /\bmini\b/i.test(lower))) {
+      continue;
+    }
+
     const aliases = [item.name.toLowerCase(), ...(item.aliases || [])];
 
     for (const alias of aliases) {
@@ -1428,6 +1495,9 @@ function matchSingleProductInSegment(segment: string): ExtractedProductMatch | n
         for (let j = i + 1; j <= tokens.length; j++) {
           const phrase = tokens.slice(i, j).join(' ');
           if (phrase.length >= 3) {
+            // Nu permitem ca token-ul izolat „pancake” să potrivească royal_pancakes dacă utilizatorul a zis mini
+            if (item.id === 'royal_pancakes' && isMiniWaffleSlang) continue;
+
             const pScore = calculateSimilarity(phrase, alias);
             if (pScore > bestScore) {
               bestScore = pScore;
@@ -1447,6 +1517,17 @@ function matchSingleProductInSegment(segment: string): ExtractedProductMatch | n
   return null;
 }
 
+function matchSingleProductInSegment(segment: string): ExtractedProductMatch | null {
+  const lower = segment.toLowerCase().trim();
+  if (!lower || lower.length < 2) return null;
+
+  const isFAQ = /(\b(cat costa|cât costă|program|orar|deschis|adresa|locatie|unde|livrare|mese|terasa)\b)/i.test(lower);
+  const isExplicit = /(\b(vreau|adaug[aă]|pune|da-mi|comand[aă]|хочу|добавь)\b)/i.test(lower);
+  if (isFAQ && !isExplicit) return null;
+
+  return findBestProductMatch(segment);
+}
+
 export function matchCompoundProductsInText(text: string): ExtractedProductMatch[] {
   const lower = text.toLowerCase().trim();
 
@@ -1459,7 +1540,7 @@ export function matchCompoundProductsInText(text: string): ExtractedProductMatch
 
   // Împărțire în segmente după conjuncții: „și”, „si”, „+”, „,”, „iar”, „plus”, „и”, „а также”
   // ATENȚIE: Nu tăiem dacă „și” / „,” este urmat de „fără”, „cu”, „topping”, „no”, „without”, „без”, „с” deoarece e o personalizare pe același produs!
-  const delimiterRegex = /(?:\b(?:[sș]i\s+o|[sș]i\s+un|si\s+o|si\s+un|[sș]i(?!\s+(?:f[aă]r[aă]|cu\b|topping\b|без\b|without\b|no\b))|plus|iar(?!\s+(?:f[aă]r[aă]|cu\b|без\b))|и(?!\s+(?:без\b|с\b|со\b))|а\s+также)\b|[,+&](?!\s*(?:f[aă]r[aă]|cu\b|topping\b|без\b|without\b|no\b)))/gi;
+  const delimiterRegex = /(?:(?<![\p{L}\p{N}_])(?:[sșş]i\s+o|[sșş]i\s+un|[sșş]i(?!\s+(?:f[aă]r[aă]|cu(?![\p{L}\p{N}_])|topping(?![\p{L}\p{N}_])|без(?![\p{L}\p{N}_])|without(?![\p{L}\p{N}_])|no(?![\p{L}\p{N}_])))|plus|iar(?!\s+(?:f[aă]r[aă]|cu(?![\p{L}\p{N}_])|без(?![\p{L}\p{N}_])))|и(?!\s+(?:без(?![\p{L}\p{N}_])|с(?![\p{L}\p{N}_])|со(?![\p{L}\p{N}_])))|а\s+также)(?![\p{L}\p{N}_])|[,+&](?!\s*(?:f[aă]r[aă]|cu(?![\p{L}\p{N}_])|topping(?![\p{L}\p{N}_])|без(?![\p{L}\p{N}_])|without(?![\p{L}\p{N}_])|no(?![\p{L}\p{N}_]))))/giu;
   const segments = lower.split(delimiterRegex).map(s => s.trim()).filter(s => s.length >= 3);
 
   const matchedItems: ExtractedProductMatch[] = [];
@@ -1646,18 +1727,62 @@ function handleClarificationOrConfusion(text: string, session: any, lang: string
 // ═══════════════════════════════════════════════════════════════════════════════
 // HANDLER 7: FAQ COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ, DIETAR)
 // ═══════════════════════════════════════════════════════════════════════════════
-function handleCustomerInquiries(text: string, lang: string): { handled: boolean, replyText?: string } {
+export function handleCustomerInquiries(text: string, lang: string): { handled: boolean, replyText?: string } {
   const lower = text.toLowerCase().trim();
 
-  const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер|good morning|good afternoon|good evening)\s*[!.,?]*\s*)$/i.test(lower);
-  const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня|hours|opening hours|open today|what time|are you open|closed)\b)/i.test(lower);
-  const isAddressQ = /(\b(unde va aflati|unde vă aflați|unde sunteti|unde sunteți|care e adresa|care este adresa|unde va gasim|unde vă găsim|adresa voastra|adresa voastră|adresa localului|unde este localul|unde va situati|unde vă situați|unde va gaseste|где находитесь|где вы находитесь|какой адрес|где находится кафе|where are you located|where is the cafe|what is your address)\b)/i.test(lower) || (/(\b(adresa|locatie|locație|где находитесь|адрес)\b)/i.test(lower) && /(\b(care|unde|cum ajung|cum găsesc|как найти|where)\b)/i.test(lower));
-  const isDeliveryQ = /(\b(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород|deliver|delivery|shipping|courier)\b)/i.test(lower);
-  const isPaymentQ = /(\b(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|card|cardul|cash|bani|terminal|pos|valuta|valută|euro|dolari|оплата|как оплатить|картой|наличными|payment|pay|how to pay|credit card)\b)/i.test(lower);
-  const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина|pork|gelatin)\b)/i.test(lower);
-  const isFreshnessQ = /(\b(ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые|fresh|warm|hot|crispy)\b)/i.test(lower);
-  const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса|tables?|seats?|seating|dine in|dine-in|terrace)/i.test(lower);
+  // 1. CLARIFICARE HISTORICĂ SLANG: fashafish / fașa / fashafisha
+  if (/(?:^|[^a-zăâîșțа-яё])(fashafish|fashafisha|fașa|fasa|fasa fish|fashafis|фаша|фашафиш|фашафиша)(?:$|[^a-zăâîșțа-яё])/i.test(lower)) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Здравствуйте! 👋 Вы имеете в виду: 1. Chocolate bites или 2. Sushi banana? 🍓"
+        : lang === 'en'
+        ? "Hello! 👋 Did you mean: 1. Chocolate bites or 2. Sushi banana? 🍓"
+        : "Bună! 👋 Vă referiți la: 1. Chocolate bites sau 2. Sushi banana? 🍓"
+    };
+  }
 
+  // 2. FAQ VALUTĂ / SCHIMB (Euro, Dolari etc.) — Regula istorică strictă commit 5293639 / 391b7b4
+  const isCurrencyQ = /(?<![\p{L}\p{N}_])(euro|eur|\$|usd|dolari?|dollars?|chf|franci?|gbp|lire?|pounds?|valut[aă]|curs|schimb|обмен|евро|доллар[а-яё]*|валют[а-яё]*)(?![\p{L}\p{N}_])/iu.test(lower);
+  if (isCurrencyQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Здравствуйте! Уточняем и вернемся с ответом."
+        : lang === 'en'
+        ? "Hello, we are checking and will get back to you shortly."
+        : "Bună, precizăm și revenim cu un răspuns."
+    };
+  }
+
+  // 3. FAQ TIMP PREPARARE & LIVRARE — Regula istorică 20-30 min preparare, 35-45 min livrare
+  const isTimeQ = /(in cat timp|în cât timp|cat dureaza|cât durează|cat timp|cât timp|peste cat|peste cât|timp de preparare|gata in|gata în|cand ajunge|când ajunge|cand e gata|când e gata|cand este gata|când este gata|когда будет готово|сколько ждать|время доставки|через сколько|how long|delivery time|preparation time)/i.test(lower);
+  if (isTimeQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Приготовление десерта занимает в среднем 20-30 минут, а доставка курьером обычно занимает 35-45 минут! 🛵✨"
+        : lang === 'en'
+        ? "Dessert preparation takes ~20-30 minutes, and courier delivery typically takes ~35-45 minutes! 🛵✨"
+        : "Prepararea desertului durează în medie 20-30 minute, iar livrarea prin curier ajunge de regulă în 35-45 minute! 🛵✨"
+    };
+  }
+
+  // 4. FAQ GENERAL DULCIURI / MENIU — Prezentare produse vedetă (Crepe Dubai, Royal Pancakes, Delux Mini Waffles, Waffle Sticks)
+  const isMenuOrSweetsQ = /(?<![\p{L}\p{N}_])(ce dulce|ce dulciuri|dulce|dulciuri|ce prajituri|ce prăjituri|ce deserturi|deserturi|desert|ce aveti|ce aveți|ce aveti bun|ce aveți bun|ce este bun|ce recomandati|ce recomandați|ce-mi recomanzi|recomanzi|meniu|meniul|ce vindeti|ce vindeți|ce pot comanda|ce bunatati|ce bunătăți|что сладкое|что есть из сладкого|какие десерты|что есть|что есть вкусного|десерты|сладости|что посоветуете|посоветуйте|desserts?|sweets?)(?![\p{L}\p{N}_])/iu.test(lower);
+  if (isMenuOrSweetsQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "У нас богатый выбор авторских десертов! 🧇🍓 Наши хиты: Crepe Dubai с фисташкой и хрустящим катаифи (265 MDL), Royal Pancakes с Nutella и фруктами (165 MDL), Delux Mini Waffles (160 MDL) и Waffle Sticks (145 MDL)! Посмотрите все меню ниже! ✨"
+        : lang === 'en'
+        ? "We have the most delicious artisanal desserts! 🧇🍓 Our signature treats are: Crepe Dubai with pistachio and crunchy kataifi (265 MDL), fluffy Royal Pancakes with Nutella and fresh fruits (165 MDL), Delux Mini Waffles (160 MDL), and Waffle Sticks (145 MDL)! You can explore our full menu and order below! ✨"
+        : "Avem cele mai delicioase deserturi artizanale! 🧇🍓 Vedetele noastre sunt: Crepe Dubai cu fistic și cataif crocant (265 MDL), Royal Pancakes pufoase cu Nutella și fructe (165 MDL), Delux Mini Waffles (160 MDL) și Waffle Sticks (145 MDL)! Puteți explora meniul complet și comanda direct mai jos! ✨"
+    };
+  }
+
+  // 5. GREETING
+  const isGreetingOnly = /^(\s*(salut|buna|bună|buna ziua|bună ziua|buna seara|bună seara|hey|hei|hello|hi|servus|привет|здравствуйте|добрый день|добрый вечер|good morning|good afternoon|good evening)\s*[!.,?]*\s*)$/i.test(lower);
   if (isGreetingOnly) {
     return {
       handled: true,
@@ -1669,6 +1794,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
+  // 6. PROGRAM & ORAR
+  const isHoursQ = /(\b(program|programul|orar|orarul|deschis|deschiși|deschisi|deschisa|deschisă|inchis|închis|inchisi|închiși|pana la|până la|la cat|la cât|la ce ora|la ce oră|lucrati|lucrați|lucra-ti|lucrati azi|lucrați azi|lucrați astăzi|lucrati astazi|deschis azi|deschis acum|до скольки|график|часы работы|открыты|открыто|работаете|работаете сегодня|hours|opening hours|open today|what time|are you open|closed)\b)/i.test(lower);
   if (isHoursQ) {
     const mentionsMonday = lower.includes('luni') || lower.includes('понедельник') || lower.includes('monday');
     if (mentionsMonday) {
@@ -1691,6 +1818,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
+  // 7. ADRESĂ & LOCAL
+  const isAddressQ = /(\b(unde va aflati|unde vă aflați|unde sunteti|unde sunteți|care e adresa|care este adresa|unde va gasim|unde vă găsim|adresa voastra|adresa voastră|adresa localului|unde este localul|unde va situati|unde vă situați|unde va gaseste|где находитесь|где вы находитесь|какой адрес|где находится кафе|where are you located|where is the cafe|what is your address)\b)/i.test(lower) || (/(\b(adresa|locatie|locație|где находитесь|адрес)\b)/i.test(lower) && /(\b(care|unde|cum ajung|cum găsesc|как найти|where)\b)/i.test(lower));
   if (isAddressQ) {
     return {
       handled: true,
@@ -1702,6 +1831,21 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
+  // 8. METODE DE PLATĂ (STRICT ONLINE CARD SAU CASH — NICIODATĂ POS LA CURIER!)
+  const isPaymentQ = /(?<![\p{L}\p{N}_])(plata|plată|achita|achitare|cum platesc|cum plătesc|metode de plata|metode de plată|card|cardul|cash|numerar|bani|pos|terminal|aparat pos|оплата|оплатить|как оплатить|картой|наличными|наличка|терминал|payment|pay|how to pay|credit card)(?![\p{L}\p{N}_])/iu.test(lower);
+  if (isPaymentQ) {
+    return {
+      handled: true,
+      replyText: lang === 'ru'
+        ? "Можно оплатить онлайн картой на сайте (maib / Apple Pay / Google Pay / MIA) или наличными при получении! 💳💵"
+        : lang === 'en'
+        ? "You can pay online by card (maib / Apple Pay / Google Pay / MIA) or cash upon delivery or pickup! 💳💵"
+        : "Puteți achita online cu cardul (maib / Apple Pay / Google Pay / MIA) sau numerar (cash) la livrare sau ridicare din boutique! 💳💵"
+    };
+  }
+
+  // 9. LIVRARE & ZONE
+  const isDeliveryQ = /(?<![\p{L}\p{N}_])(livrare|livrati|livrați|suburbii|suburbie|ciocana|botanica|durlesti|durlești|ialoveni|truseni|trușeni|colonita|colonița|cricova|stauceni|stăuceni|bubuieci|posta|poșta|curier|taxa|taxă|cat costa livrarea|cât costă livrarea|доставка|доставляете|пригород|deliver|delivery|shipping|courier)(?![\p{L}\p{N}_])/iu.test(lower);
   if (isDeliveryQ) {
     const isSuburb = lower.includes('durlesti') || lower.includes('durlești') || lower.includes('ialoveni') || lower.includes('truseni') || lower.includes('trușeni') || lower.includes('colonita') || lower.includes('colonița') || lower.includes('cricova') || lower.includes('stauceni') || lower.includes('stăuceni') || lower.includes('suburbi') || lower.includes('suburb');
     if (isSuburb) {
@@ -1724,17 +1868,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
-  if (isPaymentQ) {
-    return {
-      handled: true,
-      replyText: lang === 'ru'
-        ? "Можно оплатить картой онлайн, картой курьеру через POS-терминал или наличными при получении. 💳💵"
-        : lang === 'en'
-        ? "You can pay online by card, with card via POS terminal on delivery, or cash upon receipt. 💳💵"
-        : "Puteți achita online cu cardul, cu cardul la curier (POS) sau cash la primire. 💳💵"
-    };
-  }
-
+  // 10. DIETAR & INGREDIENTE GENERALE
+  const isDietaryQ = /(\b(halal|vegetarian|vegan|carne|porc|gelatina|gelatină|de post|халяль|вегетарианское|свинина|pork|gelatin)\b)/i.test(lower);
   if (isDietaryQ) {
     return {
       handled: true,
@@ -1746,6 +1881,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
+  // 11. FRESHNESS / CALDE
+  const isFreshnessQ = /(\b(ajung calde|calde|reci|crocante|cum ajung|ambalate|ambalaj|термобокс|горячие|теплые|fresh|warm|hot|crispy)\b)/i.test(lower);
   if (isFreshnessQ) {
     return {
       handled: true,
@@ -1757,6 +1894,8 @@ function handleCustomerInquiries(text: string, lang: string): { handled: boolean
     };
   }
 
+  // 12. SEATING
+  const isSeatingSimpleQ = /(mese|masă|locuri|terasa|terasă|pe loc|cafenea|local|interior|столик|места|посидеть|терраса|tables?|seats?|seating|dine in|dine-in|terrace)/i.test(lower);
   if (isSeatingSimpleQ) {
     return {
       handled: true,
@@ -1856,6 +1995,21 @@ export async function processMessage(
       await saveSession(senderId, session);
       await sendDispatchResponse(senderId, channel, handoffReply, "https://www.munchotella.md/ro/menu", "🍽️ Vezi Meniul");
       return { success: true, status: 'human_handoff_triggered', replyText: handoffReply };
+    }
+
+    // ─── PAS 0.2: CLARIFICARE HISTORICAL SLANG (fashafish / fașa / fashafisha) ───
+    const isFashafishClarification = /(?:^|[^a-zăâîșțа-яё])(fashafish|fashafisha|fașa|fasa|fasa fish|fashafis|фаша|фашафиш|фашафиша)(?:$|[^a-zăâîșțа-яё])/i.test(lowerMsg);
+    if (isFashafishClarification) {
+      const fashaReply = lang === 'ru'
+        ? "Здравствуйте! 👋 Вы имеете в виду: 1. Chocolate bites или 2. Sushi banana? 🍓"
+        : lang === 'en'
+        ? "Hello! 👋 Did you mean: 1. Chocolate bites or 2. Sushi banana? 🍓"
+        : "Bună! 👋 Vă referiți la: 1. Chocolate bites sau 2. Sushi banana? 🍓";
+
+      appendToHistory(session, 'assistant', fashaReply);
+      await saveSession(senderId, session);
+      await sendDispatchResponse(senderId, channel, fashaReply, `https://www.munchotella.md/${lang}/menu`, lang === 'en' ? "🍽️ Open Menu" : "🍽️ Meniu");
+      return { success: true, status: 'clarification_sent', replyText: fashaReply };
     }
 
     // ─── PAS 0.5: RĂSPUNS LA CONFIRMARE PERSONALIZARE / TOPPINGURI / EXCLUDERI ÎN AȘTEPTARE ───
@@ -2340,9 +2494,19 @@ export async function processMessage(
       };
     }
 
-    // ─── PAS 7: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ) ───
+    // ─── PAS 7: FAQ STANDARDIZAT COMPLET (LOCAȚIE, ORAR, LIVRARE, PLATĂ, VALUTĂ, TIMP) ───
     const faqResult = handleCustomerInquiries(messageText, lang);
     if (faqResult.handled && faqResult.replyText) {
+      // Dacă este întrebare de valută / schimb valutar, trimitem alertă la staff Telegram
+      if (/(?<![\p{L}\p{N}_])(euro|eur|\$|usd|dolari?|dollars?|chf|franci?|gbp|lire?|pounds?|valut[aă]|curs|schimb|обмен|евро|доллар[а-яё]*|валют[а-яё]*)(?![\p{L}\p{N}_])/iu.test(messageText)) {
+        await notifyStaffViaTelegram({
+          channel,
+          senderId,
+          messageText,
+          reason: 'uncertain_query',
+          additionalInfo: 'Întrebare valută / schimb'
+        });
+      }
       appendToHistory(session, 'assistant', faqResult.replyText);
       await saveSession(senderId, session);
       // Răspuns direct, uman și curat FĂRĂ linkuri sau carduri atașate deranjant în Instagram Direct
@@ -2382,10 +2546,51 @@ export async function processMessage(
 
       const schedInfo = session.scheduledTime ? `Programare/Oră menționată: ${session.scheduledTime}` : 'Comandă imediată';
 
+      // Încărcare dinamică instrucțiuni Admin AI din colecția settings (_id: 'ai')
+      let adminCustomPrompt = "";
+      try {
+        const { db: mongoDb } = await connectToDatabase();
+        const settingsDoc = await mongoDb.collection('settings').findOne({ _id: 'ai' as any });
+        if (settingsDoc && settingsDoc.systemPrompt) {
+          adminCustomPrompt = settingsDoc.systemPrompt;
+        }
+      } catch (dbErr) {
+        console.warn("Nu s-au putut încărca setările AI din Admin:", dbErr);
+      }
+
       const dynamicPrompt = `You are the friendly virtual assistant of the artisanal dessert boutique Munchotella Waffle Boutique in Chișinău (21/1 Nicolae Testemițanu St.).
 Opening hours: 16:00 - 00:00 (Mondays: Closed).
-Key products: Royal sushi (crepe sushi roll around a whole fresh banana with Nutella, Belgian white chocolate, strawberries, pistachio, peanuts - 155 MDL), Crepe Dubai with pistachio and kataifi (265 MDL), Royal Pancakes (165 MDL), Waffle sticks (145 MDL), Delux mini waffle (160 MDL), drinks.
-Note on Sushi: In our menu, sushi crepe is named "Royal sushi". If customers write "sushi banana", "sushi cu banana" or "sushi", it refers to Royal sushi. It cannot be prepared without banana.
+Preparation time: 20-30 minutes. Courier delivery across Chișinău: 35-45 minutes (delivery fee ~50-70 MDL).
+Accepted payment methods: Online card payment (maib Checkout — Apple Pay, Google Pay, MIA) or cash upon receipt/pickup. (Couriers DO NOT carry POS terminals).
+
+Official Complete Product Catalog & Prices:
+• Waffles:
+  - Waffle sticks (145 MDL): 2 waffles, Nutella, Belgian white chocolate, Oreo & Lotus crumbs.
+  - Delux mini waffle (160 MDL): 16 mini round waffles, Nutella, Belgian white chocolate, Oreo, Lotus, pistachio, peanuts.
+  - Nutella Mini waffles (145 MDL): 16 mini round waffles, Nutella, Belgian white chocolate, Oreo, Lotus crumbs. (Customer slang: "mini pancake", "mini clatite", "pancakes mici").
+  - Lotus Mini waffles (200 MDL): 16 mini waffles, Lotus Biscoff spread, white chocolate, Baby biscuits.
+  - Fruits waffle (155 MDL): Waffle with Nutella, white chocolate, banana, strawberries, kiwi.
+  - Classic waffle (145 MDL): Waffle with Nutella, white chocolate, Oreo, Lotus. (Aliases: "gofre", "vafli").
+  - Belgian panda waffle (160 MDL): Waffle with Nutella and Belgian white chocolate.
+  - Biscoff waffle (195 MDL): Waffle with Lotus Biscoff spread, white chocolate, Lotus biscuits.
+• Crepes:
+  - Crepe Dubai (265 MDL): Artisanal crepe with crunchy kataifi, rich pistachio cream, Nutella. (Slang: "kunafa", "kenefe", "кенефе").
+  - Delux crepe (165 MDL): Crepe with Nutella, Belgian white chocolate, Oreo, Lotus, pistachio, peanuts.
+  - Biscoff crepe (205 MDL): Crepe with Lotus Biscoff spread, Belgian white chocolate, Lotus biscuits.
+  - Fruits crepe (145 MDL): Crepe with Nutella, Belgian white chocolate, bananas, strawberries, kiwi.
+  - Oreo crepe (145 MDL): Crepe with Nutella, Belgian white chocolate, crushed Oreo.
+  - Kinder crepe (145 MDL): Crepe with Nutella, Belgian white chocolate, Kinder Bueno.
+• Specials:
+  - Chocolate bites (165 MDL): Delicate crepe bites with Nutella, Belgian white chocolate, Oreo & Lotus.
+  - Royal sushi (155 MDL): Whole fresh banana wrapped in crepe with Nutella, Belgian white chocolate, strawberries, pistachio, peanuts.
+  - Sushi banana (140 MDL): Whole fresh banana wrapped in crepe with Nutella, Belgian white chocolate, Lotus crumbs.
+• Pancakes:
+  - Biskoff pancakes (190 MDL): Fluffy pancakes with Lotus Biscoff spread, white chocolate, Lotus biscuits.
+  - Fruits pancakes (170 MDL): Fluffy pancakes with Nutella, Belgian white chocolate, fresh fruits.
+  - Royal pancakes (165 MDL): 4 fluffy pancakes with Nutella, Belgian white chocolate, Oreo & Lotus crumbs.
+• Drinks:
+  - Ice Lemonade (90 MDL), Milkshake Oreo (135 MDL), Milkshake Kinder (135 MDL), Milkshake Nutella (135 MDL), Milkshake Strawberry (135 MDL), Coca-Cola (20 MDL), Fanta (20 MDL), Sprite (20 MDL), Apă Dorna (15 MDL), Ceai (50 MDL).
+
 Essential Rules:
 1. Answer in 1 short, warm, and natural sentence (maximum 2 very short sentences, exactly like a helpful cafe server).
 2. STRICT LANGUAGE RULE:
@@ -2398,7 +2603,7 @@ Essential Rules:
    - If the customer asks something you do NOT understand, or you do NOT have clear instructions or exact facts for (e.g. custom catering, job openings, partnership requests, complaints, off-menu requests, delivery prices to distant villages, or any ambiguous question):
    - NEVER GUESS! NEVER HALLUCINATE OR MAKE UP ANSWERS!
    - You MUST output: "[HANDOFF_TO_AGENT] " followed by a brief warm notification in their language informing them that you are transferring the conversation to a team member who will reply right away.
-
+${adminCustomPrompt ? `\n[Admin Custom Instructions]:\n${adminCustomPrompt}\n` : ''}
 [Recent Conversation History]:
 ${historySnippets}
 

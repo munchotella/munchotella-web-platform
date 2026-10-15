@@ -38,31 +38,14 @@ import { useTranslations, useLocale } from "next-intl";
 import { translateTopping, translateCustomizationNote } from "@/utils/toppingTranslations";
 import CountrySelector from "@/components/ui/CountrySelector";
 import { ALL_COUNTRIES, Country } from "@/data/countries";
+import { calculateDelivery, formatDistance, formatDeliveryFee, RESTAURANT_LOCATION, getDistanceFromLatLonInKm, MAX_DELIVERY_RADIUS_KM } from "@/lib/delivery";
 import PaymentBadges from "@/components/PaymentBadges";
 import { trackInitiateCheckout, trackPurchase } from "@/utils/analytics";
 import { getMetaTrackingPayload } from "@/utils/metaTracking";
 
-// GPS Coordonate Restaurant Munchotella — Nicolae Testemițanu 21/1, Chișinău
-const RESTAURANT_LOCATION = {
-  lat: 46.996452,
-  lng: 28.834809,
-};
-
 // Regex oficial operatori mobili Republica Moldova (ANRCETI):
 // Orange (60, 61, 62, 68, 69), Moldcell (76, 78, 79, 71, 72), Moldtelecom Unite (67)
 const MOLDOVA_MOBILE_PHONE_REGEX = /^(?:60|61|62|67|68|69|71|72|76|78|79)\d{6}$/;
-
-function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371; // km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 // Cheie de persistență profil checkout (Cookies & LocalStorage)
 const CHECKOUT_PROFILE_KEY = "munchotella_checkout_profile";
@@ -123,13 +106,12 @@ export default function CheckoutPage() {
     }
   }, [isMounted, items, totalPrice]);
 
-  const [activeStep, setActiveStep] = useState<number>(1);
   const [selectedCountry, setSelectedCountry] = useState<Country>(ALL_COUNTRIES[0]);
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
   const [doorDelivery, setDoorDelivery] = useState(false);
   const [saveAddress, setSaveAddress] = useState(false);
   const [addressLabel, setAddressLabel] = useState("Acasă");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "pos" | "online">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "online">("online");
   const [timing, setTiming] = useState<"asap" | "scheduled">("asap");
   const [scheduledTime, setScheduledTime] = useState("18:00");
 
@@ -253,8 +235,11 @@ export default function CheckoutPage() {
             return { ...prev, notes: relevantNotes };
           }
           const prevTranslated = translateCustomizationNote(prev.notes, locale);
-          if (prevTranslated === relevantNotes || prev.notes.includes(relevantNotes)) {
+          if (prevTranslated === relevantNotes) {
             return { ...prev, notes: relevantNotes };
+          }
+          if (prev.notes.includes(relevantNotes)) {
+            return prev;
           }
           return { ...prev, notes: `${prev.notes}, ${relevantNotes}` };
         });
@@ -452,11 +437,14 @@ export default function CheckoutPage() {
               price: i.price,
               quantity: i.quantity,
               variantName: (i as any).selectedVariant,
-              modifiers: i.selectedToppings?.map((t: any) => ({
-                title: t.groupName || 'Topping',
-                optionName: t.name,
-                price: t.price,
-              })),
+              modifiers: [
+                ...(i.selectedToppings?.map((t: any) => ({
+                  title: t.groupName || 'Topping',
+                  optionName: t.name,
+                  price: t.price,
+                })) || []),
+                ...((i as any).customization ? [{ title: 'Preferință', optionName: (i as any).customization }] : [])
+              ],
             })),
             deliveryType,
             doorDelivery: (formData.estimatedKm < 1.0 && formData.isGeocoded) ? doorDelivery : false,
@@ -492,74 +480,21 @@ export default function CheckoutPage() {
   }, [resendCooldown]);
 
 
-  // Exact Munchotella Backend Delivery Calculation Engine
+    // Exact Munchotella Backend Delivery Calculation Engine
   const hasAddress = !!formData.street.trim() && formData.isGeocoded && formData.lat !== null;
 
   const deliveryCalc = useMemo(() => {
-    if (deliveryType === "pickup") {
-      return {
-        fee: 0,
-        isDeliverable: true,
-        isPedestrian: false,
-        distanceKm: 0,
-        hasAddress: true,
-        typeLabel: "Preluare Gratuită din Boutique",
-      };
-    }
-
-    if (!formData.street.trim() || !formData.isGeocoded || formData.lat === null) {
-      return {
-        fee: 0,
-        isDeliverable: true,
-        isPedestrian: false,
-        distanceKm: 0,
-        hasAddress: false,
-        typeLabel: formData.street.trim() ? "Se determină distanța..." : "Introduceți adresa de livrare",
-      };
-    }
-
-    const roadDistance = formData.estimatedKm;
-
-    if (roadDistance > 14.0) {
-      return {
-        fee: 0,
-        isDeliverable: false,
-        isPedestrian: false,
-        distanceKm: roadDistance,
-        hasAddress: true,
-        typeLabel: "În Afara Ariei de Livrare (max 14 km)",
-      };
-    }
-
-    if (roadDistance < 1.0) {
-      let fee = 20;
-      if (roadDistance >= 0.2 && roadDistance < 0.55) fee = 30;
-      else if (roadDistance >= 0.55) fee = 40;
-      if (doorDelivery) fee += 20;
-      return {
-        fee,
-        isDeliverable: true,
-        isPedestrian: true,
-        distanceKm: Math.round(roadDistance * 10) / 10,
-        hasAddress: true,
-        typeLabel: doorDelivery ? "Livrare Pietonală la Ușă" : "Livrare Pietonală la Scară",
-      };
-    }
-
-    // Letz Taxi Formula: 30 MDL pornire + 6.45 MDL/km
-    const startPrice = 30;
-    const perKmPrice = 6.45;
-    const fee = Math.ceil(startPrice + (roadDistance * perKmPrice));
-
-    return {
-      fee,
-      isDeliverable: true,
-      isPedestrian: false,
-      distanceKm: Math.round(roadDistance * 10) / 10,
-      hasAddress: true,
-      typeLabel: "Livrare prin Taxi",
-    };
-  }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm, formData.isGeocoded, formData.lat]);
+    return calculateDelivery({
+      deliveryType,
+      estimatedKm: formData.estimatedKm,
+      doorDelivery,
+      isGeocoded: formData.isGeocoded,
+      hasStreet: !!formData.street.trim(),
+      lat: formData.lat,
+      locale,
+      translator: (key: string) => t(key as any),
+    });
+  }, [deliveryType, doorDelivery, formData.street, formData.estimatedKm, formData.isGeocoded, formData.lat, locale, t]);
 
   let discountAmount = 0;
   if (activePromo) {
@@ -1007,43 +942,75 @@ export default function CheckoutPage() {
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeStep < 4) return;
-    if (!deliveryCalc.isDeliverable) return;
+
+    // 1. Verificare Termeni și Condiții
     if (!acceptedTerms) {
       setTermsError(true);
       return;
     }
     setTermsError(false);
 
-    if (deliveryType === 'delivery' && doorDelivery && deliveryCalc.isPedestrian && formData.estimatedKm < 1.0) {
-      const isAptMissing = !formData.apartment.trim();
-      const isEntranceMissing = !formData.entrance.trim();
-      const isFloorMissing = !formData.floor.trim();
-      const isIntercomMissing = !formData.intercom.trim();
+    // 2. Verificare Livrabilitate
+    if (!deliveryCalc.isDeliverable) return;
 
-      if (isAptMissing || isEntranceMissing || isFloorMissing || isIntercomMissing) {
-        setDoorDeliveryErrors({
-          apartment: isAptMissing,
-          entrance: isEntranceMissing,
-          floor: isFloorMissing,
-          intercom: isIntercomMissing,
-        });
-        setActiveStep(2);
-        setTimeout(() => {
+    // 3. Verificare Nume (doar prenume necesar)
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      setNameError(t('nameRequired') || "Te rugăm să introduci prenumele (ex.: Ion).");
+      nameInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nameInputRef.current?.focus();
+      return;
+    }
+    setNameError("");
+
+    // 4. Verificare Număr de Telefon (format R. Moldova)
+    const rawPhone = formData.phone.trim();
+    const digitsOnly = rawPhone.replace(/[^\d]/g, '');
+    let localDigits = digitsOnly;
+    if (localDigits.startsWith('373')) {
+      localDigits = localDigits.substring(3);
+    } else if (localDigits.startsWith('0')) {
+      localDigits = localDigits.substring(1);
+    }
+
+    if (!rawPhone || !MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
+      setPhoneError(t('phoneInvalidFormat'));
+      phoneInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      phoneInputRef.current?.focus();
+      return;
+    }
+    setPhoneError("");
+
+    // 5. Verificare Adresă de Livrare
+    if (deliveryType === 'delivery') {
+      if (!formData.street.trim() || !formData.isGeocoded) {
+        setAddressError(t('addressRequired'));
+        setIsMapModalOpen(true);
+        return;
+      }
+      setAddressError("");
+
+      if (doorDelivery && deliveryCalc.isPedestrian && formData.estimatedKm < 1.0) {
+        const isAptMissing = !formData.apartment.trim();
+        const isEntranceMissing = !formData.entrance.trim();
+        const isFloorMissing = !formData.floor.trim();
+        const isIntercomMissing = !formData.intercom.trim();
+
+        if (isAptMissing || isEntranceMissing || isFloorMissing || isIntercomMissing) {
+          setDoorDeliveryErrors({
+            apartment: isAptMissing,
+            entrance: isEntranceMissing,
+            floor: isFloorMissing,
+            intercom: isIntercomMissing,
+          });
           if (isAptMissing) apartmentInputRef.current?.focus();
           else if (isEntranceMissing) entranceInputRef.current?.focus();
           else if (isFloorMissing) floorInputRef.current?.focus();
           else if (isIntercomMissing) intercomInputRef.current?.focus();
-        }, 60);
-        return;
+          return;
+        }
       }
     }
 
-    // Smart OTP & Verificare Securizată:
-    // 1. Pentru orice comandă de valoare mare (>= 800 MDL), indiferent dacă este Cash, POS sau Card,
-    // cerem obligatoriu confirmare prin SMS OTP pentru a preveni farsele și comenzile fictive.
-    // 2. Pentru comenzi obișnuite (< 800 MDL), atât la Cash cât și la Card:
-    // afișăm popup-ul de verificare vizuală a numărului pentru ca clientul să valideze rapid cifrele.
     const isGuestOrder = !user || !user.isPhoneVerified;
     if (isGuestOrder) {
       const isHighValueOrder = grandTotal >= CASH_OTP_SECURITY_THRESHOLD_MDL;
@@ -1069,7 +1036,7 @@ export default function CheckoutPage() {
 
   const handleEditPhone = () => {
     setIsPhoneConfirmModalOpen(false);
-    setActiveStep(2);
+    
     setIsPhoneHighlighted(true);
     setTimeout(() => {
       if (phoneInputRef.current) {
@@ -1145,161 +1112,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleNextStep = async (step: number) => {
-    if (step === 3) {
-      let hasError = false;
-
-      // 1. Validare obligatorie nume
-      if (!formData.name.trim()) {
-        setNameError(t('nameRequired'));
-        hasError = true;
-      } else {
-        setNameError("");
-      }
-
-      // 2. Validare obligatorie telefon și format
-      const rawPhone = formData.phone.trim();
-      const digitsOnly = rawPhone.replace(/[^\d]/g, '');
-      let localDigits = digitsOnly;
-      if (localDigits.startsWith('373')) {
-        localDigits = localDigits.substring(3);
-      } else if (localDigits.startsWith('0')) {
-        localDigits = localDigits.substring(1);
-      }
-
-      if (!rawPhone) {
-        setPhoneError(t('phoneRequired'));
-        hasError = true;
-      } else if (!MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
-        setPhoneError(t('phoneInvalidFormat'));
-        hasError = true;
-      } else {
-        setPhoneError("");
-      }
-
-      // 3. Validare obligatorie adresă (pentru livrare)
-      const rawAddr = formData.street.trim();
-      const cleanAddr = rawAddr.toLowerCase().replace(/,\s*moldova$/i, '').trim();
-      const knownCities = ['chișinău', 'chisinau', 'bălți', 'balti', 'orhei', 'strășeni', 'straseni', 'ialoveni', 'ungheni', 'cahul', 'soroca', 'tiraspol', 'bender'];
-      const isGenericCityText = knownCities.includes(cleanAddr) || cleanAddr === 'moldova';
-
-      if (deliveryType === 'delivery') {
-        if (!rawAddr) {
-          setAddressError(t('addressRequired'));
-          hasError = true;
-        } else if (isGenericCityText) {
-          setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
-          hasError = true;
-        } else {
-          setAddressError("");
-        }
-
-        // 4. Validare obligatorie detalii livrare la ușă dacă opțiunea este bifată
-        if (doorDelivery && deliveryCalc.isPedestrian && formData.estimatedKm < 1.0) {
-          const isAptMissing = !formData.apartment.trim();
-          const isEntranceMissing = !formData.entrance.trim();
-          const isFloorMissing = !formData.floor.trim();
-          const isIntercomMissing = !formData.intercom.trim();
-
-          if (isAptMissing || isEntranceMissing || isFloorMissing || isIntercomMissing) {
-            setDoorDeliveryErrors({
-              apartment: isAptMissing,
-              entrance: isEntranceMissing,
-              floor: isFloorMissing,
-              intercom: isIntercomMissing,
-            });
-            hasError = true;
-            setActiveStep(2);
-            setTimeout(() => {
-              if (isAptMissing) apartmentInputRef.current?.focus();
-              else if (isEntranceMissing) entranceInputRef.current?.focus();
-              else if (isFloorMissing) floorInputRef.current?.focus();
-              else if (isIntercomMissing) intercomInputRef.current?.focus();
-            }, 60);
-          }
-        }
-      }
-
-      if (hasError) {
-        setActiveStep(2);
-        // Focus lin pe primul câmp cu eroare
-        if (!formData.name.trim()) {
-          nameInputRef.current?.focus();
-        } else if (!formData.phone.trim() || !MOLDOVA_MOBILE_PHONE_REGEX.test(localDigits)) {
-          phoneInputRef.current?.focus();
-        }
-        return;
-      }
-
-      if (deliveryType === 'delivery') {
-        if (!formData.isGeocoded || formData.lat === null || formData.lng === null) {
-          if (typeof window !== "undefined" && window.google?.maps?.Geocoder) {
-            try {
-              const geocoder = new window.google.maps.Geocoder();
-              const queryAddress = formData.street.toLowerCase().includes("chișinău") || formData.street.toLowerCase().includes("chisinau")
-                ? formData.street
-                : `${formData.street}, Chișinău, Moldova`;
-
-              const res = await new Promise<{ lat: number; lng: number; address: string; isGenericCity: boolean } | null>((resolve) => {
-                geocoder.geocode({ address: queryAddress, componentRestrictions: { country: "md" } }, (results, status) => {
-                  if (status === "OK" && results && results[0] && results[0].geometry?.location) {
-                    const loc = results[0].geometry.location;
-                    const formatted = results[0].formatted_address || formData.street;
-                    const clean = formatted.trim().toLowerCase().replace(/,\s*moldova$/i, '').trim();
-                    const broadTypes = ['locality', 'political', 'administrative_area_level_1', 'administrative_area_level_2', 'country'];
-                    const isGeneric = (results[0].types.length > 0 && results[0].types.every(t => broadTypes.includes(t))) || knownCities.includes(clean);
-
-                    resolve({
-                      lat: loc.lat(),
-                      lng: loc.lng(),
-                      address: formatted,
-                      isGenericCity: isGeneric
-                    });
-                  } else {
-                    resolve(null);
-                  }
-                });
-              });
-
-              if (res) {
-                if (res.isGenericCity) {
-                  setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
-                  setActiveStep(2);
-                  return;
-                }
-                const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, res.lat, res.lng);
-                const roadDist = straightDist * 1.35;
-                setFormData(prev => ({
-                  ...prev,
-                  street: res.address,
-                  lat: res.lat,
-                  lng: res.lng,
-                  estimatedKm: roadDist,
-                  isGeocoded: true
-                }));
-                setAddressError("");
-                setActiveStep(step);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-              }
-            } catch (e) {
-              console.warn("Geocoding step check failed:", e);
-            }
-          }
-
-          setAddressError(t('addressRequired'));
-          setIsMapModalOpen(true);
-          return;
-        }
-      }
-    }
-
-    setNameError("");
-    setAddressError("");
-    setPhoneError("");
-    setActiveStep(step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  
 
   if (items.length === 0) {
     return (
@@ -1350,805 +1163,713 @@ export default function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Accordion Flow */}
-          <div className="lg:col-span-7 space-y-4">
-            
-            {/* Step 1: Delivery Mode */}
-            <div className="bg-white rounded-3xl border border-[#E8E2D9] shadow-sm overflow-hidden transition-all duration-300">
-              <button 
-                type="button" 
-                onClick={() => setActiveStep(1)}
-                className="w-full flex items-center justify-between p-6 md:p-8 bg-white cursor-pointer hover:bg-[#FFFCF6] transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${activeStep >= 1 ? 'bg-[#1A120B] text-white' : 'bg-[#E8E2D9] text-[#736A60]'}`}>
+          {/* Left Column: Unified 5-in-1 Checkout Card in Munchotella Warm Luxury Aesthetic */}
+          <div className="lg:col-span-7">
+            <div className="bg-white rounded-[28px] md:rounded-[32px] border border-[#E8E2D9] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 sm:p-8 space-y-8">
+              
+              {/* Section 1: Selector Livrare vs Preluare din Boutique */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                     1
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step1Title')}</h3>
-                    {activeStep !== 1 && (
-                      <p className="text-xs text-[#736A60] font-medium mt-1">
-                        {deliveryType === 'delivery' ? t('step1Courier') : t('step1Boutique')}
-                      </p>
-                    )}
-                  </div>
+                  <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step1Title')}</h3>
                 </div>
-                {activeStep === 1 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : <CheckCircle2 className="w-6 h-6 text-[#D4A853]" />}
-              </button>
-              
-              <AnimatePresence>
-                {activeStep === 1 && (
-                  <motion.div 
-                    initial="hidden" 
-                    animate="visible" 
-                    exit="hidden" 
-                    variants={accordionVariants}
-                    className="px-6 md:px-8 pb-8"
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Delivery Option */}
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("delivery")}
+                    className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[120px] relative overflow-hidden ${
+                      deliveryType === "delivery"
+                        ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
+                        : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
+                    }`}
                   >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryType("delivery")}
-                        className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between h-32 relative overflow-hidden ${
-                          deliveryType === "delivery"
-                            ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
-                            : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
-                        }`}
-                      >
-                        {deliveryType === "delivery" && <div className="absolute top-0 left-0 w-full h-1 bg-[#D4A853]" />}
-                        <div className="flex justify-between items-start">
-                          <Truck className={`w-7 h-7 ${deliveryType === "delivery" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest bg-[#1A120B] text-white px-2.5 py-1 rounded-full">
-                            {t('courier')}
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">{t('deliveryTitle')}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('deliveryDesc')}</p>
-                        </div>
-                      </button>
+                    {deliveryType === "delivery" && <div className="absolute top-0 left-0 w-full h-1 bg-[#D4A853]" />}
+                    <div className="flex justify-between items-start gap-2">
+                      <Truck className={`w-6 h-6 ${deliveryType === "delivery" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
+                      <span className="text-[11px] font-bold text-[#9E721D] bg-[#D4A853]/15 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                        ⏱️ ~35-45 min
+                      </span>
+                    </div>
+                    <div className="mt-3">
+                      <h4 className="font-bold text-sm text-[#1A120B]">{t('deliveryTitle')}</h4>
+                      <p className="text-[11px] text-[#736A60] mt-0.5">{t('deliveryDesc')}</p>
+                    </div>
+                  </button>
 
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryType("pickup")}
-                        className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between h-32 relative overflow-hidden ${
-                          deliveryType === "pickup"
-                            ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
-                            : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
-                        }`}
-                      >
-                        {deliveryType === "pickup" && <div className="absolute top-0 left-0 w-full h-1 bg-[#D4A853]" />}
-                        <div className="flex justify-between items-start">
-                          <Store className={`w-7 h-7 ${deliveryType === "pickup" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest bg-[#D4A853] text-[#1A120B] px-2.5 py-1 rounded-full">
-                            {t('free')} (0 MDL)
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupTitle')}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițanu 21/1</p>
-                        </div>
-                      </button>
+                  {/* Pickup Option */}
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("pickup")}
+                    className={`p-5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[120px] relative overflow-hidden ${
+                      deliveryType === "pickup"
+                        ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
+                        : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
+                    }`}
+                  >
+                    {deliveryType === "pickup" && <div className="absolute top-0 left-0 w-full h-1 bg-[#D4A853]" />}
+                    <div className="flex justify-between items-start gap-2">
+                      <Store className={`w-6 h-6 ${deliveryType === "pickup" ? "text-[#D4A853]" : "text-[#736A60]"}`} />
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        <span className="text-[11px] font-bold text-[#9E721D] bg-[#D4A853]/15 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                          ⏱️ ~20-30 min
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1A120B] text-white px-2 py-0.5 rounded-full shrink-0">
+                          {t('free')} (0 MDL)
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-6 flex justify-end">
-                      <button type="button" onClick={() => handleNextStep(2)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        {t('continueBtn')}
-                      </button>
+                    <div className="mt-3">
+                      <h4 className="font-bold text-sm text-[#1A120B]">{t('pickupTitle')}</h4>
+                      <p className="text-[11px] text-[#736A60] mt-0.5">Nicolae Testemițanu 21/1</p>
                     </div>
-                  </motion.div>
+                  </button>
+                </div>
+
+                {/* If store closed: integrated inline warning notice */}
+                {!storeStatus.isOpen && (
+                  <div className="mt-4 p-4 rounded-2xl bg-[#D4A853]/10 border border-[#D4A853]/30 text-xs text-[#1A120B] flex flex-col gap-2 leading-relaxed">
+                    <div className="font-bold flex items-center gap-2 text-[#8C6B1B]">
+                      <Clock className="w-4 h-4 text-[#8C6B1B] shrink-0" />
+                      <span>{t('storeClosedBanner')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}</span>
+                    </div>
+                    <p className="text-[#736A60]">
+                      {t('preOrderOnlyNotice')}
+                    </p>
+                    <div className="pt-1 flex items-center gap-3">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-[#736A60]">
+                        {t('desiredTime')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}:
+                      </label>
+                      <input
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                        className="bg-white border border-[#E8E2D9] rounded-xl px-3 py-1.5 text-sm font-bold text-[#1A120B] outline-none focus:border-[#D4A853]"
+                      />
+                    </div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </div>
+              </div>
 
-            {/* Step 2: Date de Contact & Adresă */}
-            <div className={`bg-white rounded-3xl border shadow-sm overflow-hidden transition-all duration-300 ${activeStep === 2 ? 'border-[#1A120B]' : 'border-[#E8E2D9]'}`}>
-              <button 
-                type="button" 
-                onClick={() => { if (activeStep > 2 || activeStep < 2) setActiveStep(2) }}
-                className="w-full flex items-center justify-between p-6 md:p-8 bg-white cursor-pointer hover:bg-[#FFFCF6] transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${activeStep >= 2 ? 'bg-[#1A120B] text-white' : 'bg-[#E8E2D9] text-[#736A60]'}`}>
+              {/* Divider */}
+              <div className="border-t border-[#E8E2D9]/70" />
+
+              {/* Section 2: Date de Contact (First Name Only & Phone & Email) */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                     2
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step2Title')}</h3>
-                    {activeStep > 2 && formData.name && (
-                      <p className="text-xs text-[#736A60] font-medium mt-1 truncate max-w-[200px] md:max-w-[300px]">
-                        {formData.name} • {deliveryType === 'delivery' ? formData.street : 'Te așteptăm la noi'}
+                  <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step2Title')}</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* First Name Only */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('nameLabel')}</label>
+                    <input
+                      ref={nameInputRef}
+                      type="text"
+                      required
+                      placeholder={t('placeholderName')}
+                      className={`w-full bg-[#FFFCF6] border rounded-2xl px-5 py-3.5 text-sm outline-none transition-all ${
+                        nameError 
+                          ? 'border-red-500 ring-1 ring-red-500/20' 
+                          : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                      }`}
+                      value={formData.name}
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (nameError) setNameError("");
+                      }}
+                    />
+                    {nameError && (
+                      <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{nameError}</span>
                       </p>
                     )}
                   </div>
-                </div>
-                {activeStep === 2 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : activeStep > 2 ? <CheckCircle2 className="w-6 h-6 text-[#D4A853]" /> : null}
-              </button>
 
-              <AnimatePresence>
-                {activeStep === 2 && (
-                  <motion.div 
-                    initial="hidden" 
-                    animate="visible" 
-                    exit="hidden" 
-                    variants={accordionVariants}
-                    className="px-6 md:px-8 pb-8 space-y-6"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('nameLabel')}</label>
-                        <input
-                          ref={nameInputRef}
-                          type="text"
-                          required
-                          placeholder={t('placeholderName')}
-                          className={`w-full bg-[#FFFCF6] border rounded-2xl px-5 py-3.5 text-sm outline-none transition-all ${
-                            nameError 
-                              ? 'border-red-500 ring-1 ring-red-500/20' 
-                              : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                          }`}
-                          value={formData.name}
-                          onChange={(e) => {
-                            setFormData({ ...formData, name: e.target.value });
-                            if (nameError) setNameError("");
-                          }}
-                        />
-                        {nameError && (
-                          <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            <span>{nameError}</span>
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
-                        <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm transition-all duration-300 ${
-                          phoneError 
-                            ? 'border-red-500 ring-1 ring-red-500/20' 
-                            : isPhoneHighlighted
-                            ? 'border-[#D4A853] ring-4 ring-[#D4A853]/40 shadow-md scale-[1.01]'
-                            : 'border-[#E8E2D9] focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853]'
-                        }`}>
-                          <CountrySelector
-                            selectedCountry={selectedCountry}
-                            onSelect={(country) => setSelectedCountry(country)}
-                          />
-                          <input
-                            ref={phoneInputRef}
-                            type="tel"
-                            required
-                            placeholder="069 123 456"
-                            className="w-full bg-transparent border-none px-4 py-3.5 outline-none text-[#1A120B] text-sm shadow-none"
-                            value={formData.phone}
-                            onChange={(e) => {
-                              setFormData({ ...formData, phone: e.target.value });
-                              if (phoneError) setPhoneError("");
-                              if (isPhoneHighlighted) setIsPhoneHighlighted(false);
-                            }}
-                          />
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('phoneLabel')}</label>
+                    <div className={`relative flex items-center bg-[#FFFCF6] border rounded-2xl shadow-sm transition-all duration-300 ${
+                      phoneError 
+                        ? 'border-red-500 ring-1 ring-red-500/20' 
+                        : isPhoneHighlighted
+                        ? 'border-[#D4A853] ring-4 ring-[#D4A853]/40 shadow-md scale-[1.01]'
+                        : 'border-[#E8E2D9] focus-within:border-[#D4A853] focus-within:ring-1 focus-within:ring-[#D4A853]'
+                    }`}>
+                      <CountrySelector
+                        selectedCountry={selectedCountry}
+                        onSelect={(country) => setSelectedCountry(country)}
+                      />
+                      <input
+                        ref={phoneInputRef}
+                        type="tel"
+                        required
+                        placeholder="069 123 456"
+                        className="w-full bg-transparent border-none px-4 py-3.5 outline-none text-[#1A120B] text-sm shadow-none"
+                        value={formData.phone}
+                        onChange={(e) => {
+                          setFormData({ ...formData, phone: e.target.value });
+                          if (phoneError) setPhoneError("");
+                          if (isPhoneHighlighted) setIsPhoneHighlighted(false);
+                        }}
+                      />
+                    </div>
+                    {phoneError && (
+                      <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{phoneError}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Email (Optional unless online payment) */}
+                  <div className="sm:col-span-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">
+                        {t('emailLabel')} {paymentMethod === 'online' && <span className="text-red-500">*</span>}
+                      </label>
+                    </div>
+                    <input
+                      type="email"
+                      required={paymentMethod === 'online'}
+                      placeholder="client@email.com"
+                      className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                    <p className="text-[11px] text-[#736A60] mt-1.5 flex items-center gap-1 font-normal">
+                      <span className="text-[#D4A853]">ℹ️</span> {t('emailNote')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#E8E2D9]/70" />
+
+              {/* Section 3: Adresă de Livrare & Selector Hartă (sau Confirmare Boutique) */}
+              <div className="space-y-4">
+                {deliveryType === "delivery" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                          3
                         </div>
-                        {phoneError && (
-                          <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            <span>{phoneError}</span>
-                          </p>
-                        )}
+                        <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('deliveryAddressLabel')}</h3>
                       </div>
-                      <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">
-                            {t('emailLabel')} {paymentMethod === 'online' && <span className="text-red-500">*</span>}
-                          </label>
-                        </div>
-                        <input
-                          type="email"
-                          required={paymentMethod === 'online'}
-                          placeholder="client@email.com"
-                          className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        />
-                        <p className="text-[11px] text-[#736A60] mt-1.5 flex items-center gap-1 font-normal">
-                          <span className="text-[#D4A853]">ℹ️</span> {t('emailNote')}
-                        </p>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsMapModalOpen(true)}
+                        className="text-xs font-bold text-[#9E721D] hover:text-[#1A120B] bg-[#FAF7F2] border border-[#E8E2D9] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <MapPin size={14} />
+                        <span>{t('selectOnMap')}</span>
+                      </button>
                     </div>
 
-                    {deliveryType === "delivery" && (
-                      <div className="space-y-6 pt-4 border-t border-[#E8E2D9]">
-                        {/* Saved Addresses (Optional) */}
-                        {user && user.addresses && user.addresses.length > 0 && (
-                          <div>
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-3">{t('savedAddresses')}</label>
-                            <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar">
-                              {user.addresses.map((addr: any) => {
-                                const isSelected = formData.street === addr.street;
-                                const iconName = addr.label === 'Acasă' ? '🏠' : addr.label === 'Birou' ? '💼' : addr.label === 'Prieten' ? '👥' : '📌';
+                    {/* Saved Addresses Chips */}
+                    {user && user.addresses && user.addresses.length > 0 && (
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('savedAddresses')}</label>
+                        <div className="flex overflow-x-auto gap-2.5 pb-1 no-scrollbar">
+                          {user.addresses.map((addr: any) => {
+                            const isSelected = formData.street === addr.street;
+                            const iconName = addr.label === 'Acasă' ? '🏠' : addr.label === 'Birou' ? '💼' : addr.label === 'Prieten' ? '👥' : '📌';
+                            return (
+                              <button
+                                key={addr._id}
+                                type="button"
+                                onClick={() => {
+                                  const dist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, addr.lat, addr.lng);
+                                  setFormData(prev => ({
+                                    ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.35, isGeocoded: true
+                                  }));
+                                  setAddressError("");
+                                  setSaveAddress(false);
+                                }}
+                                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs transition-all shrink-0 cursor-pointer ${
+                                  isSelected 
+                                    ? 'bg-[#1A120B] border-[#1A120B] text-white font-bold shadow-md' 
+                                    : 'bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
+                                }`}
+                              >
+                                <span>{iconName}</span>
+                                <span>{addr.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Autocomplete Input */}
+                    <div>
+                      <MapAutocomplete
+                        value={formData.street}
+                        onChange={(val) => {
+                          setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
+                          if (addressError) setAddressError("");
+                          const cleanForDigits = val.replace(/\bMD\s*-\s*\d{4}\b/gi, "");
+                          if (/\d/.test(cleanForDigits) || !val.trim()) {
+                            setMissingHouseNumberWarning(false);
+                          }
+                        }}
+                        onPlaceSelected={(lat, lng, address, meta) => {
+                          if (meta?.isGenericCity) {
+                            setFormData(prev => ({ ...prev, street: address, lat, lng, isGeocoded: false }));
+                            setMissingHouseNumberWarning(false);
+                            setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
+                            return;
+                          }
+                          const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
+                          const roadDist = straightDist * 1.35;
+                          setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
+                          setAddressError("");
+                          setMissingHouseNumberWarning(Boolean(meta?.isStreetWithoutNumber));
+                        }}
+                        placeholder={t('placeholderAddress')}
+                        className={`w-full bg-[#FFFCF6] border rounded-2xl pl-12 pr-5 py-4 text-sm outline-none transition-all ${
+                          addressError 
+                            ? 'border-red-500 ring-1 ring-red-500/20' 
+                            : missingHouseNumberWarning
+                            ? 'border-amber-500 ring-1 ring-amber-500/20'
+                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                        }`}
+                        required={true}
+                      />
+
+                      {addressError && (
+                        <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{addressError}</span>
+                        </p>
+                      )}
+
+                      {!addressError && missingHouseNumberWarning && (
+                        <div className="mt-2 p-3 rounded-xl bg-amber-50/90 border border-amber-300/80 text-[#8C6B1B] text-xs flex items-start gap-2 leading-relaxed">
+                          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                          <span>
+                            {locale === 'ru'
+                              ? 'Вы выбрали только улицу — пожалуйста, допишите номер дома или корпуса (напр.: 115/1) для точной доставки.'
+                              : locale === 'en'
+                              ? 'You selected only the street — please add the building or house number (e.g., 115/1) for accurate delivery.'
+                              : 'Ai selectat doar strada — te rugăm să adaugi în câmp și numărul blocului sau al clădirii (ex: 115/1).'}
+                          </span>
+                        </div>
+                      )}
+
+                      {!addressError && hasAddress && (
+                        deliveryCalc.isDeliverable ? (
+                          <div className="mt-2.5 px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <div className="flex items-center gap-2 text-[#1A120B] font-medium">
+                              <span className="text-[#D4A853]">📍</span>
+                              <span>~{deliveryCalc.distanceKm} {locale === 'ru' ? 'км' : 'km'}</span>
+                              <span className="text-[#C5BCB1]">•</span>
+                              <span className="text-[#736A60]">{deliveryCalc.typeLabel}</span>
+                            </div>
+                            <span className="font-bold text-[#1A120B] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D9]">
+                              {locale === 'ru' ? 'Доставка' : locale === 'en' ? 'Delivery' : 'Livrare'}: {deliveryFee} MDL
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="mt-2.5 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs space-y-2.5">
+                            <div className="flex items-start gap-2 font-semibold">
+                              <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+                              <span>
+                                {locale === 'ru'
+                                  ? `Адрес находится за пределами зоны доставки (~${Math.round(deliveryCalc.distanceKm * 10) / 10} км, макс. 14 км).`
+                                  : locale === 'en'
+                                  ? `Address is outside our delivery zone (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`
+                                  : `Adresa se află în afara razei de livrare (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setIsMapModalOpen(true)}
+                                className="px-3 py-1.5 rounded-lg bg-white border border-red-200 text-[#1A120B] font-bold text-[11px] hover:border-[#D4A853] transition-colors cursor-pointer"
+                              >
+                                📍 {t('selectOnMap')}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeliveryType("pickup")}
+                                className="px-3 py-1.5 rounded-lg bg-[#1A120B] text-white font-bold text-[11px] hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer"
+                              >
+                                🛍️ {t('pickupTitle')} (0 MDL)
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+
+                    {/* Salvează adresa în cont */}
+                    {formData.street && formData.isGeocoded && !isAddressAlreadySaved() && (
+                      <div className="p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] shadow-sm space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={saveAddress}
+                            onChange={(e) => setSaveAddress(e.target.checked)}
+                            className="w-4 h-4 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
+                          />
+                          <span className="text-xs font-bold text-[#1A120B]">
+                            {t('saveAddressInAccount')}
+                          </span>
+                        </label>
+
+                        <AnimatePresence>
+                          {saveAddress && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="pt-3 border-t border-[#E8E2D9]/60 flex flex-wrap gap-2 items-center"
+                            >
+                              {[
+                                { key: 'Acasă', labelKey: 'addressLabelHome', emoji: '🏠' },
+                                { key: 'Birou', labelKey: 'addressLabelOffice', emoji: '💼' },
+                                { key: 'Prieten', labelKey: 'addressLabelFriend', emoji: '👥' },
+                                { key: 'Altul', labelKey: 'addressLabelOther', emoji: '📌' },
+                              ].map(opt => {
+                                const isSelected = addressLabel === opt.key;
                                 return (
                                   <button
-                                    key={addr._id}
+                                    key={opt.key}
                                     type="button"
-                                    onClick={() => {
-                                      const dist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, addr.lat, addr.lng);
-                                      setFormData(prev => ({
-                                        ...prev, street: addr.street, lat: addr.lat, lng: addr.lng, estimatedKm: dist * 1.35, isGeocoded: true
-                                      }));
-                                      setAddressError("");
-                                      setSaveAddress(false);
-                                    }}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs transition-all shrink-0 cursor-pointer ${
-                                      isSelected 
-                                        ? 'bg-[#1A120B] border-[#1A120B] text-white font-bold shadow-md' 
-                                        : 'bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
+                                    onClick={() => setAddressLabel(opt.key)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
+                                      isSelected
+                                        ? 'bg-[#1A120B] text-white font-bold shadow-sm'
+                                        : 'bg-white border border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
                                     }`}
                                   >
-                                    <span>{iconName}</span>
-                                    {addr.label}
+                                    <span>{opt.emoji}</span>
+                                    <span>{t(opt.labelKey as any) || opt.key}</span>
                                   </button>
                                 );
                               })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Search Address Input & Map Button */}
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">{t('deliveryAddressLabel')}</label>
-                            <button
-                              type="button"
-                              onClick={() => setIsMapModalOpen(true)}
-                              className="text-xs font-bold text-[#D4A853] hover:text-[#1A120B] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#FFFCF6] transition-colors"
-                            >
-                              <MapPin size={14} />
-                              <span>{t('selectOnMap')}</span>
-                            </button>
-                          </div>
-                          
-                          <MapAutocomplete
-                            value={formData.street}
-                            onChange={(val) => {
-                              setFormData(prev => ({ ...prev, street: val, isGeocoded: false }));
-                              if (addressError) setAddressError("");
-                              const cleanForDigits = val.replace(/\bMD\s*-\s*\d{4}\b/gi, "");
-                              if (/\d/.test(cleanForDigits) || !val.trim()) {
-                                setMissingHouseNumberWarning(false);
-                              }
-                            }}
-                            onPlaceSelected={(lat, lng, address, meta) => {
-                              if (meta?.isGenericCity) {
-                                setFormData(prev => ({ ...prev, street: address, lat, lng, isGeocoded: false }));
-                                setMissingHouseNumberWarning(false);
-                                setAddressError(t('addressTooGeneric') || "Te rugăm să introduci o adresă exactă (strada și numărul blocului/casei, nu doar orașul).");
-                                return;
-                              }
-                              const straightDist = getDistanceFromLatLonInKm(RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng, lat, lng);
-                              const roadDist = straightDist * 1.35;
-                              setFormData(prev => ({ ...prev, street: address, estimatedKm: roadDist, lat, lng, isGeocoded: true }));
-                              setAddressError("");
-                              setMissingHouseNumberWarning(Boolean(meta?.isStreetWithoutNumber));
-                            }}
-                            placeholder={t('placeholderAddress')}
-                            className={`w-full bg-[#FFFCF6] border rounded-2xl pl-12 pr-5 py-4 text-sm outline-none transition-all ${
-                              addressError 
-                                ? 'border-red-500 ring-1 ring-red-500/20' 
-                                : missingHouseNumberWarning
-                                ? 'border-amber-500 ring-1 ring-amber-500/20'
-                                : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                            }`}
-                            required={true}
-                          />
-
-                          {addressError && (
-                            <p className="text-[11px] text-red-600 mt-1.5 font-medium flex items-center gap-1">
-                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span>{addressError}</span>
-                            </p>
+                            </motion.div>
                           )}
-
-                          {!addressError && missingHouseNumberWarning && (
-                            <div className="mt-2 p-3 rounded-xl bg-amber-50/90 border border-amber-300/80 text-[#8C6B1B] text-xs flex items-start gap-2 leading-relaxed">
-                              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-                              <span>
-                                {locale === 'ru'
-                                  ? 'Вы выбрали только улицу — пожалуйста, допишите номер дома или корпуса (напр.: 115/1) для точной доставки.'
-                                  : locale === 'en'
-                                  ? 'You selected only the street — please add the building or house number (e.g., 115/1) for accurate delivery.'
-                                  : 'Ai selectat doar strada — te rugăm să adaugi în câmp și numărul blocului sau al clădirii (ex: 115/1).'}
-                              </span>
-                            </div>
-                          )}
-
-                          {!addressError && hasAddress && (
-                            deliveryCalc.isDeliverable ? (
-                              <div className="mt-2.5 px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D9] flex flex-wrap items-center justify-between gap-2 text-xs">
-                                <div className="flex items-center gap-2 text-[#1A120B] font-medium">
-                                  <span className="text-[#D4A853]">📍</span>
-                                  <span>~{deliveryCalc.distanceKm} km</span>
-                                  <span className="text-[#C5BCB1]">•</span>
-                                  <span className="text-[#736A60]">{deliveryCalc.typeLabel}</span>
-                                </div>
-                                <span className="font-bold text-[#1A120B] bg-white px-2.5 py-1 rounded-lg border border-[#E8E2D9]">
-                                  {locale === 'ru' ? 'Доставка' : locale === 'en' ? 'Delivery' : 'Livrare'}: {deliveryFee} MDL
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="mt-2.5 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs space-y-2.5">
-                                <div className="flex items-start gap-2 font-semibold">
-                                  <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
-                                  <span>
-                                    {locale === 'ru'
-                                      ? `Адрес находится за пределами зоны доставки (~${Math.round(deliveryCalc.distanceKm * 10) / 10} км, макс. 14 км).`
-                                      : locale === 'en'
-                                      ? `Address is outside our delivery zone (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`
-                                      : `Adresa se află în afara razei de livrare (~${Math.round(deliveryCalc.distanceKm * 10) / 10} km, max 14 km).`}
-                                  </span>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => setIsMapModalOpen(true)}
-                                    className="px-3 py-1.5 rounded-lg bg-white border border-red-200 text-[#1A120B] font-bold text-[11px] hover:border-[#D4A853] transition-colors cursor-pointer"
-                                  >
-                                    📍 {t('selectOnMap')}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setDeliveryType("pickup")}
-                                    className="px-3 py-1.5 rounded-lg bg-[#1A120B] text-white font-bold text-[11px] hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors cursor-pointer"
-                                  >
-                                    🛍️ {t('pickupTitle')} (0 MDL)
-                                  </button>
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-
-                        {/* Salvează adresa în cont — 1:1 ca în aplicația mobilă Munchotella */}
-                        {deliveryType === "delivery" && formData.street && formData.isGeocoded && !isAddressAlreadySaved() && (
-                          <div className="p-4 rounded-2xl border border-[#E8E2D9] bg-[#FFFCF6] shadow-sm space-y-3">
-                            <label className="flex items-center gap-3 cursor-pointer select-none">
-                              <input
-                                type="checkbox"
-                                checked={saveAddress}
-                                onChange={(e) => setSaveAddress(e.target.checked)}
-                                className="w-4 h-4 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-[#1A120B]">
-                                {t('saveAddressInAccount')}
-                              </span>
-                            </label>
-
-                            <AnimatePresence>
-                              {saveAddress && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="pt-3 border-t border-[#E8E2D9]/60 flex flex-wrap gap-2 items-center"
-                                >
-                                  {[
-                                    { key: 'Acasă', labelKey: 'addressLabelHome', emoji: '🏠' },
-                                    { key: 'Birou', labelKey: 'addressLabelOffice', emoji: '💼' },
-                                    { key: 'Prieten', labelKey: 'addressLabelFriend', emoji: '👥' },
-                                    { key: 'Altul', labelKey: 'addressLabelOther', emoji: '📌' },
-                                  ].map(opt => {
-                                    const isSelected = addressLabel === opt.key;
-                                    return (
-                                      <button
-                                        key={opt.key}
-                                        type="button"
-                                        onClick={() => setAddressLabel(opt.key)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer ${
-                                          isSelected
-                                            ? 'bg-[#1A120B] text-white font-bold shadow-sm'
-                                            : 'bg-white border border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]'
-                                        }`}
-                                      >
-                                        <span>{opt.emoji}</span>
-                                        <span>{t(opt.labelKey as any) || opt.key}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-
-
-                        {/* Livrare până la ușă (+20 MDL) — strict pietonal < 1km & Geocoded */}
-                        {deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 && formData.isGeocoded && (
-                          <div className="space-y-3">
-                            <label className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer group ${
-                              doorDelivery ? 'border-[#D4A853] bg-[#D4A853]/5 shadow-sm' : 'border-[#E8E2D9] bg-[#FFFCF6] hover:border-[#D4A853]/50'
-                            }`}>
-                              <div className="pt-1">
-                                <input
-                                  type="checkbox"
-                                  checked={doorDelivery}
-                                  onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setDoorDelivery(checked);
-                                    if (!checked) {
-                                      setDoorDeliveryErrors({
-                                        apartment: false,
-                                        entrance: false,
-                                        floor: false,
-                                        intercom: false,
-                                      });
-                                    }
-                                  }}
-                                  className="w-5 h-5 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
-                                />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-[#1A120B] text-sm group-hover:text-[#D4A853] transition-colors">{t('doorDeliveryTitle')}</h4>
-                                <p className="text-xs text-[#736A60] mt-1 leading-relaxed">{t('doorDeliveryDesc')}</p>
-                              </div>
-                            </label>
-
-                            <AnimatePresence>
-                              {doorDelivery && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="p-5 rounded-2xl border border-[#D4A853]/40 bg-[#FFFDF9] space-y-4 shadow-sm"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-base">🚪</span>
-                                    <div>
-                                      <h5 className="font-bold text-xs text-[#1A120B] uppercase tracking-wider">{t('doorDeliveryDetailsTitle')}</h5>
-                                      <p className="text-[11px] text-[#736A60]">{t('doorDeliveryDetailsDesc')}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                                    {/* Apartament */}
-                                    <div>
-                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
-                                        {t('apartmentLabel')}
-                                      </label>
-                                      <input
-                                        ref={apartmentInputRef}
-                                        type="text"
-                                        placeholder={t('placeholderApartment')}
-                                        value={formData.apartment}
-                                        onChange={(e) => {
-                                          setFormData(prev => ({ ...prev, apartment: e.target.value }));
-                                          if (doorDeliveryErrors.apartment) {
-                                            setDoorDeliveryErrors(prev => ({ ...prev, apartment: false }));
-                                          }
-                                        }}
-                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
-                                          doorDeliveryErrors.apartment
-                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
-                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                                        }`}
-                                      />
-                                      {doorDeliveryErrors.apartment && (
-                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
-                                          <AlertCircle className="w-3 h-3 shrink-0" />
-                                          <span>{t('doorFieldRequired')}</span>
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    {/* Scară */}
-                                    <div>
-                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
-                                        {t('entranceLabel')}
-                                      </label>
-                                      <input
-                                        ref={entranceInputRef}
-                                        type="text"
-                                        placeholder={t('placeholderEntrance')}
-                                        value={formData.entrance}
-                                        onChange={(e) => {
-                                          setFormData(prev => ({ ...prev, entrance: e.target.value }));
-                                          if (doorDeliveryErrors.entrance) {
-                                            setDoorDeliveryErrors(prev => ({ ...prev, entrance: false }));
-                                          }
-                                        }}
-                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
-                                          doorDeliveryErrors.entrance
-                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
-                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                                        }`}
-                                      />
-                                      {doorDeliveryErrors.entrance && (
-                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
-                                          <AlertCircle className="w-3 h-3 shrink-0" />
-                                          <span>{t('doorFieldRequired')}</span>
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    {/* Etaj */}
-                                    <div>
-                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
-                                        {t('floorLabel')}
-                                      </label>
-                                      <input
-                                        ref={floorInputRef}
-                                        type="text"
-                                        placeholder={t('placeholderFloor')}
-                                        value={formData.floor}
-                                        onChange={(e) => {
-                                          setFormData(prev => ({ ...prev, floor: e.target.value }));
-                                          if (doorDeliveryErrors.floor) {
-                                            setDoorDeliveryErrors(prev => ({ ...prev, floor: false }));
-                                          }
-                                        }}
-                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
-                                          doorDeliveryErrors.floor
-                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
-                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                                        }`}
-                                      />
-                                      {doorDeliveryErrors.floor && (
-                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
-                                          <AlertCircle className="w-3 h-3 shrink-0" />
-                                          <span>{t('doorFieldRequired')}</span>
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    {/* Interfon / Domofon */}
-                                    <div>
-                                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
-                                        {t('intercomLabel')}
-                                      </label>
-                                      <input
-                                        ref={intercomInputRef}
-                                        type="text"
-                                        placeholder={t('placeholderIntercom')}
-                                        value={formData.intercom}
-                                        onChange={(e) => {
-                                          setFormData(prev => ({ ...prev, intercom: e.target.value }));
-                                          if (doorDeliveryErrors.intercom) {
-                                            setDoorDeliveryErrors(prev => ({ ...prev, intercom: false }));
-                                          }
-                                        }}
-                                        className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
-                                          doorDeliveryErrors.intercom
-                                            ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
-                                            : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
-                                        }`}
-                                      />
-                                      {doorDeliveryErrors.intercom && (
-                                        <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
-                                          <AlertCircle className="w-3 h-3 shrink-0" />
-                                          <span>{t('doorFieldRequired')}</span>
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Order Notes (Valabil atât pentru livrare, cât și pentru ridicare din boutique) */}
-                    <div className="pt-4 border-t border-[#E8E2D9]">
-                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-2">{t('orderNotes')}</label>
-                      <input
-                        type="text"
-                        placeholder={t('placeholderNotes')}
-                        className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-3.5 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all"
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="mt-6 flex justify-end pt-4 border-t border-[#E8E2D9]">
-                      <button type="button" onClick={() => handleNextStep(3)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        {t('continueBtn')}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Step 3: Timpul Comenzii & Detalii */}
-            <div className={`bg-white rounded-3xl border shadow-sm overflow-hidden transition-all duration-300 ${activeStep === 3 ? 'border-[#1A120B]' : 'border-[#E8E2D9]'}`}>
-              <button 
-                type="button" 
-                onClick={() => { if (activeStep > 3 || activeStep < 3) setActiveStep(3) }}
-                className="w-full flex items-center justify-between p-6 md:p-8 bg-white cursor-pointer hover:bg-[#FFFCF6] transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${activeStep >= 3 ? 'bg-[#1A120B] text-white' : 'bg-[#E8E2D9] text-[#736A60]'}`}>
-                    3
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step3Title')}</h3>
-                    {activeStep > 3 && (
-                      <p className="text-xs text-[#736A60] font-medium mt-1 truncate">
-                        {timing === 'asap' ? t('asapDesc') : `${t('scheduledDesc')} ${scheduledTime}`}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {activeStep === 3 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : activeStep > 3 ? <CheckCircle2 className="w-6 h-6 text-[#D4A853]" /> : null}
-              </button>
-
-              <AnimatePresence>
-                {activeStep === 3 && (
-                  <motion.div 
-                    initial="hidden" 
-                    animate="visible" 
-                    exit="hidden" 
-                    variants={accordionVariants}
-                    className="px-6 md:px-8 pb-8 space-y-6"
-                  >
-                    {!storeStatus.isOpen && (
-                      <div className="p-4 rounded-2xl bg-[#D4A853]/10 border border-[#D4A853]/30 text-xs text-[#1A120B] flex flex-col gap-1.5 leading-relaxed">
-                        <div className="font-bold flex items-center gap-2 text-[#8C6B1B]">
-                          <Clock className="w-4 h-4 text-[#8C6B1B] shrink-0" />
-                          <span>{t('storeClosedBanner')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}</span>
-                        </div>
-                        <p className="text-[#736A60]">
-                          {t('preOrderOnlyNotice')}
-                        </p>
+                        </AnimatePresence>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <button
-                        type="button"
-                        disabled={!storeStatus.isOpen}
-                        onClick={() => {
-                          if (storeStatus.isOpen) setTiming("asap");
-                        }}
-                        className={`p-4 rounded-2xl border text-sm font-bold uppercase tracking-wider transition-all text-center ${
-                          !storeStatus.isOpen
-                            ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-60"
-                            : timing === "asap"
-                            ? "bg-[#D4A853] border-[#D4A853] text-[#1A120B] shadow-md cursor-pointer"
-                            : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50 cursor-pointer"
-                        }`}
-                      >
-                        {t('btnAsap')}
-                        {!storeStatus.isOpen && <span className="block text-[10px] font-normal lowercase tracking-normal mt-0.5">(indisponibil acum)</span>}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setTiming("scheduled")}
-                        className={`p-4 rounded-2xl border text-sm font-bold uppercase tracking-wider transition-all cursor-pointer text-center ${
-                          timing === "scheduled"
-                            ? "bg-[#D4A853] border-[#D4A853] text-[#1A120B] shadow-md"
-                            : "bg-[#FFFCF6] border-[#E8E2D9] text-[#736A60] hover:border-[#D4A853]/50"
-                        }`}
-                      >
-                        {t('btnSchedule')}
-                      </button>
-                    </div>
-
-                    {timing === "scheduled" && (
-                      <div className="flex flex-col items-start gap-2">
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60]">
-                          {t('desiredTime')} {storeStatus.nextOpening?.label ? `(${storeStatus.nextOpening.label})` : ''}
-                        </label>
-                        <input
-                          type="time"
-                          value={scheduledTime}
-                          onChange={(e) => setScheduledTime(e.target.value)}
-                          className="bg-[#FFFCF6] border border-[#E8E2D9] rounded-xl px-5 py-3 text-base font-bold outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] text-[#1A120B] min-w-[150px]"
-                        />
-                      </div>
-                    )}
-
-
-                    <div className="mt-6 flex justify-end">
-                      <button type="button" onClick={() => handleNextStep(4)} className="bg-[#1A120B] text-white px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#D4A853] hover:text-[#1A120B] transition-colors">
-                        {t('continueBtn')}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Step 4: Metoda de Plata */}
-            <div className={`bg-white rounded-3xl border shadow-sm overflow-hidden transition-all duration-300 ${activeStep === 4 ? 'border-[#1A120B]' : 'border-[#E8E2D9]'}`}>
-              <button 
-                type="button" 
-                onClick={() => setActiveStep(4)}
-                className="w-full flex items-center justify-between p-6 md:p-8 bg-white cursor-pointer hover:bg-[#FFFCF6] transition-colors"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${activeStep >= 4 ? 'bg-[#1A120B] text-white' : 'bg-[#E8E2D9] text-[#736A60]'}`}>
-                    4
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step4Title')}</h3>
-                  </div>
-                </div>
-                {activeStep === 4 ? <ChevronDown className="w-6 h-6 text-[#1A120B]" /> : null}
-              </button>
-
-              <AnimatePresence>
-                {activeStep === 4 && (
-                  <motion.div 
-                    initial="hidden" 
-                    animate="visible" 
-                    exit="hidden" 
-                    variants={accordionVariants}
-                    className="px-6 md:px-8 pb-8 space-y-4"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("cash")}
-                      className={`w-full p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                        paymentMethod === "cash"
-                          ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
-                          : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'cash' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
-                          <Banknote className={`w-6 h-6 ${paymentMethod === 'cash' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-[#1A120B]">{t('cashTitle', { type: deliveryType === 'delivery' ? t('cashDelivery') : t('cashPickup') })}</h4>
-                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('cashDesc')}</p>
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
-                        {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
-                      </div>
-                    </button>
-
-
-                    {/* Online Payment — maib Checkout (Card, Apple Pay, Google Pay, MIA) */}
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("online")}
-                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col gap-3 ${
-                        paymentMethod === "online"
-                          ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
-                          : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'online' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
-                            <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
+                    {/* Livrare până la ușă (+20 MDL) — strict pietonal < 1km & Geocoded */}
+                    {deliveryCalc.isPedestrian && formData.estimatedKm < 1.0 && formData.isGeocoded && (
+                      <div className="space-y-3">
+                        <label className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer group ${
+                          doorDelivery ? 'border-[#D4A853] bg-[#D4A853]/5 shadow-sm' : 'border-[#E8E2D9] bg-[#FFFCF6] hover:border-[#D4A853]/50'
+                        }`}>
+                          <div className="pt-1">
+                            <input
+                              type="checkbox"
+                              checked={doorDelivery}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setDoorDelivery(checked);
+                                if (!checked) {
+                                  setDoorDeliveryErrors({
+                                    apartment: false,
+                                    entrance: false,
+                                    floor: false,
+                                    intercom: false,
+                                  });
+                                }
+                              }}
+                              className="w-5 h-5 rounded text-[#D4A853] accent-[#D4A853] focus:ring-[#D4A853] cursor-pointer"
+                            />
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#008F79]/15 text-[#008F79]">
-                                maib
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-[#736A60] mt-0.5">{t('onlineDesc')}</p>
+                            <h4 className="font-bold text-[#1A120B] text-sm group-hover:text-[#D4A853] transition-colors">{t('doorDeliveryTitle')}</h4>
+                            <p className="text-xs text-[#736A60] mt-1 leading-relaxed">{t('doorDeliveryDesc')}</p>
                           </div>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'online' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
-                          {paymentMethod === 'online' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
-                        </div>
-                      </div>
+                        </label>
 
-                      {/* Payment Badges & MIA Notice */}
-                      <div className="pt-2 border-t border-[#E8E2D9]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                        <PaymentBadges variant="checkout" />
-                        <span className="text-[11px] font-bold text-[#008F79] bg-[#008F79]/10 px-2.5 py-1 rounded-md">
-                          MIA: 0% comision
-                        </span>
-                      </div>
-                    </button>
+                        <AnimatePresence>
+                          {doorDelivery && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="p-5 rounded-2xl border border-[#D4A853]/40 bg-[#FFFDF9] space-y-4 shadow-sm"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-base">🚪</span>
+                                <div>
+                                  <h5 className="font-bold text-xs text-[#1A120B] uppercase tracking-wider">{t('doorDeliveryDetailsTitle')}</h5>
+                                  <p className="text-[11px] text-[#736A60]">{t('doorDeliveryDetailsDesc')}</p>
+                                </div>
+                              </div>
 
-                  </motion.div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                                <div>
+                                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                    {t('apartmentLabel')}
+                                  </label>
+                                  <input
+                                    ref={apartmentInputRef}
+                                    type="text"
+                                    placeholder={t('placeholderApartment')}
+                                    value={formData.apartment}
+                                    onChange={(e) => {
+                                      setFormData(prev => ({ ...prev, apartment: e.target.value }));
+                                      if (doorDeliveryErrors.apartment) {
+                                        setDoorDeliveryErrors(prev => ({ ...prev, apartment: false }));
+                                      }
+                                    }}
+                                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                      doorDeliveryErrors.apartment
+                                        ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                        : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                    }`}
+                                  />
+                                  {doorDeliveryErrors.apartment && (
+                                    <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                      <AlertCircle className="w-3 h-3 shrink-0" />
+                                      <span>{t('doorFieldRequired')}</span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                    {t('entranceLabel')}
+                                  </label>
+                                  <input
+                                    ref={entranceInputRef}
+                                    type="text"
+                                    placeholder={t('placeholderEntrance')}
+                                    value={formData.entrance}
+                                    onChange={(e) => {
+                                      setFormData(prev => ({ ...prev, entrance: e.target.value }));
+                                      if (doorDeliveryErrors.entrance) {
+                                        setDoorDeliveryErrors(prev => ({ ...prev, entrance: false }));
+                                      }
+                                    }}
+                                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                      doorDeliveryErrors.entrance
+                                        ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                        : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                    }`}
+                                  />
+                                  {doorDeliveryErrors.entrance && (
+                                    <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                      <AlertCircle className="w-3 h-3 shrink-0" />
+                                      <span>{t('doorFieldRequired')}</span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                    {t('floorLabel')}
+                                  </label>
+                                  <input
+                                    ref={floorInputRef}
+                                    type="text"
+                                    placeholder={t('placeholderFloor')}
+                                    value={formData.floor}
+                                    onChange={(e) => {
+                                      setFormData(prev => ({ ...prev, floor: e.target.value }));
+                                      if (doorDeliveryErrors.floor) {
+                                        setDoorDeliveryErrors(prev => ({ ...prev, floor: false }));
+                                      }
+                                    }}
+                                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                      doorDeliveryErrors.floor
+                                        ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                        : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                    }`}
+                                  />
+                                  {doorDeliveryErrors.floor && (
+                                    <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                      <AlertCircle className="w-3 h-3 shrink-0" />
+                                      <span>{t('doorFieldRequired')}</span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736A60] mb-1.5">
+                                    {t('intercomLabel')}
+                                  </label>
+                                  <input
+                                    ref={intercomInputRef}
+                                    type="text"
+                                    placeholder={t('placeholderIntercom')}
+                                    value={formData.intercom}
+                                    onChange={(e) => {
+                                      setFormData(prev => ({ ...prev, intercom: e.target.value }));
+                                      if (doorDeliveryErrors.intercom) {
+                                        setDoorDeliveryErrors(prev => ({ ...prev, intercom: false }));
+                                      }
+                                    }}
+                                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs outline-none transition-all ${
+                                      doorDeliveryErrors.intercom
+                                        ? 'border-red-500 ring-2 ring-red-500/20 bg-red-50/20'
+                                        : 'border-[#E8E2D9] focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853]'
+                                    }`}
+                                  />
+                                  {doorDeliveryErrors.intercom && (
+                                    <p className="text-[10px] text-red-600 mt-1 font-medium flex items-center gap-0.5">
+                                      <AlertCircle className="w-3 h-3 shrink-0" />
+                                      <span>{t('doorFieldRequired')}</span>
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* Boutique Pickup Info Banner */
+                  <>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                        3
+                      </div>
+                      <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('pickupTitle')}</h3>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-[#FFFCF6] border border-[#E8E2D9] flex items-start gap-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-2xl bg-[#D4A853]/15 text-[#9E721D] flex items-center justify-center shrink-0">
+                        <Store className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1 text-xs text-[#736A60]">
+                        <h4 className="font-bold text-sm text-[#1A120B]">Munchotella Boutique</h4>
+                        <p className="text-sm text-[#4A4238]">Strada Nicolae Testemițanu 21/1, Chișinău</p>
+                        <p className="text-xs text-[#9E721D] font-medium pt-1">
+                          ⏱️ Ridicare proaspătă și gratuită în aproximativ 20-30 de minute.
+                        </p>
+                      </div>
+                    </div>
+                  </>
                 )}
-              </AnimatePresence>
-            </div>
+              </div>
 
+              {/* Divider */}
+              <div className="border-t border-[#E8E2D9]/70" />
+
+              {/* Section 4: Kitchen & Courier Comments (PERMANENTLY VISIBLE) */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm mt-0.5">
+                    4
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('orderNotes')}</h3>
+                    <p className="text-xs text-[#736A60] mt-1 leading-relaxed">
+                      {t('orderNotesDesc') || "Menționează aici excluderi de ingrediente (fără nucușoare, fără fistic) sau indicații speciale pentru curier (cod interfon, etaj)."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <input
+                    type="text"
+                    placeholder={t('placeholderNotes')}
+                    className="w-full bg-[#FFFCF6] border border-[#E8E2D9] rounded-2xl px-5 py-4 text-sm outline-none focus:border-[#D4A853] focus:ring-1 focus:ring-[#D4A853] transition-all text-[#1A120B]"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-[#E8E2D9]/70" />
+
+              {/* Section 5: Metoda de Plată (maib Online & Cash Only) */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1A120B] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+                    5
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-[#1A120B]">{t('step4Title')}</h3>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Option 1: Online Payment (maib) */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("online")}
+                    className={`w-full p-5 rounded-2xl border text-left transition-all duration-300 flex flex-col gap-3 cursor-pointer ${
+                      paymentMethod === "online"
+                        ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
+                        : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'online' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
+                          <CreditCard className={`w-6 h-6 ${paymentMethod === 'online' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-sm text-[#1A120B]">{t('onlineTitle')}</h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#008F79]/15 text-[#008F79]">
+                              maib
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#736A60] mt-0.5">{t('onlineDesc')}</p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === 'online' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
+                        {paymentMethod === 'online' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
+                      </div>
+                    </div>
+
+                    {/* Payment Badges & MIA Notice */}
+                    <div className="pt-2 border-t border-[#E8E2D9]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                      <PaymentBadges variant="checkout" />
+                      <span className="text-[11px] font-bold text-[#008F79] bg-[#008F79]/10 px-2.5 py-1 rounded-md">
+                        MIA: 0% comision
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Cash on Delivery / Pickup */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cash")}
+                    className={`w-full p-5 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                      paymentMethod === "cash"
+                        ? "bg-[#FFFCF6] border-[#D4A853] shadow-[0_0_0_1px_#D4A853]"
+                        : "bg-white border-[#E8E2D9] hover:border-[#D4A853]/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${paymentMethod === 'cash' ? 'bg-[#D4A853]/20' : 'bg-[#FAF7F2]'}`}>
+                        <Banknote className={`w-6 h-6 ${paymentMethod === 'cash' ? 'text-[#D4A853]' : 'text-[#736A60]'}`} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-[#1A120B]">
+                          {t('cashTitle', { type: deliveryType === 'delivery' ? t('cashDelivery') : t('cashPickup') })}
+                        </h4>
+                        <p className="text-[11px] text-[#736A60] mt-0.5">{t('cashDesc')}</p>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-[#D4A853]' : 'border-[#E8E2D9]'}`}>
+                      {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 bg-[#D4A853] rounded-full" />}
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
 
           {/* Right Column: Sticky Summary Panel */}
@@ -2262,7 +1983,7 @@ export default function CheckoutPage() {
                         {!hasAddress ? (
                           <span className="text-[#D4A853] font-medium">{t('calculatedAtStep2')}</span>
                         ) : (
-                          `~${deliveryCalc.distanceKm} km (${deliveryCalc.isPedestrian ? t('pedestrianDelivery') : t('taxiDelivery')})`
+                          `~${deliveryCalc.distanceKm} ${locale === "ru" ? "км" : "km"} (${deliveryCalc.isPedestrian ? t("pedestrianDelivery") : t("taxiDelivery")})`
                         )}
                       </span>
                     )}
@@ -2409,9 +2130,9 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable || activeStep < 4}
+                  disabled={isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable}
                   className={`w-full py-4.5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-xl min-h-[56px] flex items-center justify-center gap-2 cursor-pointer ${
-                    isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable || activeStep < 4
+                    isSubmitting || isSendingOtp || !deliveryCalc.isDeliverable
                       ? "bg-[#E8E2D9] text-[#736A60] shadow-none cursor-not-allowed opacity-80"
                       : "bg-[#1A120B] hover:bg-[#D4A853] text-white hover:text-[#1A120B] shadow-[#1A120B]/10 hover:shadow-[#D4A853]/20"
                   }`}
@@ -2434,7 +2155,7 @@ export default function CheckoutPage() {
                     </>
                   ) : (
                     <>
-                      {activeStep < 4 ? t('completeSteps') : t('placeOrderBtn')}
+                      {t('placeOrderBtn')}
                     </>
                   )}
                 </button>
@@ -2452,11 +2173,6 @@ export default function CheckoutPage() {
                       {t('otpCallFallbackBtn')}
                     </button>
                   </div>
-                )}
-                {activeStep < 4 && deliveryCalc.isDeliverable && (
-                  <p className="text-center text-[10px] text-[#736A60] font-medium mt-3 uppercase tracking-wider">
-                    {t('missingInfo')}
-                  </p>
                 )}
 
                 {/* Trust & Security Badge directly below button with dedicated breathing room */}

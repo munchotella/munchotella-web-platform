@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useToast } from "@/context/ToastContext";
+import { useTranslations } from "next-intl";
 
 export type ToppingOption = {
   name: string;
@@ -44,9 +46,6 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-import { useToast } from "@/context/ToastContext";
-import { useTranslations } from "next-intl";
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("Cart");
   const [items, setItems] = useState<CartItem[]>([]);
@@ -78,13 +77,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const openCartParam = urlParams.get('openCart');
         const notesParam = urlParams.get('notes');
 
+        let decodedNotes = "";
         if (notesParam) {
           try {
-            const decodedNotes = decodeURIComponent(notesParam);
-            localStorage.setItem("munchotella_order_notes", decodedNotes);
+            decodedNotes = decodeURIComponent(notesParam);
           } catch (_) {
-            localStorage.setItem("munchotella_order_notes", notesParam);
+            decodedNotes = notesParam;
           }
+          try {
+            localStorage.setItem("munchotella_order_notes", decodedNotes);
+          } catch (_) {}
         }
 
         if (preloadedParam) {
@@ -105,19 +107,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           }
           const preloadedList = JSON.parse(decodedJson);
           if (Array.isArray(preloadedList) && preloadedList.length > 0) {
-            const formattedPreloaded = preloadedList.map((item: any) => ({
-              cartItemId: `${item.id || item.name}-${item.customization || ''}-${Date.now()}`,
-              id: item.id || item.name,
-              name: item.name,
-              basePrice: Number(item.price || item.basePrice || 0),
-              price: Number(item.price || item.basePrice || 0),
-              image: item.image || "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png",
-              quantity: Number(item.quantity || 1),
-              selectedToppings: item.selectedToppings || [],
-              customization: item.customization || notesParam || undefined,
-            }));
+            const formattedPreloaded = preloadedList.map((item: any) => {
+              let itemCust = item.customization;
+              if (!itemCust && decodedNotes) {
+                if (decodedNotes.includes(`${item.name}:`)) {
+                  itemCust = decodedNotes.split(`${item.name}:`)[1].trim();
+                } else if (!decodedNotes.includes(':')) {
+                  itemCust = decodedNotes.trim();
+                }
+              }
+
+              return {
+                cartItemId: `${item.id || item.name}-${itemCust || ''}-${Date.now()}`,
+                id: item.id || item.name,
+                name: item.name,
+                basePrice: Number(item.price || item.basePrice || 0),
+                price: Number(item.price || item.basePrice || 0),
+                image: item.image || "https://cdn.prod.website-files.com/6512d4990c0eb6724e204777/651fb37a2693b04934ff4e38_Nutella%20Mini%20waffles%20100%20lei.png",
+                quantity: Number(item.quantity || 1),
+                selectedToppings: item.selectedToppings || [],
+                customization: itemCust || item.customization || undefined,
+              };
+            });
             initialItems = formattedPreloaded;
-            localStorage.setItem("munchotella_cart", JSON.stringify(formattedPreloaded));
+            try {
+              localStorage.setItem("munchotella_cart", JSON.stringify(formattedPreloaded));
+            } catch (_) {}
           }
         }
 
@@ -136,7 +151,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Save to localStorage whenever items change
   useEffect(() => {
-    localStorage.setItem("munchotella_cart", JSON.stringify(items));
+    try {
+      localStorage.setItem("munchotella_cart", JSON.stringify(items));
+    } catch (_) {}
   }, [items]);
 
   const addToCart = (input: AddToCartInput) => {
