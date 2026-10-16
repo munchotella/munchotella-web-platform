@@ -394,7 +394,7 @@ export default function ProductCustomizationModal({
                             return (
                               <div
                                 key={topping.name}
-                                onClick={(e) => toggleTopping(e, { name: cleanToppingName, price: topping.price })}
+                                onClick={(e) => toggleTopping(e, { name: cleanToppingName, price: topping.price, groupName: group.title })}
                                 className={`group flex items-center justify-between py-2.5 px-3.5 md:py-3 md:px-4 cursor-pointer transition-all hover:bg-[#FAF8F5] select-none ${
                                   index !== group.options.length - 1 ? "border-b border-[#EAE1DB]" : ""
                                 } ${isSelected ? "bg-[#FFFBF5]" : ""}`}

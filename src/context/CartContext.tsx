@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 export type ToppingOption = {
   name: string;
   price: number;
+  groupName?: string;
 };
 
 export type CartItem = {

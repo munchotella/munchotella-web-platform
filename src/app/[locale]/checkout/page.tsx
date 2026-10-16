@@ -477,7 +477,7 @@ export default function CheckoutPage() {
               variantName: (i as any).selectedVariant,
               modifiers: [
                 ...(i.selectedToppings?.map((t: any) => ({
-                  title: t.groupName || 'Topping',
+                  title: t.groupName || 'Toppinguri',
                   optionName: t.name,
                   price: t.price,
                 })) || []),
@@ -794,8 +794,9 @@ export default function CheckoutPage() {
           variantName: (i as any).selectedVariant,
           modifiers: [
             ...(i.selectedToppings?.map((t: any) => ({
-              title: t.groupName || 'Topping',
-              optionName: t.name
+              title: t.groupName || 'Toppinguri',
+              optionName: t.name,
+              price: t.price,
             })) || []),
             ...((i as any).customization ? [{ title: 'Preferință', optionName: (i as any).customization }] : [])
           ]
