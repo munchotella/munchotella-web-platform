@@ -1956,6 +1956,14 @@ export async function processMessage(
     const lang = detectLanguage(messageText);
     const lowerMsg = messageText.toLowerCase().trim();
 
+    try {
+      const globalPaused = await redisSessionClient.get('bot:global:paused');
+      if (globalPaused === true || globalPaused === 'true' || globalPaused === 1 || globalPaused === '1') {
+        console.log(`[Bot Global Pause] Robotul este oprit global pentru toate conversațiile (${senderId} [${channel}]).`);
+        return { success: true, status: 'human_assisted_pause_active' };
+      }
+    } catch (_) {}
+
     let session = await getSession(senderId);
     appendToHistory(session, 'user', messageText);
 
