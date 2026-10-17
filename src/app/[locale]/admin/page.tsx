@@ -42,7 +42,7 @@ export default function AdminDashboardPage() {
       
       if (statsRes?.data) setStats(statsRes.data);
       if (ordersRes?.data) {
-        const newOrders = ordersRes.data.slice(0, 5);
+        const newOrders = ordersRes.data.filter((o: any) => o.status !== "abandoned_draft").slice(0, 5);
         setLiveOrders((prevOrders) => {
           if (prevOrders.length > 0 && newOrders.length > 0) {
             const hasNew = newOrders.some((no: any) => !prevOrders.some((po: any) => po._id === no._id));
